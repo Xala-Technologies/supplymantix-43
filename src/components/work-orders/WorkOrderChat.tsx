@@ -21,6 +21,7 @@ interface ChatMessage {
   users?: {
     email: string;
   };
+  // Optional properties for sample data
   attachments?: string[];
   message_type?: 'text' | 'status_update' | 'assignment' | 'system';
 }
