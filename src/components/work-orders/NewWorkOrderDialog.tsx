@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import {
@@ -26,14 +27,12 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Calendar } from "@/components/ui/calendar";
-import { CalendarIcon, Plus, X } from "lucide-react";
+import { CalendarIcon, Plus } from "lucide-react";
 import { format } from "date-fns";
 import { useCreateWorkOrder } from "@/hooks/useWorkOrders";
 import { useLocations } from "@/hooks/useLocations";
-import { useProcedures, useCreateProcedure } from "@/hooks/useProcedures";
 import { supabase } from "@/integrations/supabase/client";
-import { Badge } from "@/components/ui/badge";
-import { workOrderProcedureService, type Procedure } from "@/lib/workOrderProcedureService";
+import { WorkOrderProcedureSection } from "./WorkOrderProcedureSection";
 
 interface NewWorkOrderFormData {
   title: string;
@@ -50,14 +49,9 @@ export const NewWorkOrderDialog = () => {
   const [open, setOpen] = useState(false);
   const [showCalendar, setShowCalendar] = useState(false);
   const [selectedProcedures, setSelectedProcedures] = useState<string[]>([]);
-  const [showNewProcedureForm, setShowNewProcedureForm] = useState(false);
-  const [newProcedureTitle, setNewProcedureTitle] = useState("");
-  const [newProcedureDescription, setNewProcedureDescription] = useState("");
   
   const createWorkOrder = useCreateWorkOrder();
   const { data: locations } = useLocations();
-  const { data: procedures } = useProcedures();
-  const createProcedure = useCreateProcedure();
   
   const form = useForm<NewWorkOrderFormData>({
     defaultValues: {
@@ -74,14 +68,12 @@ export const NewWorkOrderDialog = () => {
 
   const onSubmit = async (data: NewWorkOrderFormData) => {
     try {
-      // Get current user to get tenant_id
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
         console.error("No authenticated user found");
         return;
       }
 
-      // Get user's tenant_id
       const { data: userData, error: userError } = await supabase
         .from("users")
         .select("tenant_id")
@@ -93,7 +85,6 @@ export const NewWorkOrderDialog = () => {
         return;
       }
 
-      // Find the location_id from the selected location name
       const selectedLocation = locations?.find(loc => loc.name === data.location);
       
       await createWorkOrder.mutateAsync({
@@ -110,9 +101,6 @@ export const NewWorkOrderDialog = () => {
       setOpen(false);
       form.reset();
       setSelectedProcedures([]);
-      setShowNewProcedureForm(false);
-      setNewProcedureTitle("");
-      setNewProcedureDescription("");
     } catch (error) {
       console.error("Error creating work order:", error);
     }
@@ -128,57 +116,6 @@ export const NewWorkOrderDialog = () => {
     setSelectedProcedures(selectedProcedures.filter(id => id !== procedureId));
   };
 
-  const handleCreateNewProcedure = async () => {
-    if (!newProcedureTitle.trim()) return;
-
-    try {
-      // Get current user to get tenant_id
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        console.error("No authenticated user found");
-        return;
-      }
-
-      // Get user's tenant_id
-      const { data: userData, error: userError } = await supabase
-        .from("users")
-        .select("tenant_id")
-        .eq("id", user.id)
-        .single();
-
-      if (userError || !userData) {
-        console.error("Error getting user tenant:", userError);
-        return;
-      }
-
-      const newProcedure = await createProcedure.mutateAsync({
-        title: newProcedureTitle,
-        description: newProcedureDescription,
-        tenant_id: userData.tenant_id,
-        created_by: user.id,
-        estimated_duration: 30, // Default duration
-        steps: [], // Empty steps array for now
-      });
-
-      // Add the new procedure to selected procedures
-      setSelectedProcedures([...selectedProcedures, newProcedure.id]);
-      
-      // Reset form
-      setNewProcedureTitle("");
-      setNewProcedureDescription("");
-      setShowNewProcedureForm(false);
-    } catch (error) {
-      console.error("Error creating procedure:", error);
-    }
-  };
-
-  // Get recommended procedures based on current form data
-  const recommendedProcedures = workOrderProcedureService.getRecommendedProcedures({
-    title: form.watch("title"),
-    category: form.watch("category"),
-    asset: form.watch("asset"),
-  });
-
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
@@ -189,7 +126,7 @@ export const NewWorkOrderDialog = () => {
       </DialogTrigger>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Create New Work Order</DialogTitle>
+          <DialogTitle>New Work Order</DialogTitle>
         </DialogHeader>
         
         <Form {...form}>
@@ -217,7 +154,7 @@ export const NewWorkOrderDialog = () => {
                     <FormLabel>Description</FormLabel>
                     <FormControl>
                       <Textarea 
-                        placeholder="Describe the work order details..."
+                        placeholder="Add a description"
                         className="min-h-[100px]"
                         {...field} 
                       />
@@ -296,7 +233,7 @@ export const NewWorkOrderDialog = () => {
                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Select assignee" />
+                          <SelectValue placeholder="Start typing..." />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
@@ -388,131 +325,12 @@ export const NewWorkOrderDialog = () => {
               />
             </div>
 
-            {/* Procedures Section */}
             <div className="border-t pt-6">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold">Procedures</h3>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setShowNewProcedureForm(!showNewProcedureForm)}
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  Create New Procedure
-                </Button>
-              </div>
-
-              {/* Selected Procedures */}
-              {selectedProcedures.length > 0 && (
-                <div className="mb-4">
-                  <h4 className="text-sm font-medium mb-2">Selected Procedures:</h4>
-                  <div className="flex flex-wrap gap-2">
-                    {selectedProcedures.map((procedureId) => {
-                      const procedure = procedures?.find(p => p.id === procedureId) || 
-                                      workOrderProcedureService.sampleProcedures.find(p => p.id === procedureId);
-                      return (
-                        <Badge key={procedureId} variant="secondary" className="flex items-center gap-2">
-                          {procedure?.title || 'Unknown Procedure'}
-                          <X 
-                            className="h-3 w-3 cursor-pointer hover:text-red-600" 
-                            onClick={() => handleRemoveProcedure(procedureId)}
-                          />
-                        </Badge>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
-
-              {/* New Procedure Form */}
-              {showNewProcedureForm && (
-                <div className="border rounded-lg p-4 mb-4 bg-gray-50">
-                  <h4 className="text-sm font-medium mb-3">Create New Procedure</h4>
-                  <div className="space-y-3">
-                    <Input
-                      placeholder="Procedure title"
-                      value={newProcedureTitle}
-                      onChange={(e) => setNewProcedureTitle(e.target.value)}
-                    />
-                    <Textarea
-                      placeholder="Procedure description"
-                      value={newProcedureDescription}
-                      onChange={(e) => setNewProcedureDescription(e.target.value)}
-                    />
-                    <div className="flex gap-2">
-                      <Button
-                        type="button"
-                        size="sm"
-                        onClick={handleCreateNewProcedure}
-                        disabled={!newProcedureTitle.trim() || createProcedure.isPending}
-                      >
-                        {createProcedure.isPending ? "Creating..." : "Create & Add"}
-                      </Button>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setShowNewProcedureForm(false)}
-                      >
-                        Cancel
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* Recommended Procedures */}
-              {recommendedProcedures.length > 0 && (
-                <div className="mb-4">
-                  <h4 className="text-sm font-medium mb-2">Recommended Procedures:</h4>
-                  <div className="space-y-2">
-                    {recommendedProcedures.map((procedure) => (
-                      <div key={procedure.id} className="flex items-center justify-between p-3 border rounded-lg bg-blue-50">
-                        <div>
-                          <p className="font-medium text-sm">{procedure.title}</p>
-                          <p className="text-xs text-gray-600">{procedure.description}</p>
-                        </div>
-                        <Button
-                          type="button"
-                          size="sm"
-                          variant="outline"
-                          onClick={() => handleAddProcedure(procedure.id)}
-                          disabled={selectedProcedures.includes(procedure.id)}
-                        >
-                          {selectedProcedures.includes(procedure.id) ? "Added" : "Add"}
-                        </Button>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Existing Procedures */}
-              {procedures && procedures.length > 0 && (
-                <div>
-                  <h4 className="text-sm font-medium mb-2">Available Procedures:</h4>
-                  <div className="max-h-40 overflow-y-auto space-y-2">
-                    {procedures.map((procedure) => (
-                      <div key={procedure.id} className="flex items-center justify-between p-2 border rounded-lg">
-                        <div>
-                          <p className="font-medium text-sm">{procedure.title}</p>
-                          <p className="text-xs text-gray-600">{procedure.description}</p>
-                        </div>
-                        <Button
-                          type="button"
-                          size="sm"
-                          variant="outline"
-                          onClick={() => handleAddProcedure(procedure.id)}
-                          disabled={selectedProcedures.includes(procedure.id)}
-                        >
-                          {selectedProcedures.includes(procedure.id) ? "Added" : "Add"}
-                        </Button>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
+              <WorkOrderProcedureSection
+                selectedProcedures={selectedProcedures}
+                onProcedureAdd={handleAddProcedure}
+                onProcedureRemove={handleRemoveProcedure}
+              />
             </div>
 
             <div className="flex justify-end space-x-4 pt-4">
@@ -528,7 +346,7 @@ export const NewWorkOrderDialog = () => {
                 disabled={createWorkOrder.isPending}
                 className="bg-blue-600 hover:bg-blue-700"
               >
-                {createWorkOrder.isPending ? "Creating..." : "Create Work Order"}
+                {createWorkOrder.isPending ? "Creating..." : "Create"}
               </Button>
             </div>
           </form>
