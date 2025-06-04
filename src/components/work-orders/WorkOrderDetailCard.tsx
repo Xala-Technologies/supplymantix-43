@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { MessageCircle, Edit, MoreHorizontal, Copy, Lock, Pause, Play, CheckCircle2, Clock, User, MapPin, Plus, ChevronDown, ListTodo } from "lucide-react";
 import { format } from "date-fns";
+import { WorkOrderProcedures } from "./WorkOrderProcedures";
 
 interface WorkOrderDetailCardProps {
   workOrder: {
@@ -131,6 +132,9 @@ export const WorkOrderDetailCard = ({ workOrder }: WorkOrderDetailCardProps) => 
           </div>
         </CardHeader>
       </Card>
+
+      {/* Procedures Section */}
+      <WorkOrderProcedures workOrderId={workOrder.id} workOrder={workOrder} />
 
       {/* Categories */}
       <Card className="shadow-sm border-gray-200">
