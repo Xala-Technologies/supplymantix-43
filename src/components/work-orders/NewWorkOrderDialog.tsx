@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import {
@@ -29,6 +30,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { CalendarIcon, Plus } from "lucide-react";
 import { format } from "date-fns";
 import { useCreateWorkOrder } from "@/hooks/useWorkOrders";
+import { useLocations } from "@/hooks/useLocations";
 
 interface NewWorkOrderFormData {
   title: string;
@@ -45,6 +47,7 @@ export const NewWorkOrderDialog = () => {
   const [open, setOpen] = useState(false);
   const [showCalendar, setShowCalendar] = useState(false);
   const createWorkOrder = useCreateWorkOrder();
+  const { data: locations } = useLocations();
   
   const form = useForm<NewWorkOrderFormData>({
     defaultValues: {
@@ -61,14 +64,16 @@ export const NewWorkOrderDialog = () => {
 
   const onSubmit = async (data: NewWorkOrderFormData) => {
     try {
+      // Find the location_id from the selected location name
+      const selectedLocation = locations?.find(loc => loc.name === data.location);
+      
       await createWorkOrder.mutateAsync({
         title: data.title,
         description: data.description,
         due_date: data.dueDate.toISOString(),
         assigned_to: data.assignedTo,
         asset_id: data.asset,
-        location: data.location,
-        category: data.category,
+        location_id: selectedLocation?.id,
         status: "open",
       });
       
@@ -250,12 +255,11 @@ export const NewWorkOrderDialog = () => {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="Production Line 1">Production Line 1</SelectItem>
-                        <SelectItem value="Production Line 2">Production Line 2</SelectItem>
-                        <SelectItem value="Production Line 3">Production Line 3</SelectItem>
-                        <SelectItem value="Utility Room">Utility Room</SelectItem>
-                        <SelectItem value="Building A">Building A</SelectItem>
-                        <SelectItem value="Entire Facility">Entire Facility</SelectItem>
+                        {locations?.map((location) => (
+                          <SelectItem key={location.id} value={location.name}>
+                            {location.name}
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                     <FormMessage />

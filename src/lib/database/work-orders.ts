@@ -11,7 +11,8 @@ export const workOrdersApi = {
       .select(`
         *,
         assets(name, location),
-        users(email)
+        users(email),
+        locations(name)
       `)
       .order("created_at", { ascending: false });
     

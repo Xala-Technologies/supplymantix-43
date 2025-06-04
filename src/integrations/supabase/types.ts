@@ -259,6 +259,41 @@ export type Database = {
           },
         ]
       }
+      locations: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name: string
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "locations_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       organization_members: {
         Row: {
           created_at: string | null
@@ -687,6 +722,7 @@ export type Database = {
           description: string | null
           due_date: string | null
           id: string
+          location_id: string | null
           status: Database["public"]["Enums"]["work_order_status"]
           tenant_id: string
           title: string
@@ -699,6 +735,7 @@ export type Database = {
           description?: string | null
           due_date?: string | null
           id?: string
+          location_id?: string | null
           status?: Database["public"]["Enums"]["work_order_status"]
           tenant_id: string
           title: string
@@ -711,6 +748,7 @@ export type Database = {
           description?: string | null
           due_date?: string | null
           id?: string
+          location_id?: string | null
           status?: Database["public"]["Enums"]["work_order_status"]
           tenant_id?: string
           title?: string
@@ -729,6 +767,13 @@ export type Database = {
             columns: ["assigned_to"]
             isOneToOne: false
             referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "work_orders_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "locations"
             referencedColumns: ["id"]
           },
           {
