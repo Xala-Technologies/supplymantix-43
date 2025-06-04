@@ -5,7 +5,6 @@ import { Badge } from "@/components/ui/badge";
 import { Plus, X } from "lucide-react";
 import { ProcedureSelectionDialog } from "./ProcedureSelectionDialog";
 import { useProcedures } from "@/hooks/useProcedures";
-import { workOrderProcedureService } from "@/lib/workOrderProcedureService";
 
 interface WorkOrderProcedureSectionProps {
   selectedProcedures: string[];
@@ -21,16 +20,15 @@ export const WorkOrderProcedureSection = ({
   const [showProcedureDialog, setShowProcedureDialog] = useState(false);
   const { data: procedures } = useProcedures();
 
-  const allProcedures = [
-    ...(procedures || []),
-    ...workOrderProcedureService.sampleProcedures,
-  ];
-
   const handleProcedureSelect = (procedureId: string) => {
     if (!selectedProcedures.includes(procedureId)) {
       onProcedureAdd(procedureId);
     }
     setShowProcedureDialog(false);
+  };
+
+  const getSelectedProcedureDetails = (procedureId: string) => {
+    return procedures?.find(p => p.id === procedureId);
   };
 
   return (
@@ -43,7 +41,7 @@ export const WorkOrderProcedureSection = ({
         <div className="space-y-3">
           <div className="flex flex-wrap gap-2">
             {selectedProcedures.map((procedureId) => {
-              const procedure = allProcedures.find(p => p.id === procedureId);
+              const procedure = getSelectedProcedureDetails(procedureId);
               return (
                 <Badge 
                   key={procedureId} 

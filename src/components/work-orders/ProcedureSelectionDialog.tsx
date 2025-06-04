@@ -12,7 +12,6 @@ import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, Plus, Search } from "lucide-react";
 import { useProcedures, useCreateProcedure } from "@/hooks/useProcedures";
 import { supabase } from "@/integrations/supabase/client";
-import { workOrderProcedureService } from "@/lib/workOrderProcedureService";
 
 interface ProcedureSelectionDialogProps {
   open: boolean;
@@ -32,7 +31,7 @@ export const ProcedureSelectionDialog = ({
   const [newProcedureTitle, setNewProcedureTitle] = useState("");
   const [newProcedureDescription, setNewProcedureDescription] = useState("");
   
-  const { data: procedures } = useProcedures();
+  const { data: procedures, isLoading } = useProcedures();
   const createProcedure = useCreateProcedure();
 
   const handleCreateNewProcedure = async () => {
@@ -68,13 +67,9 @@ export const ProcedureSelectionDialog = ({
     }
   };
 
-  const allProcedures = [
-    ...(procedures || []),
-    ...workOrderProcedureService.sampleProcedures,
-  ];
-
-  const filteredProcedures = allProcedures.filter(procedure =>
-    procedure.title.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredProcedures = (procedures || []).filter(procedure =>
+    procedure.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    (procedure.description && procedure.description.toLowerCase().includes(searchQuery.toLowerCase()))
   );
 
   const getProcedureIcon = (title: string) => {
@@ -83,18 +78,17 @@ export const ProcedureSelectionDialog = ({
     if (title.toLowerCase().includes('fire')) return '🧯';
     if (title.toLowerCase().includes('forklift')) return '🚛';
     if (title.toLowerCase().includes('safety')) return '👷';
+    if (title.toLowerCase().includes('inspection')) return '🔍';
+    if (title.toLowerCase().includes('maintenance')) return '🛠️';
+    if (title.toLowerCase().includes('calibration')) return '📏';
     return '📋';
   };
 
   const getProcedureFieldCount = (procedure: any) => {
     if (procedure.steps && Array.isArray(procedure.steps)) {
-      return `${procedure.steps.length} fields`;
+      return `${procedure.steps.length} step${procedure.steps.length !== 1 ? 's' : ''}`;
     }
-    // For sample procedures
-    if (procedure.steps && procedure.steps.length) {
-      return `${procedure.steps.length} fields`;
-    }
-    return '1 field';
+    return '0 steps';
   };
 
   return (
@@ -172,24 +166,41 @@ export const ProcedureSelectionDialog = ({
             </div>
 
             <div>
-              <h3 className="text-sm font-medium text-gray-700 mb-3">All Templates</h3>
+              <h3 className="text-sm font-medium text-gray-700 mb-3">
+                {isLoading ? "Loading procedures..." : `All Templates (${filteredProcedures.length})`}
+              </h3>
               <div className="space-y-2 max-h-96 overflow-y-auto">
-                {filteredProcedures.map((procedure) => (
-                  <div
-                    key={procedure.id}
-                    className="flex items-center gap-3 p-3 border rounded-lg hover:bg-gray-50 cursor-pointer"
-                    onClick={() => onProcedureSelect(procedure.id)}
-                  >
-                    <div className="text-2xl">{getProcedureIcon(procedure.title)}</div>
-                    <div className="flex-1">
-                      <h4 className="font-medium text-gray-900">{procedure.title}</h4>
-                      <p className="text-sm text-gray-500">{getProcedureFieldCount(procedure)}</p>
-                    </div>
-                    {selectedProcedures.includes(procedure.id) && (
-                      <Badge variant="secondary">Added</Badge>
-                    )}
+                {isLoading ? (
+                  <div className="text-center py-8 text-gray-500">
+                    Loading procedures...
                   </div>
-                ))}
+                ) : filteredProcedures.length === 0 ? (
+                  <div className="text-center py-8 text-gray-500">
+                    {searchQuery ? "No procedures found matching your search." : "No procedures available. Create your first procedure!"}
+                  </div>
+                ) : (
+                  filteredProcedures.map((procedure) => (
+                    <div
+                      key={procedure.id}
+                      className="flex items-center gap-3 p-3 border rounded-lg hover:bg-gray-50 cursor-pointer"
+                      onClick={() => onProcedureSelect(procedure.id)}
+                    >
+                      <div className="text-2xl">{getProcedureIcon(procedure.title)}</div>
+                      <div className="flex-1">
+                        <h4 className="font-medium text-gray-900">{procedure.title}</h4>
+                        <p className="text-sm text-gray-500 mb-1">
+                          {procedure.description || "No description"}
+                        </p>
+                        <p className="text-xs text-gray-400">
+                          {getProcedureFieldCount(procedure)} • {procedure.estimated_duration || 30} min
+                        </p>
+                      </div>
+                      {selectedProcedures.includes(procedure.id) && (
+                        <Badge variant="secondary">Added</Badge>
+                      )}
+                    </div>
+                  ))
+                )}
               </div>
             </div>
           </div>
