@@ -1,8 +1,8 @@
 
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Search, Plus, User, Calendar, MapPin, Tag, AlertTriangle, CircleCheck, Filter, Settings } from "lucide-react";
+import { Search, User, Calendar, MapPin, Tag, AlertTriangle, CircleCheck, Filter, Settings } from "lucide-react";
+import { NewWorkOrderDialog } from "./NewWorkOrderDialog";
 
 export const WorkOrdersHeader = () => {
   return (
@@ -27,10 +27,7 @@ export const WorkOrdersHeader = () => {
                 className="pl-10 w-full sm:w-64"
               />
             </div>
-            <Button className="bg-blue-600 hover:bg-blue-700 whitespace-nowrap">
-              <Plus className="h-4 w-4 mr-2" />
-              New Work Order
-            </Button>
+            <NewWorkOrderDialog />
           </div>
         </div>
         
