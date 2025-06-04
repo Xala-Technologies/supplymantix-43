@@ -5,6 +5,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { MessageCircle, Edit, MoreHorizontal, Copy, Lock, Pause, Play, CheckCircle2, Clock, User, MapPin, Plus, ChevronDown, ListTodo } from "lucide-react";
 import { format } from "date-fns";
 import { WorkOrderProcedures } from "./WorkOrderProcedures";
+import { TimeAndCostTracking } from "./TimeAndCostTracking";
 
 interface WorkOrderDetailCardProps {
   workOrder: {
@@ -136,6 +137,9 @@ export const WorkOrderDetailCard = ({ workOrder }: WorkOrderDetailCardProps) => 
       {/* Procedures Section */}
       <WorkOrderProcedures workOrderId={workOrder.id} workOrder={workOrder} />
 
+      {/* Time & Cost Tracking - Enhanced */}
+      <TimeAndCostTracking workOrderId={workOrder.id} />
+
       {/* Categories */}
       <Card className="shadow-sm border-gray-200">
         <CardContent className="p-6">
@@ -146,39 +150,6 @@ export const WorkOrderDetailCard = ({ workOrder }: WorkOrderDetailCardProps) => 
                 {category}
               </Badge>
             ))}
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Time & Cost Tracking */}
-      <Card className="shadow-sm border-gray-200">
-        <CardContent className="p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-6">Time & Cost Tracking</h3>
-          
-          <div className="space-y-6">
-            {/* Parts */}
-            <div className="flex items-center justify-between py-3 border-b border-gray-100">
-              <span className="text-gray-700 font-medium">Parts</span>
-              <Button variant="ghost" size="sm" className="text-blue-600 hover:text-blue-700">
-                Add <Plus className="w-4 h-4 ml-1" />
-              </Button>
-            </div>
-
-            {/* Time */}
-            <div className="flex items-center justify-between py-3 border-b border-gray-100">
-              <span className="text-gray-700 font-medium">Time</span>
-              <Button variant="ghost" size="sm" className="text-blue-600 hover:text-blue-700">
-                Add <Plus className="w-4 h-4 ml-1" />
-              </Button>
-            </div>
-
-            {/* Other Costs */}
-            <div className="flex items-center justify-between py-3">
-              <span className="text-gray-700 font-medium">Other Costs</span>
-              <Button variant="ghost" size="sm" className="text-blue-600 hover:text-blue-700">
-                Add <Plus className="w-4 h-4 ml-1" />
-              </Button>
-            </div>
           </div>
         </CardContent>
       </Card>
