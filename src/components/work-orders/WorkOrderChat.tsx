@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { Send, Paperclip, Image, Mic, MoreVertical, Reply } from "lucide-react";
+import { Send, Paperclip, Image, Mic, MoreVertical, Reply, Clock, CheckCheck } from "lucide-react";
 import { format } from "date-fns";
 import { useChatMessages, useCreateChatMessage } from "@/hooks/useWorkOrders";
 
@@ -112,26 +112,51 @@ export const WorkOrderChat = ({ workOrderId }: WorkOrderChatProps) => {
 
   const allMessages = [...sampleMessages, ...messages];
 
-  const getMessageTypeColor = (type?: string) => {
+  const getMessageTypeStyle = (type?: string) => {
     switch (type) {
       case 'status_update':
-        return 'bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200 shadow-sm';
+        return {
+          bg: 'bg-gradient-to-r from-blue-50 via-blue-25 to-indigo-50',
+          border: 'border-blue-200/60',
+          shadow: 'shadow-blue-100/50',
+          icon: '🔄'
+        };
       case 'assignment':
-        return 'bg-gradient-to-r from-green-50 to-emerald-50 border-green-200 shadow-sm';
+        return {
+          bg: 'bg-gradient-to-r from-green-50 via-emerald-25 to-green-50',
+          border: 'border-green-200/60',
+          shadow: 'shadow-green-100/50',
+          icon: '👤'
+        };
       case 'system':
-        return 'bg-gradient-to-r from-gray-50 to-slate-50 border-gray-200 shadow-sm';
+        return {
+          bg: 'bg-gradient-to-r from-gray-50 via-slate-25 to-gray-50',
+          border: 'border-gray-200/60',
+          shadow: 'shadow-gray-100/50',
+          icon: '⚙️'
+        };
       default:
-        return 'bg-white border-gray-200 shadow-sm hover:shadow-md transition-shadow duration-200';
+        return {
+          bg: 'bg-white',
+          border: 'border-gray-200/80',
+          shadow: 'shadow-sm hover:shadow-lg',
+          icon: '💬'
+        };
     }
   };
 
   if (isLoading) {
     return (
-      <Card className="shadow-lg">
-        <CardContent className="p-6">
-          <div className="text-center text-gray-500 py-12">
-            <div className="animate-spin w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full mx-auto mb-4"></div>
-            Loading messages...
+      <Card className="shadow-2xl border-0 bg-gradient-to-br from-white to-gray-50/30">
+        <CardContent className="p-8">
+          <div className="text-center text-gray-500 py-16">
+            <div className="relative mx-auto mb-6 w-12 h-12">
+              <div className="absolute inset-0 bg-blue-500/20 rounded-full animate-ping"></div>
+              <div className="relative bg-blue-500 rounded-full w-12 h-12 flex items-center justify-center">
+                <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+              </div>
+            </div>
+            <p className="text-lg font-medium">Loading conversation...</p>
           </div>
         </CardContent>
       </Card>
@@ -139,105 +164,151 @@ export const WorkOrderChat = ({ workOrderId }: WorkOrderChatProps) => {
   }
 
   return (
-    <Card className="h-[600px] md:h-[600px] flex flex-col shadow-lg border-0 bg-gradient-to-b from-white to-gray-50">
-      <CardHeader className="pb-3 md:pb-4 px-4 md:px-6 bg-white border-b border-gray-100">
-        <CardTitle className="flex items-center justify-between text-base md:text-lg">
-          <div className="flex items-center gap-3">
-            <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-            <span className="font-semibold text-gray-900">Work Order Discussion</span>
+    <Card className="h-[600px] md:h-[650px] flex flex-col shadow-2xl border-0 bg-gradient-to-br from-white via-gray-50/30 to-white overflow-hidden">
+      <CardHeader className="pb-4 md:pb-5 px-5 md:px-7 bg-gradient-to-r from-white via-blue-50/30 to-white border-b border-gray-100/80 backdrop-blur-sm">
+        <CardTitle className="flex items-center justify-between text-lg md:text-xl">
+          <div className="flex items-center gap-4">
+            <div className="relative">
+              <div className="w-3 h-3 bg-emerald-500 rounded-full animate-pulse shadow-lg shadow-emerald-500/50"></div>
+              <div className="absolute inset-0 w-3 h-3 bg-emerald-400 rounded-full animate-ping"></div>
+            </div>
+            <div>
+              <span className="font-bold text-gray-900 bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text">Work Order Discussion</span>
+              <p className="text-sm text-gray-500 font-normal mt-1">Real-time collaboration</p>
+            </div>
           </div>
-          <Badge variant="outline" className="text-xs bg-blue-50 text-blue-700 border-blue-200">
-            {allMessages.length} messages
-          </Badge>
+          <div className="flex items-center gap-3">
+            <Badge variant="outline" className="text-xs bg-blue-50/80 text-blue-700 border-blue-200/60 px-3 py-1 font-semibold shadow-sm">
+              {allMessages.length} messages
+            </Badge>
+          </div>
         </CardTitle>
       </CardHeader>
       
-      <CardContent className="flex-1 flex flex-col p-0 bg-gray-50">
+      <CardContent className="flex-1 flex flex-col p-0 bg-gradient-to-b from-gray-50/30 to-white">
         {/* Messages */}
-        <div className="flex-1 overflow-y-auto px-3 md:px-6 py-4 space-y-4 md:space-y-5">
-          {allMessages.map((message) => (
-            <div key={message.id} className={`border rounded-xl p-4 md:p-5 ${getMessageTypeColor((message as any).message_type)} transition-all duration-200 hover:scale-[1.01]`}>
-              <div className="flex items-start gap-3 md:gap-4">
-                <Avatar className="w-8 h-8 md:w-10 md:h-10 flex-shrink-0 ring-2 ring-white shadow-sm">
-                  <AvatarFallback className="bg-gradient-to-br from-blue-500 to-blue-600 text-white text-sm font-semibold">
-                    {message.users?.email ? getInitials(message.users.email) : 'SY'}
-                  </AvatarFallback>
-                </Avatar>
-                
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-2 flex-wrap">
-                    <span className="font-semibold text-sm md:text-base text-gray-900">
-                      {message.users?.email?.split('@')[0].replace('.', ' ') || 'System'}
-                    </span>
-                    {(message as any).message_type && (message as any).message_type !== 'text' && (
-                      <Badge variant="secondary" className="text-xs bg-white/80 backdrop-blur-sm">
-                        {(message as any).message_type.replace('_', ' ')}
-                      </Badge>
-                    )}
-                    <span className="text-xs text-gray-500 ml-auto">
-                      {formatMessageTime(message.created_at)}
-                    </span>
-                  </div>
-                  
-                  <p className="text-sm md:text-base text-gray-800 leading-relaxed mb-3 break-words">
-                    {message.message}
-                  </p>
-                  
-                  {(message as any).attachments && (message as any).attachments.length > 0 && (
-                    <div className="flex flex-wrap gap-2 mb-3">
-                      {(message as any).attachments.map((attachment: string, index: number) => (
-                        <div key={index} className="flex items-center gap-2 px-3 py-2 bg-white/70 backdrop-blur-sm rounded-lg border border-gray-200 text-sm hover:bg-white/90 transition-colors cursor-pointer">
-                          <Paperclip className="w-4 h-4 text-gray-500" />
-                          <span className="truncate max-w-32 md:max-w-none font-medium text-gray-700">{attachment}</span>
+        <div className="flex-1 overflow-y-auto px-4 md:px-7 py-5 space-y-5 md:space-y-6">
+          {allMessages.map((message, index) => {
+            const messageStyle = getMessageTypeStyle((message as any).message_type);
+            const isConsecutive = index > 0 && allMessages[index - 1].user_id === message.user_id;
+            
+            return (
+              <div 
+                key={message.id} 
+                className={`group transition-all duration-300 hover:scale-[1.01] ${
+                  isConsecutive ? 'mt-2' : 'mt-6'
+                }`}
+              >
+                <div className={`
+                  border rounded-2xl p-5 md:p-6 transition-all duration-300 
+                  ${messageStyle.bg} ${messageStyle.border} ${messageStyle.shadow}
+                  hover:shadow-xl hover:border-opacity-80 transform hover:-translate-y-0.5
+                `}>
+                  <div className="flex items-start gap-4 md:gap-5">
+                    {!isConsecutive && (
+                      <div className="relative flex-shrink-0">
+                        <Avatar className="w-10 h-10 md:w-12 md:h-12 ring-3 ring-white shadow-lg">
+                          <AvatarFallback className="bg-gradient-to-br from-blue-500 to-blue-600 text-white text-sm font-bold">
+                            {message.users?.email ? getInitials(message.users.email) : 'SY'}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-white rounded-full flex items-center justify-center shadow-md">
+                          <span className="text-xs">{messageStyle.icon}</span>
                         </div>
-                      ))}
+                      </div>
+                    )}
+                    
+                    {isConsecutive && <div className="w-10 md:w-12 flex-shrink-0"></div>}
+                    
+                    <div className="flex-1 min-w-0">
+                      {!isConsecutive && (
+                        <div className="flex items-center gap-3 mb-3 flex-wrap">
+                          <span className="font-bold text-base md:text-lg text-gray-900">
+                            {message.users?.email?.split('@')[0].replace('.', ' ').replace(/\b\w/g, l => l.toUpperCase()) || 'System'}
+                          </span>
+                          {(message as any).message_type && (message as any).message_type !== 'text' && (
+                            <Badge variant="secondary" className="text-xs bg-white/90 backdrop-blur-sm border-0 shadow-sm px-2 py-1">
+                              {(message as any).message_type.replace('_', ' ')}
+                            </Badge>
+                          )}
+                          <div className="flex items-center gap-1 text-xs text-gray-500 ml-auto">
+                            <Clock className="w-3 h-3" />
+                            <span className="font-medium">{formatMessageTime(message.created_at)}</span>
+                          </div>
+                        </div>
+                      )}
+                      
+                      <div className="bg-white/40 backdrop-blur-sm rounded-xl p-4 mb-4 border border-white/60">
+                        <p className="text-sm md:text-base text-gray-800 leading-relaxed break-words">
+                          {message.message}
+                        </p>
+                      </div>
+                      
+                      {(message as any).attachments && (message as any).attachments.length > 0 && (
+                        <div className="flex flex-wrap gap-2 mb-4">
+                          {(message as any).attachments.map((attachment: string, index: number) => (
+                            <div key={index} className="group flex items-center gap-2 px-4 py-2 bg-white/80 backdrop-blur-sm rounded-xl border border-gray-200/60 text-sm hover:bg-white hover:shadow-md transition-all duration-200 cursor-pointer">
+                              <Paperclip className="w-4 h-4 text-blue-500 group-hover:text-blue-600 transition-colors" />
+                              <span className="truncate max-w-32 md:max-w-none font-medium text-gray-700 group-hover:text-gray-900">
+                                {attachment}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                      
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <Button variant="ghost" size="sm" className="h-8 px-3 text-xs text-gray-600 hover:text-blue-600 hover:bg-blue-50 transition-all duration-200 rounded-lg">
+                            <Reply className="w-3 h-3 mr-2" />
+                            Reply
+                          </Button>
+                          <Button variant="ghost" size="sm" className="h-8 px-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-all duration-200 rounded-lg">
+                            <MoreVertical className="w-3 h-3" />
+                          </Button>
+                        </div>
+                        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                          <CheckCheck className="w-3 h-3 text-green-500" />
+                          <span className="text-xs text-gray-500">Delivered</span>
+                        </div>
+                      </div>
                     </div>
-                  )}
-                  
-                  <div className="flex items-center gap-3">
-                    <Button variant="ghost" size="sm" className="h-7 px-3 text-xs text-gray-600 hover:text-blue-600 hover:bg-blue-50 transition-colors">
-                      <Reply className="w-3 h-3 mr-1" />
-                      Reply
-                    </Button>
-                    <Button variant="ghost" size="sm" className="h-7 px-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors">
-                      <MoreVertical className="w-3 h-3" />
-                    </Button>
                   </div>
                 </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
           
           {isTyping && (
-            <div className="flex items-center gap-3 px-4 py-3 bg-white/60 backdrop-blur-sm rounded-xl border border-gray-200 text-sm text-gray-600">
-              <Avatar className="w-7 h-7">
-                <AvatarFallback className="bg-gradient-to-br from-gray-400 to-gray-500 text-white text-xs">
+            <div className="flex items-center gap-4 px-5 py-4 bg-white/80 backdrop-blur-sm rounded-2xl border border-gray-200/60 text-sm text-gray-600 shadow-sm animate-fade-in">
+              <Avatar className="w-8 h-8 ring-2 ring-white shadow-md">
+                <AvatarFallback className="bg-gradient-to-br from-blue-400 to-blue-500 text-white text-xs font-semibold">
                   ZB
                 </AvatarFallback>
               </Avatar>
               <span className="font-medium">Zach Brown is typing</span>
               <div className="flex gap-1 ml-2">
-                <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
-                <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
-                <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+                <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce shadow-sm" style={{ animationDelay: '0ms' }}></div>
+                <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce shadow-sm" style={{ animationDelay: '150ms' }}></div>
+                <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce shadow-sm" style={{ animationDelay: '300ms' }}></div>
               </div>
             </div>
           )}
         </div>
         
         {/* Message Input */}
-        <div className="border-t border-gray-200 p-4 bg-white">
-          <div className="flex items-center gap-2 md:gap-3">
-            <Button variant="ghost" size="sm" className="flex-shrink-0 h-9 w-9 p-0 hover:bg-gray-100 transition-colors">
-              <Paperclip className="w-4 h-4 text-gray-500" />
+        <div className="border-t border-gray-200/80 p-5 md:p-6 bg-gradient-to-r from-white via-gray-50/50 to-white backdrop-blur-sm">
+          <div className="flex items-center gap-3 md:gap-4">
+            <Button variant="ghost" size="sm" className="flex-shrink-0 h-10 w-10 p-0 hover:bg-blue-50 hover:text-blue-600 transition-all duration-200 rounded-xl shadow-sm hover:shadow-md">
+              <Paperclip className="w-4 h-4" />
             </Button>
-            <Button variant="ghost" size="sm" className="flex-shrink-0 h-9 w-9 p-0 hover:bg-gray-100 transition-colors">
-              <Image className="w-4 h-4 text-gray-500" />
+            <Button variant="ghost" size="sm" className="flex-shrink-0 h-10 w-10 p-0 hover:bg-green-50 hover:text-green-600 transition-all duration-200 rounded-xl shadow-sm hover:shadow-md">
+              <Image className="w-4 h-4" />
             </Button>
             
             <div className="flex-1 relative">
               <Input
-                placeholder="Type a message..."
+                placeholder="Type your message..."
                 value={newMessage}
                 onChange={(e) => setNewMessage(e.target.value)}
                 onKeyPress={(e) => {
@@ -246,11 +317,11 @@ export const WorkOrderChat = ({ workOrderId }: WorkOrderChatProps) => {
                     handleSendMessage();
                   }
                 }}
-                className="pr-12 text-sm md:text-base h-10 border-gray-300 focus:border-blue-500 focus:ring-blue-500 rounded-xl"
+                className="pr-14 text-sm md:text-base h-11 border-gray-300/80 focus:border-blue-500 focus:ring-blue-500/20 rounded-2xl bg-white/80 backdrop-blur-sm shadow-sm hover:shadow-md transition-all duration-200"
               />
               <Button 
                 size="sm" 
-                className="absolute right-1 top-1 h-8 w-8 p-0 bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors"
+                className="absolute right-1.5 top-1.5 h-8 w-8 p-0 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 rounded-xl transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105"
                 onClick={handleSendMessage}
                 disabled={!newMessage.trim() || createMessage.isPending}
               >
@@ -258,15 +329,21 @@ export const WorkOrderChat = ({ workOrderId }: WorkOrderChatProps) => {
               </Button>
             </div>
             
-            <Button variant="ghost" size="sm" className="flex-shrink-0 h-9 w-9 p-0 hover:bg-gray-100 transition-colors">
-              <Mic className="w-4 h-4 text-gray-500" />
+            <Button variant="ghost" size="sm" className="flex-shrink-0 h-10 w-10 p-0 hover:bg-red-50 hover:text-red-600 transition-all duration-200 rounded-xl shadow-sm hover:shadow-md">
+              <Mic className="w-4 h-4" />
             </Button>
           </div>
           
-          <div className="flex items-center justify-between mt-3 text-xs text-gray-500">
-            <span className="hidden sm:block">Press Enter to send, Shift+Enter for new line</span>
-            <span className="sm:hidden">Enter to send</span>
-            <span className="font-medium">{newMessage.length}/500</span>
+          <div className="flex items-center justify-between mt-4 text-xs text-gray-500">
+            <span className="hidden sm:block font-medium">Press Enter to send • Shift+Enter for new line</span>
+            <span className="sm:hidden font-medium">Enter to send</span>
+            <div className="flex items-center gap-2">
+              <span className={`font-semibold transition-colors duration-200 ${
+                newMessage.length > 450 ? 'text-red-500' : newMessage.length > 350 ? 'text-yellow-500' : 'text-gray-500'
+              }`}>
+                {newMessage.length}/500
+              </span>
+            </div>
           </div>
         </div>
       </CardContent>
