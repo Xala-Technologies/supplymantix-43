@@ -7,11 +7,11 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Plus, Search } from "lucide-react";
-import { useProcedures, useCreateProcedure } from "@/hooks/useProcedures";
-import { supabase } from "@/integrations/supabase/client";
+import { ArrowLeft, Plus } from "lucide-react";
+import { useProcedures } from "@/hooks/useProcedures";
+import { ProcedureSearchInput } from "./procedure-selection/ProcedureSearchInput";
+import { ProcedureList } from "./procedure-selection/ProcedureList";
+import { CreateProcedureForm } from "./procedure-selection/CreateProcedureForm";
 
 interface ProcedureSelectionDialogProps {
   open: boolean;
@@ -28,67 +28,11 @@ export const ProcedureSelectionDialog = ({
 }: ProcedureSelectionDialogProps) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [showCreateForm, setShowCreateForm] = useState(false);
-  const [newProcedureTitle, setNewProcedureTitle] = useState("");
-  const [newProcedureDescription, setNewProcedureDescription] = useState("");
-  
-  const { data: procedures, isLoading } = useProcedures();
-  const createProcedure = useCreateProcedure();
+  const { data: procedures = [], isLoading } = useProcedures();
 
-  const handleCreateNewProcedure = async () => {
-    if (!newProcedureTitle.trim()) return;
-
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-
-      const { data: userData, error: userError } = await supabase
-        .from("users")
-        .select("tenant_id")
-        .eq("id", user.id)
-        .single();
-
-      if (userError || !userData) return;
-
-      const newProcedure = await createProcedure.mutateAsync({
-        title: newProcedureTitle,
-        description: newProcedureDescription,
-        tenant_id: userData.tenant_id,
-        created_by: user.id,
-        estimated_duration: 30,
-        steps: [],
-      });
-
-      onProcedureSelect(newProcedure.id);
-      setNewProcedureTitle("");
-      setNewProcedureDescription("");
-      setShowCreateForm(false);
-    } catch (error) {
-      console.error("Error creating procedure:", error);
-    }
-  };
-
-  const filteredProcedures = (procedures || []).filter(procedure =>
-    procedure.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    (procedure.description && procedure.description.toLowerCase().includes(searchQuery.toLowerCase()))
-  );
-
-  const getProcedureIcon = (title: string) => {
-    if (title.toLowerCase().includes('compressor')) return '🔧';
-    if (title.toLowerCase().includes('scale')) return '⚖️';
-    if (title.toLowerCase().includes('fire')) return '🧯';
-    if (title.toLowerCase().includes('forklift')) return '🚛';
-    if (title.toLowerCase().includes('safety')) return '👷';
-    if (title.toLowerCase().includes('inspection')) return '🔍';
-    if (title.toLowerCase().includes('maintenance')) return '🛠️';
-    if (title.toLowerCase().includes('calibration')) return '📏';
-    return '📋';
-  };
-
-  const getProcedureFieldCount = (procedure: any) => {
-    if (procedure.steps && Array.isArray(procedure.steps)) {
-      return `${procedure.steps.length} step${procedure.steps.length !== 1 ? 's' : ''}`;
-    }
-    return '0 steps';
+  const handleProcedureCreated = (procedureId: string) => {
+    onProcedureSelect(procedureId);
+    setShowCreateForm(false);
   };
 
   return (
@@ -125,83 +69,28 @@ export const ProcedureSelectionDialog = ({
         </DialogHeader>
 
         {showCreateForm ? (
-          <div className="space-y-4">
-            <Input
-              placeholder="Procedure title"
-              value={newProcedureTitle}
-              onChange={(e) => setNewProcedureTitle(e.target.value)}
-            />
-            <textarea
-              placeholder="Procedure description"
-              value={newProcedureDescription}
-              onChange={(e) => setNewProcedureDescription(e.target.value)}
-              className="w-full p-3 border rounded-md min-h-[100px] resize-none"
-            />
-            <div className="flex gap-2">
-              <Button
-                onClick={handleCreateNewProcedure}
-                disabled={!newProcedureTitle.trim() || createProcedure.isPending}
-                className="bg-blue-600 hover:bg-blue-700"
-              >
-                {createProcedure.isPending ? "Creating..." : "Add Procedure"}
-              </Button>
-              <Button
-                variant="outline"
-                onClick={() => setShowCreateForm(false)}
-              >
-                Cancel
-              </Button>
-            </div>
-          </div>
+          <CreateProcedureForm
+            onProcedureCreated={handleProcedureCreated}
+            onCancel={() => setShowCreateForm(false)}
+          />
         ) : (
           <div className="space-y-4">
-            <div className="relative">
-              <Search className="h-4 w-4 absolute left-3 top-3 text-gray-400" />
-              <Input
-                placeholder="Search Procedure Templates..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10"
-              />
-            </div>
+            <ProcedureSearchInput
+              searchQuery={searchQuery}
+              onSearchChange={setSearchQuery}
+            />
 
             <div>
               <h3 className="text-sm font-medium text-gray-700 mb-3">
-                {isLoading ? "Loading procedures..." : `All Templates (${filteredProcedures.length})`}
+                {isLoading ? "Loading procedures..." : `All Templates (${procedures.length})`}
               </h3>
-              <div className="space-y-2 max-h-96 overflow-y-auto">
-                {isLoading ? (
-                  <div className="text-center py-8 text-gray-500">
-                    Loading procedures...
-                  </div>
-                ) : filteredProcedures.length === 0 ? (
-                  <div className="text-center py-8 text-gray-500">
-                    {searchQuery ? "No procedures found matching your search." : "No procedures available. Create your first procedure!"}
-                  </div>
-                ) : (
-                  filteredProcedures.map((procedure) => (
-                    <div
-                      key={procedure.id}
-                      className="flex items-center gap-3 p-3 border rounded-lg hover:bg-gray-50 cursor-pointer"
-                      onClick={() => onProcedureSelect(procedure.id)}
-                    >
-                      <div className="text-2xl">{getProcedureIcon(procedure.title)}</div>
-                      <div className="flex-1">
-                        <h4 className="font-medium text-gray-900">{procedure.title}</h4>
-                        <p className="text-sm text-gray-500 mb-1">
-                          {procedure.description || "No description"}
-                        </p>
-                        <p className="text-xs text-gray-400">
-                          {getProcedureFieldCount(procedure)} • {procedure.estimated_duration || 30} min
-                        </p>
-                      </div>
-                      {selectedProcedures.includes(procedure.id) && (
-                        <Badge variant="secondary">Added</Badge>
-                      )}
-                    </div>
-                  ))
-                )}
-              </div>
+              <ProcedureList
+                procedures={procedures}
+                selectedProcedures={selectedProcedures}
+                onProcedureSelect={onProcedureSelect}
+                isLoading={isLoading}
+                searchQuery={searchQuery}
+              />
             </div>
           </div>
         )}
