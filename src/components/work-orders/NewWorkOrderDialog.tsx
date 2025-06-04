@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import {
@@ -65,7 +64,6 @@ export const NewWorkOrderDialog = () => {
       await createWorkOrder.mutateAsync({
         title: data.title,
         description: data.description,
-        priority: data.priority,
         due_date: data.dueDate.toISOString(),
         assigned_to: data.assignedTo,
         asset_id: data.asset,
