@@ -1,10 +1,11 @@
-
 import { DashboardLayout } from "@/components/Layout/DashboardLayout";
 import { useWorkOrders } from "@/hooks/useWorkOrders";
 import { WorkOrdersList } from "@/components/work-orders/WorkOrdersList";
 import { WorkOrderDetailCard } from "@/components/work-orders/WorkOrderDetailCard";
 import { WorkOrdersHeader } from "@/components/work-orders/WorkOrdersHeader";
 import { useState } from "react";
+import { ChevronLeft } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 export default function WorkOrders() {
   const { data: workOrders, isLoading } = useWorkOrders();
@@ -111,17 +112,25 @@ export default function WorkOrders() {
         <WorkOrdersHeader />
         
         <div className="flex-1 flex overflow-hidden">
-          {/* Sidebar - responsive width */}
-          <div className="hidden md:block">
+          {/* Desktop Layout */}
+          <div className="hidden md:flex w-full">
+            {/* Sidebar */}
             <WorkOrdersList 
               workOrders={sampleWorkOrders}
               selectedWorkOrderId={selectedWorkOrder}
               onSelectWorkOrder={setSelectedWorkOrder}
             />
+            
+            {/* Detail view */}
+            <div className="flex-1 bg-white overflow-y-auto">
+              <div className="p-4 lg:p-6">
+                <WorkOrderDetailCard workOrder={selectedWorkOrderData} />
+              </div>
+            </div>
           </div>
           
-          {/* Mobile list view */}
-          <div className="md:hidden w-full">
+          {/* Mobile Layout */}
+          <div className="md:hidden w-full flex flex-col">
             {!selectedWorkOrder ? (
               <WorkOrdersList 
                 workOrders={sampleWorkOrders}
@@ -129,27 +138,28 @@ export default function WorkOrders() {
                 onSelectWorkOrder={setSelectedWorkOrder}
               />
             ) : (
-              <div className="flex flex-col h-full">
-                <div className="p-4 border-b bg-white">
-                  <button 
+              <>
+                {/* Mobile header with back button */}
+                <div className="p-3 border-b bg-white flex items-center gap-3">
+                  <Button 
+                    variant="ghost" 
+                    size="sm"
                     onClick={() => setSelectedWorkOrder(null)}
-                    className="text-blue-600 hover:text-blue-800 flex items-center gap-2"
+                    className="p-1 h-auto"
                   >
-                    ← Back to list
-                  </button>
+                    <ChevronLeft className="w-5 h-5" />
+                  </Button>
+                  <span className="font-medium text-gray-900 truncate">
+                    Work Order #{selectedWorkOrderData.id}
+                  </span>
                 </div>
-                <div className="flex-1 p-4 overflow-y-auto">
+                
+                {/* Mobile detail view */}
+                <div className="flex-1 p-3 overflow-y-auto bg-white">
                   <WorkOrderDetailCard workOrder={selectedWorkOrderData} />
                 </div>
-              </div>
+              </>
             )}
-          </div>
-          
-          {/* Detail view - desktop only */}
-          <div className="hidden md:block flex-1 bg-white overflow-y-auto">
-            <div className="p-6">
-              <WorkOrderDetailCard workOrder={selectedWorkOrderData} />
-            </div>
           </div>
         </div>
       </div>

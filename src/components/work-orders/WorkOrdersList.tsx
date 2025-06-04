@@ -70,10 +70,10 @@ export const WorkOrdersList = ({ workOrders, selectedWorkOrderId, onSelectWorkOr
   const teamWorkOrders = todoWorkOrders.slice(4); // Rest as "assigned to teams"
 
   return (
-    <div className="w-full md:w-96 lg:w-[28rem] bg-white border-r border-gray-200 flex flex-col h-full">
+    <div className="w-full md:w-80 lg:w-96 xl:w-[28rem] bg-white border-r border-gray-200 flex flex-col h-full">
       {/* Header */}
-      <div className="p-4 border-b border-gray-100">
-        <div className="flex items-center space-x-4 mb-4">
+      <div className="p-3 md:p-4 border-b border-gray-100">
+        <div className="flex items-center space-x-3 md:space-x-4 mb-3 md:mb-4">
           <div className="pb-2 border-b-2 border-blue-600">
             <span className="text-blue-600 font-semibold text-sm">To Do</span>
           </div>
@@ -83,46 +83,46 @@ export const WorkOrdersList = ({ workOrders, selectedWorkOrderId, onSelectWorkOr
         </div>
         
         <div className="flex items-center justify-between text-xs text-gray-600">
-          <span>Sort By: Due Date: Earliest First</span>
-          <button className="text-gray-400 hover:text-gray-600 text-sm">↻</button>
+          <span className="truncate">Sort By: Due Date: Earliest First</span>
+          <button className="text-gray-400 hover:text-gray-600 text-sm flex-shrink-0 ml-2">↻</button>
         </div>
       </div>
       
       {/* Scrollable content */}
       <div className="flex-1 overflow-y-auto">
         {/* Assigned to Me Section */}
-        <div className="p-4">
+        <div className="p-3 md:p-4">
           <div className="flex items-center justify-between mb-3">
             <h3 className="text-sm font-semibold text-gray-900">
               Assigned to Me ({myWorkOrders.length})
             </h3>
           </div>
           
-          <div className="space-y-3">
+          <div className="space-y-2 md:space-y-3">
             {myWorkOrders.map((workOrder) => (
               <div
                 key={workOrder.id}
                 className={cn(
-                  "p-4 rounded-lg border-2 cursor-pointer transition-all duration-200 hover:shadow-md",
+                  "p-3 md:p-4 rounded-lg border-2 cursor-pointer transition-all duration-200 hover:shadow-md",
                   selectedWorkOrderId === workOrder.id 
                     ? "bg-blue-50 border-blue-300 shadow-sm" 
                     : "bg-white border-gray-200 hover:border-gray-300"
                 )}
                 onClick={() => onSelectWorkOrder(workOrder.id)}
               >
-                <div className="flex items-start gap-3">
+                <div className="flex items-start gap-2 md:gap-3">
                   {/* Icon */}
-                  <div className="w-10 h-10 bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <span className="text-sm">🔧</span>
+                  <div className="w-8 h-8 md:w-10 md:h-10 bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <span className="text-xs md:text-sm">🔧</span>
                   </div>
                   
                   <div className="flex-1 min-w-0">
                     {/* Title and Priority */}
                     <div className="flex items-start justify-between mb-2">
-                      <h4 className="text-sm font-semibold text-gray-900 leading-tight pr-2">
+                      <h4 className="text-xs md:text-sm font-semibold text-gray-900 leading-tight pr-2 line-clamp-2">
                         {workOrder.title}
                       </h4>
-                      <div className={cn("w-3 h-3 rounded-full flex-shrink-0", getPriorityColor(workOrder.priority))} />
+                      <div className={cn("w-2.5 h-2.5 md:w-3 md:h-3 rounded-full flex-shrink-0", getPriorityColor(workOrder.priority))} />
                     </div>
                     
                     {/* Asset and ID */}
@@ -131,33 +131,33 @@ export const WorkOrdersList = ({ workOrders, selectedWorkOrderId, onSelectWorkOr
                     </div>
                     
                     {/* Status and Due Date */}
-                    <div className="flex flex-col gap-2 mb-3">
+                    <div className="flex flex-col gap-1.5 md:gap-2 mb-2 md:mb-3">
                       <Badge className={cn("text-xs w-fit border", getStatusColor(workOrder.status))}>
                         {workOrder.status}
                       </Badge>
                       <div className="flex items-center gap-1 text-xs text-gray-500">
-                        <Clock className="w-3 h-3" />
-                        <span>{formatDueDate(workOrder.dueDate)}</span>
+                        <Clock className="w-3 h-3 flex-shrink-0" />
+                        <span className="truncate">{formatDueDate(workOrder.dueDate)}</span>
                       </div>
                       <div className="flex items-center gap-1 text-xs text-gray-500">
-                        <MapPin className="w-3 h-3" />
-                        <span>{workOrder.location}</span>
+                        <MapPin className="w-3 h-3 flex-shrink-0" />
+                        <span className="truncate">{workOrder.location}</span>
                       </div>
                     </div>
                     
                     {/* Assigned Users */}
                     <div className="flex items-center gap-2">
-                      <Users className="w-3 h-3 text-gray-400" />
-                      <div className="flex items-center gap-1">
-                        {workOrder.assignedTo.slice(0, 3).map((assignee, index) => (
-                          <Avatar key={index} className="w-6 h-6 border border-white">
+                      <Users className="w-3 h-3 text-gray-400 flex-shrink-0" />
+                      <div className="flex items-center gap-1 min-w-0">
+                        {workOrder.assignedTo.slice(0, 2).map((assignee, index) => (
+                          <Avatar key={index} className="w-5 h-5 md:w-6 md:h-6 border border-white flex-shrink-0">
                             <AvatarFallback className="text-xs bg-blue-100 text-blue-700 font-medium">
                               {getInitials(assignee)}
                             </AvatarFallback>
                           </Avatar>
                         ))}
-                        {workOrder.assignedTo.length > 3 && (
-                          <span className="text-xs text-gray-500 ml-1">+{workOrder.assignedTo.length - 3}</span>
+                        {workOrder.assignedTo.length > 2 && (
+                          <span className="text-xs text-gray-500 ml-1">+{workOrder.assignedTo.length - 2}</span>
                         )}
                       </div>
                     </div>
@@ -170,27 +170,30 @@ export const WorkOrdersList = ({ workOrders, selectedWorkOrderId, onSelectWorkOr
         
         {/* Assigned to Teams Section */}
         {teamWorkOrders.length > 0 && (
-          <div className="px-4 pb-4">
-            <div className="border-t border-gray-100 pt-4">
+          <div className="px-3 md:px-4 pb-3 md:pb-4">
+            <div className="border-t border-gray-100 pt-3 md:pt-4">
               <h3 className="text-sm font-semibold text-gray-900 mb-3">
                 Assigned to My Teams ({teamWorkOrders.length})
               </h3>
               
-              <div className="space-y-3">
+              <div className="space-y-2 md:space-y-3">
                 {teamWorkOrders.map((workOrder) => (
                   <div
                     key={workOrder.id}
-                    className="p-3 rounded-lg border border-gray-200 bg-gray-50 cursor-pointer hover:bg-gray-100 transition-colors"
+                    className={cn(
+                      "p-3 rounded-lg border border-gray-200 bg-gray-50 cursor-pointer hover:bg-gray-100 transition-colors",
+                      selectedWorkOrderId === workOrder.id && "bg-blue-50 border-blue-300"
+                    )}
                     onClick={() => onSelectWorkOrder(workOrder.id)}
                   >
-                    <div className="flex items-start gap-3">
-                      <div className="w-8 h-8 bg-gray-200 rounded-lg flex items-center justify-center">
+                    <div className="flex items-start gap-2 md:gap-3">
+                      <div className="w-7 h-7 md:w-8 md:h-8 bg-gray-200 rounded-lg flex items-center justify-center flex-shrink-0">
                         <span className="text-xs">
                           {workOrder.category === 'Safety' ? '🔥' : '🔧'}
                         </span>
                       </div>
                       <div className="flex-1 min-w-0">
-                        <h4 className="text-sm font-medium text-gray-900 mb-1 truncate">
+                        <h4 className="text-xs md:text-sm font-medium text-gray-900 mb-1 line-clamp-2">
                           {workOrder.title}
                         </h4>
                         <div className="text-xs text-gray-600 mb-2 truncate">
