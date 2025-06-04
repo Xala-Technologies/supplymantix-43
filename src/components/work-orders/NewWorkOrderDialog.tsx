@@ -71,7 +71,7 @@ export const NewWorkOrderDialog = () => {
         asset_id: data.asset,
         location: data.location,
         category: data.category,
-        status: "Open",
+        status: "open",
       });
       
       setOpen(false);
