@@ -145,6 +145,9 @@ export const sampleProcedures: Procedure[] = [
 
 // Service functions to manage work order-procedure relationships
 export const workOrderProcedureService = {
+  // Export sampleProcedures as part of the service
+  sampleProcedures,
+  
   // Get recommended procedures for a work order based on its characteristics
   getRecommendedProcedures(workOrder: any): Procedure[] {
     const recommendations: Procedure[] = [];
@@ -188,6 +191,17 @@ export const workOrderProcedureService = {
           procedureId: 'proc-002',
           status: 'not_started',
           assignedTo: 'Safety Team'
+        }
+      ];
+    }
+    
+    if (workOrderId === '5960') {
+      return [
+        {
+          workOrderId: '5960',
+          procedureId: 'proc-003',
+          status: 'not_started',
+          assignedTo: 'Maintenance Team 1'
         }
       ];
     }

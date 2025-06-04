@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Clock, User, CheckCircle2, AlertCircle, Play, Plus } from "lucide-react";
-import { workOrderProcedureService, type Procedure, type WorkOrderProcedureLink } from "@/lib/workOrderProcedureService";
+import { workOrderProcedureService, sampleProcedures, type Procedure, type WorkOrderProcedureLink } from "@/lib/workOrderProcedureService";
 
 interface WorkOrderProceduresProps {
   workOrderId: string;
@@ -67,7 +67,7 @@ export const WorkOrderProcedures = ({ workOrderId, workOrder }: WorkOrderProcedu
           </CardHeader>
           <CardContent className="space-y-4">
             {linkedProcedures.map((link) => {
-              const procedure = workOrderProcedureService.sampleProcedures.find(p => p.id === link.procedureId);
+              const procedure = sampleProcedures.find(p => p.id === link.procedureId);
               if (!procedure) return null;
               
               return (
