@@ -7,6 +7,7 @@ import { procurementApi } from "./procurement";
 import { usersApi } from "./users";
 import { organizationsApi } from "./organizations";
 import { locationsApi } from "./locations";
+import { billingApi } from "./billing";
 
 export const databaseApi = {
   ...workOrdersApi,
@@ -17,4 +18,5 @@ export const databaseApi = {
   ...usersApi,
   ...organizationsApi,
   ...locationsApi,
+  ...billingApi,
 };

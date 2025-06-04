@@ -1,4 +1,3 @@
-
 import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { useOrganizationSubscription, useCreateOrganizationSubscription, useSubscriptionTemplates } from "@/hooks/useBilling";
@@ -38,14 +37,16 @@ export const OrganizationSubscription = ({ organizationId }: OrganizationSubscri
 
     try {
       // Create new organization subscription
-      await createOrganizationSubscription.mutateAsync({
+      const subscriptionData = {
         organization_id: organizationId,
         subscription_id: selectedTemplate.id,
         status: 'active',
         billing_cycle: 'monthly',
         current_period_start: new Date().toISOString(),
         current_period_end: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), // 30 days from now
-      });
+      };
+
+      await createOrganizationSubscription.mutateAsync(subscriptionData);
 
       toast({
         title: "Subscription Updated",

@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import {
@@ -31,6 +30,7 @@ import { CalendarIcon, Plus } from "lucide-react";
 import { format } from "date-fns";
 import { useCreateWorkOrder } from "@/hooks/useWorkOrders";
 import { useLocations } from "@/hooks/useLocations";
+import { supabase } from "@/integrations/supabase/client";
 
 interface NewWorkOrderFormData {
   title: string;
@@ -64,6 +64,25 @@ export const NewWorkOrderDialog = () => {
 
   const onSubmit = async (data: NewWorkOrderFormData) => {
     try {
+      // Get current user to get tenant_id
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        console.error("No authenticated user found");
+        return;
+      }
+
+      // Get user's tenant_id
+      const { data: userData, error: userError } = await supabase
+        .from("users")
+        .select("tenant_id")
+        .eq("id", user.id)
+        .single();
+
+      if (userError || !userData) {
+        console.error("Error getting user tenant:", userError);
+        return;
+      }
+
       // Find the location_id from the selected location name
       const selectedLocation = locations?.find(loc => loc.name === data.location);
       
@@ -74,6 +93,7 @@ export const NewWorkOrderDialog = () => {
         assigned_to: data.assignedTo,
         asset_id: data.asset,
         location_id: selectedLocation?.id,
+        tenant_id: userData.tenant_id,
         status: "open",
       });
       
