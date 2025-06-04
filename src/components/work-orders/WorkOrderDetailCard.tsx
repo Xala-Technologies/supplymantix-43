@@ -1,11 +1,17 @@
+
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { MessageCircle, Edit, MoreHorizontal, Copy, Lock, Pause, Play, CheckCircle2, Clock, User, MapPin, Plus, ChevronDown, ListTodo } from "lucide-react";
 import { format } from "date-fns";
 import { WorkOrderProcedures } from "./WorkOrderProcedures";
 import { TimeAndCostTracking } from "./TimeAndCostTracking";
+import { WorkOrderExecution } from "./WorkOrderExecution";
+import { WorkOrderStatusManagement } from "./WorkOrderStatusManagement";
+import { WorkOrderAssignment } from "./WorkOrderAssignment";
+import { WorkOrderChat } from "./WorkOrderChat";
 
 interface WorkOrderDetailCardProps {
   workOrder: {
@@ -134,11 +140,89 @@ export const WorkOrderDetailCard = ({ workOrder }: WorkOrderDetailCardProps) => 
         </CardHeader>
       </Card>
 
-      {/* Procedures Section */}
-      <WorkOrderProcedures workOrderId={workOrder.id} workOrder={workOrder} />
+      {/* Main Content Tabs */}
+      <Card className="shadow-sm border-gray-200">
+        <CardContent className="p-0">
+          <Tabs defaultValue="procedures" className="w-full">
+            <div className="border-b border-gray-200 px-6">
+              <TabsList className="h-12 p-0 bg-transparent space-x-8">
+                <TabsTrigger 
+                  value="procedures" 
+                  className="h-12 px-0 border-b-2 border-transparent data-[state=active]:border-blue-600 data-[state=active]:bg-transparent rounded-none"
+                >
+                  Procedures
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="execution" 
+                  className="h-12 px-0 border-b-2 border-transparent data-[state=active]:border-blue-600 data-[state=active]:bg-transparent rounded-none"
+                >
+                  Execution
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="status" 
+                  className="h-12 px-0 border-b-2 border-transparent data-[state=active]:border-blue-600 data-[state=active]:bg-transparent rounded-none"
+                >
+                  Status
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="assignment" 
+                  className="h-12 px-0 border-b-2 border-transparent data-[state=active]:border-blue-600 data-[state=active]:bg-transparent rounded-none"
+                >
+                  Assignment
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="tracking" 
+                  className="h-12 px-0 border-b-2 border-transparent data-[state=active]:border-blue-600 data-[state=active]:bg-transparent rounded-none"
+                >
+                  Time & Cost
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="chat" 
+                  className="h-12 px-0 border-b-2 border-transparent data-[state=active]:border-blue-600 data-[state=active]:bg-transparent rounded-none"
+                >
+                  Discussion
+                </TabsTrigger>
+              </TabsList>
+            </div>
 
-      {/* Time & Cost Tracking - Enhanced */}
-      <TimeAndCostTracking workOrderId={workOrder.id} />
+            <div className="p-6">
+              <TabsContent value="procedures" className="mt-0">
+                <WorkOrderProcedures workOrderId={workOrder.id} workOrder={workOrder} />
+              </TabsContent>
+
+              <TabsContent value="execution" className="mt-0">
+                <WorkOrderExecution workOrderId={workOrder.id} />
+              </TabsContent>
+
+              <TabsContent value="status" className="mt-0">
+                <WorkOrderStatusManagement 
+                  workOrder={workOrder}
+                  onStatusChange={(newStatus, comment) => {
+                    console.log('Status change:', newStatus, comment);
+                  }}
+                />
+              </TabsContent>
+
+              <TabsContent value="assignment" className="mt-0">
+                <WorkOrderAssignment 
+                  workOrder={workOrder}
+                  onAssignmentChange={(assigneeIds, comment) => {
+                    console.log('Assignment change:', assigneeIds, comment);
+                  }}
+                />
+              </TabsContent>
+
+              <TabsContent value="tracking" className="mt-0">
+                <TimeAndCostTracking workOrderId={workOrder.id} />
+              </TabsContent>
+
+              <TabsContent value="chat" className="mt-0">
+                <WorkOrderChat workOrderId={workOrder.id} />
+              </TabsContent>
+            </div>
+          </Tabs>
+        </CardContent>
+      </Card>
 
       {/* Categories */}
       <Card className="shadow-sm border-gray-200">
