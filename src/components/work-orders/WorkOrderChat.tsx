@@ -136,9 +136,9 @@ export const WorkOrderChat = ({ workOrderId }: WorkOrderChatProps) => {
   }
 
   return (
-    <Card className="h-[600px] flex flex-col">
-      <CardHeader className="pb-4">
-        <CardTitle className="flex items-center justify-between">
+    <Card className="h-[600px] md:h-[600px] flex flex-col">
+      <CardHeader className="pb-3 md:pb-4 px-3 md:px-6">
+        <CardTitle className="flex items-center justify-between text-base md:text-lg">
           <span>Work Order Discussion</span>
           <Badge variant="outline" className="text-xs">
             {allMessages.length} messages
@@ -148,19 +148,19 @@ export const WorkOrderChat = ({ workOrderId }: WorkOrderChatProps) => {
       
       <CardContent className="flex-1 flex flex-col p-0">
         {/* Messages */}
-        <div className="flex-1 overflow-y-auto px-6 space-y-4">
+        <div className="flex-1 overflow-y-auto px-3 md:px-6 space-y-3 md:space-y-4">
           {allMessages.map((message) => (
-            <div key={message.id} className={`border rounded-lg p-4 ${getMessageTypeColor((message as any).message_type)}`}>
-              <div className="flex items-start gap-3">
-                <Avatar className="w-8 h-8 flex-shrink-0">
+            <div key={message.id} className={`border rounded-lg p-3 md:p-4 ${getMessageTypeColor((message as any).message_type)}`}>
+              <div className="flex items-start gap-2 md:gap-3">
+                <Avatar className="w-6 h-6 md:w-8 md:h-8 flex-shrink-0">
                   <AvatarFallback className="bg-blue-100 text-blue-700 text-xs">
                     {message.users?.email ? getInitials(message.users.email) : 'SY'}
                   </AvatarFallback>
                 </Avatar>
                 
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="font-medium text-sm text-gray-900">
+                  <div className="flex items-center gap-2 mb-1 flex-wrap">
+                    <span className="font-medium text-xs md:text-sm text-gray-900">
                       {message.users?.email?.split('@')[0].replace('.', ' ') || 'System'}
                     </span>
                     {(message as any).message_type && (message as any).message_type !== 'text' && (
@@ -173,27 +173,27 @@ export const WorkOrderChat = ({ workOrderId }: WorkOrderChatProps) => {
                     </span>
                   </div>
                   
-                  <p className="text-sm text-gray-700 leading-relaxed mb-2">
+                  <p className="text-xs md:text-sm text-gray-700 leading-relaxed mb-2 break-words">
                     {message.message}
                   </p>
                   
                   {(message as any).attachments && (message as any).attachments.length > 0 && (
-                    <div className="flex flex-wrap gap-2 mt-2">
+                    <div className="flex flex-wrap gap-1 md:gap-2 mt-2">
                       {(message as any).attachments.map((attachment: string, index: number) => (
                         <div key={index} className="flex items-center gap-1 px-2 py-1 bg-gray-100 rounded text-xs">
                           <Paperclip className="w-3 h-3" />
-                          <span>{attachment}</span>
+                          <span className="truncate max-w-20 md:max-w-none">{attachment}</span>
                         </div>
                       ))}
                     </div>
                   )}
                   
                   <div className="flex items-center gap-2 mt-2">
-                    <Button variant="ghost" size="sm" className="h-6 px-2 text-xs text-gray-500 hover:text-gray-700">
+                    <Button variant="ghost" size="sm" className="h-5 md:h-6 px-1 md:px-2 text-xs text-gray-500 hover:text-gray-700">
                       <Reply className="w-3 h-3 mr-1" />
                       Reply
                     </Button>
-                    <Button variant="ghost" size="sm" className="h-6 px-1 text-gray-400 hover:text-gray-600">
+                    <Button variant="ghost" size="sm" className="h-5 md:h-6 px-1 text-gray-400 hover:text-gray-600">
                       <MoreVertical className="w-3 h-3" />
                     </Button>
                   </div>
@@ -203,30 +203,30 @@ export const WorkOrderChat = ({ workOrderId }: WorkOrderChatProps) => {
           ))}
           
           {isTyping && (
-            <div className="flex items-center gap-3 px-4 py-2 text-sm text-gray-500">
-              <Avatar className="w-6 h-6">
+            <div className="flex items-center gap-2 md:gap-3 px-3 md:px-4 py-2 text-xs md:text-sm text-gray-500">
+              <Avatar className="w-5 h-5 md:w-6 md:h-6">
                 <AvatarFallback className="bg-gray-100 text-gray-600 text-xs">
                   ZB
                 </AvatarFallback>
               </Avatar>
               <span>Zach Brown is typing...</span>
               <div className="flex gap-1">
-                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
-                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
-                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+                <div className="w-1.5 h-1.5 md:w-2 md:h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+                <div className="w-1.5 h-1.5 md:w-2 md:h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+                <div className="w-1.5 h-1.5 md:w-2 md:h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
               </div>
             </div>
           )}
         </div>
         
         {/* Message Input */}
-        <div className="border-t border-gray-200 p-4">
-          <div className="flex items-center gap-2">
-            <Button variant="ghost" size="sm" className="flex-shrink-0">
-              <Paperclip className="w-4 h-4" />
+        <div className="border-t border-gray-200 p-3 md:p-4 bg-white">
+          <div className="flex items-center gap-1 md:gap-2">
+            <Button variant="ghost" size="sm" className="flex-shrink-0 h-8 w-8 md:h-9 md:w-9 p-0">
+              <Paperclip className="w-3 h-3 md:w-4 md:h-4" />
             </Button>
-            <Button variant="ghost" size="sm" className="flex-shrink-0">
-              <Image className="w-4 h-4" />
+            <Button variant="ghost" size="sm" className="flex-shrink-0 h-8 w-8 md:h-9 md:w-9 p-0">
+              <Image className="w-3 h-3 md:w-4 md:h-4" />
             </Button>
             
             <div className="flex-1 relative">
@@ -240,11 +240,11 @@ export const WorkOrderChat = ({ workOrderId }: WorkOrderChatProps) => {
                     handleSendMessage();
                   }
                 }}
-                className="pr-12"
+                className="pr-10 md:pr-12 text-sm md:text-base h-8 md:h-9"
               />
               <Button 
                 size="sm" 
-                className="absolute right-1 top-1 h-7 w-7 p-0"
+                className="absolute right-1 top-0.5 md:top-1 h-6 w-6 md:h-7 md:w-7 p-0"
                 onClick={handleSendMessage}
                 disabled={!newMessage.trim() || createMessage.isPending}
               >
@@ -252,13 +252,14 @@ export const WorkOrderChat = ({ workOrderId }: WorkOrderChatProps) => {
               </Button>
             </div>
             
-            <Button variant="ghost" size="sm" className="flex-shrink-0">
-              <Mic className="w-4 h-4" />
+            <Button variant="ghost" size="sm" className="flex-shrink-0 h-8 w-8 md:h-9 md:w-9 p-0">
+              <Mic className="w-3 h-3 md:w-4 md:h-4" />
             </Button>
           </div>
           
           <div className="flex items-center justify-between mt-2 text-xs text-gray-500">
-            <span>Press Enter to send, Shift+Enter for new line</span>
+            <span className="hidden sm:block">Press Enter to send, Shift+Enter for new line</span>
+            <span className="sm:hidden">Enter to send</span>
             <span>{newMessage.length}/500</span>
           </div>
         </div>
