@@ -107,18 +107,49 @@ export default function WorkOrders() {
 
   return (
     <DashboardLayout>
-      <div className="h-full flex flex-col">
+      <div className="h-full flex flex-col bg-gray-50">
         <WorkOrdersHeader />
         
         <div className="flex-1 flex overflow-hidden">
-          <WorkOrdersList 
-            workOrders={sampleWorkOrders}
-            selectedWorkOrderId={selectedWorkOrder}
-            onSelectWorkOrder={setSelectedWorkOrder}
-          />
+          {/* Sidebar - responsive width */}
+          <div className="hidden md:block">
+            <WorkOrdersList 
+              workOrders={sampleWorkOrders}
+              selectedWorkOrderId={selectedWorkOrder}
+              onSelectWorkOrder={setSelectedWorkOrder}
+            />
+          </div>
           
-          <div className="flex-1 p-6 overflow-y-auto">
-            <WorkOrderDetailCard workOrder={selectedWorkOrderData} />
+          {/* Mobile list view */}
+          <div className="md:hidden w-full">
+            {!selectedWorkOrder ? (
+              <WorkOrdersList 
+                workOrders={sampleWorkOrders}
+                selectedWorkOrderId={selectedWorkOrder}
+                onSelectWorkOrder={setSelectedWorkOrder}
+              />
+            ) : (
+              <div className="flex flex-col h-full">
+                <div className="p-4 border-b bg-white">
+                  <button 
+                    onClick={() => setSelectedWorkOrder(null)}
+                    className="text-blue-600 hover:text-blue-800 flex items-center gap-2"
+                  >
+                    ← Back to list
+                  </button>
+                </div>
+                <div className="flex-1 p-4 overflow-y-auto">
+                  <WorkOrderDetailCard workOrder={selectedWorkOrderData} />
+                </div>
+              </div>
+            )}
+          </div>
+          
+          {/* Detail view - desktop only */}
+          <div className="hidden md:block flex-1 bg-white overflow-y-auto">
+            <div className="p-6">
+              <WorkOrderDetailCard workOrder={selectedWorkOrderData} />
+            </div>
           </div>
         </div>
       </div>
