@@ -1,4 +1,3 @@
-
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -78,7 +77,7 @@ export const WorkOrderDetailCard = ({ workOrder }: WorkOrderDetailCardProps) => 
   ];
 
   return (
-    <div className="w-full max-w-5xl mx-auto space-y-6">
+    <div className="w-full max-w-5xl mx-auto space-y-6 relative">
       {/* Header Card */}
       <Card className="shadow-sm border-gray-200">
         <CardHeader className="pb-4">
@@ -238,15 +237,11 @@ export const WorkOrderDetailCard = ({ workOrder }: WorkOrderDetailCardProps) => 
         </CardContent>
       </Card>
 
-      {/* Vendors */}
+      {/* Updated Vendors Card - removed the View Procedure button */}
       <Card className="shadow-sm border-gray-200">
         <CardContent className="p-6">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-semibold text-gray-900">Vendors</h3>
-            <Button variant="outline" size="sm" className="text-blue-600 border-blue-200 hover:bg-blue-50">
-              <ListTodo className="w-4 h-4 mr-2" />
-              View Procedure
-            </Button>
           </div>
           
           <div className="space-y-3">
@@ -278,6 +273,22 @@ export const WorkOrderDetailCard = ({ workOrder }: WorkOrderDetailCardProps) => 
           </div>
         </CardContent>
       </Card>
+
+      {/* Floating Action Bar */}
+      <div className="fixed bottom-6 right-6 z-50">
+        <div className="bg-white rounded-full shadow-lg border border-gray-200 p-2 backdrop-blur-sm bg-white/95">
+          <Button 
+            className="bg-blue-600 hover:bg-blue-700 text-white rounded-full h-12 px-6 shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105"
+            onClick={() => {
+              // Navigate to procedures or open procedures modal
+              console.log('View procedures clicked');
+            }}
+          >
+            <ListTodo className="w-5 h-5 mr-2" />
+            View Procedures
+          </Button>
+        </div>
+      </div>
     </div>
   );
 };
