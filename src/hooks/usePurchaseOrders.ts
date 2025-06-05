@@ -7,7 +7,10 @@ import type { CreatePurchaseOrderRequest, UpdatePurchaseOrderRequest } from "@/t
 export const usePurchaseOrders = () => {
   return useQuery({
     queryKey: ["purchase-orders"],
-    queryFn: databaseApi.getPurchaseOrders,
+    queryFn: () => {
+      console.log("usePurchaseOrders: Fetching purchase orders...");
+      return databaseApi.getPurchaseOrders();
+    },
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
 };
@@ -32,12 +35,17 @@ export const useCreatePurchaseOrder = () => {
   const queryClient = useQueryClient();
   
   return useMutation({
-    mutationFn: (data: CreatePurchaseOrderRequest) => databaseApi.createPurchaseOrder(data),
-    onSuccess: () => {
+    mutationFn: (data: CreatePurchaseOrderRequest) => {
+      console.log("useCreatePurchaseOrder: Creating purchase order with data:", data);
+      return databaseApi.createPurchaseOrder(data);
+    },
+    onSuccess: (result) => {
+      console.log("useCreatePurchaseOrder: Purchase order created successfully:", result);
       queryClient.invalidateQueries({ queryKey: ["purchase-orders"] });
       toast.success("Purchase order created successfully");
     },
     onError: (error: Error) => {
+      console.error("useCreatePurchaseOrder: Failed to create purchase order:", error);
       toast.error(`Failed to create purchase order: ${error.message}`);
     },
   });

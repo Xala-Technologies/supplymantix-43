@@ -2,41 +2,24 @@
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { DashboardLayout } from "@/components/Layout/DashboardLayout";
 import { PurchaseOrderForm } from "@/components/purchase-orders/PurchaseOrderForm";
-import { purchaseOrdersApi } from "@/lib/database/purchase-orders";
 import { useInventoryItems } from "@/hooks/useInventory";
+import { useCreatePurchaseOrder } from "@/hooks/usePurchaseOrders";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import { useEffect, useState } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
 export default function CreatePurchaseOrder() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const queryClient = useQueryClient();
   const { data: inventoryItems } = useInventoryItems();
+  const createPurchaseOrder = useCreatePurchaseOrder();
 
   // Get prefill data from URL params
   const inventoryItemId = searchParams.get('inventory_item_id');
   const quantity = searchParams.get('quantity');
 
   const [initialLineItems, setInitialLineItems] = useState<any[]>([]);
-
-  const createPurchaseOrder = useMutation({
-    mutationFn: (data: any) => {
-      console.log("Creating purchase order with data:", data);
-      return purchaseOrdersApi.createPurchaseOrder(data);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["purchase-orders"] });
-      toast.success("Purchase order created successfully");
-      navigate("/dashboard/purchase-orders");
-    },
-    onError: (error: Error) => {
-      console.error("Failed to create purchase order:", error);
-      toast.error(`Failed to create purchase order: ${error.message}`);
-    }
-  });
 
   useEffect(() => {
     if (inventoryItemId && quantity && inventoryItems) {
@@ -51,9 +34,17 @@ export default function CreatePurchaseOrder() {
     }
   }, [inventoryItemId, quantity, inventoryItems]);
 
-  const handleSubmit = (data: any) => {
-    console.log("Submitting purchase order:", data);
-    createPurchaseOrder.mutate(data);
+  const handleSubmit = async (data: any) => {
+    console.log("CreatePurchaseOrder: Submitting purchase order:", data);
+    
+    try {
+      await createPurchaseOrder.mutateAsync(data);
+      console.log("CreatePurchaseOrder: Purchase order created successfully");
+      navigate("/dashboard/purchase-orders");
+    } catch (error) {
+      console.error("CreatePurchaseOrder: Failed to create purchase order:", error);
+      toast.error(`Failed to create purchase order: ${error}`);
+    }
   };
 
   return (
