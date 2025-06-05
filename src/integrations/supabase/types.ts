@@ -661,6 +661,101 @@ export type Database = {
           },
         ]
       }
+      request_comments: {
+        Row: {
+          comment: string
+          created_at: string | null
+          id: string
+          request_id: string
+          user_id: string | null
+        }
+        Insert: {
+          comment: string
+          created_at?: string | null
+          id?: string
+          request_id: string
+          user_id?: string | null
+        }
+        Update: {
+          comment?: string
+          created_at?: string | null
+          id?: string
+          request_id?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "request_comments_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      requests: {
+        Row: {
+          actual_cost: number | null
+          asset_id: string | null
+          assigned_to: string | null
+          attachments: Json | null
+          category: string | null
+          created_at: string | null
+          description: string | null
+          due_date: string | null
+          estimated_cost: number | null
+          id: string
+          location: string | null
+          notes: string | null
+          priority: Database["public"]["Enums"]["request_priority"]
+          requested_by: string | null
+          status: Database["public"]["Enums"]["request_status"]
+          tenant_id: string
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          actual_cost?: number | null
+          asset_id?: string | null
+          assigned_to?: string | null
+          attachments?: Json | null
+          category?: string | null
+          created_at?: string | null
+          description?: string | null
+          due_date?: string | null
+          estimated_cost?: number | null
+          id?: string
+          location?: string | null
+          notes?: string | null
+          priority?: Database["public"]["Enums"]["request_priority"]
+          requested_by?: string | null
+          status?: Database["public"]["Enums"]["request_status"]
+          tenant_id: string
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          actual_cost?: number | null
+          asset_id?: string | null
+          assigned_to?: string | null
+          attachments?: Json | null
+          category?: string | null
+          created_at?: string | null
+          description?: string | null
+          due_date?: string | null
+          estimated_cost?: number | null
+          id?: string
+          location?: string | null
+          notes?: string | null
+          priority?: Database["public"]["Enums"]["request_priority"]
+          requested_by?: string | null
+          status?: Database["public"]["Enums"]["request_status"]
+          tenant_id?: string
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       subscriptions: {
         Row: {
           billing_cycle: string | null
@@ -1031,6 +1126,14 @@ export type Database = {
         | "ordered"
         | "received"
         | "cancelled"
+      request_priority: "low" | "medium" | "high" | "urgent"
+      request_status:
+        | "pending"
+        | "approved"
+        | "rejected"
+        | "in_progress"
+        | "completed"
+        | "cancelled"
       work_order_status:
         | "open"
         | "in_progress"
@@ -1170,6 +1273,15 @@ export const Constants = {
         "approved",
         "ordered",
         "received",
+        "cancelled",
+      ],
+      request_priority: ["low", "medium", "high", "urgent"],
+      request_status: [
+        "pending",
+        "approved",
+        "rejected",
+        "in_progress",
+        "completed",
         "cancelled",
       ],
       work_order_status: [

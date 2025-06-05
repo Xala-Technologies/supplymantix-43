@@ -1,4 +1,3 @@
-
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/sonner";
@@ -21,6 +20,7 @@ import Inventory from "@/pages/Inventory";
 import Procedures from "@/pages/Procedures";
 import PurchaseOrders from "@/pages/PurchaseOrders";
 import CreatePurchaseOrder from "@/pages/CreatePurchaseOrder";
+import Requests from "@/pages/Requests";
 import Organization from "@/pages/Organization";
 import TranslationManagement from "@/pages/TranslationManagement";
 
@@ -89,86 +89,7 @@ function App() {
               
               <Route path="/dashboard/requests" element={
                 <ProtectedRoute>
-                  <ModulePlaceholder 
-                    title="Requests" 
-                    description="Submit and track maintenance requests" 
-                    icon="📝"
-                    features={[
-                      "Easy request submission form",
-                      "Request prioritization system",
-                      "Real-time status tracking",
-                      "Automatic work order generation",
-                      "Mobile-friendly interface"
-                    ]}
-                  />
-                </ProtectedRoute>
-              } />
-              
-              <Route path="/dashboard/meters" element={
-                <ProtectedRoute>
-                  <ModulePlaceholder 
-                    title="Meters" 
-                    description="Monitor equipment meters and readings" 
-                    icon="📊"
-                    features={[
-                      "Digital meter reading capture",
-                      "Automated reading schedules",
-                      "Trend analysis and reporting",
-                      "Threshold alerts and notifications",
-                      "Historical data visualization"
-                    ]}
-                  />
-                </ProtectedRoute>
-              } />
-              
-              <Route path="/dashboard/locations" element={
-                <ProtectedRoute>
-                  <ModulePlaceholder 
-                    title="Locations" 
-                    description="Manage facility locations and areas" 
-                    icon="📍"
-                    features={[
-                      "Hierarchical location structure",
-                      "Interactive facility maps",
-                      "Asset location tracking",
-                      "QR code generation for locations",
-                      "Location-based reporting"
-                    ]}
-                  />
-                </ProtectedRoute>
-              } />
-              
-              <Route path="/dashboard/reporting" element={
-                <ProtectedRoute>
-                  <ModulePlaceholder 
-                    title="Reporting" 
-                    description="Generate reports and analytics" 
-                    icon="📈"
-                    features={[
-                      "Pre-built report templates",
-                      "Custom report builder",
-                      "Automated report scheduling",
-                      "KPI dashboards and metrics",
-                      "Export to multiple formats"
-                    ]}
-                  />
-                </ProtectedRoute>
-              } />
-              
-              <Route path="/dashboard/messages" element={
-                <ProtectedRoute>
-                  <ModulePlaceholder 
-                    title="Messages" 
-                    description="Team communication and notifications" 
-                    icon="💬"
-                    features={[
-                      "Real-time team messaging",
-                      "Work order collaboration",
-                      "File sharing and attachments",
-                      "Push notifications",
-                      "Message history and search"
-                    ]}
-                  />
+                  <Requests />
                 </ProtectedRoute>
               } />
               
