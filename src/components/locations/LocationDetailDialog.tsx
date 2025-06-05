@@ -2,9 +2,8 @@
 import React from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { MapPin, Building2, Settings, Users } from "lucide-react";
+import { MapPin, Building2 } from "lucide-react";
 
 interface LocationDetailDialogProps {
   location: any;
@@ -19,7 +18,7 @@ export const LocationDetailDialog = ({ location, onClose }: LocationDetailDialog
           <DialogTitle className="flex items-center gap-3">
             <Building2 className="h-6 w-6 text-blue-600" />
             {location.name}
-            <Badge variant="secondary">{location.type}</Badge>
+            <Badge variant="secondary">Location</Badge>
           </DialogTitle>
         </DialogHeader>
 
@@ -50,12 +49,12 @@ export const LocationDetailDialog = ({ location, onClose }: LocationDetailDialog
               <h3 className="font-medium mb-3">Location Details</h3>
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Type:</span>
-                  <span className="capitalize">{location.type}</span>
-                </div>
-                <div className="flex justify-between">
                   <span className="text-muted-foreground">Description:</span>
                   <span>{location.description || "No description"}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Created:</span>
+                  <span>{new Date(location.created_at).toLocaleDateString()}</span>
                 </div>
               </div>
             </div>
