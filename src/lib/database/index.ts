@@ -1,28 +1,14 @@
-
-import { workOrdersApi } from "./work-orders";
-import { assetsApi } from "./assets";
 import { inventoryApi } from "./inventory";
-import { proceduresApi } from "./procedures";
-import { procurementApi } from "./procurement";
-import { purchaseOrdersApi } from "./purchase-orders";
-import { requestsApi } from "./requests";
-import { usersApi } from "./users";
-import { organizationsApi } from "./organizations";
-import { locationsApi } from "./locations";
-import { billingApi } from "./billing";
-import { integrationsApi } from "./integrations";
 
 export const databaseApi = {
-  ...workOrdersApi,
-  ...assetsApi,
-  ...inventoryApi,
-  ...proceduresApi,
-  ...procurementApi,
-  ...purchaseOrdersApi,
-  ...requestsApi,
-  ...usersApi,
-  ...organizationsApi,
-  ...locationsApi,
-  ...billingApi,
-  ...integrationsApi,
+  getInventoryItems: inventoryApi.getInventoryItems,
+  createInventoryItem: inventoryApi.createInventoryItem,
+
+  // Purchase Orders
+  getPurchaseOrders: () => import("./purchase-orders").then(m => m.purchaseOrdersApi.getPurchaseOrders()),
+  getPurchaseOrderById: (id: string) => import("./purchase-orders").then(m => m.purchaseOrdersApi.getPurchaseOrderById(id)),
+  getPurchaseOrderLineItems: (purchaseOrderId: string) => import("./purchase-orders").then(m => m.purchaseOrdersApi.getPurchaseOrderLineItems(purchaseOrderId)),
+  createPurchaseOrder: (data: any) => import("./purchase-orders").then(m => m.purchaseOrdersApi.createPurchaseOrder(data)),
+  updatePurchaseOrder: (data: any) => import("./purchase-orders").then(m => m.purchaseOrdersApi.updatePurchaseOrder(data)),
+  deletePurchaseOrder: (id: string) => import("./purchase-orders").then(m => m.purchaseOrdersApi.deletePurchaseOrder(id)),
 };

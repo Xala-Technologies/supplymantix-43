@@ -2,16 +2,18 @@
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { DashboardLayout } from "@/components/Layout/DashboardLayout";
 import { PurchaseOrderForm } from "@/components/purchase-orders/PurchaseOrderForm";
-import { useCreatePurchaseOrder } from "@/hooks/usePurchaseOrders";
+import { purchaseOrdersApi } from "@/lib/database/purchase-orders";
 import { useInventoryItems } from "@/hooks/useInventory";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import { useEffect, useState } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 
 export default function CreatePurchaseOrder() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const createPurchaseOrder = useCreatePurchaseOrder();
+  const queryClient = useQueryClient();
   const { data: inventoryItems } = useInventoryItems();
 
   // Get prefill data from URL params
@@ -19,6 +21,22 @@ export default function CreatePurchaseOrder() {
   const quantity = searchParams.get('quantity');
 
   const [initialLineItems, setInitialLineItems] = useState<any[]>([]);
+
+  const createPurchaseOrder = useMutation({
+    mutationFn: (data: any) => {
+      console.log("Creating purchase order with data:", data);
+      return purchaseOrdersApi.createPurchaseOrder(data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["purchase-orders"] });
+      toast.success("Purchase order created successfully");
+      navigate("/dashboard/purchase-orders");
+    },
+    onError: (error: Error) => {
+      console.error("Failed to create purchase order:", error);
+      toast.error(`Failed to create purchase order: ${error.message}`);
+    }
+  });
 
   useEffect(() => {
     if (inventoryItemId && quantity && inventoryItems) {
@@ -34,15 +52,8 @@ export default function CreatePurchaseOrder() {
   }, [inventoryItemId, quantity, inventoryItems]);
 
   const handleSubmit = (data: any) => {
-    console.log("Creating purchase order:", data);
-    createPurchaseOrder.mutate(data, {
-      onSuccess: () => {
-        navigate("/dashboard/purchase-orders");
-      },
-      onError: (error) => {
-        console.error("Failed to create purchase order:", error);
-      }
-    });
+    console.log("Submitting purchase order:", data);
+    createPurchaseOrder.mutate(data);
   };
 
   return (
