@@ -79,6 +79,13 @@ function App() {
                     title="Purchase Orders" 
                     description="Manage purchase orders and procurement requests" 
                     icon="💰"
+                    features={[
+                      "Create and manage purchase orders",
+                      "Vendor management and selection",
+                      "Approval workflow automation",
+                      "Budget tracking and cost control",
+                      "Integration with inventory management"
+                    ]}
                   />
                 </ProtectedRoute>
               } />
@@ -89,6 +96,13 @@ function App() {
                     title="Requests" 
                     description="Submit and track maintenance requests" 
                     icon="📝"
+                    features={[
+                      "Easy request submission form",
+                      "Request prioritization system",
+                      "Real-time status tracking",
+                      "Automatic work order generation",
+                      "Mobile-friendly interface"
+                    ]}
                   />
                 </ProtectedRoute>
               } />
@@ -99,6 +113,13 @@ function App() {
                     title="Meters" 
                     description="Monitor equipment meters and readings" 
                     icon="📊"
+                    features={[
+                      "Digital meter reading capture",
+                      "Automated reading schedules",
+                      "Trend analysis and reporting",
+                      "Threshold alerts and notifications",
+                      "Historical data visualization"
+                    ]}
                   />
                 </ProtectedRoute>
               } />
@@ -109,6 +130,13 @@ function App() {
                     title="Locations" 
                     description="Manage facility locations and areas" 
                     icon="📍"
+                    features={[
+                      "Hierarchical location structure",
+                      "Interactive facility maps",
+                      "Asset location tracking",
+                      "QR code generation for locations",
+                      "Location-based reporting"
+                    ]}
                   />
                 </ProtectedRoute>
               } />
@@ -119,6 +147,13 @@ function App() {
                     title="Reporting" 
                     description="Generate reports and analytics" 
                     icon="📈"
+                    features={[
+                      "Pre-built report templates",
+                      "Custom report builder",
+                      "Automated report scheduling",
+                      "KPI dashboards and metrics",
+                      "Export to multiple formats"
+                    ]}
                   />
                 </ProtectedRoute>
               } />
@@ -129,6 +164,13 @@ function App() {
                     title="Messages" 
                     description="Team communication and notifications" 
                     icon="💬"
+                    features={[
+                      "Real-time team messaging",
+                      "Work order collaboration",
+                      "File sharing and attachments",
+                      "Push notifications",
+                      "Message history and search"
+                    ]}
                   />
                 </ProtectedRoute>
               } />
