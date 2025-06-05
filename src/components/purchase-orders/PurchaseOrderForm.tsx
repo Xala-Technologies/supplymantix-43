@@ -16,6 +16,7 @@ import { Plus, Trash2, Package } from "lucide-react";
 import { useInventoryItems } from "@/hooks/useInventory";
 import { PurchaseOrder, PurchaseOrderStatus } from "@/types/purchaseOrder";
 import { formatCurrency } from "@/lib/utils";
+import { toast } from "sonner";
 
 interface LineItem {
   inventory_item_id: string;
@@ -93,12 +94,15 @@ export const PurchaseOrderForm = ({
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  const validateForm = () => {
+    if (!vendor.trim()) {
+      toast.error("Vendor is required");
+      return false;
+    }
     
-    // Validate
-    if (!vendor.trim() || !poNumber.trim()) {
-      return;
+    if (!poNumber.trim()) {
+      toast.error("PO Number is required");
+      return false;
     }
 
     const validLineItems = lineItems.filter(item => 
@@ -106,8 +110,43 @@ export const PurchaseOrderForm = ({
     );
 
     if (validLineItems.length === 0) {
+      toast.error("At least one valid line item is required");
+      return false;
+    }
+
+    // Check for invalid quantities
+    const invalidQuantity = lineItems.some(item => 
+      item.inventory_item_id && (item.quantity <= 0 || !Number.isInteger(item.quantity))
+    );
+    
+    if (invalidQuantity) {
+      toast.error("All quantities must be positive integers");
+      return false;
+    }
+
+    // Check for invalid prices
+    const invalidPrice = lineItems.some(item => 
+      item.inventory_item_id && item.unit_price < 0
+    );
+    
+    if (invalidPrice) {
+      toast.error("All unit prices must be zero or positive");
+      return false;
+    }
+
+    return true;
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!validateForm()) {
       return;
     }
+
+    const validLineItems = lineItems.filter(item => 
+      item.inventory_item_id && item.quantity > 0 && item.unit_price >= 0
+    );
 
     onSubmit({
       vendor: vendor.trim(),
@@ -117,6 +156,16 @@ export const PurchaseOrderForm = ({
       due_date: dueDate || undefined,
       line_items: validLineItems,
     });
+  };
+
+  const isFormValid = () => {
+    if (!vendor.trim() || !poNumber.trim()) return false;
+    
+    const validLineItems = lineItems.filter(item => 
+      item.inventory_item_id && item.quantity > 0 && item.unit_price >= 0
+    );
+    
+    return validLineItems.length > 0;
   };
 
   return (
@@ -233,8 +282,9 @@ export const PurchaseOrderForm = ({
                 <Input
                   type="number"
                   min="1"
+                  step="1"
                   value={item.quantity}
-                  onChange={(e) => handleLineItemChange(index, 'quantity', parseInt(e.target.value) || 0)}
+                  onChange={(e) => handleLineItemChange(index, 'quantity', parseInt(e.target.value) || 1)}
                 />
               </div>
               <div className="w-32 space-y-2">
@@ -275,7 +325,11 @@ export const PurchaseOrderForm = ({
 
       {/* Submit Button */}
       <div className="flex justify-end">
-        <Button type="submit" disabled={isLoading} className="min-w-32">
+        <Button 
+          type="submit" 
+          disabled={isLoading || !isFormValid()} 
+          className="min-w-32"
+        >
           {isLoading ? 'Saving...' : mode === 'create' ? 'Create Purchase Order' : 'Update Purchase Order'}
         </Button>
       </div>
