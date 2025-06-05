@@ -1,3 +1,4 @@
+
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/sonner";
@@ -19,6 +20,7 @@ import Assets from "@/pages/Assets";
 import Inventory from "@/pages/Inventory";
 import Procedures from "@/pages/Procedures";
 import PurchaseOrders from "@/pages/PurchaseOrders";
+import CreatePurchaseOrder from "@/pages/CreatePurchaseOrder";
 import Organization from "@/pages/Organization";
 import TranslationManagement from "@/pages/TranslationManagement";
 
@@ -76,6 +78,12 @@ function App() {
               <Route path="/dashboard/purchase-orders" element={
                 <ProtectedRoute>
                   <PurchaseOrders />
+                </ProtectedRoute>
+              } />
+
+              <Route path="/dashboard/purchase-orders/new" element={
+                <ProtectedRoute>
+                  <CreatePurchaseOrder />
                 </ProtectedRoute>
               } />
               
