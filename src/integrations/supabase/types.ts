@@ -1062,6 +1062,19 @@ export type Database = {
         Args: { token_param: string; user_id_param: string }
         Returns: boolean
       }
+      copy_asset_procedures_to_work_order: {
+        Args: { asset_id_param: string; work_order_id_param: string }
+        Returns: undefined
+      }
+      decrement_inventory_and_log: {
+        Args: {
+          inv_item_id: string
+          qty_used: number
+          wo_id: string
+          usage_notes?: string
+        }
+        Returns: undefined
+      }
       get_invitation_by_token: {
         Args: { token_param: string }
         Returns: {
@@ -1076,6 +1089,10 @@ export type Database = {
       get_user_tenant_id: {
         Args: Record<PropertyKey, never>
         Returns: string
+      }
+      increment_inventory_from_po: {
+        Args: { po_id: string }
+        Returns: undefined
       }
       record_parts_usage: {
         Args: {
