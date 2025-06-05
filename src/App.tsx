@@ -1,4 +1,3 @@
-
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/sonner";
@@ -19,6 +18,7 @@ import WorkOrders from "@/pages/WorkOrders";
 import Assets from "@/pages/Assets";
 import Inventory from "@/pages/Inventory";
 import Procedures from "@/pages/Procedures";
+import PurchaseOrders from "@/pages/PurchaseOrders";
 import Organization from "@/pages/Organization";
 import TranslationManagement from "@/pages/TranslationManagement";
 
@@ -75,18 +75,7 @@ function App() {
               
               <Route path="/dashboard/purchase-orders" element={
                 <ProtectedRoute>
-                  <ModulePlaceholder 
-                    title="Purchase Orders" 
-                    description="Manage purchase orders and procurement requests" 
-                    icon="💰"
-                    features={[
-                      "Create and manage purchase orders",
-                      "Vendor management and selection",
-                      "Approval workflow automation",
-                      "Budget tracking and cost control",
-                      "Integration with inventory management"
-                    ]}
-                  />
+                  <PurchaseOrders />
                 </ProtectedRoute>
               } />
               
