@@ -8,6 +8,7 @@ import { usersApi } from "./users";
 import { organizationsApi } from "./organizations";
 import { locationsApi } from "./locations";
 import { billingApi } from "./billing";
+import { integrationsApi } from "./integrations";
 
 export const databaseApi = {
   ...workOrdersApi,
@@ -19,4 +20,5 @@ export const databaseApi = {
   ...organizationsApi,
   ...locationsApi,
   ...billingApi,
+  ...integrationsApi,
 };

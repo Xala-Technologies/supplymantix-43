@@ -1,5 +1,5 @@
 import { DashboardLayout } from "@/components/Layout/DashboardLayout";
-import { useWorkOrders } from "@/hooks/useWorkOrders";
+import { useWorkOrdersIntegration } from "@/hooks/useWorkOrdersIntegration";
 import { WorkOrdersList } from "@/components/work-orders/WorkOrdersList";
 import { WorkOrderDetailCard } from "@/components/work-orders/WorkOrderDetailCard";
 import { WorkOrdersHeader } from "@/components/work-orders/WorkOrdersHeader";
@@ -8,9 +8,38 @@ import { ChevronLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export default function WorkOrders() {
-  const { data: workOrders, isLoading } = useWorkOrders();
+  const { data: workOrders, isLoading } = useWorkOrdersIntegration();
   const [selectedWorkOrder, setSelectedWorkOrder] = useState<string | null>('5969');
+  const [filters, setFilters] = useState({
+    assignedTo: '',
+    status: '',
+    priority: '',
+    category: '',
+    location: '',
+    dueDate: ''
+  });
 
+  // Apply filters to work orders
+  const filteredWorkOrders = workOrders?.filter(wo => {
+    if (filters.assignedTo && !wo.assignedTo?.some((user: string) => 
+      user.toLowerCase().includes(filters.assignedTo.toLowerCase())
+    )) return false;
+    
+    if (filters.status && wo.status !== filters.status) return false;
+    if (filters.priority && wo.priority !== filters.priority) return false;
+    if (filters.category && wo.category !== filters.category) return false;
+    if (filters.location && !wo.location?.toLowerCase().includes(filters.location.toLowerCase())) return false;
+    
+    if (filters.dueDate) {
+      const woDate = new Date(wo.dueDate).toDateString();
+      const filterDate = new Date(filters.dueDate).toDateString();
+      if (woDate !== filterDate) return false;
+    }
+    
+    return true;
+  }) || [];
+
+  // Use sample data if no real data is available yet
   const sampleWorkOrders = [
     {
       id: '5969',
@@ -26,6 +55,12 @@ export default function WorkOrders() {
       },
       location: 'Production Line 3',
       category: 'Equipment',
+      timeSpent: 2.5,
+      totalCost: 145.50,
+      partsUsed: [
+        { name: 'Cutting Blade', quantity: 1, cost: 25.00 },
+        { name: 'Belt Assembly', quantity: 1, cost: 120.50 }
+      ]
     },
     {
       id: '5962',
@@ -104,19 +139,20 @@ export default function WorkOrders() {
     },
   ];
 
-  const selectedWorkOrderData = sampleWorkOrders.find(wo => wo.id === selectedWorkOrder) || sampleWorkOrders[0];
+  const displayWorkOrders = filteredWorkOrders.length > 0 ? filteredWorkOrders : sampleWorkOrders;
+  const selectedWorkOrderData = displayWorkOrders.find(wo => wo.id === selectedWorkOrder) || displayWorkOrders[0];
 
   return (
     <DashboardLayout>
       <div className="h-full flex flex-col bg-gray-50">
-        <WorkOrdersHeader />
+        <WorkOrdersHeader filters={filters} onFiltersChange={setFilters} />
         
         <div className="flex-1 flex overflow-hidden">
           {/* Desktop Layout */}
           <div className="hidden md:flex w-full">
             {/* Sidebar */}
             <WorkOrdersList 
-              workOrders={sampleWorkOrders}
+              workOrders={displayWorkOrders}
               selectedWorkOrderId={selectedWorkOrder}
               onSelectWorkOrder={setSelectedWorkOrder}
             />
@@ -133,7 +169,7 @@ export default function WorkOrders() {
           <div className="md:hidden w-full flex flex-col">
             {!selectedWorkOrder ? (
               <WorkOrdersList 
-                workOrders={sampleWorkOrders}
+                workOrders={displayWorkOrders}
                 selectedWorkOrderId={selectedWorkOrder}
                 onSelectWorkOrder={setSelectedWorkOrder}
               />
