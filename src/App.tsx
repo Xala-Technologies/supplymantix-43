@@ -95,6 +95,30 @@ function App() {
                 </ProtectedRoute>
               } />
               
+              <Route path="/dashboard/meters" element={
+                <ProtectedRoute>
+                  <Meters />
+                </ProtectedRoute>
+              } />
+              
+              <Route path="/dashboard/locations" element={
+                <ProtectedRoute>
+                  <Locations />
+                </ProtectedRoute>
+              } />
+              
+              <Route path="/dashboard/reporting" element={
+                <ProtectedRoute>
+                  <Reporting />
+                </ProtectedRoute>
+              } />
+              
+              <Route path="/dashboard/messages" element={
+                <ProtectedRoute>
+                  <Messages />
+                </ProtectedRoute>
+              } />
+              
               <Route path="/dashboard/organization" element={
                 <ProtectedRoute>
                   <Organization />
