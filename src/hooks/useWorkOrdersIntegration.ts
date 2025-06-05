@@ -18,9 +18,11 @@ export const useWorkOrdersIntegration = () => {
       return workOrders.map(wo => ({
         ...wo,
         asset: assets.find(a => a.id === wo.asset_id),
-        partsUsed: wo.parts_used || [],
+        partsUsed: wo.parts_used ? JSON.parse(wo.parts_used as string) : [],
         totalCost: wo.total_cost || 0,
-        timeSpent: wo.time_spent || 0
+        timeSpent: wo.time_spent || 0,
+        priority: wo.priority || 'medium',
+        category: wo.category || 'maintenance'
       }));
     },
   });
@@ -36,10 +38,7 @@ export const usePartsUsageTracking = () => {
       quantity: number;
       notes?: string;
     }) => {
-      // This would call an RPC function that:
-      // 1. Decrements inventory
-      // 2. Records parts usage
-      // 3. Updates work order costs
+      // This calls the RPC function that handles the transaction
       return databaseApi.recordPartsUsage({
         work_order_id: workOrderId,
         inventory_item_id: inventoryItemId,

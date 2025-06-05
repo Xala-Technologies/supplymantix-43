@@ -8,7 +8,7 @@ export const integrationsApi = {
     quantity: number;
     notes?: string;
   }) {
-    // This would call a database function that handles the transaction
+    // This calls the database function that handles the transaction
     const { data: result, error } = await supabase.rpc('record_parts_usage', {
       wo_id: data.work_order_id,
       item_id: data.inventory_item_id,
@@ -38,18 +38,28 @@ export const integrationsApi = {
   },
 
   async attachProcedureToWorkOrder(workOrderId: string, procedureId: string) {
+    // For now, we'll update the work order with procedure info
+    // In the future, this could use the work_order_procedures table
     const { data, error } = await supabase
-      .from("work_order_procedures")
-      .insert({
-        work_order_id: workOrderId,
-        procedure_id: procedureId,
-        status: 'pending'
-      })
-      .select()
+      .from("work_orders")
+      .select('*')
+      .eq("id", workOrderId)
       .single();
     
     if (error) throw error;
-    return data;
+    
+    // Update with procedure attachment logic
+    const { data: result, error: updateError } = await supabase
+      .from("work_orders")
+      .update({ 
+        description: `${data.description || ''}\n\nProcedure ${procedureId} attached.`
+      })
+      .eq("id", workOrderId)
+      .select()
+      .single();
+    
+    if (updateError) throw updateError;
+    return result;
   },
 
   async getWorkOrderWithDetails(id: string) {
@@ -59,12 +69,7 @@ export const integrationsApi = {
         *,
         assets(name, location, status),
         users(email),
-        locations(name),
-        work_order_procedures(
-          id,
-          status,
-          procedures(title, steps)
-        )
+        locations(name)
       `)
       .eq("id", id)
       .single();

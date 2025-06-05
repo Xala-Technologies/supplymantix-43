@@ -28,6 +28,8 @@ export const useAssetIntegration = () => {
         
         return {
           ...asset,
+          category: asset.category || 'equipment',
+          criticality: asset.criticality || 'medium',
           openWorkOrders: openWorkOrders.length,
           totalWorkOrders: assetWorkOrders.length,
           totalDowntime: `${totalDowntime.toFixed(1)} hours`,
@@ -37,7 +39,6 @@ export const useAssetIntegration = () => {
             .sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime())[0]?.updated_at,
           nextMaintenance: calculateNextMaintenance(assetWorkOrders),
           healthScore: calculateHealthScore(assetWorkOrders, totalDowntime),
-          criticality: asset.criticality || 'medium'
         };
       });
     },
@@ -87,7 +88,8 @@ export const useCreateWorkOrderForAsset = () => {
         title,
         description,
         priority,
-        status: 'open'
+        status: 'open',
+        tenant_id: '', // This will be set by RLS/backend
       });
       
       // Attach procedures if provided

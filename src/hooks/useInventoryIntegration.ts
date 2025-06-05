@@ -16,15 +16,17 @@ export const useInventoryIntegration = () => {
         const isLowStock = item.quantity <= (item.min_quantity || 0);
         const pendingOrders = purchaseOrders.filter(po => 
           po.status === 'pending' && 
-          po.line_items?.some((li: any) => li.inventory_item_id === item.id)
+          po.line_items && JSON.parse(po.line_items as string)?.some((li: any) => li.inventory_item_id === item.id)
         );
+        
+        const lineItems = po => po.line_items ? JSON.parse(po.line_items as string) : [];
         
         return {
           ...item,
           isLowStock,
           needsReorder: isLowStock && pendingOrders.length === 0,
           pendingQuantity: pendingOrders.reduce((sum, po) => 
-            sum + (po.line_items?.find((li: any) => li.inventory_item_id === item.id)?.quantity || 0), 0
+            sum + (lineItems(po)?.find((li: any) => li.inventory_item_id === item.id)?.quantity || 0), 0
           ),
           totalValue: (item.quantity || 0) * (item.unit_cost || 0),
           usageHistory: [], // Would fetch from work_order_parts_used
@@ -56,7 +58,9 @@ export const useCreateReorderPO = () => {
         status: 'draft',
         total_amount: totalAmount,
         notes: 'Auto-generated for low stock items',
-        line_items: lineItems
+        line_items: JSON.stringify(lineItems),
+        po_number: `PO-${Date.now()}`,
+        tenant_id: '', // This will be set by RLS/backend
       });
     },
     onSuccess: () => {

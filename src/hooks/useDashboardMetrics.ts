@@ -18,12 +18,12 @@ export const useDashboardMetrics = () => {
       const overdueWorkOrders = openWorkOrders.filter(wo => 
         wo.due_date && new Date(wo.due_date) < new Date()
       );
-      const highPriorityWOs = openWorkOrders.filter(wo => wo.priority === 'high');
+      const highPriorityWOs = openWorkOrders.filter(wo => (wo.priority || 'medium') === 'high');
       
       // Asset Metrics
       const totalAssets = assets.length;
       const onlineAssets = assets.filter(a => a.status === 'active').length;
-      const criticalAssets = assets.filter(a => a.criticality === 'high').length;
+      const criticalAssets = assets.filter(a => (a.criticality || 'medium') === 'high').length;
       
       // Inventory Metrics
       const totalInventoryValue = inventory.reduce((sum, item) => 
