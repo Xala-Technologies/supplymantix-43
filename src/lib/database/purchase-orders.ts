@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/integrations/supabase/types";
 import type { CreatePurchaseOrderRequest, UpdatePurchaseOrderRequest } from "@/types/purchaseOrder";
@@ -7,17 +6,30 @@ type Tables = Database["public"]["Tables"];
 
 export const purchaseOrdersApi = {
   async getPurchaseOrders() {
-    console.log("Fetching purchase orders...");
+    console.log("=== getPurchaseOrders START ===");
+    
+    // First check if user is authenticated
+    const { data: userData, error: userError } = await supabase.auth.getUser();
+    console.log("Auth check:", { userData: userData?.user?.id, userError });
+    
+    if (userError || !userData.user) {
+      console.error("User not authenticated in getPurchaseOrders");
+      throw new Error("User not authenticated");
+    }
+
     const { data, error } = await supabase
       .from("purchase_orders")
       .select("*")
       .order("created_at", { ascending: false });
     
+    console.log("Purchase orders query result:", { data, error, count: data?.length });
+    
     if (error) {
       console.error("Error fetching purchase orders:", error);
       throw error;
     }
-    console.log("Purchase orders fetched:", data);
+    
+    console.log("=== getPurchaseOrders END ===");
     return data;
   },
 
@@ -37,7 +49,8 @@ export const purchaseOrdersApi = {
   },
 
   async createPurchaseOrder(request: CreatePurchaseOrderRequest) {
-    console.log("Creating purchase order:", request);
+    console.log("=== createPurchaseOrder START ===");
+    console.log("Request data:", request);
     
     // Get current user
     const { data: userData, error: userError } = await supabase.auth.getUser();
@@ -49,68 +62,86 @@ export const purchaseOrdersApi = {
     console.log("Authenticated user:", userData.user.id);
 
     // Get user's tenant_id - try to find existing user record first
-    let userRecord = null;
+    console.log("Querying users table for tenant_id...");
     const { data: existingUser, error: userQueryError } = await supabase
       .from("users")
       .select("tenant_id")
       .eq("id", userData.user.id)
       .single();
     
+    console.log("User query result:", { existingUser, userQueryError });
+    
     if (userQueryError && userQueryError.code !== 'PGRST116') {
       console.error("Error querying user:", userQueryError);
       throw new Error("Failed to get user information");
     }
     
-    if (existingUser) {
-      userRecord = existingUser;
-      console.log("Found existing user record:", userRecord);
-    } else {
-      console.log("User record not found, this might be a new user");
-      // For now, we'll throw an error as the user should have been created during signup
+    if (!existingUser) {
+      console.error("User record not found in users table");
+      // Let's check what users exist
+      const { data: allUsers } = await supabase.from("users").select("id, email");
+      console.log("All users in database:", allUsers);
       throw new Error("User record not found. Please contact support.");
     }
+
+    console.log("Found user record with tenant_id:", existingUser.tenant_id);
 
     // Calculate total amount
     const totalAmount = request.line_items.reduce((sum, item) => 
       sum + (item.quantity * item.unit_price), 0
     );
 
-    console.log("Creating PO with tenant_id:", userRecord.tenant_id);
+    console.log("Calculated total amount:", totalAmount);
+
+    // Prepare PO data
+    const poData = {
+      tenant_id: existingUser.tenant_id,
+      vendor: request.vendor,
+      po_number: request.po_number,
+      notes: request.notes,
+      due_date: request.due_date,
+      status: 'draft' as const,
+      total_amount: totalAmount,
+      requested_by: userData.user.id,
+    };
+
+    console.log("Creating PO with data:", poData);
 
     // Create the purchase order
     const { data: po, error: poError } = await supabase
       .from("purchase_orders")
-      .insert({
-        tenant_id: userRecord.tenant_id,
-        vendor: request.vendor,
-        po_number: request.po_number,
-        notes: request.notes,
-        due_date: request.due_date,
-        status: 'draft',
-        total_amount: totalAmount,
-        requested_by: userData.user.id,
-      })
+      .insert(poData)
       .select()
       .single();
+
+    console.log("PO creation result:", { po, poError });
 
     if (poError) {
       console.error("Error creating purchase order:", poError);
       throw poError;
     }
 
-    console.log("Purchase order created:", po);
+    console.log("Purchase order created successfully:", po);
 
     // Insert line items
+    console.log("Creating line items...");
     for (const item of request.line_items) {
       console.log("Creating line item:", item);
-      const { error: lineError } = await supabase
+      const lineItemData = {
+        purchase_order_id: po.id,
+        inventory_item_id: item.inventory_item_id,
+        quantity: item.quantity,
+        unit_price: item.unit_price,
+      };
+      
+      console.log("Line item data:", lineItemData);
+      
+      const { data: lineItemResult, error: lineError } = await supabase
         .from("purchase_order_line_items")
-        .insert({
-          purchase_order_id: po.id,
-          inventory_item_id: item.inventory_item_id,
-          quantity: item.quantity,
-          unit_price: item.unit_price,
-        });
+        .insert(lineItemData)
+        .select();
+
+      console.log("Line item creation result:", { lineItemResult, lineError });
 
       if (lineError) {
         console.error("Error creating line item:", lineError);
@@ -118,7 +149,8 @@ export const purchaseOrdersApi = {
       }
     }
 
-    console.log("Purchase order created successfully:", po);
+    console.log("=== createPurchaseOrder END ===");
+    console.log("Final PO result:", po);
     return po;
   },
 

@@ -35,16 +35,28 @@ export default function CreatePurchaseOrder() {
   }, [inventoryItemId, quantity, inventoryItems]);
 
   const handleSubmit = async (data: any) => {
-    console.log("CreatePurchaseOrder: Submitting purchase order:", data);
+    console.log("=== CreatePurchaseOrder handleSubmit START ===");
+    console.log("Form data received:", data);
     
     try {
-      await createPurchaseOrder.mutateAsync(data);
-      console.log("CreatePurchaseOrder: Purchase order created successfully");
+      console.log("Calling createPurchaseOrder mutation...");
+      const result = await createPurchaseOrder.mutateAsync(data);
+      console.log("Mutation completed successfully:", result);
+      
+      toast.success("Purchase order created successfully!");
+      console.log("Navigating to purchase orders list...");
       navigate("/dashboard/purchase-orders");
+      
     } catch (error) {
-      console.error("CreatePurchaseOrder: Failed to create purchase order:", error);
-      toast.error(`Failed to create purchase order: ${error}`);
+      console.error("=== CreatePurchaseOrder handleSubmit ERROR ===");
+      console.error("Error details:", error);
+      console.error("Error message:", error instanceof Error ? error.message : String(error));
+      
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      toast.error(`Failed to create purchase order: ${errorMessage}`);
     }
+    
+    console.log("=== CreatePurchaseOrder handleSubmit END ===");
   };
 
   return (
