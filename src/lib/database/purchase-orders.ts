@@ -39,22 +39,43 @@ export const purchaseOrdersApi = {
   async createPurchaseOrder(request: CreatePurchaseOrderRequest) {
     console.log("Creating purchase order:", request);
     
-    // Get current user's tenant_id
-    const { data: userData } = await supabase.auth.getUser();
-    if (!userData.user) throw new Error("User not authenticated");
+    // Get current user
+    const { data: userData, error: userError } = await supabase.auth.getUser();
+    if (userError || !userData.user) {
+      console.error("User authentication error:", userError);
+      throw new Error("User not authenticated");
+    }
+    
+    console.log("Authenticated user:", userData.user.id);
 
-    const { data: userRecord } = await supabase
+    // Get user's tenant_id - try to find existing user record first
+    let userRecord = null;
+    const { data: existingUser, error: userQueryError } = await supabase
       .from("users")
       .select("tenant_id")
       .eq("id", userData.user.id)
       .single();
     
-    if (!userRecord) throw new Error("User record not found");
+    if (userQueryError && userQueryError.code !== 'PGRST116') {
+      console.error("Error querying user:", userQueryError);
+      throw new Error("Failed to get user information");
+    }
+    
+    if (existingUser) {
+      userRecord = existingUser;
+      console.log("Found existing user record:", userRecord);
+    } else {
+      console.log("User record not found, this might be a new user");
+      // For now, we'll throw an error as the user should have been created during signup
+      throw new Error("User record not found. Please contact support.");
+    }
 
     // Calculate total amount
     const totalAmount = request.line_items.reduce((sum, item) => 
       sum + (item.quantity * item.unit_price), 0
     );
+
+    console.log("Creating PO with tenant_id:", userRecord.tenant_id);
 
     // Create the purchase order
     const { data: po, error: poError } = await supabase
@@ -77,8 +98,11 @@ export const purchaseOrdersApi = {
       throw poError;
     }
 
+    console.log("Purchase order created:", po);
+
     // Insert line items
     for (const item of request.line_items) {
+      console.log("Creating line item:", item);
       const { error: lineError } = await supabase
         .from("purchase_order_line_items")
         .insert({
