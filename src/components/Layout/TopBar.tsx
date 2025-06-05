@@ -54,7 +54,7 @@ export const TopBar = () => {
   };
 
   return (
-    <header className="h-16 border-b border-gray-200 bg-white flex items-center justify-between px-6">
+    <header className="sticky top-0 z-50 h-16 border-b border-gray-200 bg-white flex items-center justify-between px-6">
       <SidebarTrigger />
 
       {/* Global Search */}
