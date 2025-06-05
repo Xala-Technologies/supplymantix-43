@@ -1,0 +1,59 @@
+
+import React, { useState } from "react";
+import { DashboardLayout } from "@/components/Layout/DashboardLayout";
+import { MetersHeader } from "@/components/meters/MetersHeader";
+import { MetersList } from "@/components/meters/MetersList";
+import { MeterForm } from "@/components/meters/MeterForm";
+import { MeterDetailDialog } from "@/components/meters/MeterDetailDialog";
+import { useMeters } from "@/hooks/useMeters";
+
+const Meters = () => {
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [selectedMeter, setSelectedMeter] = useState(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [typeFilter, setTypeFilter] = useState("all");
+
+  const { data: meters, isLoading } = useMeters();
+
+  const filteredMeters = meters?.filter(meter => {
+    const matchesSearch = meter.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                         meter.location?.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesType = typeFilter === "all" || meter.type === typeFilter;
+    return matchesSearch && matchesType;
+  }) || [];
+
+  return (
+    <DashboardLayout>
+      <div className="space-y-6">
+        <MetersHeader
+          onCreateMeter={() => setIsFormOpen(true)}
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
+          typeFilter={typeFilter}
+          onTypeFilterChange={setTypeFilter}
+        />
+
+        <MetersList
+          meters={filteredMeters}
+          isLoading={isLoading}
+          onMeterClick={setSelectedMeter}
+        />
+
+        {isFormOpen && (
+          <MeterForm
+            onClose={() => setIsFormOpen(false)}
+          />
+        )}
+
+        {selectedMeter && (
+          <MeterDetailDialog
+            meter={selectedMeter}
+            onClose={() => setSelectedMeter(null)}
+          />
+        )}
+      </div>
+    </DashboardLayout>
+  );
+};
+
+export default Meters;

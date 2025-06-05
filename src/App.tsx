@@ -1,3 +1,4 @@
+
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/sonner";
@@ -21,11 +22,12 @@ import Procedures from "@/pages/Procedures";
 import PurchaseOrders from "@/pages/PurchaseOrders";
 import CreatePurchaseOrder from "@/pages/CreatePurchaseOrder";
 import Requests from "@/pages/Requests";
+import Meters from "@/pages/Meters";
+import Locations from "@/pages/Locations";
+import Reporting from "@/pages/Reporting";
+import Messages from "@/pages/Messages";
 import Organization from "@/pages/Organization";
 import TranslationManagement from "@/pages/TranslationManagement";
-
-// Placeholder components for other routes
-import { ModulePlaceholder } from "@/components/ModulePlaceholder";
 
 import "./App.css";
 
