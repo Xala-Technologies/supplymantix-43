@@ -1,0 +1,283 @@
+
+import { useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Plus, Trash2, Package } from "lucide-react";
+import { useInventoryItems } from "@/hooks/useInventory";
+import { PurchaseOrder, PurchaseOrderStatus } from "@/types/purchaseOrder";
+import { formatCurrency } from "@/lib/utils";
+
+interface LineItem {
+  inventory_item_id: string;
+  quantity: number;
+  unit_price: number;
+}
+
+interface PurchaseOrderFormProps {
+  initialData?: Partial<PurchaseOrder>;
+  initialLineItems?: LineItem[];
+  onSubmit: (data: {
+    vendor: string;
+    po_number: string;
+    status?: PurchaseOrderStatus;
+    notes?: string;
+    due_date?: string;
+    line_items: LineItem[];
+  }) => void;
+  isLoading?: boolean;
+  mode: 'create' | 'edit';
+}
+
+export const PurchaseOrderForm = ({
+  initialData,
+  initialLineItems = [],
+  onSubmit,
+  isLoading,
+  mode,
+}: PurchaseOrderFormProps) => {
+  const [vendor, setVendor] = useState(initialData?.vendor || '');
+  const [poNumber, setPoNumber] = useState(initialData?.po_number || '');
+  const [status, setStatus] = useState<PurchaseOrderStatus>(initialData?.status || 'draft');
+  const [notes, setNotes] = useState(initialData?.notes || '');
+  const [dueDate, setDueDate] = useState(
+    initialData?.due_date ? initialData.due_date.split('T')[0] : ''
+  );
+  const [lineItems, setLineItems] = useState<LineItem[]>(
+    initialLineItems.length > 0 
+      ? initialLineItems 
+      : [{ inventory_item_id: '', quantity: 1, unit_price: 0 }]
+  );
+
+  const { data: inventoryItems } = useInventoryItems();
+
+  // Generate PO number for new orders
+  useEffect(() => {
+    if (mode === 'create' && !poNumber) {
+      const timestamp = Date.now().toString().slice(-6);
+      setPoNumber(`PO-${timestamp}`);
+    }
+  }, [mode, poNumber]);
+
+  const totalAmount = lineItems.reduce(
+    (sum, item) => sum + (item.quantity * item.unit_price),
+    0
+  );
+
+  const handleLineItemChange = (
+    index: number,
+    field: keyof LineItem,
+    value: string | number
+  ) => {
+    const updated = [...lineItems];
+    (updated[index] as any)[field] = value;
+    setLineItems(updated);
+  };
+
+  const addLineItem = () => {
+    setLineItems([...lineItems, { inventory_item_id: '', quantity: 1, unit_price: 0 }]);
+  };
+
+  const removeLineItem = (index: number) => {
+    if (lineItems.length > 1) {
+      setLineItems(lineItems.filter((_, i) => i !== index));
+    }
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    // Validate
+    if (!vendor.trim() || !poNumber.trim()) {
+      return;
+    }
+
+    const validLineItems = lineItems.filter(item => 
+      item.inventory_item_id && item.quantity > 0 && item.unit_price >= 0
+    );
+
+    if (validLineItems.length === 0) {
+      return;
+    }
+
+    onSubmit({
+      vendor: vendor.trim(),
+      po_number: poNumber.trim(),
+      status: mode === 'edit' ? status : undefined,
+      notes: notes.trim() || undefined,
+      due_date: dueDate || undefined,
+      line_items: validLineItems,
+    });
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-6">
+      {/* Header Information */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Purchase Order Details</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="vendor">Vendor *</Label>
+              <Input
+                id="vendor"
+                value={vendor}
+                onChange={(e) => setVendor(e.target.value)}
+                placeholder="Enter vendor name"
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="po_number">PO Number *</Label>
+              <Input
+                id="po_number"
+                value={poNumber}
+                onChange={(e) => setPoNumber(e.target.value)}
+                placeholder="Auto-generated"
+                required
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {mode === 'edit' && (
+              <div className="space-y-2">
+                <Label htmlFor="status">Status</Label>
+                <Select value={status} onValueChange={(value: PurchaseOrderStatus) => setStatus(value)}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="draft">Draft</SelectItem>
+                    <SelectItem value="pending_approval">Pending Approval</SelectItem>
+                    <SelectItem value="sent">Sent</SelectItem>
+                    <SelectItem value="fully_received">Fully Received</SelectItem>
+                    <SelectItem value="closed">Closed</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+            <div className="space-y-2">
+              <Label htmlFor="due_date">Due Date</Label>
+              <Input
+                id="due_date"
+                type="date"
+                value={dueDate}
+                onChange={(e) => setDueDate(e.target.value)}
+              />
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="notes">Notes</Label>
+            <Textarea
+              id="notes"
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              placeholder="Additional notes or instructions"
+              rows={3}
+            />
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Line Items */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <CardTitle className="flex items-center gap-2">
+              <Package className="h-5 w-5" />
+              Line Items
+            </CardTitle>
+            <Button type="button" variant="outline" size="sm" onClick={addLineItem}>
+              <Plus className="h-4 w-4 mr-2" />
+              Add Item
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {lineItems.map((item, index) => (
+            <div key={index} className="flex items-end gap-4 p-4 border rounded-lg">
+              <div className="flex-1 space-y-2">
+                <Label>Inventory Item *</Label>
+                <Select 
+                  value={item.inventory_item_id}
+                  onValueChange={(value) => handleLineItemChange(index, 'inventory_item_id', value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select item" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {inventoryItems?.map((invItem) => (
+                      <SelectItem key={invItem.id} value={invItem.id}>
+                        {invItem.name} {invItem.sku ? `(${invItem.sku})` : ''} - Stock: {invItem.quantity}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="w-24 space-y-2">
+                <Label>Quantity *</Label>
+                <Input
+                  type="number"
+                  min="1"
+                  value={item.quantity}
+                  onChange={(e) => handleLineItemChange(index, 'quantity', parseInt(e.target.value) || 0)}
+                />
+              </div>
+              <div className="w-32 space-y-2">
+                <Label>Unit Price *</Label>
+                <Input
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  value={item.unit_price}
+                  onChange={(e) => handleLineItemChange(index, 'unit_price', parseFloat(e.target.value) || 0)}
+                />
+              </div>
+              <div className="w-32 space-y-2">
+                <Label>Total</Label>
+                <div className="h-10 flex items-center px-3 bg-muted rounded-md text-sm font-medium">
+                  {formatCurrency(item.quantity * item.unit_price)}
+                </div>
+              </div>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => removeLineItem(index)}
+                disabled={lineItems.length === 1}
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            </div>
+          ))}
+
+          <div className="flex justify-end items-center gap-4 pt-4 border-t">
+            <div className="text-lg font-semibold">
+              Total: {formatCurrency(totalAmount)}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Submit Button */}
+      <div className="flex justify-end">
+        <Button type="submit" disabled={isLoading} className="min-w-32">
+          {isLoading ? 'Saving...' : mode === 'create' ? 'Create Purchase Order' : 'Update Purchase Order'}
+        </Button>
+      </div>
+    </form>
+  );
+};

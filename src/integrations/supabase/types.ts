@@ -549,6 +549,48 @@ export type Database = {
           },
         ]
       }
+      purchase_order_line_items: {
+        Row: {
+          created_at: string | null
+          id: string
+          inventory_item_id: string
+          purchase_order_id: string
+          quantity: number
+          unit_price: number
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          inventory_item_id: string
+          purchase_order_id: string
+          quantity: number
+          unit_price: number
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          inventory_item_id?: string
+          purchase_order_id?: string
+          quantity?: number
+          unit_price?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "purchase_order_line_items_inventory_item_id_fkey"
+            columns: ["inventory_item_id"]
+            isOneToOne: false
+            referencedRelation: "inventory_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "purchase_order_line_items_purchase_order_id_fkey"
+            columns: ["purchase_order_id"]
+            isOneToOne: false
+            referencedRelation: "purchase_orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       purchase_orders: {
         Row: {
           approved_by: string | null
