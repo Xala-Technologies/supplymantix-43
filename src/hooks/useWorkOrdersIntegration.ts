@@ -8,23 +8,30 @@ export const useWorkOrdersIntegration = () => {
   return useQuery({
     queryKey: ["work-orders-integration"],
     queryFn: async () => {
-      const [workOrders, assets, inventory] = await Promise.all([
-        databaseApi.getWorkOrders(),
-        databaseApi.getAssets(),
-        databaseApi.getInventoryItems()
-      ]);
-      
-      // Merge data for rich display
-      return workOrders.map(wo => ({
-        ...wo,
-        asset: assets.find(a => a.id === wo.asset_id),
-        partsUsed: wo.parts_used ? JSON.parse(wo.parts_used as string) : [],
-        totalCost: wo.total_cost || 0,
-        timeSpent: wo.time_spent || 0,
-        priority: wo.priority || 'medium',
-        category: wo.category || 'maintenance'
-      }));
+      try {
+        const [workOrders, assets, inventory] = await Promise.all([
+          databaseApi.getWorkOrders(),
+          databaseApi.getAssets(),
+          databaseApi.getInventoryItems()
+        ]);
+        
+        // Merge data for rich display
+        return workOrders.map(wo => ({
+          ...wo,
+          asset: assets.find(a => a.id === wo.asset_id),
+          partsUsed: wo.parts_used ? JSON.parse(wo.parts_used as string) : [],
+          totalCost: wo.total_cost || 0,
+          timeSpent: wo.time_spent || 0,
+          priority: wo.priority || 'medium',
+          category: wo.category || 'maintenance'
+        }));
+      } catch (error) {
+        console.error('Error fetching work orders:', error);
+        return [];
+      }
     },
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    cacheTime: 10 * 60 * 1000, // 10 minutes
   });
 };
 
@@ -38,7 +45,6 @@ export const usePartsUsageTracking = () => {
       quantity: number;
       notes?: string;
     }) => {
-      // This calls the RPC function that handles the transaction
       return databaseApi.recordPartsUsage({
         work_order_id: workOrderId,
         inventory_item_id: inventoryItemId,
@@ -74,6 +80,10 @@ export const useWorkOrderStatusUpdate = () => {
       queryClient.invalidateQueries({ queryKey: ["work-orders"] });
       queryClient.invalidateQueries({ queryKey: ["work-orders-integration"] });
       toast.success("Work order status updated");
+    },
+    onError: (error) => {
+      toast.error("Failed to update work order status");
+      console.error("Status update error:", error);
     }
   });
 };
