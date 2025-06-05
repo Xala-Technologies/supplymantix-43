@@ -15,7 +15,7 @@ export interface Request {
   estimated_cost?: number;
   actual_cost?: number;
   notes?: string;
-  attachments?: any[];
+  attachments?: any;
   created_at: string;
   updated_at: string;
 }
