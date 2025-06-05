@@ -19,7 +19,7 @@ export const useInventoryIntegration = () => {
           po.line_items && JSON.parse(po.line_items as string)?.some((li: any) => li.inventory_item_id === item.id)
         );
         
-        const lineItems = po => po.line_items ? JSON.parse(po.line_items as string) : [];
+        const lineItems = (po: any) => po.line_items ? JSON.parse(po.line_items as string) : [];
         
         return {
           ...item,
@@ -45,22 +45,14 @@ export const useCreateReorderPO = () => {
       const lineItems = lowStockItems.map(item => ({
         inventory_item_id: item.id,
         quantity: item.reorderSuggestion,
-        unit_cost: item.unit_cost || 0,
-        description: `Reorder for ${item.name}`
+        unit_price: item.unit_cost || 0,
       }));
-      
-      const totalAmount = lineItems.reduce((sum, item) => 
-        sum + (item.quantity * item.unit_cost), 0
-      );
       
       return databaseApi.createPurchaseOrder({
         vendor: 'Auto-Generated Supplier',
-        status: 'draft',
-        total_amount: totalAmount,
-        notes: 'Auto-generated for low stock items',
-        line_items: JSON.stringify(lineItems),
         po_number: `PO-${Date.now()}`,
-        tenant_id: '', // This will be set by RLS/backend
+        notes: 'Auto-generated for low stock items',
+        line_items: lineItems,
       });
     },
     onSuccess: () => {

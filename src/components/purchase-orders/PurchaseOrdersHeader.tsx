@@ -1,10 +1,10 @@
 
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
-import { useRouter } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 export const PurchaseOrdersHeader = () => {
-  const router = useRouter();
+  const navigate = useNavigate();
 
   return (
     <div className="flex items-center justify-between">
@@ -14,7 +14,7 @@ export const PurchaseOrdersHeader = () => {
           Manage and track your purchase orders and vendor relationships
         </p>
       </div>
-      <Button onClick={() => router.push("/dashboard/purchase-orders/new")}>
+      <Button onClick={() => navigate("/dashboard/purchase-orders/new")}>
         <Plus className="mr-2 h-4 w-4" />
         New Purchase Order
       </Button>

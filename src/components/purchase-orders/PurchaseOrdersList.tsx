@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Eye, Edit, Trash2, Calendar, DollarSign } from "lucide-react";
-import { useRouter } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { PurchaseOrder } from "@/types/purchaseOrder";
 import { formatCurrency, formatDate } from "@/lib/utils";
 
@@ -24,13 +24,15 @@ const getStatusColor = (status: string) => {
   switch (status) {
     case 'draft':
       return 'bg-gray-100 text-gray-800 hover:bg-gray-200';
-    case 'pending_approval':
+    case 'pending':
       return 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200';
-    case 'sent':
+    case 'approved':
       return 'bg-blue-100 text-blue-800 hover:bg-blue-200';
-    case 'fully_received':
+    case 'ordered':
+      return 'bg-purple-100 text-purple-800 hover:bg-purple-200';
+    case 'received':
       return 'bg-green-100 text-green-800 hover:bg-green-200';
-    case 'closed':
+    case 'cancelled':
       return 'bg-red-100 text-red-800 hover:bg-red-200';
     default:
       return 'bg-gray-100 text-gray-800 hover:bg-gray-200';
@@ -38,7 +40,7 @@ const getStatusColor = (status: string) => {
 };
 
 export const PurchaseOrdersList = ({ purchaseOrders, onDelete }: PurchaseOrdersListProps) => {
-  const router = useRouter();
+  const navigate = useNavigate();
 
   if (purchaseOrders.length === 0) {
     return (
@@ -53,7 +55,7 @@ export const PurchaseOrdersList = ({ purchaseOrders, onDelete }: PurchaseOrdersL
           </p>
           <Button 
             className="mt-4" 
-            onClick={() => router.push("/dashboard/purchase-orders/new")}
+            onClick={() => navigate("/dashboard/purchase-orders/new")}
           >
             Create Purchase Order
           </Button>
@@ -117,14 +119,14 @@ export const PurchaseOrdersList = ({ purchaseOrders, onDelete }: PurchaseOrdersL
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => router.push(`/dashboard/purchase-orders/${po.id}`)}
+                      onClick={() => navigate(`/dashboard/purchase-orders/${po.id}`)}
                     >
                       <Eye className="h-4 w-4" />
                     </Button>
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => router.push(`/dashboard/purchase-orders/${po.id}/edit`)}
+                      onClick={() => navigate(`/dashboard/purchase-orders/${po.id}/edit`)}
                     >
                       <Edit className="h-4 w-4" />
                     </Button>

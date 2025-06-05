@@ -1,10 +1,11 @@
 
 export type PurchaseOrderStatus =
   | 'draft'
-  | 'pending_approval'
-  | 'sent'
-  | 'fully_received'
-  | 'closed';
+  | 'pending'
+  | 'approved'
+  | 'ordered'
+  | 'received'
+  | 'cancelled';
 
 export interface PurchaseOrder {
   id: string;
