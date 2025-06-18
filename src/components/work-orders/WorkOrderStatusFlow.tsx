@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -89,71 +90,75 @@ export const WorkOrderStatusFlow = ({ workOrder }: WorkOrderStatusFlowProps) => 
   const availableActions = getAvailableActions();
 
   return (
-    <Card>
-      <CardHeader>
+    <Card className="border-gray-200 shadow-sm rounded-2xl">
+      <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-t-2xl">
         <CardTitle className="flex items-center justify-between">
           <span className="flex items-center gap-2">
-            <Clock className="w-5 h-5" />
+            <div className="p-2 bg-blue-100 rounded-lg">
+              <Clock className="w-5 h-5 text-blue-600" />
+            </div>
             Status Management
           </span>
-          <Badge className={getStatusColor(workOrder.status)}>
+          <Badge className={`${getStatusColor(workOrder.status)} font-medium border`}>
             {workOrder.status.replace('_', ' ').toUpperCase()}
           </Badge>
         </CardTitle>
       </CardHeader>
       
-      <CardContent className="space-y-4">
-        {/* Status Progress Timeline */}
-        <div className="flex items-center justify-between text-sm">
-          <div className="flex flex-col items-center space-y-1">
-            <div className={`w-3 h-3 rounded-full ${
-              ['draft', 'open', 'in_progress', 'on_hold', 'completed', 'archived'].includes(workOrder.status)
-                ? 'bg-blue-500' : 'bg-gray-300'
-            }`} />
-            <span className="text-xs">Draft</span>
-          </div>
-          <div className="flex-1 h-px bg-gray-200 mx-2" />
-          <div className="flex flex-col items-center space-y-1">
-            <div className={`w-3 h-3 rounded-full ${
-              ['open', 'in_progress', 'on_hold', 'completed', 'archived'].includes(workOrder.status)
-                ? 'bg-blue-500' : 'bg-gray-300'
-            }`} />
-            <span className="text-xs">Open</span>
-          </div>
-          <div className="flex-1 h-px bg-gray-200 mx-2" />
-          <div className="flex flex-col items-center space-y-1">
-            <div className={`w-3 h-3 rounded-full ${
-              ['in_progress', 'completed', 'archived'].includes(workOrder.status)
-                ? 'bg-yellow-500' : 'bg-gray-300'
-            }`} />
-            <span className="text-xs">In Progress</span>
-          </div>
-          <div className="flex-1 h-px bg-gray-200 mx-2" />
-          <div className="flex flex-col items-center space-y-1">
-            <div className={`w-3 h-3 rounded-full ${
-              ['completed', 'archived'].includes(workOrder.status)
-                ? 'bg-green-500' : 'bg-gray-300'
-            }`} />
-            <span className="text-xs">Complete</span>
+      <CardContent className="space-y-6 p-6">
+        {/* Enhanced Status Progress Timeline */}
+        <div className="bg-gray-50/50 rounded-xl p-4 border border-gray-100">
+          <div className="flex items-center justify-between text-sm">
+            <div className="flex flex-col items-center space-y-2">
+              <div className={`w-4 h-4 rounded-full transition-colors ${
+                ['draft', 'open', 'in_progress', 'on_hold', 'completed', 'archived'].includes(workOrder.status)
+                  ? 'bg-blue-500 ring-4 ring-blue-100' : 'bg-gray-300'
+              }`} />
+              <span className="text-xs font-medium">Draft</span>
+            </div>
+            <div className="flex-1 h-0.5 bg-gray-200 mx-3" />
+            <div className="flex flex-col items-center space-y-2">
+              <div className={`w-4 h-4 rounded-full transition-colors ${
+                ['open', 'in_progress', 'on_hold', 'completed', 'archived'].includes(workOrder.status)
+                  ? 'bg-blue-500 ring-4 ring-blue-100' : 'bg-gray-300'
+              }`} />
+              <span className="text-xs font-medium">Open</span>
+            </div>
+            <div className="flex-1 h-0.5 bg-gray-200 mx-3" />
+            <div className="flex flex-col items-center space-y-2">
+              <div className={`w-4 h-4 rounded-full transition-colors ${
+                ['in_progress', 'completed', 'archived'].includes(workOrder.status)
+                  ? 'bg-yellow-500 ring-4 ring-yellow-100' : 'bg-gray-300'
+              }`} />
+              <span className="text-xs font-medium">In Progress</span>
+            </div>
+            <div className="flex-1 h-0.5 bg-gray-200 mx-3" />
+            <div className="flex flex-col items-center space-y-2">
+              <div className={`w-4 h-4 rounded-full transition-colors ${
+                ['completed', 'archived'].includes(workOrder.status)
+                  ? 'bg-green-500 ring-4 ring-green-100' : 'bg-gray-300'
+              }`} />
+              <span className="text-xs font-medium">Complete</span>
+            </div>
           </div>
         </div>
 
         {/* Status Change Notes */}
         {availableActions.length > 0 && (
-          <div className="space-y-3">
+          <div className="space-y-4">
             <div>
-              <Label htmlFor="status-notes">Status Change Notes (Optional)</Label>
+              <Label htmlFor="status-notes" className="text-sm font-medium">Status Change Notes (Optional)</Label>
               <Textarea
                 id="status-notes"
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
                 placeholder="Add notes about this status change..."
-                className="mt-1 min-h-[80px]"
+                className="mt-2 min-h-[80px] border-gray-200 rounded-xl"
               />
             </div>
 
-            {/* Action Buttons */}
-            <div className="flex flex-wrap gap-2">
+            {/* Enhanced Action Buttons */}
+            <div className="flex flex-wrap gap-3">
               {availableActions.map((action) => {
                 const IconComponent = action.icon;
                 return (
@@ -162,12 +167,12 @@ export const WorkOrderStatusFlow = ({ workOrder }: WorkOrderStatusFlowProps) => 
                     onClick={() => handleStatusChange(action.action, notes)}
                     disabled={isChangingStatus}
                     variant="outline"
-                    className={`flex items-center gap-2 ${
-                      action.color === 'green' ? 'border-green-500 text-green-700 hover:bg-green-50' :
-                      action.color === 'blue' ? 'border-blue-500 text-blue-700 hover:bg-blue-50' :
-                      action.color === 'orange' ? 'border-orange-500 text-orange-700 hover:bg-orange-50' :
-                      action.color === 'red' ? 'border-red-500 text-red-700 hover:bg-red-50' :
-                      'border-gray-500 text-gray-700 hover:bg-gray-50'
+                    className={`flex items-center gap-2 px-4 py-2 rounded-xl font-medium transition-all hover:scale-105 ${
+                      action.color === 'green' ? 'border-green-300 text-green-700 bg-green-50 hover:bg-green-100' :
+                      action.color === 'blue' ? 'border-blue-300 text-blue-700 bg-blue-50 hover:bg-blue-100' :
+                      action.color === 'orange' ? 'border-orange-300 text-orange-700 bg-orange-50 hover:bg-orange-100' :
+                      action.color === 'red' ? 'border-red-300 text-red-700 bg-red-50 hover:bg-red-100' :
+                      'border-gray-300 text-gray-700 bg-gray-50 hover:bg-gray-100'
                     }`}
                   >
                     <IconComponent className="w-4 h-4" />
@@ -179,14 +184,16 @@ export const WorkOrderStatusFlow = ({ workOrder }: WorkOrderStatusFlowProps) => 
           </div>
         )}
 
-        {/* Current Status Info */}
-        <div className="bg-gray-50 p-3 rounded-lg">
-          <div className="flex items-center gap-2 text-sm text-gray-600">
-            <FileText className="w-4 h-4" />
+        {/* Enhanced Current Status Info */}
+        <div className="bg-gradient-to-r from-gray-50 to-blue-50 p-4 rounded-xl border border-gray-200">
+          <div className="flex items-center gap-3 text-sm text-gray-700">
+            <div className="p-2 bg-white rounded-lg shadow-sm">
+              <FileText className="w-4 h-4 text-gray-600" />
+            </div>
             <span>
-              Status: <strong>{workOrder.status.replace('_', ' ')}</strong>
+              Status: <strong className="text-gray-900">{workOrder.status.replace('_', ' ')}</strong>
               {workOrder.updated_at && (
-                <span className="ml-2">
+                <span className="ml-2 text-gray-500">
                   • Last updated {new Date(workOrder.updated_at).toLocaleDateString()}
                 </span>
               )}

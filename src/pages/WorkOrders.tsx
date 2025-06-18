@@ -138,11 +138,11 @@ export default function WorkOrders() {
 
   return (
     <DashboardLayout>
-      <div className="h-full flex">
-        {/* Desktop Layout */}
-        <div className="hidden lg:flex h-full w-full">
-          {/* Left Sidebar - Work Orders List */}
-          <div className="w-80 bg-white border-r border-gray-100 flex flex-col">
+      <div className="h-full flex w-full">
+        {/* Desktop Layout with 70/30 split */}
+        <div className="hidden lg:flex h-full w-full gap-1">
+          {/* Left Panel - 30% */}
+          <div className="w-[30%] bg-white border border-gray-200 rounded-xl shadow-sm flex flex-col overflow-hidden">
             <EnhancedWorkOrdersList 
               workOrders={transformedWorkOrders}
               selectedWorkOrderId={selectedWorkOrder}
@@ -151,8 +151,8 @@ export default function WorkOrders() {
             />
           </div>
           
-          {/* Main Content Area */}
-          <div className="flex-1 flex flex-col bg-gray-50">
+          {/* Main Content Area - 70% */}
+          <div className="w-[70%] flex flex-col bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
             {viewMode === 'detail' && selectedWorkOrderData && (
               <EnhancedWorkOrderDetail 
                 workOrder={selectedWorkOrderData}
@@ -185,14 +185,14 @@ export default function WorkOrders() {
             {viewMode === 'list' && (
               <div className="flex-1 flex items-center justify-center">
                 <div className="text-center space-y-4">
-                  <div className="w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center mx-auto">
+                  <div className="w-16 h-16 bg-gradient-to-br from-blue-50 to-indigo-100 rounded-2xl flex items-center justify-center mx-auto">
                     <span className="text-2xl">📋</span>
                   </div>
                   <div className="space-y-2">
                     <h3 className="text-lg font-semibold text-gray-900">Select a work order</h3>
                     <p className="text-sm text-gray-500">Choose a work order from the list to view details</p>
                   </div>
-                  <Button onClick={handleCreateWorkOrder} className="mt-4">
+                  <Button onClick={handleCreateWorkOrder} className="mt-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700">
                     <Plus className="w-4 h-4 mr-2" />
                     Create New Work Order
                   </Button>
@@ -205,7 +205,7 @@ export default function WorkOrders() {
         {/* Mobile Layout */}
         <div className="lg:hidden h-full w-full">
           {viewMode === 'list' && (
-            <div className="h-full bg-white">
+            <div className="h-full bg-white rounded-xl border border-gray-200 shadow-sm">
               <div className="p-4 border-b border-gray-100">
                 <h1 className="text-xl font-semibold text-gray-900">Work Orders</h1>
                 <p className="text-gray-600 text-sm mt-0.5">Manage and track maintenance work orders</p>
@@ -220,7 +220,7 @@ export default function WorkOrders() {
           )}
           
           {viewMode === 'detail' && selectedWorkOrderData && (
-            <div className="h-full bg-white flex flex-col">
+            <div className="h-full bg-white rounded-xl border border-gray-200 shadow-sm flex flex-col">
               <div className="p-3 border-b border-gray-100 flex items-center gap-3">
                 <Button 
                   variant="ghost" 
@@ -248,7 +248,7 @@ export default function WorkOrders() {
           )}
           
           {viewMode === 'form' && (
-            <div className="h-full bg-white flex flex-col">
+            <div className="h-full bg-white rounded-xl border border-gray-200 shadow-sm flex flex-col">
               <div className="p-3 border-b border-gray-100 flex items-center gap-3">
                 <Button 
                   variant="ghost" 
