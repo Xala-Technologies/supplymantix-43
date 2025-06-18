@@ -1,12 +1,10 @@
 
 export type PurchaseOrderStatus =
   | 'draft'
-  | 'submitted'
+  | 'pending'
   | 'approved'
   | 'ordered'
-  | 'partially_fulfilled'
-  | 'completed'
-  | 'rejected'
+  | 'received'
   | 'cancelled';
 
 export type ApprovalStatus = 
@@ -14,6 +12,7 @@ export type ApprovalStatus =
   | 'approved'
   | 'rejected';
 
+// Simplified vendor interface to match current usage
 export interface Vendor {
   id: string;
   name: string;
@@ -60,8 +59,7 @@ export interface PurchaseOrder {
   id: string;
   tenant_id: string;
   po_number: string;
-  vendor_id: string;
-  vendor?: Vendor;
+  vendor?: string; // Keep as string to match current schema
   status: PurchaseOrderStatus;
   total_amount: number;
   tax_amount?: number;
@@ -100,13 +98,12 @@ export interface PurchaseOrderLineItem {
   created_at: string;
 }
 
+// Align with current database schema
 export interface CreatePurchaseOrderRequest {
-  vendor_id: string;
+  vendor: string; // Use string vendor to match current schema
   po_number: string;
   notes?: string;
   due_date?: string;
-  billing_address?: Omit<Address, 'id'>;
-  shipping_address?: Omit<Address, 'id'>;
   line_items: {
     inventory_item_id?: string;
     description: string;
@@ -118,13 +115,11 @@ export interface CreatePurchaseOrderRequest {
 
 export interface UpdatePurchaseOrderRequest {
   id: string;
-  vendor_id?: string;
+  vendor?: string;
   po_number?: string;
   status?: PurchaseOrderStatus;
   notes?: string;
   due_date?: string;
-  billing_address?: Omit<Address, 'id'>;
-  shipping_address?: Omit<Address, 'id'>;
   line_items?: {
     id?: string;
     inventory_item_id?: string;
@@ -151,35 +146,4 @@ export interface FulfillmentRequest {
   line_item_id: string;
   received_quantity: number;
   notes?: string;
-}
-
-export interface POSettings {
-  id: string;
-  tenant_id: string;
-  po_number_prefix: string;
-  po_number_format: string;
-  default_billing_address?: Address;
-  default_shipping_address?: Address;
-  approval_rules: ApprovalRule[];
-  cc_emails: string[];
-  custom_fields: CustomField[];
-}
-
-export interface ApprovalRule {
-  id: string;
-  name: string;
-  amount_min?: number;
-  amount_max?: number;
-  required_roles: string[];
-  departments?: string[];
-  order: number;
-}
-
-export interface CustomField {
-  id: string;
-  label: string;
-  type: 'text' | 'number' | 'date' | 'select';
-  required: boolean;
-  options?: string[];
-  order: number;
 }

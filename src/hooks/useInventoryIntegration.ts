@@ -50,7 +50,7 @@ export const useCreateReorderPO = () => {
       }));
       
       return databaseApi.createPurchaseOrder({
-        vendor: 'Auto-Generated Supplier',
+        vendor: 'Auto-Generated Supplier', // Use string vendor
         po_number: `PO-${Date.now()}`,
         notes: 'Auto-generated for low stock items',
         line_items: lineItems,

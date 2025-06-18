@@ -59,10 +59,9 @@ export const useCheckOrCreateLowStockPO = () => {
       const poNumber = `AUTO-${Date.now().toString().slice(-6)}`;
       
       const newPO = await purchaseOrdersApi.createPurchaseOrder({
-        vendor: "Auto-Reorder Vendor",
+        vendor: "Auto-Reorder Vendor", // Use string vendor
         po_number: poNumber,
         notes: `Auto-generated for low stock item: ${inventoryItem.name}`,
-        due_date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(), // 7 days from now
         line_items: [{
           inventory_item_id: inventoryItem.id,
           description: inventoryItem.name,

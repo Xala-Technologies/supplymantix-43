@@ -3,17 +3,12 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { purchaseOrdersEnhancedApi } from "@/lib/database/purchase-orders-enhanced";
 import { toast } from "sonner";
 import type { 
-  CreatePurchaseOrderRequest,
   UpdatePurchaseOrderRequest,
-  SubmitForApprovalRequest,
-  ApprovalDecisionRequest,
-  FulfillmentRequest,
-  Vendor
 } from "@/types/purchaseOrder";
 
 export const usePurchaseOrdersEnhanced = (filters?: {
   status?: string;
-  vendor_id?: string;
+  vendor?: string;
   requested_by?: string;
   date_from?: string;
   date_to?: string;
@@ -42,22 +37,6 @@ export const useVendors = () => {
   });
 };
 
-export const useCreateVendor = () => {
-  const queryClient = useQueryClient();
-  
-  return useMutation({
-    mutationFn: (vendor: Omit<Vendor, 'id' | 'created_at' | 'updated_at'>) =>
-      purchaseOrdersEnhancedApi.createVendor(vendor),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["vendors"] });
-      toast.success("Vendor created successfully");
-    },
-    onError: (error: Error) => {
-      toast.error(`Failed to create vendor: ${error.message}`);
-    },
-  });
-};
-
 export const useUpdatePurchaseOrderEnhanced = () => {
   const queryClient = useQueryClient();
   
@@ -71,115 +50,6 @@ export const useUpdatePurchaseOrderEnhanced = () => {
     },
     onError: (error: Error) => {
       toast.error(`Failed to update purchase order: ${error.message}`);
-    },
-  });
-};
-
-export const useSoftDeletePurchaseOrder = () => {
-  const queryClient = useQueryClient();
-  
-  return useMutation({
-    mutationFn: (id: string) => purchaseOrdersEnhancedApi.softDeletePurchaseOrder(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["purchase-orders-enhanced"] });
-      toast.success("Purchase order deleted successfully");
-    },
-    onError: (error: Error) => {
-      toast.error(`Failed to delete purchase order: ${error.message}`);
-    },
-  });
-};
-
-export const useRestorePurchaseOrder = () => {
-  const queryClient = useQueryClient();
-  
-  return useMutation({
-    mutationFn: (id: string) => purchaseOrdersEnhancedApi.restorePurchaseOrder(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["purchase-orders-enhanced"] });
-      toast.success("Purchase order restored successfully");
-    },
-    onError: (error: Error) => {
-      toast.error(`Failed to restore purchase order: ${error.message}`);
-    },
-  });
-};
-
-export const useSubmitForApproval = () => {
-  const queryClient = useQueryClient();
-  
-  return useMutation({
-    mutationFn: (request: SubmitForApprovalRequest) =>
-      purchaseOrdersEnhancedApi.submitForApproval(request),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["purchase-orders-enhanced"] });
-      toast.success("Purchase order submitted for approval");
-    },
-    onError: (error: Error) => {
-      toast.error(`Failed to submit for approval: ${error.message}`);
-    },
-  });
-};
-
-export const useApproveOrRejectPurchaseOrder = () => {
-  const queryClient = useQueryClient();
-  
-  return useMutation({
-    mutationFn: (request: ApprovalDecisionRequest) =>
-      purchaseOrdersEnhancedApi.approveOrRejectPurchaseOrder(request),
-    onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ["purchase-orders-enhanced"] });
-      queryClient.invalidateQueries({ queryKey: ["purchase-order-enhanced", variables.purchase_order_id] });
-      const action = variables.decision === 'approved' ? 'approved' : 'rejected';
-      toast.success(`Purchase order ${action} successfully`);
-    },
-    onError: (error: Error) => {
-      toast.error(`Failed to process approval: ${error.message}`);
-    },
-  });
-};
-
-export const useFulfillLineItem = () => {
-  const queryClient = useQueryClient();
-  
-  return useMutation({
-    mutationFn: (request: FulfillmentRequest) =>
-      purchaseOrdersEnhancedApi.fulfillLineItem(request),
-    onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ["purchase-orders-enhanced"] });
-      queryClient.invalidateQueries({ queryKey: ["purchase-order-enhanced", variables.purchase_order_id] });
-      toast.success("Line item fulfilled successfully");
-    },
-    onError: (error: Error) => {
-      toast.error(`Failed to fulfill line item: ${error.message}`);
-    },
-  });
-};
-
-export const useUploadAttachment = () => {
-  const queryClient = useQueryClient();
-  
-  return useMutation({
-    mutationFn: ({ purchaseOrderId, file }: { purchaseOrderId: string; file: File }) =>
-      purchaseOrdersEnhancedApi.uploadAttachment(purchaseOrderId, file),
-    onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ["purchase-order-enhanced", variables.purchaseOrderId] });
-      toast.success("Attachment uploaded successfully");
-    },
-    onError: (error: Error) => {
-      toast.error(`Failed to upload attachment: ${error.message}`);
-    },
-  });
-};
-
-export const useGeneratePOPdf = () => {
-  return useMutation({
-    mutationFn: (id: string) => purchaseOrdersEnhancedApi.generatePOPdf(id),
-    onSuccess: (url) => {
-      window.open(url, '_blank');
-    },
-    onError: (error: Error) => {
-      toast.error(`Failed to generate PDF: ${error.message}`);
     },
   });
 };
@@ -201,6 +71,75 @@ export const useExportPOCsv = () => {
     },
     onError: (error: Error) => {
       toast.error(`Failed to export CSV: ${error.message}`);
+    },
+  });
+};
+
+// Placeholder hooks for future implementation
+export const useCreateVendor = () => {
+  return useMutation({
+    mutationFn: () => {
+      throw new Error("Vendor management not yet implemented");
+    },
+  });
+};
+
+export const useSoftDeletePurchaseOrder = () => {
+  return useMutation({
+    mutationFn: () => {
+      throw new Error("Soft delete not yet implemented");
+    },
+  });
+};
+
+export const useRestorePurchaseOrder = () => {
+  return useMutation({
+    mutationFn: () => {
+      throw new Error("Restore not yet implemented");
+    },
+  });
+};
+
+export const useSubmitForApproval = () => {
+  return useMutation({
+    mutationFn: () => {
+      throw new Error("Approval workflow not yet implemented");
+    },
+  });
+};
+
+export const useApproveOrRejectPurchaseOrder = () => {
+  return useMutation({
+    mutationFn: () => {
+      throw new Error("Approval workflow not yet implemented");
+    },
+  });
+};
+
+export const useFulfillLineItem = () => {
+  return useMutation({
+    mutationFn: () => {
+      throw new Error("Fulfillment not yet implemented");
+    },
+  });
+};
+
+export const useUploadAttachment = () => {
+  return useMutation({
+    mutationFn: () => {
+      throw new Error("Attachments not yet implemented");
+    },
+  });
+};
+
+export const useGeneratePOPdf = () => {
+  return useMutation({
+    mutationFn: (id: string) => purchaseOrdersEnhancedApi.generatePOPdf(id),
+    onSuccess: (url) => {
+      window.open(url, '_blank');
+    },
+    onError: (error: Error) => {
+      toast.error(`Failed to generate PDF: ${error.message}`);
     },
   });
 };
