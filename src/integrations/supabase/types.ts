@@ -150,6 +150,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "chat_messages_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users_with_role"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "chat_messages_work_order_id_fkey"
             columns: ["work_order_id"]
             isOneToOne: false
@@ -157,6 +164,343 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      documentation: {
+        Row: {
+          access_level: string | null
+          category: string
+          content: string
+          created_at: string | null
+          created_by: string | null
+          id: string
+          is_published: boolean | null
+          slug: string
+          tags: string[] | null
+          title: string
+          updated_at: string | null
+          version: string | null
+        }
+        Insert: {
+          access_level?: string | null
+          category: string
+          content: string
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          is_published?: boolean | null
+          slug: string
+          tags?: string[] | null
+          title: string
+          updated_at?: string | null
+          version?: string | null
+        }
+        Update: {
+          access_level?: string | null
+          category?: string
+          content?: string
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          is_published?: boolean | null
+          slug?: string
+          tags?: string[] | null
+          title?: string
+          updated_at?: string | null
+          version?: string | null
+        }
+        Relationships: []
+      }
+      documentation_attachments: {
+        Row: {
+          created_at: string | null
+          document_id: string | null
+          file_name: string
+          file_url: string
+          id: string
+          uploaded_by: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          document_id?: string | null
+          file_name: string
+          file_url: string
+          id?: string
+          uploaded_by?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          document_id?: string | null
+          file_name?: string
+          file_url?: string
+          id?: string
+          uploaded_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "documentation_attachments_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "documentation_documents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      documentation_categories: {
+        Row: {
+          created_at: string | null
+          id: string
+          name: string
+          organization_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          name: string
+          organization_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          name?: string
+          organization_id?: string
+        }
+        Relationships: []
+      }
+      documentation_collaboration_spaces: {
+        Row: {
+          created_at: string | null
+          id: string
+          name: string
+          organization_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          name: string
+          organization_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          name?: string
+          organization_id?: string
+        }
+        Relationships: []
+      }
+      documentation_documents: {
+        Row: {
+          category_id: string | null
+          content: string | null
+          created_at: string | null
+          id: string
+          organization_id: string
+          title: string
+          updated_at: string | null
+          views: number | null
+        }
+        Insert: {
+          category_id?: string | null
+          content?: string | null
+          created_at?: string | null
+          id?: string
+          organization_id: string
+          title: string
+          updated_at?: string | null
+          views?: number | null
+        }
+        Update: {
+          category_id?: string | null
+          content?: string | null
+          created_at?: string | null
+          id?: string
+          organization_id?: string
+          title?: string
+          updated_at?: string | null
+          views?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "documentation_documents_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "documentation_categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      documentation_integrations: {
+        Row: {
+          config: Json | null
+          created_at: string | null
+          id: string
+          name: string
+          organization_id: string
+        }
+        Insert: {
+          config?: Json | null
+          created_at?: string | null
+          id?: string
+          name: string
+          organization_id: string
+        }
+        Update: {
+          config?: Json | null
+          created_at?: string | null
+          id?: string
+          name?: string
+          organization_id?: string
+        }
+        Relationships: []
+      }
+      documentation_settings: {
+        Row: {
+          created_at: string | null
+          id: string
+          organization_id: string
+          settings: Json | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          organization_id: string
+          settings?: Json | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          organization_id?: string
+          settings?: Json | null
+        }
+        Relationships: []
+      }
+      documentation_sync_configs: {
+        Row: {
+          config: Json | null
+          created_at: string | null
+          id: string
+          organization_id: string
+        }
+        Insert: {
+          config?: Json | null
+          created_at?: string | null
+          id?: string
+          organization_id: string
+        }
+        Update: {
+          config?: Json | null
+          created_at?: string | null
+          id?: string
+          organization_id?: string
+        }
+        Relationships: []
+      }
+      documentation_sync_jobs: {
+        Row: {
+          created_at: string | null
+          id: string
+          organization_id: string
+          status: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          organization_id: string
+          status?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          organization_id?: string
+          status?: string | null
+        }
+        Relationships: []
+      }
+      documentation_tags: {
+        Row: {
+          created_at: string | null
+          id: string
+          name: string
+          organization_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          name: string
+          organization_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          name?: string
+          organization_id?: string
+        }
+        Relationships: []
+      }
+      global_theme_settings: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          id: string
+          is_active: boolean
+          name: string
+          theme_config: Json
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          theme_config?: Json
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          theme_config?: Json
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      global_translations: {
+        Row: {
+          category: string | null
+          created_at: string | null
+          created_by: string | null
+          id: string
+          is_custom: boolean | null
+          language: string
+          translation_key: string
+          updated_at: string | null
+          value: string
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          is_custom?: boolean | null
+          language: string
+          translation_key: string
+          updated_at?: string | null
+          value: string
+        }
+        Update: {
+          category?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          is_custom?: boolean | null
+          language?: string
+          translation_key?: string
+          updated_at?: string | null
+          value?: string
+        }
+        Relationships: []
       }
       inventory_items: {
         Row: {
@@ -300,6 +644,125 @@ export type Database = {
           },
         ]
       }
+      notification_preferences: {
+        Row: {
+          category: string
+          created_at: string | null
+          email_enabled: boolean | null
+          id: string
+          in_app_enabled: boolean | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          category: string
+          created_at?: string | null
+          email_enabled?: boolean | null
+          id?: string
+          in_app_enabled?: boolean | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          category?: string
+          created_at?: string | null
+          email_enabled?: boolean | null
+          id?: string
+          in_app_enabled?: boolean | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      notification_templates: {
+        Row: {
+          category: string
+          created_at: string | null
+          id: string
+          message_template: string
+          severity: string
+          title_template: string
+          type: string
+          updated_at: string | null
+        }
+        Insert: {
+          category: string
+          created_at?: string | null
+          id?: string
+          message_template: string
+          severity: string
+          title_template: string
+          type: string
+          updated_at?: string | null
+        }
+        Update: {
+          category?: string
+          created_at?: string | null
+          id?: string
+          message_template?: string
+          severity?: string
+          title_template?: string
+          type?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      notifications: {
+        Row: {
+          category: string
+          created_at: string | null
+          data: Json | null
+          expires_at: string | null
+          id: string
+          message: string
+          organization_id: string | null
+          read_at: string | null
+          severity: string
+          title: string
+          type: string
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          category: string
+          created_at?: string | null
+          data?: Json | null
+          expires_at?: string | null
+          id?: string
+          message: string
+          organization_id?: string | null
+          read_at?: string | null
+          severity: string
+          title: string
+          type: string
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          category?: string
+          created_at?: string | null
+          data?: Json | null
+          expires_at?: string | null
+          id?: string
+          message?: string
+          organization_id?: string | null
+          read_at?: string | null
+          severity?: string
+          title?: string
+          type?: string
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notifications_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       organization_members: {
         Row: {
           created_at: string | null
@@ -355,6 +818,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "organization_members_invited_by_fkey"
+            columns: ["invited_by"]
+            isOneToOne: false
+            referencedRelation: "users_with_role"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "organization_members_organization_id_fkey"
             columns: ["organization_id"]
             isOneToOne: false
@@ -366,6 +836,13 @@ export type Database = {
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "organization_members_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users_with_role"
             referencedColumns: ["id"]
           },
         ]
@@ -429,6 +906,41 @@ export type Database = {
             columns: ["subscription_id"]
             isOneToOne: false
             referencedRelation: "subscriptions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      organization_themes: {
+        Row: {
+          created_at: string | null
+          id: string
+          is_active: boolean | null
+          organization_id: string
+          theme_overrides: Json
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          organization_id: string
+          theme_overrides?: Json
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          organization_id?: string
+          theme_overrides?: Json
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "organization_themes_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: true
+            referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
         ]
@@ -541,6 +1053,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "procedures_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "users_with_role"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "procedures_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
@@ -646,10 +1165,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "purchase_orders_approved_by_fkey"
+            columns: ["approved_by"]
+            isOneToOne: false
+            referencedRelation: "users_with_role"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "purchase_orders_requested_by_fkey"
             columns: ["requested_by"]
             isOneToOne: false
             referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "purchase_orders_requested_by_fkey"
+            columns: ["requested_by"]
+            isOneToOne: false
+            referencedRelation: "users_with_role"
             referencedColumns: ["id"]
           },
           {
@@ -756,6 +1289,42 @@ export type Database = {
         }
         Relationships: []
       }
+      search_analytics: {
+        Row: {
+          clicked_result_id: string | null
+          clicked_result_type: string | null
+          created_at: string
+          entity_types: string[] | null
+          id: string
+          results_count: number | null
+          search_duration_ms: number | null
+          search_query: string
+          user_id: string | null
+        }
+        Insert: {
+          clicked_result_id?: string | null
+          clicked_result_type?: string | null
+          created_at?: string
+          entity_types?: string[] | null
+          id?: string
+          results_count?: number | null
+          search_duration_ms?: number | null
+          search_query: string
+          user_id?: string | null
+        }
+        Update: {
+          clicked_result_id?: string | null
+          clicked_result_type?: string | null
+          created_at?: string
+          entity_types?: string[] | null
+          id?: string
+          results_count?: number | null
+          search_duration_ms?: number | null
+          search_query?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       subscriptions: {
         Row: {
           billing_cycle: string | null
@@ -834,23 +1403,65 @@ export type Database = {
         }
         Relationships: []
       }
+      user_roles: {
+        Row: {
+          assigned_at: string | null
+          assigned_by: string | null
+          created_at: string | null
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          assigned_at?: string | null
+          assigned_by?: string | null
+          created_at?: string | null
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          assigned_at?: string | null
+          assigned_by?: string | null
+          created_at?: string | null
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       users: {
         Row: {
+          avatar_url: string | null
           created_at: string | null
           email: string
+          first_name: string | null
           id: string
+          last_name: string | null
+          status: string | null
           tenant_id: string
         }
         Insert: {
+          avatar_url?: string | null
           created_at?: string | null
           email: string
+          first_name?: string | null
           id?: string
+          last_name?: string | null
+          status?: string | null
           tenant_id: string
         }
         Update: {
+          avatar_url?: string | null
           created_at?: string | null
           email?: string
+          first_name?: string | null
           id?: string
+          last_name?: string | null
+          status?: string | null
           tenant_id?: string
         }
         Relationships: [
@@ -1038,6 +1649,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "work_orders_assigned_to_fkey"
+            columns: ["assigned_to"]
+            isOneToOne: false
+            referencedRelation: "users_with_role"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "work_orders_location_id_fkey"
             columns: ["location_id"]
             isOneToOne: false
@@ -1055,16 +1673,40 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      users_with_role: {
+        Row: {
+          avatar_url: string | null
+          created_at: string | null
+          email: string | null
+          first_name: string | null
+          id: string | null
+          last_name: string | null
+          status: string | null
+          system_role: Database["public"]["Enums"]["app_role"] | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       accept_invitation: {
         Args: { token_param: string; user_id_param: string }
         Returns: boolean
       }
+      assign_system_role: {
+        Args: {
+          target_user_id: string
+          new_role: Database["public"]["Enums"]["app_role"]
+          assigned_by_user_id?: string
+        }
+        Returns: undefined
+      }
       copy_asset_procedures_to_work_order: {
         Args: { asset_id_param: string; work_order_id_param: string }
         Returns: undefined
+      }
+      current_user_is_super_admin: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
       }
       decrement_inventory_and_log: {
         Args: {
@@ -1074,6 +1716,34 @@ export type Database = {
           usage_notes?: string
         }
         Returns: undefined
+      }
+      delete_notifications: {
+        Args: { p_user_id: string; p_notification_ids: string[] }
+        Returns: undefined
+      }
+      enum_values: {
+        Args: { enum_name: string }
+        Returns: string[]
+      }
+      get_current_user_tenant_id: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
+      get_documentation_gaps: {
+        Args: { org_id: string }
+        Returns: {
+          id: string
+          title: string
+          gap_reason: string
+        }[]
+      }
+      get_documentation_performance: {
+        Args: { org_id: string }
+        Returns: {
+          id: string
+          title: string
+          views: number
+        }[]
       }
       get_invitation_by_token: {
         Args: { token_param: string }
@@ -1086,13 +1756,97 @@ export type Database = {
           organization_name: string
         }[]
       }
+      get_trending_documents: {
+        Args:
+          | { org_id: string }
+          | { p_organization_id: string; p_limit?: number }
+        Returns: {
+          id: string
+          title: string
+          content: string
+          category_id: string
+          organization_id: string
+          created_at: string
+          updated_at: string
+          views: number
+        }[]
+      }
+      get_user_system_role: {
+        Args: { user_id_param?: string }
+        Returns: Database["public"]["Enums"]["app_role"]
+      }
       get_user_tenant_id: {
         Args: Record<PropertyKey, never>
         Returns: string
       }
+      global_search: {
+        Args: { search_query: string; entity_types?: string[] }
+        Returns: {
+          entity_type: string
+          entity_id: string
+          title: string
+          subtitle: string
+          url: string
+          relevance: number
+          created_at: string
+        }[]
+      }
       increment_inventory_from_po: {
         Args: { po_id: string }
         Returns: undefined
+      }
+      log_search_analytics: {
+        Args: {
+          search_query_param: string
+          entity_types_param?: string[]
+          results_count_param?: number
+          search_duration_ms_param?: number
+        }
+        Returns: string
+      }
+      log_search_click: {
+        Args: {
+          analytics_id_param: string
+          clicked_result_id_param: string
+          clicked_result_type_param: string
+        }
+        Returns: undefined
+      }
+      mark_all_notifications_as_read: {
+        Args: { p_user_id: string }
+        Returns: {
+          category: string
+          created_at: string | null
+          data: Json | null
+          expires_at: string | null
+          id: string
+          message: string
+          organization_id: string | null
+          read_at: string | null
+          severity: string
+          title: string
+          type: string
+          updated_at: string | null
+          user_id: string | null
+        }[]
+      }
+      mark_notifications_as_read: {
+        Args: { p_user_id: string; p_notification_ids: string[] }
+        Returns: {
+          category: string
+          created_at: string | null
+          data: Json | null
+          expires_at: string | null
+          id: string
+          message: string
+          organization_id: string | null
+          read_at: string | null
+          severity: string
+          title: string
+          type: string
+          updated_at: string | null
+          user_id: string | null
+        }[]
       }
       record_parts_usage: {
         Args: {
@@ -1101,6 +1855,65 @@ export type Database = {
           qty: number
           usage_notes?: string
         }
+        Returns: undefined
+      }
+      search_documentation: {
+        Args: { search_query: string }
+        Returns: {
+          id: string
+          title: string
+          category: string
+          slug: string
+          access_level: string
+          created_at: string
+          relevance: number
+        }[]
+      }
+      search_organizations: {
+        Args: { search_query: string }
+        Returns: {
+          id: string
+          name: string
+          contact_email: string
+          created_at: string
+          member_count: number
+          relevance: number
+        }[]
+      }
+      search_subscriptions: {
+        Args: { search_query: string }
+        Returns: {
+          id: string
+          plan_name: string
+          status: string
+          billing_cycle: string
+          created_at: string
+          price_monthly: number
+          relevance: number
+        }[]
+      }
+      search_users: {
+        Args: { search_query: string }
+        Returns: {
+          id: string
+          email: string
+          tenant_id: string
+          created_at: string
+          organization_count: number
+          relevance: number
+        }[]
+      }
+      update_user_info: {
+        Args: {
+          user_id_param: string
+          first_name_param?: string
+          last_name_param?: string
+          avatar_url_param?: string
+        }
+        Returns: undefined
+      }
+      update_user_status: {
+        Args: { user_id_param: string; status_param: string }
         Returns: undefined
       }
       user_can_manage_organization_members: {
@@ -1115,6 +1928,10 @@ export type Database = {
         Args: { tenant_uuid: string }
         Returns: boolean
       }
+      user_is_org_admin: {
+        Args: { user_id_param?: string }
+        Returns: boolean
+      }
       user_is_organization_member: {
         Args: { org_id: string; user_id: string }
         Returns: boolean
@@ -1125,7 +1942,19 @@ export type Database = {
       }
     }
     Enums: {
+      app_role: "super_admin" | "organization_admin" | "user"
       asset_status: "active" | "maintenance" | "out_of_service" | "retired"
+      color_token:
+        | "primary"
+        | "secondary"
+        | "accent"
+        | "background"
+        | "surface"
+        | "error"
+        | "success"
+        | "warning"
+        | "info"
+      font_size: "xs" | "sm" | "md" | "lg" | "xl" | "2xl"
       organization_role:
         | "owner"
         | "admin"
@@ -1272,7 +2101,20 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      app_role: ["super_admin", "organization_admin", "user"],
       asset_status: ["active", "maintenance", "out_of_service", "retired"],
+      color_token: [
+        "primary",
+        "secondary",
+        "accent",
+        "background",
+        "surface",
+        "error",
+        "success",
+        "warning",
+        "info",
+      ],
+      font_size: ["xs", "sm", "md", "lg", "xl", "2xl"],
       organization_role: [
         "owner",
         "admin",
