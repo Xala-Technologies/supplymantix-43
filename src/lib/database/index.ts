@@ -6,6 +6,7 @@ import { assetsApi } from "./assets";
 import { proceduresApi } from "./procedures";
 import { procurementApi } from "./procurement";
 import { purchaseOrdersApi } from "./purchase-orders";
+import { purchaseOrdersEnhancedApi } from "./purchase-orders-enhanced";
 import { requestsApi } from "./requests";
 import { usersApi } from "./users";
 import { organizationsApi } from "./organizations";
@@ -21,6 +22,7 @@ export const databaseApi = {
   ...proceduresApi,
   ...procurementApi,
   ...purchaseOrdersApi,
+  ...purchaseOrdersEnhancedApi,
   ...requestsApi,
   ...usersApi,
   ...organizationsApi,
