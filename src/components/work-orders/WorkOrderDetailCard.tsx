@@ -1,11 +1,10 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Clock, Users, MapPin, AlertCircle, Calendar, Tag } from 'lucide-react';
 import { WorkOrder } from '@/types/workOrder';
-import { WorkOrderChecklist } from './WorkOrderChecklist';
+import { EnhancedChecklist } from './EnhancedChecklist';
 import { WorkOrderTimeTracking } from './WorkOrderTimeTracking';
 import { WorkOrderProcedureSection } from './WorkOrderProcedureSection';
 import { TimeAndCostTracking } from './TimeAndCostTracking';
@@ -136,8 +135,8 @@ export const WorkOrderDetailCard = ({ workOrder }: WorkOrderDetailCardProps) => 
         </CardContent>
       </Card>
 
-      {/* Checklist */}
-      <WorkOrderChecklist workOrderId={workOrder.id} />
+      {/* Enhanced Checklist */}
+      <EnhancedChecklist workOrderId={workOrder.id} />
 
       {/* Time Tracking */}
       <WorkOrderTimeTracking workOrderId={workOrder.id} />
