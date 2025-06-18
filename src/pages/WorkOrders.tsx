@@ -15,7 +15,7 @@ const sampleWorkOrders: WorkOrder[] = [
     id: '5969',
     title: 'Wrapper Malfunction - Items Stuck on Belt',
     status: 'in_progress',
-    dueDate: '2023-10-05T08:43:00Z',
+    due_date: '2023-10-05T08:43:00Z',
     priority: 'high',
     assignedTo: ['Zach Brown'],
     description: 'The cutter is not fully cutting, and packages are either tearing away from the cutting assembly, or tipping over and causing stoppage.',
@@ -26,20 +26,22 @@ const sampleWorkOrders: WorkOrder[] = [
     },
     location: 'Production Line 3',
     category: 'equipment',
-    timeSpent: 2.5,
-    totalCost: 145.50,
-    partsUsed: [
+    time_spent: 2.5,
+    total_cost: 145.50,
+    parts_used: [
       { name: 'Cutting Blade', quantity: 1, cost: 25.00 },
       { name: 'Belt Assembly', quantity: 1, cost: 120.50 }
     ],
-    createdAt: '2023-10-05T08:00:00Z',
-    updatedAt: '2023-10-05T10:30:00Z'
+    created_at: '2023-10-05T08:00:00Z',
+    updated_at: '2023-10-05T10:30:00Z',
+    tenant_id: 'sample-tenant-id',
+    tags: ['urgent', 'production']
   },
   {
     id: '5962',
     title: '[Safety] OSHA Compliance - Daily Site Walk',
     status: 'on_hold',
-    dueDate: '2023-10-04T10:00:00Z',
+    due_date: '2023-10-04T10:00:00Z',
     priority: 'medium',
     assignedTo: ['Safety Team'],
     description: 'Daily safety inspection and compliance check.',
@@ -50,14 +52,16 @@ const sampleWorkOrders: WorkOrder[] = [
     },
     location: 'Entire Facility',
     category: 'safety',
-    createdAt: '2023-10-04T08:00:00Z',
-    updatedAt: '2023-10-04T09:00:00Z'
+    created_at: '2023-10-04T08:00:00Z',
+    updated_at: '2023-10-04T09:00:00Z',
+    tenant_id: 'sample-tenant-id',
+    tags: ['safety', 'compliance']
   },
   {
     id: '5960',
     title: '[Inspection] Wrapper Cleaning',
     status: 'in_progress',
-    dueDate: '2023-10-06T14:00:00Z',
+    due_date: '2023-10-06T14:00:00Z',
     priority: 'low',
     assignedTo: ['Maintenance Team 1'],
     description: 'Regular cleaning and maintenance of wrapper equipment.',
@@ -68,14 +72,16 @@ const sampleWorkOrders: WorkOrder[] = [
     },
     location: 'Production Line 3',
     category: 'maintenance',
-    createdAt: '2023-10-06T08:00:00Z',
-    updatedAt: '2023-10-06T10:00:00Z'
+    created_at: '2023-10-06T08:00:00Z',
+    updated_at: '2023-10-06T10:00:00Z',
+    tenant_id: 'sample-tenant-id',
+    tags: ['maintenance', 'scheduled']
   },
   {
     id: '5983',
     title: 'Bearing Inspection',
     status: 'in_progress',
-    dueDate: '2023-10-07T09:00:00Z',
+    due_date: '2023-10-07T09:00:00Z',
     priority: 'high',
     assignedTo: ['Maintenance Team 1'],
     description: 'Inspection of conveyor bearing assembly.',
@@ -86,14 +92,16 @@ const sampleWorkOrders: WorkOrder[] = [
     },
     location: 'Production Line 2',
     category: 'inspection',
-    createdAt: '2023-10-07T08:00:00Z',
-    updatedAt: '2023-10-07T08:30:00Z'
+    created_at: '2023-10-07T08:00:00Z',
+    updated_at: '2023-10-07T08:30:00Z',
+    tenant_id: 'sample-tenant-id',
+    tags: ['inspection', 'bearing']
   },
   {
     id: '5988',
     title: 'Weekly Compressor PM',
     status: 'open',
-    dueDate: '2023-10-08T16:00:00Z',
+    due_date: '2023-10-08T16:00:00Z',
     priority: 'low',
     assignedTo: ['Maintenance Team 2'],
     description: 'Preventive maintenance for air compressor system.',
@@ -104,14 +112,16 @@ const sampleWorkOrders: WorkOrder[] = [
     },
     location: 'Utility Room',
     category: 'maintenance',
-    createdAt: '2023-10-08T08:00:00Z',
-    updatedAt: '2023-10-08T08:00:00Z'
+    created_at: '2023-10-08T08:00:00Z',
+    updated_at: '2023-10-08T08:00:00Z',
+    tenant_id: 'sample-tenant-id',
+    tags: ['pm', 'weekly']
   },
   {
     id: '5982',
     title: 'Fire Extinguisher Inspection',
     status: 'open',
-    dueDate: '2023-10-09T11:00:00Z',
+    due_date: '2023-10-09T11:00:00Z',
     priority: 'low',
     assignedTo: ['Safety Team'],
     description: 'Monthly fire extinguisher inspection and documentation.',
@@ -122,8 +132,10 @@ const sampleWorkOrders: WorkOrder[] = [
     },
     location: 'Building A',
     category: 'safety',
-    createdAt: '2023-10-09T08:00:00Z',
-    updatedAt: '2023-10-09T08:00:00Z'
+    created_at: '2023-10-09T08:00:00Z',
+    updated_at: '2023-10-09T08:00:00Z',
+    tenant_id: 'sample-tenant-id',
+    tags: ['safety', 'monthly']
   },
 ];
 

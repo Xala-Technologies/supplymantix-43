@@ -1,109 +1,167 @@
+import { useQuery } from "@tanstack/react-query";
 
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { databaseApi } from "@/lib/database";
+interface Asset {
+  id: string;
+  name: string;
+  description?: string;
+  status: "active" | "inactive" | "maintenance";
+  location?: string;
+  category?: string;
+  tenant_id: string;
+  created_at: string;
+  updated_at: string;
+}
 
-export const useAssetIntegration = () => {
-  return useQuery({
-    queryKey: ["assets-integration"],
-    queryFn: async () => {
-      const [assets, workOrders, procedures] = await Promise.all([
-        databaseApi.getAssets(),
-        databaseApi.getWorkOrders(),
-        databaseApi.getProcedures()
-      ]);
-      
-      return assets.map(asset => {
-        const assetWorkOrders = workOrders.filter(wo => wo.asset_id === asset.id);
-        const openWorkOrders = assetWorkOrders.filter(wo => 
-          !['completed', 'closed', 'cancelled'].includes(wo.status)
-        );
-        
-        const totalDowntime = assetWorkOrders.reduce((sum, wo) => 
-          sum + (wo.time_spent || 0), 0
-        );
-        
-        const assetProcedures = procedures.filter(proc => 
-          proc.asset_type === asset.category || proc.asset_type === 'all'
-        );
-        
-        return {
-          ...asset,
-          category: asset.category || 'equipment',
-          criticality: asset.criticality || 'medium',
-          openWorkOrders: openWorkOrders.length,
-          totalWorkOrders: assetWorkOrders.length,
-          totalDowntime: `${totalDowntime.toFixed(1)} hours`,
-          availableProcedures: assetProcedures,
-          lastMaintenance: assetWorkOrders
-            .filter(wo => wo.status === 'completed')
-            .sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime())[0]?.updated_at,
-          nextMaintenance: calculateNextMaintenance(assetWorkOrders),
-          healthScore: calculateHealthScore(assetWorkOrders, totalDowntime),
-        };
+interface WorkOrder {
+  id: string;
+  title: string;
+  description?: string;
+  status: "open" | "in_progress" | "on_hold" | "completed" | "cancelled";
+  priority: "low" | "medium" | "high";
+  assigned_to: string;
+  due_date: string;
+  created_at: string;
+  updated_at: string;
+  tenant_id: string;
+  category: string;
+  tags: string[];
+}
+
+const mockAssets: Asset[] = [
+  {
+    id: "asset-001",
+    name: "Production Line A",
+    description: "Main production line for product X",
+    status: "active",
+    location: "Factory Floor",
+    category: "production",
+    tenant_id: "tenant-1",
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  },
+  {
+    id: "asset-002",
+    name: "HVAC System - Building B",
+    description: "Heating, ventilation, and air conditioning system",
+    status: "active",
+    location: "Building B - Utility Room",
+    category: "hvac",
+    tenant_id: "tenant-1",
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  },
+  {
+    id: "asset-003",
+    name: "Conveyor Belt System",
+    description: "Automated conveyor system for moving products",
+    status: "maintenance",
+    location: "Factory Floor - Section 3",
+    category: "conveyor",
+    tenant_id: "tenant-1",
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  },
+];
+
+const mockWorkOrders = [
+  {
+    id: "wo-001",
+    title: "Monthly Preventive Maintenance",
+    description: "Routine maintenance check for optimal performance",
+    status: "open" as const,
+    priority: "medium" as const,
+    assigned_to: "maintenance-team-1",
+    due_date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    tenant_id: "tenant-1",
+    category: "maintenance",
+    tags: ["routine", "monthly"]
+  },
+  {
+    id: "wo-002",
+    title: "Repair - Conveyor Belt Slipping",
+    description: "Conveyor belt is slipping, causing production delays",
+    status: "in_progress" as const,
+    priority: "high" as const,
+    assigned_to: "maintenance-team-2",
+    due_date: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString(),
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    tenant_id: "tenant-1",
+    category: "repair",
+    tags: ["urgent", "conveyor"]
+  },
+  {
+    id: "wo-003",
+    title: "HVAC Filter Replacement",
+    description: "Replace filters in the HVAC system",
+    status: "completed" as const,
+    priority: "medium" as const,
+    assigned_to: "hvac-team-1",
+    due_date: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    tenant_id: "tenant-1",
+    category: "hvac",
+    tags: ["hvac", "filter"]
+  },
+];
+
+interface UseAssetsResult {
+  assets: Asset[];
+  loading: boolean;
+  error: any;
+}
+
+export const useAssetsIntegration = (): UseAssetsResult => {
+  const { data, isLoading, error } = useQuery<Asset[]>(
+    "assets",
+    () => {
+      return new Promise((resolve) => {
+        setTimeout(() => {
+          resolve(mockAssets);
+        }, 500);
       });
     },
-  });
+    {
+      refetchOnMount: false,
+      refetchOnWindowFocus: false,
+    }
+  );
+
+  return {
+    assets: data || [],
+    loading: isLoading,
+    error,
+  };
 };
 
-function calculateNextMaintenance(workOrders: any[]): string {
-  // Simple logic - next PM should be 30 days from last completed maintenance
-  const lastCompleted = workOrders
-    .filter(wo => wo.status === 'completed' && wo.category === 'PM')
-    .sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime())[0];
-  
-  if (!lastCompleted) return new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
-  
-  const nextDate = new Date(lastCompleted.updated_at);
-  nextDate.setDate(nextDate.getDate() + 30);
-  return nextDate.toISOString().split('T')[0];
+interface UseWorkOrdersResult {
+  workOrders: WorkOrder[];
+  loading: boolean;
+  error: any;
 }
 
-function calculateHealthScore(workOrders: any[], totalDowntime: number): number {
-  const recent = workOrders.filter(wo => {
-    const woDate = new Date(wo.created_at);
-    const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
-    return woDate > thirtyDaysAgo;
-  });
-  
-  const baseScore = 100;
-  const downtimePenalty = Math.min(totalDowntime * 2, 30);
-  const recentIssuesPenalty = recent.length * 5;
-  
-  return Math.max(baseScore - downtimePenalty - recentIssuesPenalty, 0);
-}
-
-export const useCreateWorkOrderForAsset = () => {
-  const queryClient = useQueryClient();
-  
-  return useMutation({
-    mutationFn: async ({ assetId, title, description, priority = 'medium', procedures = [] }: {
-      assetId: string;
-      title: string;
-      description: string;
-      priority?: string;
-      procedures?: string[];
-    }) => {
-      const workOrder = await databaseApi.createWorkOrder({
-        asset_id: assetId,
-        title,
-        description,
-        priority,
-        status: 'open',
-        tenant_id: '', // This will be set by RLS/backend
+export const useWorkOrdersIntegration = (): UseWorkOrdersResult => {
+  const { data, isLoading, error } = useQuery<WorkOrder[]>(
+    "workOrders",
+    () => {
+      return new Promise((resolve) => {
+        setTimeout(() => {
+          resolve(mockWorkOrders);
+        }, 500);
       });
-      
-      // Attach procedures if provided
-      if (procedures.length > 0) {
-        await Promise.all(procedures.map(procId => 
-          databaseApi.attachProcedureToWorkOrder(workOrder.id, procId)
-        ));
-      }
-      
-      return workOrder;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["work-orders"] });
-      queryClient.invalidateQueries({ queryKey: ["assets-integration"] });
+    {
+      refetchOnMount: false,
+      refetchOnWindowFocus: false,
     }
-  });
+  );
+
+  return {
+    workOrders: data || [],
+    loading: isLoading,
+    error,
+  };
 };

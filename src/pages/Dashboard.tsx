@@ -1,4 +1,3 @@
-
 import { DashboardLayout } from "@/components/Layout/DashboardLayout";
 import { DashboardMetrics } from "@/components/dashboard/DashboardMetrics";
 import { WorkOrdersDashboard } from "@/components/dashboard/WorkOrdersDashboard";
@@ -11,118 +10,112 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 // Sample data for demonstration
 const sampleWorkOrders: WorkOrder[] = [
   {
-    id: '5969',
-    title: 'Wrapper Malfunction - Items Stuck on Belt',
+    id: '1',
+    title: 'Emergency Repair - Production Line A',
     status: 'in_progress',
-    dueDate: '2023-10-05T08:43:00Z',
-    priority: 'high',
-    assignedTo: ['Zach Brown'],
-    description: 'The cutter is not fully cutting, and packages are either tearing away from the cutting assembly, or tipping over and causing stoppage.',
+    priority: 'urgent',
+    assignedTo: ['John Doe'],
     asset: {
-      id: 'wrapper-001',
-      name: 'Wrapper - Orion Model A',
-      status: 'active',
+      id: 'asset-1',
+      name: 'Production Line A',
+      status: 'active'
     },
-    location: 'Production Line 3',
-    category: 'equipment',
-    timeSpent: 2.5,
-    totalCost: 145.50,
-    partsUsed: [
-      { name: 'Cutting Blade', quantity: 1, cost: 25.00 },
-      { name: 'Belt Assembly', quantity: 1, cost: 120.50 }
-    ],
-    createdAt: '2023-10-05T08:00:00Z',
-    updatedAt: '2023-10-05T10:30:00Z'
+    due_date: '2023-12-20T16:00:00Z',
+    category: 'emergency',
+    created_at: '2023-12-18T09:00:00Z',
+    updated_at: '2023-12-18T14:30:00Z',
+    tenant_id: 'sample-tenant',
+    tags: ['emergency']
   },
   {
-    id: '5962',
-    title: '[Safety] OSHA Compliance - Daily Site Walk',
-    status: 'on_hold',
-    dueDate: '2023-10-04T10:00:00Z',
+    id: '2',
+    title: 'Scheduled Maintenance - HVAC System',
+    status: 'open',
     priority: 'medium',
-    assignedTo: ['Safety Team'],
-    description: 'Daily safety inspection and compliance check.',
+    assignedTo: ['Jane Smith'],
     asset: {
-      id: 'facility-001',
-      name: 'Facility',
-      status: 'active',
+      id: 'asset-2', 
+      name: 'HVAC System',
+      status: 'active'
     },
-    location: 'Entire Facility',
-    category: 'safety',
-    createdAt: '2023-10-04T08:00:00Z',
-    updatedAt: '2023-10-04T09:00:00Z'
-  },
-  {
-    id: '5960',
-    title: '[Inspection] Wrapper Cleaning',
-    status: 'in_progress',
-    dueDate: '2023-10-06T14:00:00Z',
-    priority: 'low',
-    assignedTo: ['Maintenance Team 1'],
-    description: 'Regular cleaning and maintenance of wrapper equipment.',
-    asset: {
-      id: 'wrapper-001',
-      name: 'Wrapper - Orion Model A',
-      status: 'active',
-    },
-    location: 'Production Line 3',
+    due_date: '2023-12-22T10:00:00Z',
     category: 'maintenance',
-    createdAt: '2023-10-06T08:00:00Z',
-    updatedAt: '2023-10-06T10:00:00Z'
+    created_at: '2023-12-18T08:00:00Z',
+    updated_at: '2023-12-18T08:00:00Z',
+    tenant_id: 'sample-tenant',
+    tags: ['scheduled']
   },
   {
-    id: '5983',
-    title: 'Bearing Inspection',
-    status: 'in_progress',
-    dueDate: '2023-10-07T09:00:00Z',
-    priority: 'high',
-    assignedTo: ['Maintenance Team 1'],
-    description: 'Inspection of conveyor bearing assembly.',
+    id: '3',
+    title: 'Inspection - Safety Equipment',
+    status: 'completed',
+    priority: 'low',
+    assignedTo: ['Bob Wilson'],
     asset: {
-      id: 'conveyor-001',
-      name: 'Conveyor - 3200 Series Modular',
-      status: 'active',
+      id: 'asset-3',
+      name: 'Safety Equipment',
+      status: 'active'
     },
-    location: 'Production Line 2',
+    due_date: '2023-12-19T14:00:00Z',
     category: 'inspection',
-    createdAt: '2023-10-07T08:00:00Z',
-    updatedAt: '2023-10-07T08:30:00Z'
+    created_at: '2023-12-17T10:00:00Z',
+    updated_at: '2023-12-19T15:00:00Z',
+    tenant_id: 'sample-tenant',
+    tags: ['safety']
   },
   {
-    id: '5988',
-    title: 'Weekly Compressor PM',
-    status: 'open',
-    dueDate: '2023-10-08T16:00:00Z',
-    priority: 'low',
-    assignedTo: ['Maintenance Team 2'],
-    description: 'Preventive maintenance for air compressor system.',
+    id: '4',
+    title: 'Calibration - Measurement Tools',
+    status: 'on_hold',
+    priority: 'medium',
+    assignedTo: ['Alice Johnson'],
     asset: {
-      id: 'compressor-001',
-      name: '35-005 - Air Compressor - VSS Single Screw',
-      status: 'active',
+      id: 'asset-4',
+      name: 'Measurement Tools',
+      status: 'active'
     },
-    location: 'Utility Room',
+    due_date: '2023-12-25T11:00:00Z',
+    category: 'calibration',
+    created_at: '2023-12-18T11:00:00Z',
+    updated_at: '2023-12-18T13:00:00Z',
+    tenant_id: 'sample-tenant',
+    tags: ['calibration']
+  },
+  {
+    id: '5',
+    title: 'Repair - Conveyor Belt',
+    status: 'open',
+    priority: 'high',
+    assignedTo: ['Mike Brown'],
+    asset: {
+      id: 'asset-5',
+      name: 'Conveyor Belt',
+      status: 'active'
+    },
+    due_date: '2023-12-21T13:00:00Z',
+    category: 'repair',
+    created_at: '2023-12-18T12:00:00Z',
+    updated_at: '2023-12-18T12:00:00Z',
+    tenant_id: 'sample-tenant',
+    tags: ['repair']
+  },
+  {
+    id: '6',
+    title: 'Preventive Maintenance - Generator',
+    status: 'draft',
+    priority: 'low',
+    assignedTo: ['Sarah Davis'],
+    asset: {
+      id: 'asset-6',
+      name: 'Backup Generator',
+      status: 'active'
+    },
+    due_date: '2023-12-28T09:00:00Z',
     category: 'maintenance',
-    createdAt: '2023-10-08T08:00:00Z',
-    updatedAt: '2023-10-08T08:00:00Z'
-  },
-  {
-    id: '5982',
-    title: 'Fire Extinguisher Inspection',
-    status: 'open',
-    dueDate: '2023-10-09T11:00:00Z',
-    priority: 'low',
-    assignedTo: ['Safety Team'],
-    description: 'Monthly fire extinguisher inspection and documentation.',
-    asset: {
-      id: 'extinguisher-001',
-      name: 'ABC Fire Extinguisher (5 lb)',
-      status: 'active',
-    },
-    location: 'Building A',
-    category: 'safety',
-    createdAt: '2023-10-09T08:00:00Z',
-    updatedAt: '2023-10-09T08:00:00Z'
+    created_at: '2023-12-18T15:00:00Z',
+    updated_at: '2023-12-18T15:00:00Z',
+    tenant_id: 'sample-tenant',
+    tags: ['preventive']
   },
 ];
 

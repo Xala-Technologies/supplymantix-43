@@ -6,22 +6,33 @@ export const transformWorkOrderData = (workOrder: any): WorkOrder => {
     id: workOrder.id,
     title: workOrder.title || 'Untitled Work Order',
     status: workOrder.status || 'open',
-    dueDate: workOrder.due_date || new Date().toISOString(),
+    due_date: workOrder.due_date || workOrder.dueDate || new Date().toISOString(),
+    dueDate: workOrder.due_date || workOrder.dueDate || new Date().toISOString(), // Support both formats
     priority: workOrder.priority || 'medium',
     assignedTo: workOrder.assigned_to ? [workOrder.assigned_to] : [],
     description: workOrder.description || '',
-    asset: {
-      id: workOrder.asset?.id || '',
+    asset: typeof workOrder.asset === 'string' ? {
+      id: workOrder.asset_id || '',
+      name: workOrder.asset || 'Unknown Asset',
+      status: 'active',
+    } : {
+      id: workOrder.asset?.id || workOrder.asset_id || '',
       name: workOrder.asset?.name || workOrder.assets?.name || 'Unknown Asset',
       status: workOrder.asset?.status || workOrder.assets?.status || 'active',
     },
-    location: workOrder.locations?.name || workOrder.location || 'Unknown Location',
+    location: typeof workOrder.location === 'string' ? workOrder.location : workOrder.locations?.name || workOrder.location || 'Unknown Location',
     category: workOrder.category || 'maintenance',
-    timeSpent: workOrder.time_spent || 0,
-    totalCost: workOrder.total_cost || 0,
-    partsUsed: workOrder.parts_used ? JSON.parse(workOrder.parts_used) : [],
-    createdAt: workOrder.created_at,
-    updatedAt: workOrder.updated_at,
+    time_spent: workOrder.time_spent || workOrder.timeSpent || 0,
+    timeSpent: workOrder.time_spent || workOrder.timeSpent || 0, // Support both formats
+    total_cost: workOrder.total_cost || workOrder.totalCost || 0,
+    totalCost: workOrder.total_cost || workOrder.totalCost || 0, // Support both formats
+    parts_used: workOrder.parts_used ? (typeof workOrder.parts_used === 'string' ? JSON.parse(workOrder.parts_used) : workOrder.parts_used) : [],
+    partsUsed: workOrder.parts_used ? (typeof workOrder.parts_used === 'string' ? JSON.parse(workOrder.parts_used) : workOrder.parts_used) : [], // Support both formats
+    created_at: workOrder.created_at || workOrder.createdAt,
+    createdAt: workOrder.created_at || workOrder.createdAt, // Support both formats
+    updated_at: workOrder.updated_at,
+    tenant_id: workOrder.tenant_id,
+    tags: workOrder.tags || [],
   };
 };
 

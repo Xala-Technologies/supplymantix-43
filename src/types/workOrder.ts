@@ -15,30 +15,39 @@ export interface WorkOrder {
   tags: string[];
   start_date?: string;
   due_date?: string;
+  dueDate?: string; // Support both formats for compatibility
   template_id?: string;
   recurrence_rules?: RecurrenceRules;
   tenant_id: string;
   time_spent?: number;
+  timeSpent?: number; // Support both formats for compatibility
   total_cost?: number;
+  totalCost?: number; // Support both formats for compatibility
   parts_used?: Array<{
     name: string;
     quantity: number;
     cost?: number;
   }>;
+  partsUsed?: Array<{
+    name: string;
+    quantity: number;
+    cost?: number;
+  }>; // Support both formats for compatibility
   category?: string;
   created_at: string;
+  createdAt?: string; // Support both formats for compatibility
   updated_at: string;
   
   // Relations
   asset?: {
     id: string;
     name: string;
-    status: string;
-  };
+    status?: string;
+  } | string; // Support both object and string formats
   location?: {
     id: string;
     name: string;
-  };
+  } | string; // Support both object and string formats
   assignedTo: string[];
 }
 
