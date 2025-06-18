@@ -158,10 +158,10 @@ export default function WorkOrders() {
   if (isLoading) {
     return (
       <DashboardLayout>
-        <div className="h-full flex items-center justify-center">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-            <p className="text-gray-600">Loading work orders...</p>
+        <div className="h-96 flex items-center justify-center">
+          <div className="text-center space-y-4">
+            <div className="animate-spin rounded-full h-8 w-8 border-2 border-primary border-t-transparent mx-auto"></div>
+            <p className="text-muted-foreground">Loading work orders...</p>
           </div>
         </div>
       </DashboardLayout>
@@ -170,37 +170,41 @@ export default function WorkOrders() {
 
   return (
     <DashboardLayout>
-      <div className="h-full flex flex-col bg-gray-50">
+      <div className="h-full flex flex-col space-y-6">
         {/* Mobile-only header */}
-        <div className="md:hidden p-4 bg-white border-b">
-          <h1 className="text-2xl font-bold text-gray-900">Work Orders</h1>
-          <p className="text-gray-600">Manage and track maintenance work orders</p>
+        <div className="md:hidden">
+          <h1 className="text-2xl font-semibold tracking-tight">Work Orders</h1>
+          <p className="text-muted-foreground">Manage and track maintenance work orders</p>
         </div>
         
-        <div className="flex-1 flex overflow-hidden">
+        <div className="flex-1 flex gap-6 overflow-hidden">
           {/* Desktop Layout */}
-          <div className="hidden md:flex w-full">
+          <div className="hidden md:flex w-full gap-6">
             {/* Sidebar */}
-            <EnhancedWorkOrdersList 
-              workOrders={transformedWorkOrders}
-              selectedWorkOrderId={selectedWorkOrder}
-              onSelectWorkOrder={setSelectedWorkOrder}
-              onCreateWorkOrder={handleCreateWorkOrder}
-            />
+            <div className="w-96 flex-shrink-0">
+              <EnhancedWorkOrdersList 
+                workOrders={transformedWorkOrders}
+                selectedWorkOrderId={selectedWorkOrder}
+                onSelectWorkOrder={setSelectedWorkOrder}
+                onCreateWorkOrder={handleCreateWorkOrder}
+              />
+            </div>
             
             {/* Detail view */}
-            <div className="flex-1 bg-white overflow-y-auto">
-              <div className="p-6">
+            <div className="flex-1 bg-card rounded-xl border shadow-sm overflow-hidden">
+              <div className="h-full overflow-y-auto">
                 {selectedWorkOrderData ? (
                   <WorkOrderDetailCard workOrder={selectedWorkOrderData} />
                 ) : (
-                  <div className="h-full flex items-center justify-center text-gray-500">
-                    <div className="text-center">
-                      <div className="w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center mx-auto mb-4">
+                  <div className="h-full flex items-center justify-center">
+                    <div className="text-center space-y-4">
+                      <div className="w-16 h-16 bg-muted rounded-xl flex items-center justify-center mx-auto">
                         <span className="text-2xl">📋</span>
                       </div>
-                      <p className="text-lg font-medium">Select a work order</p>
-                      <p className="text-sm text-gray-400">Choose a work order from the list to view details</p>
+                      <div className="space-y-2">
+                        <h3 className="text-lg font-medium">Select a work order</h3>
+                        <p className="text-sm text-muted-foreground">Choose a work order from the list to view details</p>
+                      </div>
                     </div>
                   </div>
                 )}
@@ -218,34 +222,34 @@ export default function WorkOrders() {
                 onCreateWorkOrder={handleCreateWorkOrder}
               />
             ) : (
-              <>
+              <div className="space-y-4">
                 {/* Mobile header with back button */}
-                <div className="p-3 border-b bg-white flex items-center gap-3">
+                <div className="flex items-center gap-3 p-4 bg-card rounded-xl border">
                   <Button 
                     variant="ghost" 
                     size="sm"
                     onClick={() => setSelectedWorkOrder(null)}
-                    className="p-1 h-auto"
+                    className="p-2 h-auto"
                   >
                     <ChevronLeft className="w-5 h-5" />
                   </Button>
-                  <div className="flex-1 min-w-0">
-                    <span className="font-medium text-gray-900 truncate block">
+                  <div className="flex-1 min-w-0 space-y-1">
+                    <h2 className="font-medium truncate">
                       {selectedWorkOrderData?.title || `Work Order #${selectedWorkOrder}`}
-                    </span>
-                    <span className="text-sm text-gray-500">
+                    </h2>
+                    <p className="text-sm text-muted-foreground">
                       #{selectedWorkOrder}
-                    </span>
+                    </p>
                   </div>
                 </div>
                 
                 {/* Mobile detail view */}
-                <div className="flex-1 p-3 overflow-y-auto bg-white">
+                <div className="bg-card rounded-xl border shadow-sm overflow-hidden">
                   {selectedWorkOrderData && (
                     <WorkOrderDetailCard workOrder={selectedWorkOrderData} />
                   )}
                 </div>
-              </>
+              </div>
             )}
           </div>
         </div>
