@@ -55,30 +55,30 @@ export const EnhancedWorkOrdersList = ({
   return (
     <div className="h-full flex flex-col">
       {/* Header */}
-      <div className="p-6 border-b border-gray-200">
-        <div className="flex items-center justify-between mb-4">
+      <div className="p-4 border-b border-gray-100">
+        <div className="flex items-center justify-between mb-3">
           <div>
-            <h2 className="text-xl font-semibold text-gray-900">Work Orders</h2>
-            <p className="text-sm text-gray-600 mt-1">
+            <h2 className="text-lg font-semibold text-gray-900">Work Orders</h2>
+            <p className="text-xs text-gray-600 mt-0.5">
               {filteredWorkOrders.length} of {workOrders.length} orders
             </p>
           </div>
           {onCreateWorkOrder && (
-            <Button onClick={onCreateWorkOrder} size="sm" className="gap-2">
-              <Plus className="w-4 h-4" />
+            <Button onClick={onCreateWorkOrder} size="sm" className="gap-1.5 h-8 px-3">
+              <Plus className="w-3.5 h-3.5" />
               New
             </Button>
           )}
         </div>
         
         {/* Search */}
-        <div className="relative mb-4">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+        <div className="relative mb-3">
+          <Search className="absolute left-2.5 top-1/2 transform -translate-y-1/2 text-gray-400 w-3.5 h-3.5" />
           <Input
             placeholder="Search work orders..."
             value={filters.search}
             onChange={(e) => setFilters(prev => ({ ...prev, search: e.target.value }))}
-            className="pl-9 border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+            className="pl-8 h-8 text-sm border-gray-200 focus:border-blue-500 focus:ring-blue-500"
           />
         </div>
 
@@ -87,23 +87,23 @@ export const EnhancedWorkOrdersList = ({
           variant="ghost"
           size="sm"
           onClick={() => setShowFilters(!showFilters)}
-          className="w-full justify-between text-gray-600 hover:text-gray-900 hover:bg-gray-50"
+          className="w-full justify-between text-gray-600 hover:text-gray-900 hover:bg-gray-50 h-7 px-2"
         >
-          <div className="flex items-center gap-2">
-            <Filter className="w-4 h-4" />
-            <span>Filters</span>
+          <div className="flex items-center gap-1.5">
+            <Filter className="w-3.5 h-3.5" />
+            <span className="text-xs">Filters</span>
           </div>
-          <ChevronDown className={cn("w-4 h-4 transition-transform", showFilters && "rotate-180")} />
+          <ChevronDown className={cn("w-3.5 h-3.5 transition-transform", showFilters && "rotate-180")} />
         </Button>
 
         {/* Expandable Filters */}
         {showFilters && (
-          <div className="mt-4 space-y-3 p-4 bg-gray-50 rounded-lg border border-gray-200">
-            <div className="grid grid-cols-2 gap-3">
+          <div className="mt-3 space-y-2 p-3 bg-gray-50 rounded-md border border-gray-100">
+            <div className="grid grid-cols-2 gap-2">
               <div>
                 <label className="text-xs font-medium text-gray-700 mb-1 block">Status</label>
                 <Select value={filters.status} onValueChange={(value) => setFilters(prev => ({ ...prev, status: value }))}>
-                  <SelectTrigger className="h-8">
+                  <SelectTrigger className="h-7 text-xs">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -119,7 +119,7 @@ export const EnhancedWorkOrdersList = ({
               <div>
                 <label className="text-xs font-medium text-gray-700 mb-1 block">Priority</label>
                 <Select value={filters.priority} onValueChange={(value) => setFilters(prev => ({ ...prev, priority: value }))}>
-                  <SelectTrigger className="h-8">
+                  <SelectTrigger className="h-7 text-xs">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -138,7 +138,7 @@ export const EnhancedWorkOrdersList = ({
       {/* Work Orders List */}
       <div className="flex-1 overflow-y-auto">
         {filteredWorkOrders.length > 0 ? (
-          <div className="p-4 space-y-3">
+          <div className="p-3 space-y-2">
             {filteredWorkOrders.map((workOrder) => (
               <WorkOrderCard
                 key={workOrder.id}
@@ -150,10 +150,10 @@ export const EnhancedWorkOrdersList = ({
             ))}
           </div>
         ) : (
-          <div className="flex-1 flex items-center justify-center p-8">
+          <div className="flex-1 flex items-center justify-center p-6">
             <div className="text-center">
-              <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center mx-auto mb-3">
-                <Search className="w-6 h-6 text-gray-400" />
+              <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center mx-auto mb-2">
+                <Search className="w-5 h-5 text-gray-400" />
               </div>
               <h3 className="text-sm font-medium text-gray-900 mb-1">No work orders found</h3>
               <p className="text-xs text-gray-500">Try adjusting your search or filters</p>
@@ -178,7 +178,7 @@ const WorkOrderCard = ({ workOrder, isSelected, onClick, getInitials }: WorkOrde
   return (
     <div
       className={cn(
-        "p-4 rounded-lg border cursor-pointer transition-all duration-200",
+        "p-3 rounded-lg border cursor-pointer transition-all duration-200",
         isSelected 
           ? "bg-blue-50 border-blue-200 shadow-sm" 
           : "bg-white border-gray-200 hover:border-gray-300 hover:shadow-sm",
@@ -186,12 +186,12 @@ const WorkOrderCard = ({ workOrder, isSelected, onClick, getInitials }: WorkOrde
       )}
       onClick={onClick}
     >
-      <div className="space-y-3">
+      <div className="space-y-2">
         {/* Header */}
-        <div className="flex items-start gap-3">
-          <div className={cn("w-2 h-2 rounded-full mt-2 flex-shrink-0", getPriorityColor(workOrder.priority))} />
+        <div className="flex items-start gap-2">
+          <div className={cn("w-1.5 h-1.5 rounded-full mt-1.5 flex-shrink-0", getPriorityColor(workOrder.priority))} />
           <div className="flex-1 min-w-0">
-            <h4 className="text-sm font-semibold text-gray-900 leading-tight line-clamp-2 mb-1">
+            <h4 className="text-sm font-semibold text-gray-900 leading-tight line-clamp-2 mb-0.5">
               {workOrder.title}
             </h4>
             <p className="text-xs text-gray-600">
@@ -202,7 +202,7 @@ const WorkOrderCard = ({ workOrder, isSelected, onClick, getInitials }: WorkOrde
         
         {/* Status and Due Date */}
         <div className="flex items-center justify-between">
-          <Badge className={cn("text-xs", getStatusColor(workOrder.status))}>
+          <Badge className={cn("text-xs h-5 px-2", getStatusColor(workOrder.status))}>
             {workOrder.status.replace('_', ' ')}
           </Badge>
           <div className={cn(
@@ -225,14 +225,14 @@ const WorkOrderCard = ({ workOrder, isSelected, onClick, getInitials }: WorkOrde
           <div className="flex items-center gap-1 flex-shrink-0">
             <Users className="w-3 h-3 text-gray-400" />
             {workOrder.assignedTo.slice(0, 2).map((assignee, index) => (
-              <Avatar key={index} className="w-5 h-5 border border-white">
+              <Avatar key={index} className="w-4 h-4 border border-white">
                 <AvatarFallback className="text-xs bg-blue-100 text-blue-700 font-medium">
                   {getInitials(assignee)}
                 </AvatarFallback>
               </Avatar>
             ))}
             {workOrder.assignedTo.length > 2 && (
-              <span className="text-gray-500 ml-1">+{workOrder.assignedTo.length - 2}</span>
+              <span className="text-gray-500 ml-0.5">+{workOrder.assignedTo.length - 2}</span>
             )}
           </div>
         </div>

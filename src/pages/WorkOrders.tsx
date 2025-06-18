@@ -98,9 +98,9 @@ export default function WorkOrders() {
     return (
       <DashboardLayout>
         <div className="flex items-center justify-center h-[60vh]">
-          <div className="text-center space-y-4">
-            <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto"></div>
-            <p className="text-muted-foreground">Loading work orders...</p>
+          <div className="text-center space-y-3">
+            <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto"></div>
+            <p className="text-muted-foreground text-sm">Loading work orders...</p>
           </div>
         </div>
       </DashboardLayout>
@@ -109,11 +109,11 @@ export default function WorkOrders() {
 
   return (
     <DashboardLayout>
-      <div className="h-full bg-gray-50">
+      <div className="h-full -m-6">
         {/* Desktop Layout */}
         <div className="hidden lg:flex h-full">
           {/* Left Sidebar - Work Orders List */}
-          <div className="w-96 bg-white border-r border-gray-200 flex flex-col">
+          <div className="w-80 bg-white border-r border-gray-100 flex flex-col">
             <EnhancedWorkOrdersList 
               workOrders={transformedWorkOrders}
               selectedWorkOrderId={selectedWorkOrder}
@@ -125,18 +125,18 @@ export default function WorkOrders() {
           {/* Main Content Area - Work Order Details */}
           <div className="flex-1 flex flex-col">
             {selectedWorkOrderData ? (
-              <div className="h-full overflow-auto bg-white">
+              <div className="h-full overflow-auto bg-gray-50">
                 <WorkOrderDetailCard workOrder={selectedWorkOrderData} />
               </div>
             ) : (
-              <div className="flex-1 flex items-center justify-center bg-white">
-                <div className="text-center space-y-4 p-8">
-                  <div className="w-16 h-16 bg-gray-100 rounded-xl flex items-center justify-center mx-auto">
-                    <span className="text-2xl">📋</span>
+              <div className="flex-1 flex items-center justify-center bg-gray-50">
+                <div className="text-center space-y-3 p-6">
+                  <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center mx-auto">
+                    <span className="text-xl">📋</span>
                   </div>
-                  <div className="space-y-2">
-                    <h3 className="text-xl font-semibold text-gray-900">Select a work order</h3>
-                    <p className="text-gray-500">Choose a work order from the list to view details</p>
+                  <div className="space-y-1">
+                    <h3 className="text-lg font-semibold text-gray-900">Select a work order</h3>
+                    <p className="text-sm text-gray-500">Choose a work order from the list to view details</p>
                   </div>
                 </div>
               </div>
@@ -148,9 +148,9 @@ export default function WorkOrders() {
         <div className="lg:hidden h-full">
           {!selectedWorkOrder ? (
             <div className="h-full bg-white">
-              <div className="p-4 border-b border-gray-200">
-                <h1 className="text-2xl font-semibold text-gray-900">Work Orders</h1>
-                <p className="text-gray-600 mt-1">Manage and track maintenance work orders</p>
+              <div className="p-4 border-b border-gray-100">
+                <h1 className="text-xl font-semibold text-gray-900">Work Orders</h1>
+                <p className="text-gray-600 text-sm mt-0.5">Manage and track maintenance work orders</p>
               </div>
               <EnhancedWorkOrdersList 
                 workOrders={transformedWorkOrders}
@@ -162,20 +162,20 @@ export default function WorkOrders() {
           ) : (
             <div className="h-full bg-white flex flex-col">
               {/* Mobile Header */}
-              <div className="p-4 border-b border-gray-200 flex items-center gap-3">
+              <div className="p-3 border-b border-gray-100 flex items-center gap-3">
                 <Button 
                   variant="ghost" 
                   size="sm"
                   onClick={() => setSelectedWorkOrder(null)}
-                  className="p-2"
+                  className="p-1.5 h-auto"
                 >
-                  <ChevronLeft className="w-5 h-5" />
+                  <ChevronLeft className="w-4 h-4" />
                 </Button>
                 <div className="flex-1 min-w-0">
-                  <h2 className="font-semibold text-gray-900 truncate">
+                  <h2 className="font-semibold text-gray-900 truncate text-sm">
                     {selectedWorkOrderData?.title || `Work Order #${selectedWorkOrder}`}
                   </h2>
-                  <p className="text-sm text-gray-500">#{selectedWorkOrder}</p>
+                  <p className="text-xs text-gray-500">#{selectedWorkOrder}</p>
                 </div>
               </div>
               
