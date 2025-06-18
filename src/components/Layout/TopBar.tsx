@@ -56,7 +56,7 @@ export const TopBar = () => {
   const isCollapsed = state === "collapsed";
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-30 h-16 border-b bg-white/95 backdrop-blur-md supports-[backdrop-filter]:bg-white/80 shadow-sm transition-all duration-300">
+    <header className="fixed top-0 left-0 right-0 z-50 h-16 border-b bg-white/95 backdrop-blur-md supports-[backdrop-filter]:bg-white/80 shadow-sm transition-all duration-300">
       <div className="flex h-full items-center">
         {/* Enhanced Sidebar Toggle */}
         <div 
@@ -75,7 +75,7 @@ export const TopBar = () => {
             className={`
               relative h-10 w-10 p-0 rounded-xl transition-all duration-300 ease-in-out
               hover:bg-gradient-to-br hover:from-blue-50 hover:to-purple-50 
-              hover:border-blue-200/50 hover:shadow-md
+              hover:border-blue-200/50 hover:shadow-md z-50
               ${isCollapsed 
                 ? 'bg-gradient-to-br from-blue-50 to-purple-50 border border-blue-200/50 shadow-sm' 
                 : 'hover:bg-gray-100'
