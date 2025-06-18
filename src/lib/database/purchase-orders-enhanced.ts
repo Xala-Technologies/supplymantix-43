@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/integrations/supabase/types";
 import type { 
@@ -185,18 +186,39 @@ export const purchaseOrdersEnhancedApi = {
   },
 
   async getPurchaseOrderApprovals(purchaseOrderId: string) {
-    const { data, error } = await supabase
+    // First get the approvals
+    const { data: approvals, error: approvalsError } = await supabase
       .from("purchase_order_approvals")
       .select(`
         *,
-        approver:users!purchase_order_approvals_approver_id_fkey(id, first_name, last_name, email),
         rule:purchase_order_approval_rules!purchase_order_approvals_rule_id_fkey(*)
       `)
       .eq("purchase_order_id", purchaseOrderId)
       .order("created_at", { ascending: true });
     
-    if (error) throw error;
-    return data as PurchaseOrderApproval[];
+    if (approvalsError) throw approvalsError;
+
+    if (!approvals || approvals.length === 0) {
+      return [];
+    }
+
+    // Then get the user data separately for each approval
+    const approvalsWithUsers = await Promise.all(
+      approvals.map(async (approval) => {
+        const { data: user, error: userError } = await supabase
+          .from("users")
+          .select("id, first_name, last_name, email")
+          .eq("id", approval.approver_id)
+          .single();
+
+        return {
+          ...approval,
+          approver: userError ? null : user
+        };
+      })
+    );
+
+    return approvalsWithUsers as PurchaseOrderApproval[];
   },
 
   async submitForApproval(request: SubmitForApprovalRequest) {
