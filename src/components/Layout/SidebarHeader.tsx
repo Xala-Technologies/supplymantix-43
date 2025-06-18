@@ -9,7 +9,7 @@ export function AppSidebarHeader() {
   const isCollapsed = state === "collapsed";
 
   return (
-    <BaseSidebarHeader className="h-16 p-4 border-b border-gray-100 bg-white sticky top-0 z-50">
+    <BaseSidebarHeader className="h-16 p-4 border-b border-gray-100 bg-white relative z-50">
       <Link to="/dashboard" className="flex items-center space-x-3 group transition-all duration-300 ease-in-out">
         <div className="relative">
           <div className={`

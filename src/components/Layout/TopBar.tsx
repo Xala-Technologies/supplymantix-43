@@ -56,7 +56,7 @@ export const TopBar = () => {
   const isCollapsed = state === "collapsed";
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-40 h-16 border-b bg-white/95 backdrop-blur-md supports-[backdrop-filter]:bg-white/80 shadow-sm transition-all duration-300">
+    <header className="fixed top-0 left-0 right-0 z-30 h-16 border-b bg-white/95 backdrop-blur-md supports-[backdrop-filter]:bg-white/80 shadow-sm transition-all duration-300">
       <div className="flex h-full items-center">
         {/* Enhanced Sidebar Toggle */}
         <div 
