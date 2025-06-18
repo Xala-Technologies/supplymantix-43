@@ -6,7 +6,7 @@ import { AppSidebarFooter } from "./SidebarFooter";
 
 export function AppSidebar() {
   return (
-    <Sidebar className="border-r-0 bg-white shadow-lg">
+    <Sidebar className="sidebar-ultra-soft border-r-0 bg-white/95 backdrop-blur-xl shadow-xs">
       <AppSidebarHeader />
       <SidebarNavigation />
       <AppSidebarFooter />
