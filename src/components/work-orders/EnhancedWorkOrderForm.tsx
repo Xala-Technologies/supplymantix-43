@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -10,7 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
-import { Calendar, User, Tag, Clock, FileTemplate, Plus, X } from "lucide-react";
+import { Calendar, User, Tag, Clock, FileText, Plus, X } from "lucide-react";
 import { WorkOrder } from "@/types/workOrder";
 
 const workOrderSchema = z.object({
@@ -84,7 +83,7 @@ export const EnhancedWorkOrderForm = ({
       <Card>
         <CardHeader className="pb-4">
           <CardTitle className="flex items-center gap-2">
-            <FileTemplate className="w-5 h-5" />
+            <FileText className="w-5 h-5" />
             {workOrder ? 'Edit Work Order' : 'Create Work Order'}
           </CardTitle>
         </CardHeader>

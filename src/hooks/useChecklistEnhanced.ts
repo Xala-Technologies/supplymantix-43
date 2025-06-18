@@ -1,13 +1,13 @@
 
 import { useState } from "react";
 import { useChecklistItems, useCreateChecklistItem, useUpdateChecklistItem } from "./useWorkOrdersEnhanced";
-import { useUpdateWorkOrderStatus } from "./useWorkOrdersIntegration";
+import { useWorkOrderStatusUpdate } from "./useWorkOrdersIntegration";
 
 export const useChecklistEnhanced = (workOrderId: string) => {
   const { data: checklistItems = [], isLoading } = useChecklistItems(workOrderId);
   const createItem = useCreateChecklistItem();
   const updateItem = useUpdateChecklistItem();
-  const updateWorkOrderStatus = useUpdateWorkOrderStatus();
+  const updateWorkOrderStatus = useWorkOrderStatusUpdate();
 
   const [isCreating, setIsCreating] = useState(false);
   const [isRemoving, setIsRemoving] = useState(false);

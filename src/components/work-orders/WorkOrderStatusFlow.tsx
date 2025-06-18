@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -15,7 +14,7 @@ import {
   FileText 
 } from "lucide-react";
 import { WorkOrder } from "@/types/workOrder";
-import { useUpdateWorkOrderStatus } from "@/hooks/useWorkOrdersIntegration";
+import { useWorkOrderStatusUpdate } from "@/hooks/useWorkOrdersIntegration";
 
 interface WorkOrderStatusFlowProps {
   workOrder: WorkOrder;
@@ -24,7 +23,7 @@ interface WorkOrderStatusFlowProps {
 export const WorkOrderStatusFlow = ({ workOrder }: WorkOrderStatusFlowProps) => {
   const [notes, setNotes] = useState("");
   const [isChangingStatus, setIsChangingStatus] = useState(false);
-  const updateStatus = useUpdateWorkOrderStatus();
+  const updateStatus = useWorkOrderStatusUpdate();
 
   const handleStatusChange = async (newStatus: string, statusNotes?: string) => {
     setIsChangingStatus(true);
