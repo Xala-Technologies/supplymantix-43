@@ -19,11 +19,11 @@ export function SidebarNavigation() {
   return (
     <SidebarContent className="px-2 py-0 bg-white">
       {Object.entries(groupedItems).map(([group, items]) => (
-        <SidebarGroup key={group} className="mb-0">
-          <SidebarGroupLabel className="text-gray-500 uppercase text-xs font-bold tracking-widest mb-1 px-2 py-1">
+        <SidebarGroup key={group} className="mb-0 py-0">
+          <SidebarGroupLabel className="text-gray-500 uppercase text-xs font-bold tracking-widest mb-0 px-2 py-2">
             {t(group as keyof typeof t)}
           </SidebarGroupLabel>
-          <SidebarGroupContent>
+          <SidebarGroupContent className="py-0">
             <SidebarMenu className="space-y-0">
               {items.map((item) => {
                 const isActive = location.pathname === item.url;
@@ -34,7 +34,7 @@ export function SidebarNavigation() {
                     <SidebarMenuButton 
                       asChild
                       className={`
-                        relative group h-8 px-2 rounded-lg transition-all duration-300 ease-out
+                        relative group h-8 px-2 rounded-lg transition-all duration-300 ease-out my-0
                         ${isActive 
                           ? 'bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200/50 text-blue-700 shadow-sm' 
                           : 'text-gray-700 hover:text-gray-900 hover:bg-gray-50'
