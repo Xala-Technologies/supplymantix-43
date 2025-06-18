@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,7 +11,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Plus, Trash2, Package } from "lucide-react";
+import { Separator } from "@/components/ui/separator";
+import { Plus, Trash2, Package, Building2, MapPin, FileText } from "lucide-react";
 import { useInventoryItems } from "@/hooks/useInventory";
 import { PurchaseOrder, PurchaseOrderStatus } from "@/types/purchaseOrder";
 import { formatCurrency } from "@/lib/utils";
@@ -131,7 +131,6 @@ export const PurchaseOrderForm = ({
       return false;
     }
 
-    // Check for invalid quantities
     const invalidQuantity = lineItems.some(item => 
       item.description.trim() && (item.quantity <= 0 || !Number.isInteger(item.quantity))
     );
@@ -141,7 +140,6 @@ export const PurchaseOrderForm = ({
       return false;
     }
 
-    // Check for invalid prices
     const invalidPrice = lineItems.some(item => 
       item.description.trim() && item.unit_price < 0
     );
@@ -230,200 +228,251 @@ export const PurchaseOrderForm = ({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      {/* Header Information */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Purchase Order Details</CardTitle>
+      <Card className="shadow-lg border-0 bg-gradient-to-br from-white to-gray-50">
+        <CardHeader className="bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-t-lg">
+          <CardTitle className="flex items-center gap-3 text-xl">
+            <FileText className="h-6 w-6" />
+            {mode === 'create' ? 'Create Purchase Order' : 'Edit Purchase Order'}
+          </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <VendorSelector
-              value={vendor}
-              onChange={setVendor}
-              vendors={mockVendors}
-              onCreateVendor={handleCreateVendor}
-            />
-            <div className="space-y-2">
-              <Label htmlFor="po_number">PO Number *</Label>
-              <Input
-                id="po_number"
-                value={poNumber}
-                onChange={(e) => setPoNumber(e.target.value)}
-                placeholder="Auto-generated"
-                required
-              />
+        
+        <CardContent className="p-8 space-y-8">
+          {/* Basic Information Section */}
+          <div className="space-y-6">
+            <div className="flex items-center gap-2 text-lg font-semibold text-gray-800">
+              <Building2 className="h-5 w-5 text-blue-600" />
+              Basic Information
             </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {mode === 'edit' && (
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <VendorSelector
+                value={vendor}
+                onChange={setVendor}
+                vendors={mockVendors}
+                onCreateVendor={handleCreateVendor}
+              />
+              
               <div className="space-y-2">
-                <Label htmlFor="status">Status</Label>
-                <Select value={status} onValueChange={(value: PurchaseOrderStatus) => setStatus(value)}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="draft">Draft</SelectItem>
-                    <SelectItem value="pending">Pending</SelectItem>
-                    <SelectItem value="approved">Approved</SelectItem>
-                    <SelectItem value="ordered">Ordered</SelectItem>
-                    <SelectItem value="received">Received</SelectItem>
-                    <SelectItem value="cancelled">Cancelled</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            )}
-            <div className="space-y-2">
-              <Label htmlFor="due_date">Due Date</Label>
-              <Input
-                id="due_date"
-                type="date"
-                value={dueDate}
-                onChange={(e) => setDueDate(e.target.value)}
-              />
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="notes">Notes</Label>
-            <Textarea
-              id="notes"
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              placeholder="Additional notes or instructions"
-              rows={3}
-            />
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Addresses */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Addresses</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <AddressSelector
-              type="billing"
-              value={billingAddress}
-              onChange={setBillingAddress}
-              addresses={mockAddresses}
-              onCreateAddress={handleCreateAddress}
-            />
-            <AddressSelector
-              type="shipping"
-              value={shippingAddress}
-              onChange={setShippingAddress}
-              addresses={mockAddresses}
-              onCreateAddress={handleCreateAddress}
-            />
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Line Items */}
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle className="flex items-center gap-2">
-              <Package className="h-5 w-5" />
-              Line Items
-            </CardTitle>
-            <Button type="button" variant="outline" size="sm" onClick={addLineItem}>
-              <Plus className="h-4 w-4 mr-2" />
-              Add Item
-            </Button>
-          </div>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {lineItems.map((item, index) => (
-            <div key={index} className="flex items-end gap-4 p-4 border rounded-lg">
-              <div className="flex-1 space-y-2">
-                <Label>Inventory Item</Label>
-                <Select 
-                  value={item.inventory_item_id}
-                  onValueChange={(value) => handleLineItemChange(index, 'inventory_item_id', value)}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select item" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {inventoryItems?.map((invItem) => (
-                      <SelectItem key={invItem.id} value={invItem.id}>
-                        {invItem.name} {invItem.sku ? `(${invItem.sku})` : ''} - Stock: {invItem.quantity}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="flex-1 space-y-2">
-                <Label>Description *</Label>
+                <Label htmlFor="po_number" className="text-sm font-medium text-gray-700">
+                  PO Number *
+                </Label>
                 <Input
-                  type="text"
-                  value={item.description}
-                  onChange={(e) => handleLineItemChange(index, 'description', e.target.value)}
-                  placeholder="Item description"
+                  id="po_number"
+                  value={poNumber}
+                  onChange={(e) => setPoNumber(e.target.value)}
+                  placeholder="Auto-generated"
+                  className="border-gray-300 focus:ring-blue-500 focus:border-blue-500"
                   required
                 />
               </div>
-              <div className="w-24 space-y-2">
-                <Label>Quantity *</Label>
-                <Input
-                  type="number"
-                  min="1"
-                  step="1"
-                  value={item.quantity}
-                  onChange={(e) => handleLineItemChange(index, 'quantity', parseInt(e.target.value) || 1)}
-                />
-              </div>
-              <div className="w-32 space-y-2">
-                <Label>Unit Price *</Label>
-                <Input
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  value={item.unit_price}
-                  onChange={(e) => handleLineItemChange(index, 'unit_price', parseFloat(e.target.value) || 0)}
-                />
-              </div>
-              <div className="w-32 space-y-2">
-                <Label>Total</Label>
-                <div className="h-10 flex items-center px-3 bg-muted rounded-md text-sm font-medium">
-                  {formatCurrency(item.quantity * item.unit_price)}
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {mode === 'edit' && (
+                <div className="space-y-2">
+                  <Label htmlFor="status" className="text-sm font-medium text-gray-700">
+                    Status
+                  </Label>
+                  <Select value={status} onValueChange={(value: PurchaseOrderStatus) => setStatus(value)}>
+                    <SelectTrigger className="border-gray-300 focus:ring-blue-500 focus:border-blue-500">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="draft">Draft</SelectItem>
+                      <SelectItem value="pending">Pending</SelectItem>
+                      <SelectItem value="approved">Approved</SelectItem>
+                      <SelectItem value="ordered">Ordered</SelectItem>
+                      <SelectItem value="received">Received</SelectItem>
+                      <SelectItem value="cancelled">Cancelled</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
+              )}
+              
+              <div className="space-y-2">
+                <Label htmlFor="due_date" className="text-sm font-medium text-gray-700">
+                  Due Date
+                </Label>
+                <Input
+                  id="due_date"
+                  type="date"
+                  value={dueDate}
+                  onChange={(e) => setDueDate(e.target.value)}
+                  className="border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+                />
               </div>
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                onClick={() => removeLineItem(index)}
-                disabled={lineItems.length === 1}
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="notes" className="text-sm font-medium text-gray-700">
+                Notes
+              </Label>
+              <Textarea
+                id="notes"
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                placeholder="Additional notes or instructions"
+                rows={3}
+                className="border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+              />
+            </div>
+          </div>
+
+          <Separator className="my-8" />
+
+          {/* Addresses Section */}
+          <div className="space-y-6">
+            <div className="flex items-center gap-2 text-lg font-semibold text-gray-800">
+              <MapPin className="h-5 w-5 text-blue-600" />
+              Addresses
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <AddressSelector
+                type="billing"
+                value={billingAddress}
+                onChange={setBillingAddress}
+                addresses={mockAddresses}
+                onCreateAddress={handleCreateAddress}
+              />
+              <AddressSelector
+                type="shipping"
+                value={shippingAddress}
+                onChange={setShippingAddress}
+                addresses={mockAddresses}
+                onCreateAddress={handleCreateAddress}
+              />
+            </div>
+          </div>
+
+          <Separator className="my-8" />
+
+          {/* Line Items Section */}
+          <div className="space-y-6">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2 text-lg font-semibold text-gray-800">
+                <Package className="h-5 w-5 text-blue-600" />
+                Line Items
+              </div>
+              <Button 
+                type="button" 
+                variant="outline" 
+                size="sm" 
+                onClick={addLineItem}
+                className="bg-blue-50 hover:bg-blue-100 text-blue-700 border-blue-200"
               >
-                <Trash2 className="h-4 w-4" />
+                <Plus className="h-4 w-4 mr-2" />
+                Add Item
               </Button>
             </div>
-          ))}
 
-          <div className="flex justify-end items-center gap-4 pt-4 border-t">
-            <div className="text-lg font-semibold">
-              Total: {formatCurrency(totalAmount)}
+            <div className="space-y-4">
+              {lineItems.map((item, index) => (
+                <div key={index} className="bg-gray-50 rounded-lg p-6 border border-gray-200">
+                  <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-end">
+                    <div className="lg:col-span-3 space-y-2">
+                      <Label className="text-sm font-medium text-gray-700">Inventory Item</Label>
+                      <Select 
+                        value={item.inventory_item_id}
+                        onValueChange={(value) => handleLineItemChange(index, 'inventory_item_id', value)}
+                      >
+                        <SelectTrigger className="border-gray-300 focus:ring-blue-500 focus:border-blue-500">
+                          <SelectValue placeholder="Select item" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {inventoryItems?.map((invItem) => (
+                            <SelectItem key={invItem.id} value={invItem.id}>
+                              {invItem.name} {invItem.sku ? `(${invItem.sku})` : ''} - Stock: {invItem.quantity}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    
+                    <div className="lg:col-span-3 space-y-2">
+                      <Label className="text-sm font-medium text-gray-700">Description *</Label>
+                      <Input
+                        type="text"
+                        value={item.description}
+                        onChange={(e) => handleLineItemChange(index, 'description', e.target.value)}
+                        placeholder="Item description"
+                        className="border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+                        required
+                      />
+                    </div>
+                    
+                    <div className="lg:col-span-2 space-y-2">
+                      <Label className="text-sm font-medium text-gray-700">Quantity *</Label>
+                      <Input
+                        type="number"
+                        min="1"
+                        step="1"
+                        value={item.quantity}
+                        onChange={(e) => handleLineItemChange(index, 'quantity', parseInt(e.target.value) || 1)}
+                        className="border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+                      />
+                    </div>
+                    
+                    <div className="lg:col-span-2 space-y-2">
+                      <Label className="text-sm font-medium text-gray-700">Unit Price *</Label>
+                      <Input
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        value={item.unit_price}
+                        onChange={(e) => handleLineItemChange(index, 'unit_price', parseFloat(e.target.value) || 0)}
+                        className="border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+                      />
+                    </div>
+                    
+                    <div className="lg:col-span-1 space-y-2">
+                      <Label className="text-sm font-medium text-gray-700">Total</Label>
+                      <div className="h-10 flex items-center px-3 bg-blue-50 rounded-md text-sm font-semibold text-blue-800 border border-blue-200">
+                        {formatCurrency(item.quantity * item.unit_price)}
+                      </div>
+                    </div>
+                    
+                    <div className="lg:col-span-1 flex justify-center">
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => removeLineItem(index)}
+                        disabled={lineItems.length === 1}
+                        className="text-red-600 hover:text-red-800 hover:bg-red-50"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
+
+            {/* Total Section */}
+            <div className="flex justify-end">
+              <div className="bg-blue-50 rounded-lg p-6 border-2 border-blue-200">
+                <div className="text-2xl font-bold text-blue-800">
+                  Total: {formatCurrency(totalAmount)}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <Separator className="my-8" />
+
+          {/* Submit Button */}
+          <div className="flex justify-end pt-4">
+            <Button 
+              type="submit" 
+              disabled={isLoading || !isFormValid()} 
+              className="min-w-48 h-12 text-lg bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 shadow-lg"
+            >
+              {isLoading ? 'Saving...' : mode === 'create' ? 'Create Purchase Order' : 'Update Purchase Order'}
+            </Button>
           </div>
         </CardContent>
       </Card>
-
-      {/* Submit Button */}
-      <div className="flex justify-end">
-        <Button 
-          type="submit" 
-          disabled={isLoading || !isFormValid()} 
-          className="min-w-32"
-        >
-          {isLoading ? 'Saving...' : mode === 'create' ? 'Create Purchase Order' : 'Update Purchase Order'}
-        </Button>
-      </div>
     </form>
   );
 };
