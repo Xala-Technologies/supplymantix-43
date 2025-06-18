@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import {
@@ -32,7 +31,7 @@ import { format } from "date-fns";
 import { useCreateWorkOrder } from "@/hooks/useWorkOrders";
 import { useLocations } from "@/hooks/useLocations";
 import { supabase } from "@/integrations/supabase/client";
-import { WorkOrderProcedureSection } from "./WorkOrderProcedureSection";
+import { NewWorkOrderProcedureSection } from "./NewWorkOrderProcedureSection";
 
 interface NewWorkOrderFormData {
   title: string;
@@ -326,7 +325,7 @@ export const NewWorkOrderDialog = () => {
             </div>
 
             <div className="border-t pt-6">
-              <WorkOrderProcedureSection
+              <NewWorkOrderProcedureSection
                 selectedProcedures={selectedProcedures}
                 onProcedureAdd={handleAddProcedure}
                 onProcedureRemove={handleRemoveProcedure}
