@@ -17,14 +17,14 @@ export function SidebarNavigation() {
   const { t } = useLanguage();
 
   return (
-    <SidebarContent className="px-2 py-1 bg-white">
+    <SidebarContent className="px-2 py-0 bg-white">
       {Object.entries(groupedItems).map(([group, items]) => (
-        <SidebarGroup key={group} className="mb-1">
-          <SidebarGroupLabel className="text-gray-500 uppercase text-xs font-bold tracking-widest mb-1 px-2">
+        <SidebarGroup key={group} className="mb-0">
+          <SidebarGroupLabel className="text-gray-500 uppercase text-xs font-bold tracking-widest mb-1 px-2 py-1">
             {t(group as keyof typeof t)}
           </SidebarGroupLabel>
           <SidebarGroupContent>
-            <SidebarMenu className="space-y-0.5">
+            <SidebarMenu className="space-y-0">
               {items.map((item) => {
                 const isActive = location.pathname === item.url;
                 const Icon = item.icon;
