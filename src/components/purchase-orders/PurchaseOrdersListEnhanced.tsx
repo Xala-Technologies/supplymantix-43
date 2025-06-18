@@ -14,7 +14,7 @@ import { Eye, Edit, Trash2, Calendar, DollarSign } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { PurchaseOrder } from "@/types/purchaseOrder";
 import { formatCurrency, formatDate } from "@/lib/utils";
-import { PurchaseOrderStatusBadge } from "./PurchaseOrderStatusBadge";
+import { PurchaseOrderStatusBadgeEnhanced } from "./PurchaseOrderStatusBadgeEnhanced";
 
 interface PurchaseOrdersListEnhancedProps {
   purchaseOrders: PurchaseOrder[];
@@ -78,11 +78,10 @@ export const PurchaseOrdersListEnhanced = ({ purchaseOrders, onDelete }: Purchas
             {purchaseOrders.map((po) => (
               <TableRow key={po.id} className="hover:bg-muted/50">
                 <TableCell className="font-medium">{po.po_number}</TableCell>
-                <TableCell>{typeof po.vendor === 'string' ? po.vendor : po.vendor?.name || 'Unknown'}</TableCell>
+                <TableCell>{po.vendor || 'Unknown'}</TableCell>
                 <TableCell>
-                  <PurchaseOrderStatusBadge 
+                  <PurchaseOrderStatusBadgeEnhanced 
                     status={po.status}
-                    createdAt={po.created_at}
                   />
                 </TableCell>
                 <TableCell className="font-medium">

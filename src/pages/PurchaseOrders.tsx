@@ -3,9 +3,10 @@ import { DashboardLayout } from "@/components/Layout/DashboardLayout";
 import { PurchaseOrdersHeader } from "@/components/purchase-orders/PurchaseOrdersHeader";
 import { PurchaseOrdersList } from "@/components/purchase-orders/PurchaseOrdersList";
 import { usePurchaseOrders, useDeletePurchaseOrder } from "@/hooks/usePurchaseOrders";
+import { PurchaseOrder } from "@/types/purchaseOrder";
 
 export default function PurchaseOrders() {
-  const { data: purchaseOrders, isLoading, error } = usePurchaseOrders();
+  const { data: purchaseOrdersData, isLoading, error } = usePurchaseOrders();
   const deletePurchaseOrder = useDeletePurchaseOrder();
 
   const handleDelete = (id: string) => {
@@ -32,12 +33,18 @@ export default function PurchaseOrders() {
     );
   }
 
+  // Transform the data to match PurchaseOrder interface
+  const purchaseOrders: PurchaseOrder[] = (purchaseOrdersData || []).map(po => ({
+    ...po,
+    line_items: Array.isArray(po.line_items) ? po.line_items : []
+  }));
+
   return (
     <DashboardLayout>
       <div className="space-y-6">
         <PurchaseOrdersHeader />
         <PurchaseOrdersList 
-          purchaseOrders={purchaseOrders || []} 
+          purchaseOrders={purchaseOrders} 
           onDelete={handleDelete}
         />
       </div>

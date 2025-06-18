@@ -33,7 +33,7 @@ export const purchaseOrdersEnhancedApi = {
       `)
       .order("created_at", { ascending: false });
 
-    if (filters?.status) {
+    if (filters?.status && ['draft', 'pending', 'approved', 'ordered', 'received', 'cancelled'].includes(filters.status)) {
       query = query.eq("status", filters.status);
     }
     if (filters?.vendor) {
@@ -52,7 +52,12 @@ export const purchaseOrdersEnhancedApi = {
     const { data, error } = await query;
     
     if (error) throw error;
-    return data;
+    
+    // Transform to match PurchaseOrder interface
+    return data?.map(po => ({
+      ...po,
+      line_items: Array.isArray(po.line_items) ? po.line_items : []
+    })) as PurchaseOrder[];
   },
 
   async getPurchaseOrderById(id: string) {
@@ -66,7 +71,12 @@ export const purchaseOrdersEnhancedApi = {
       .single();
     
     if (error) throw error;
-    return data;
+    
+    // Transform to match PurchaseOrder interface
+    return {
+      ...data,
+      line_items: data.purchase_order_line_items || []
+    } as PurchaseOrder;
   },
 
   async updatePurchaseOrder(request: UpdatePurchaseOrderRequest) {
@@ -120,7 +130,10 @@ export const purchaseOrdersEnhancedApi = {
       }
     }
 
-    return po;
+    return {
+      ...po,
+      line_items: []
+    } as PurchaseOrder;
   },
 
   // Placeholder methods for future implementation
@@ -169,7 +182,7 @@ export const purchaseOrdersEnhancedApi = {
       'Quantity', 'Unit Price', 'Total Amount', 'Created Date'
     ];
     
-    const rows = po.purchase_order_line_items?.map((item: any) => [
+    const rows = po.line_items?.map((item: any) => [
       po.po_number,
       po.vendor || '',
       po.status,
