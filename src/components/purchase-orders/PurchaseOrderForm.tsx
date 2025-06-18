@@ -20,6 +20,7 @@ import { toast } from "sonner";
 
 interface LineItem {
   inventory_item_id: string;
+  description: string;
   quantity: number;
   unit_price: number;
 }
@@ -46,7 +47,9 @@ export const PurchaseOrderForm = ({
   isLoading,
   mode,
 }: PurchaseOrderFormProps) => {
-  const [vendor, setVendor] = useState(initialData?.vendor || '');
+  const [vendor, setVendor] = useState(
+    typeof initialData?.vendor === 'string' ? initialData.vendor : ''
+  );
   const [poNumber, setPoNumber] = useState(initialData?.po_number || '');
   const [status, setStatus] = useState<PurchaseOrderStatus>(initialData?.status || 'draft');
   const [notes, setNotes] = useState(initialData?.notes || '');
@@ -56,7 +59,7 @@ export const PurchaseOrderForm = ({
   const [lineItems, setLineItems] = useState<LineItem[]>(
     initialLineItems.length > 0 
       ? initialLineItems 
-      : [{ inventory_item_id: '', quantity: 1, unit_price: 0 }]
+      : [{ inventory_item_id: '', description: '', quantity: 1, unit_price: 0 }]
   );
 
   const { data: inventoryItems } = useInventoryItems();
@@ -81,11 +84,21 @@ export const PurchaseOrderForm = ({
   ) => {
     const updated = [...lineItems];
     (updated[index] as any)[field] = value;
+    
+    // Auto-fill description when inventory item is selected
+    if (field === 'inventory_item_id' && typeof value === 'string') {
+      const selectedItem = inventoryItems?.find(item => item.id === value);
+      if (selectedItem) {
+        updated[index].description = selectedItem.name;
+        updated[index].unit_price = selectedItem.unit_cost || 0;
+      }
+    }
+    
     setLineItems(updated);
   };
 
   const addLineItem = () => {
-    setLineItems([...lineItems, { inventory_item_id: '', quantity: 1, unit_price: 0 }]);
+    setLineItems([...lineItems, { inventory_item_id: '', description: '', quantity: 1, unit_price: 0 }]);
   };
 
   const removeLineItem = (index: number) => {
@@ -106,7 +119,7 @@ export const PurchaseOrderForm = ({
     }
 
     const validLineItems = lineItems.filter(item => 
-      item.inventory_item_id && item.quantity > 0 && item.unit_price >= 0
+      item.description.trim() && item.quantity > 0 && item.unit_price >= 0
     );
 
     if (validLineItems.length === 0) {
@@ -116,7 +129,7 @@ export const PurchaseOrderForm = ({
 
     // Check for invalid quantities
     const invalidQuantity = lineItems.some(item => 
-      item.inventory_item_id && (item.quantity <= 0 || !Number.isInteger(item.quantity))
+      item.description.trim() && (item.quantity <= 0 || !Number.isInteger(item.quantity))
     );
     
     if (invalidQuantity) {
@@ -126,7 +139,7 @@ export const PurchaseOrderForm = ({
 
     // Check for invalid prices
     const invalidPrice = lineItems.some(item => 
-      item.inventory_item_id && item.unit_price < 0
+      item.description.trim() && item.unit_price < 0
     );
     
     if (invalidPrice) {
@@ -145,7 +158,7 @@ export const PurchaseOrderForm = ({
     }
 
     const validLineItems = lineItems.filter(item => 
-      item.inventory_item_id && item.quantity > 0 && item.unit_price >= 0
+      item.description.trim() && item.quantity > 0 && item.unit_price >= 0
     );
 
     onSubmit({
@@ -162,7 +175,7 @@ export const PurchaseOrderForm = ({
     if (!vendor.trim() || !poNumber.trim()) return false;
     
     const validLineItems = lineItems.filter(item => 
-      item.inventory_item_id && item.quantity > 0 && item.unit_price >= 0
+      item.description.trim() && item.quantity > 0 && item.unit_price >= 0
     );
     
     return validLineItems.length > 0;
@@ -260,7 +273,7 @@ export const PurchaseOrderForm = ({
           {lineItems.map((item, index) => (
             <div key={index} className="flex items-end gap-4 p-4 border rounded-lg">
               <div className="flex-1 space-y-2">
-                <Label>Inventory Item *</Label>
+                <Label>Inventory Item</Label>
                 <Select 
                   value={item.inventory_item_id}
                   onValueChange={(value) => handleLineItemChange(index, 'inventory_item_id', value)}
@@ -276,6 +289,16 @@ export const PurchaseOrderForm = ({
                     ))}
                   </SelectContent>
                 </Select>
+              </div>
+              <div className="flex-1 space-y-2">
+                <Label>Description *</Label>
+                <Input
+                  type="text"
+                  value={item.description}
+                  onChange={(e) => handleLineItemChange(index, 'description', e.target.value)}
+                  placeholder="Item description"
+                  required
+                />
               </div>
               <div className="w-24 space-y-2">
                 <Label>Quantity *</Label>

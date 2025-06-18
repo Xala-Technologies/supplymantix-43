@@ -96,7 +96,7 @@ export const PurchaseOrdersList = ({ purchaseOrders, onDelete }: PurchaseOrdersL
             {purchaseOrders.map((po) => (
               <TableRow key={po.id} className="hover:bg-muted/50">
                 <TableCell className="font-medium">{po.po_number}</TableCell>
-                <TableCell>{po.vendor}</TableCell>
+                <TableCell>{typeof po.vendor === 'string' ? po.vendor : po.vendor?.name || 'Unknown'}</TableCell>
                 <TableCell>
                   <Badge 
                     variant="secondary" 

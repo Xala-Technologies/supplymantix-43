@@ -44,6 +44,7 @@ export const useCreateReorderPO = () => {
     mutationFn: async (lowStockItems: any[]) => {
       const lineItems = lowStockItems.map(item => ({
         inventory_item_id: item.id,
+        description: item.name || 'Reorder item',
         quantity: item.reorderSuggestion,
         unit_price: item.unit_cost || 0,
       }));

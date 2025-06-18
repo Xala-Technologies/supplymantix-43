@@ -65,6 +65,7 @@ export const useCheckOrCreateLowStockPO = () => {
         due_date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(), // 7 days from now
         line_items: [{
           inventory_item_id: inventoryItem.id,
+          description: inventoryItem.name,
           quantity: reorderQuantity,
           unit_price: inventoryItem.unit_cost || 0
         }]
