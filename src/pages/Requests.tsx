@@ -1,12 +1,13 @@
 
 import { useState } from "react";
 import { DashboardLayout } from "@/components/Layout/DashboardLayout";
+import { PageContainer } from "@/components/Layout/PageContainer";
+import { PageHeader } from "@/components/Layout/PageHeader";
+import { PageContent } from "@/components/Layout/PageContent";
 import { RequestsHeader } from "@/components/requests/RequestsHeader";
 import { RequestsList } from "@/components/requests/RequestsList";
 import { RequestForm } from "@/components/requests/RequestForm";
 import { RequestDetailDialog } from "@/components/requests/RequestDetailDialog";
-import { Button } from "@/components/ui/button";
-import { ArrowLeft } from "lucide-react";
 import { useRequests, useCreateRequest, useUpdateRequest, useDeleteRequest } from "@/hooks/useRequests";
 import type { Request, CreateRequestRequest } from "@/types/request";
 
@@ -17,6 +18,10 @@ export default function Requests() {
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [priorityFilter, setPriorityFilter] = useState("all");
+  const [viewMode, setViewMode] = useState<'grid' | 'table'>('grid');
+
+  // Simulate user role - in real app this would come from auth context
+  const userRole = 'admin'; // or 'user'
 
   const { data: requests = [], isLoading } = useRequests();
   const createRequest = useCreateRequest();
@@ -75,33 +80,23 @@ export default function Requests() {
   if (view === "create") {
     return (
       <DashboardLayout>
-        <div className="h-full">
-          <div className="flex items-center gap-4 p-4 border-b bg-white">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setView("list")}
-            >
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to Requests
-            </Button>
-            <div>
-              <h1 className="text-xl font-semibold text-gray-900">Create New Request</h1>
-              <p className="text-sm text-muted-foreground">
-                Submit a new request for maintenance, repairs, or services
-              </p>
-            </div>
-          </div>
-
-          <div className="flex-1 overflow-y-auto">
+        <PageContainer>
+          <PageHeader
+            title="Create New Request"
+            description="Submit a new request for maintenance, repairs, or services"
+            showBackButton
+            onBack={() => setView("list")}
+            backButtonText="Back to Requests"
+          />
+          <PageContent>
             <RequestForm
               onSubmit={handleCreateRequest}
               onCancel={() => setView("list")}
               isLoading={createRequest.isPending}
               mode="create"
             />
-          </div>
-        </div>
+          </PageContent>
+        </PageContainer>
       </DashboardLayout>
     );
   }
@@ -109,28 +104,18 @@ export default function Requests() {
   if (view === "edit" && selectedRequest) {
     return (
       <DashboardLayout>
-        <div className="h-full">
-          <div className="flex items-center gap-4 p-4 border-b bg-white">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => {
-                setView("list");
-                setSelectedRequest(null);
-              }}
-            >
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to Requests
-            </Button>
-            <div>
-              <h1 className="text-xl font-semibold text-gray-900">Edit Request</h1>
-              <p className="text-sm text-muted-foreground">
-                Update request details and information
-              </p>
-            </div>
-          </div>
-
-          <div className="flex-1 overflow-y-auto">
+        <PageContainer>
+          <PageHeader
+            title="Edit Request"
+            description="Update request details and information"
+            showBackButton
+            onBack={() => {
+              setView("list");
+              setSelectedRequest(null);
+            }}
+            backButtonText="Back to Requests"
+          />
+          <PageContent>
             <RequestForm
               onSubmit={handleEditRequest}
               onCancel={() => {
@@ -141,25 +126,20 @@ export default function Requests() {
               initialData={selectedRequest}
               mode="edit"
             />
-          </div>
-        </div>
+          </PageContent>
+        </PageContainer>
       </DashboardLayout>
     );
   }
 
   return (
     <DashboardLayout>
-      <div className="h-full">
-        <div className="flex items-center gap-4 p-4 border-b bg-white">
-          <div className="flex-1">
-            <h1 className="text-xl font-semibold text-gray-900">Requests</h1>
-            <p className="text-sm text-muted-foreground">
-              Manage and track maintenance requests and service tickets
-            </p>
-          </div>
-        </div>
-
-        <div className="flex-1 overflow-y-auto p-4">
+      <PageContainer>
+        <PageHeader
+          title="Requests"
+          description="Manage and track maintenance requests and service tickets"
+        />
+        <PageContent>
           <div className="space-y-6">
             <RequestsHeader
               onCreateRequest={() => setView("create")}
@@ -169,6 +149,9 @@ export default function Requests() {
               onStatusFilterChange={setStatusFilter}
               priorityFilter={priorityFilter}
               onPriorityFilterChange={setPriorityFilter}
+              viewMode={viewMode}
+              onViewModeChange={setViewMode}
+              userRole={userRole}
             />
 
             {isLoading ? (
@@ -179,6 +162,8 @@ export default function Requests() {
                 onEditRequest={handleEditMode}
                 onDeleteRequest={handleDeleteRequest}
                 onViewRequest={handleViewRequest}
+                viewMode={viewMode}
+                userRole={userRole}
               />
             )}
 
@@ -188,8 +173,8 @@ export default function Requests() {
               onOpenChange={setDetailDialogOpen}
             />
           </div>
-        </div>
-      </div>
+        </PageContent>
+      </PageContainer>
     </DashboardLayout>
   );
 }
