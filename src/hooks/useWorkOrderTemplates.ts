@@ -154,7 +154,9 @@ export const useCreateWorkOrderFromTemplate = () => {
   const queryClient = useQueryClient();
   
   return useMutation({
-    mutationFn: (templateId: string) => workOrdersEnhancedApi.createWorkOrderFromTemplate(templateId),
+    mutationFn: async (data: { templateId: string; workOrderData?: Partial<Tables["work_orders"]["Insert"]> }) => {
+      return workOrdersEnhancedApi.createWorkOrderFromTemplate(data.templateId, data.workOrderData || {});
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["work-orders"] });
       toast.success("Work order created from template");

@@ -162,7 +162,12 @@ export const WorkOrderTemplatesDialog = ({ isOpen, onClose }: WorkOrderTemplates
 
   const handleCreateFromTemplate = async (template: any) => {
     try {
-      await createFromTemplate.mutateAsync(template.id);
+      await createFromTemplate.mutateAsync({
+        templateId: template.id,
+        workOrderData: {
+          title: `${template.title} - ${new Date().toLocaleDateString()}`,
+        }
+      });
       onClose();
     } catch (error) {
       console.error("Create from template error:", error);
