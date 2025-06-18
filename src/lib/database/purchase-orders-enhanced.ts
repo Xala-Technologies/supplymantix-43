@@ -77,7 +77,7 @@ export const purchaseOrdersEnhancedApi = {
 
     // Only filter by status if it's a valid enum value
     if (filters?.status && validStatuses.includes(filters.status as PurchaseOrderStatus)) {
-      query = query.eq("status", filters.status);
+      query = query.eq("status", filters.status as PurchaseOrderStatus);
     }
     if (filters?.vendor) {
       query = query.eq("vendor", filters.vendor);
@@ -97,7 +97,7 @@ export const purchaseOrdersEnhancedApi = {
     if (error) throw error;
     
     // Transform to match PurchaseOrder interface
-    return data?.map(po => transformPurchaseOrder(po)) || [];
+    return (data || []).map(po => transformPurchaseOrder(po));
   },
 
   async getPurchaseOrderById(id: string) {
