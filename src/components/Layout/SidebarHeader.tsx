@@ -1,15 +1,13 @@
-
 import { Link } from "react-router-dom";
 import { SidebarHeader as BaseSidebarHeader } from "@/components/ui/sidebar";
 import { useSidebar } from "@/components/ui/sidebar";
 import { Zap } from "lucide-react";
-
 export function AppSidebarHeader() {
-  const { state } = useSidebar();
+  const {
+    state
+  } = useSidebar();
   const isCollapsed = state === "collapsed";
-
-  return (
-    <BaseSidebarHeader className="h-16 p-4 border-b border-gray-100 bg-white relative z-50">
+  return <BaseSidebarHeader className="h-16 p-4 border-b border-gray-100 bg-white relative z-50 py-[16px] my-[50px]">
       <Link to="/dashboard" className="flex items-center space-x-3 group transition-all duration-300 ease-in-out">
         <div className="relative">
           <div className={`
@@ -23,10 +21,7 @@ export function AppSidebarHeader() {
         </div>
         <div className={`
           flex flex-col transition-all duration-300 ease-in-out
-          ${isCollapsed 
-            ? 'opacity-0 scale-75 w-0 overflow-hidden' 
-            : 'opacity-100 scale-100 flex-1'
-          }
+          ${isCollapsed ? 'opacity-0 scale-75 w-0 overflow-hidden' : 'opacity-100 scale-100 flex-1'}
         `}>
           <span className="text-xl font-bold text-gray-900 group-hover:text-blue-700 transition-colors duration-300">
             SupplyMantix
@@ -36,6 +31,5 @@ export function AppSidebarHeader() {
           </span>
         </div>
       </Link>
-    </BaseSidebarHeader>
-  );
+    </BaseSidebarHeader>;
 }
