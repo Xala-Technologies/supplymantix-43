@@ -39,10 +39,10 @@ export const PurchaseOrderLineItems = ({ purchaseOrder }: PurchaseOrderLineItems
             <TableBody>
               {lineItems.map((item, index) => (
                 <TableRow key={item.id || index}>
-                  <TableCell>{item.description}</TableCell>
+                  <TableCell>{item.description || `Item ${index + 1}`}</TableCell>
                   <TableCell>{item.quantity}</TableCell>
                   <TableCell>{formatCurrency(item.unit_price)}</TableCell>
-                  <TableCell>{formatCurrency(item.total_amount)}</TableCell>
+                  <TableCell>{formatCurrency(item.total_amount || (item.quantity * item.unit_price))}</TableCell>
                 </TableRow>
               ))}
             </TableBody>

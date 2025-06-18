@@ -4,14 +4,56 @@ import type { Database } from "@/integrations/supabase/types";
 import type { 
   CreatePurchaseOrderRequest, 
   UpdatePurchaseOrderRequest,
-  PurchaseOrder
+  PurchaseOrder,
+  PurchaseOrderLineItem,
+  PurchaseOrderStatus
 } from "@/types/purchaseOrder";
 
 type Tables = Database["public"]["Tables"];
+type PurchaseOrderRow = Tables["purchase_orders"]["Row"];
+type PurchaseOrderLineItemRow = Tables["purchase_order_line_items"]["Row"];
+
+// Valid status values from the database enum
+const validStatuses: PurchaseOrderStatus[] = ['draft', 'pending', 'approved', 'ordered', 'received', 'cancelled'];
+
+// Transform database line item to interface
+const transformLineItem = (dbItem: PurchaseOrderLineItemRow): PurchaseOrderLineItem => ({
+  id: dbItem.id,
+  purchase_order_id: dbItem.purchase_order_id,
+  inventory_item_id: dbItem.inventory_item_id || undefined,
+  description: `Item ${dbItem.id}`, // Fallback description since it's not in DB
+  quantity: dbItem.quantity,
+  unit_price: dbItem.unit_price,
+  total_amount: dbItem.quantity * dbItem.unit_price,
+  created_at: dbItem.created_at || new Date().toISOString(),
+});
+
+// Transform database PO to interface
+const transformPurchaseOrder = (dbPo: any, lineItems: PurchaseOrderLineItem[] = []): PurchaseOrder => ({
+  id: dbPo.id,
+  tenant_id: dbPo.tenant_id,
+  po_number: dbPo.po_number,
+  vendor: dbPo.vendor || undefined,
+  status: dbPo.status as PurchaseOrderStatus,
+  total_amount: dbPo.total_amount || 0,
+  tax_amount: undefined,
+  shipping_amount: undefined,
+  notes: dbPo.notes || undefined,
+  due_date: dbPo.due_date || undefined,
+  requested_by: dbPo.requested_by || '',
+  approved_by: dbPo.approved_by || undefined,
+  billing_address: undefined,
+  shipping_address: undefined,
+  created_at: dbPo.created_at || new Date().toISOString(),
+  updated_at: dbPo.updated_at || new Date().toISOString(),
+  deleted_at: undefined,
+  line_items: lineItems,
+  approvals: undefined,
+  attachments: undefined,
+});
 
 // Simplified enhanced API that works with current schema
 export const purchaseOrdersEnhancedApi = {
-  // Use existing purchase orders API for now
   async getAllPurchaseOrders(filters?: {
     status?: string;
     vendor?: string;
@@ -33,7 +75,8 @@ export const purchaseOrdersEnhancedApi = {
       `)
       .order("created_at", { ascending: false });
 
-    if (filters?.status && ['draft', 'pending', 'approved', 'ordered', 'received', 'cancelled'].includes(filters.status)) {
+    // Only filter by status if it's a valid enum value
+    if (filters?.status && validStatuses.includes(filters.status as PurchaseOrderStatus)) {
       query = query.eq("status", filters.status);
     }
     if (filters?.vendor) {
@@ -54,10 +97,7 @@ export const purchaseOrdersEnhancedApi = {
     if (error) throw error;
     
     // Transform to match PurchaseOrder interface
-    return data?.map(po => ({
-      ...po,
-      line_items: Array.isArray(po.line_items) ? po.line_items : []
-    })) as PurchaseOrder[];
+    return data?.map(po => transformPurchaseOrder(po)) || [];
   },
 
   async getPurchaseOrderById(id: string) {
@@ -72,11 +112,11 @@ export const purchaseOrdersEnhancedApi = {
     
     if (error) throw error;
     
+    // Transform line items
+    const lineItems = (data.purchase_order_line_items || []).map(transformLineItem);
+    
     // Transform to match PurchaseOrder interface
-    return {
-      ...data,
-      line_items: data.purchase_order_line_items || []
-    } as PurchaseOrder;
+    return transformPurchaseOrder(data, lineItems);
   },
 
   async updatePurchaseOrder(request: UpdatePurchaseOrderRequest) {
@@ -114,9 +154,6 @@ export const purchaseOrdersEnhancedApi = {
 
       // Insert new line items
       for (const item of line_items) {
-        const lineTotal = item.quantity * item.unit_price;
-        const taxAmount = item.tax_rate ? lineTotal * (item.tax_rate / 100) : 0;
-        
         const { error: lineError } = await supabase
           .from("purchase_order_line_items")
           .insert({
@@ -130,15 +167,11 @@ export const purchaseOrdersEnhancedApi = {
       }
     }
 
-    return {
-      ...po,
-      line_items: []
-    } as PurchaseOrder;
+    return transformPurchaseOrder(po);
   },
 
   // Placeholder methods for future implementation
   async getVendors() {
-    // Return empty array for now - will be implemented when vendors table is created
     return [];
   },
 
@@ -182,14 +215,14 @@ export const purchaseOrdersEnhancedApi = {
       'Quantity', 'Unit Price', 'Total Amount', 'Created Date'
     ];
     
-    const rows = po.line_items?.map((item: any) => [
+    const rows = po.line_items?.map((item: PurchaseOrderLineItem) => [
       po.po_number,
       po.vendor || '',
       po.status,
       item.description || '',
       item.quantity.toString(),
       item.unit_price.toString(),
-      (item.quantity * item.unit_price).toString(),
+      item.total_amount.toString(),
       po.created_at
     ]) || [];
     

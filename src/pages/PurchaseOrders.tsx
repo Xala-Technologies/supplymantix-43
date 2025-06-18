@@ -3,7 +3,7 @@ import { DashboardLayout } from "@/components/Layout/DashboardLayout";
 import { PurchaseOrdersHeader } from "@/components/purchase-orders/PurchaseOrdersHeader";
 import { PurchaseOrdersList } from "@/components/purchase-orders/PurchaseOrdersList";
 import { usePurchaseOrders, useDeletePurchaseOrder } from "@/hooks/usePurchaseOrders";
-import { PurchaseOrder } from "@/types/purchaseOrder";
+import { PurchaseOrder, PurchaseOrderLineItem } from "@/types/purchaseOrder";
 
 export default function PurchaseOrders() {
   const { data: purchaseOrdersData, isLoading, error } = usePurchaseOrders();
@@ -34,10 +34,29 @@ export default function PurchaseOrders() {
   }
 
   // Transform the data to match PurchaseOrder interface
-  const purchaseOrders: PurchaseOrder[] = (purchaseOrdersData || []).map(po => ({
-    ...po,
-    line_items: Array.isArray(po.line_items) ? po.line_items : []
-  }));
+  const purchaseOrders: PurchaseOrder[] = (purchaseOrdersData || []).map(po => {
+    // Transform line_items from Json to proper array
+    let lineItems: PurchaseOrderLineItem[] = [];
+    if (Array.isArray(po.line_items)) {
+      lineItems = po.line_items
+        .filter((item): item is any => item !== null && typeof item === 'object')
+        .map((item: any, index: number) => ({
+          id: item.id || `temp-${index}`,
+          purchase_order_id: po.id,
+          inventory_item_id: item.inventory_item_id,
+          description: item.description || `Item ${index + 1}`,
+          quantity: item.quantity || 0,
+          unit_price: item.unit_price || 0,
+          total_amount: (item.quantity || 0) * (item.unit_price || 0),
+          created_at: item.created_at || new Date().toISOString(),
+        }));
+    }
+
+    return {
+      ...po,
+      line_items: lineItems
+    } as PurchaseOrder;
+  });
 
   return (
     <DashboardLayout>
