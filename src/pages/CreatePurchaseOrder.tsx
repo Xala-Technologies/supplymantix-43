@@ -74,7 +74,6 @@ export default function CreatePurchaseOrder() {
         </div>
         
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Create Purchase Order</h1>
           <p className="text-muted-foreground">
             Create a new purchase order to track vendor orders and deliveries
           </p>
