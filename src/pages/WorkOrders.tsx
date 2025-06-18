@@ -76,67 +76,7 @@ const sampleWorkOrders: WorkOrder[] = [
     updated_at: '2023-10-06T10:00:00Z',
     tenant_id: 'sample-tenant-id',
     tags: ['maintenance', 'scheduled']
-  },
-  {
-    id: '5983',
-    title: 'Bearing Inspection',
-    status: 'in_progress',
-    due_date: '2023-10-07T09:00:00Z',
-    priority: 'high',
-    assignedTo: ['Maintenance Team 1'],
-    description: 'Inspection of conveyor bearing assembly.',
-    asset: {
-      id: 'conveyor-001',
-      name: 'Conveyor - 3200 Series Modular',
-      status: 'active',
-    },
-    location: 'Production Line 2',
-    category: 'inspection',
-    created_at: '2023-10-07T08:00:00Z',
-    updated_at: '2023-10-07T08:30:00Z',
-    tenant_id: 'sample-tenant-id',
-    tags: ['inspection', 'bearing']
-  },
-  {
-    id: '5988',
-    title: 'Weekly Compressor PM',
-    status: 'open',
-    due_date: '2023-10-08T16:00:00Z',
-    priority: 'low',
-    assignedTo: ['Maintenance Team 2'],
-    description: 'Preventive maintenance for air compressor system.',
-    asset: {
-      id: 'compressor-001',
-      name: '35-005 - Air Compressor - VSS Single Screw',
-      status: 'active',
-    },
-    location: 'Utility Room',
-    category: 'maintenance',
-    created_at: '2023-10-08T08:00:00Z',
-    updated_at: '2023-10-08T08:00:00Z',
-    tenant_id: 'sample-tenant-id',
-    tags: ['pm', 'weekly']
-  },
-  {
-    id: '5982',
-    title: 'Fire Extinguisher Inspection',
-    status: 'open',
-    due_date: '2023-10-09T11:00:00Z',
-    priority: 'low',
-    assignedTo: ['Safety Team'],
-    description: 'Monthly fire extinguisher inspection and documentation.',
-    asset: {
-      id: 'extinguisher-001',
-      name: 'ABC Fire Extinguisher (5 lb)',
-      status: 'active',
-    },
-    location: 'Building A',
-    category: 'safety',
-    created_at: '2023-10-09T08:00:00Z',
-    updated_at: '2023-10-09T08:00:00Z',
-    tenant_id: 'sample-tenant-id',
-    tags: ['safety', 'monthly']
-  },
+  }
 ];
 
 export default function WorkOrders() {
@@ -151,16 +91,15 @@ export default function WorkOrders() {
   const selectedWorkOrderData = transformedWorkOrders.find(wo => wo.id === selectedWorkOrder) || transformedWorkOrders[0];
 
   const handleCreateWorkOrder = () => {
-    // TODO: Open create work order dialog
     console.log('Create new work order');
   };
 
   if (isLoading) {
     return (
       <DashboardLayout>
-        <div className="h-96 flex items-center justify-center">
+        <div className="flex items-center justify-center h-[60vh]">
           <div className="text-center space-y-4">
-            <div className="animate-spin rounded-full h-8 w-8 border-2 border-primary border-t-transparent mx-auto"></div>
+            <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto"></div>
             <p className="text-muted-foreground">Loading work orders...</p>
           </div>
         </div>
@@ -170,88 +109,84 @@ export default function WorkOrders() {
 
   return (
     <DashboardLayout>
-      <div className="h-full flex flex-col space-y-6">
-        {/* Mobile-only header */}
-        <div className="md:hidden">
-          <h1 className="text-2xl font-semibold tracking-tight">Work Orders</h1>
-          <p className="text-muted-foreground">Manage and track maintenance work orders</p>
-        </div>
-        
-        <div className="flex-1 flex gap-6 overflow-hidden">
-          {/* Desktop Layout */}
-          <div className="hidden md:flex w-full gap-6">
-            {/* Sidebar */}
-            <div className="w-96 flex-shrink-0">
-              <EnhancedWorkOrdersList 
-                workOrders={transformedWorkOrders}
-                selectedWorkOrderId={selectedWorkOrder}
-                onSelectWorkOrder={setSelectedWorkOrder}
-                onCreateWorkOrder={handleCreateWorkOrder}
-              />
-            </div>
-            
-            {/* Detail view */}
-            <div className="flex-1 bg-card rounded-xl border shadow-sm overflow-hidden">
-              <div className="h-full overflow-y-auto">
-                {selectedWorkOrderData ? (
-                  <WorkOrderDetailCard workOrder={selectedWorkOrderData} />
-                ) : (
-                  <div className="h-full flex items-center justify-center">
-                    <div className="text-center space-y-4">
-                      <div className="w-16 h-16 bg-muted rounded-xl flex items-center justify-center mx-auto">
-                        <span className="text-2xl">📋</span>
-                      </div>
-                      <div className="space-y-2">
-                        <h3 className="text-lg font-medium">Select a work order</h3>
-                        <p className="text-sm text-muted-foreground">Choose a work order from the list to view details</p>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
+      <div className="h-full bg-gray-50">
+        {/* Desktop Layout */}
+        <div className="hidden lg:flex h-full">
+          {/* Left Sidebar - Work Orders List */}
+          <div className="w-96 bg-white border-r border-gray-200 flex flex-col">
+            <EnhancedWorkOrdersList 
+              workOrders={transformedWorkOrders}
+              selectedWorkOrderId={selectedWorkOrder}
+              onSelectWorkOrder={setSelectedWorkOrder}
+              onCreateWorkOrder={handleCreateWorkOrder}
+            />
           </div>
           
-          {/* Mobile Layout */}
-          <div className="md:hidden w-full flex flex-col">
-            {!selectedWorkOrder ? (
-              <EnhancedWorkOrdersList 
-                workOrders={transformedWorkOrders}
-                selectedWorkOrderId={selectedWorkOrder}
-                onSelectWorkOrder={setSelectedWorkOrder}
-                onCreateWorkOrder={handleCreateWorkOrder}
-              />
+          {/* Main Content Area - Work Order Details */}
+          <div className="flex-1 flex flex-col">
+            {selectedWorkOrderData ? (
+              <div className="h-full overflow-auto bg-white">
+                <WorkOrderDetailCard workOrder={selectedWorkOrderData} />
+              </div>
             ) : (
-              <div className="space-y-4">
-                {/* Mobile header with back button */}
-                <div className="flex items-center gap-3 p-4 bg-card rounded-xl border">
-                  <Button 
-                    variant="ghost" 
-                    size="sm"
-                    onClick={() => setSelectedWorkOrder(null)}
-                    className="p-2 h-auto"
-                  >
-                    <ChevronLeft className="w-5 h-5" />
-                  </Button>
-                  <div className="flex-1 min-w-0 space-y-1">
-                    <h2 className="font-medium truncate">
-                      {selectedWorkOrderData?.title || `Work Order #${selectedWorkOrder}`}
-                    </h2>
-                    <p className="text-sm text-muted-foreground">
-                      #{selectedWorkOrder}
-                    </p>
+              <div className="flex-1 flex items-center justify-center bg-white">
+                <div className="text-center space-y-4 p-8">
+                  <div className="w-16 h-16 bg-gray-100 rounded-xl flex items-center justify-center mx-auto">
+                    <span className="text-2xl">📋</span>
                   </div>
-                </div>
-                
-                {/* Mobile detail view */}
-                <div className="bg-card rounded-xl border shadow-sm overflow-hidden">
-                  {selectedWorkOrderData && (
-                    <WorkOrderDetailCard workOrder={selectedWorkOrderData} />
-                  )}
+                  <div className="space-y-2">
+                    <h3 className="text-xl font-semibold text-gray-900">Select a work order</h3>
+                    <p className="text-gray-500">Choose a work order from the list to view details</p>
+                  </div>
                 </div>
               </div>
             )}
           </div>
+        </div>
+        
+        {/* Mobile Layout */}
+        <div className="lg:hidden h-full">
+          {!selectedWorkOrder ? (
+            <div className="h-full bg-white">
+              <div className="p-4 border-b border-gray-200">
+                <h1 className="text-2xl font-semibold text-gray-900">Work Orders</h1>
+                <p className="text-gray-600 mt-1">Manage and track maintenance work orders</p>
+              </div>
+              <EnhancedWorkOrdersList 
+                workOrders={transformedWorkOrders}
+                selectedWorkOrderId={selectedWorkOrder}
+                onSelectWorkOrder={setSelectedWorkOrder}
+                onCreateWorkOrder={handleCreateWorkOrder}
+              />
+            </div>
+          ) : (
+            <div className="h-full bg-white flex flex-col">
+              {/* Mobile Header */}
+              <div className="p-4 border-b border-gray-200 flex items-center gap-3">
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  onClick={() => setSelectedWorkOrder(null)}
+                  className="p-2"
+                >
+                  <ChevronLeft className="w-5 h-5" />
+                </Button>
+                <div className="flex-1 min-w-0">
+                  <h2 className="font-semibold text-gray-900 truncate">
+                    {selectedWorkOrderData?.title || `Work Order #${selectedWorkOrder}`}
+                  </h2>
+                  <p className="text-sm text-gray-500">#{selectedWorkOrder}</p>
+                </div>
+              </div>
+              
+              {/* Mobile Content */}
+              <div className="flex-1 overflow-auto">
+                {selectedWorkOrderData && (
+                  <WorkOrderDetailCard workOrder={selectedWorkOrderData} />
+                )}
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </DashboardLayout>
