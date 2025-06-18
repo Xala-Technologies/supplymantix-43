@@ -59,6 +59,38 @@ export type Database = {
           },
         ]
       }
+      attachments: {
+        Row: {
+          file_name: string
+          id: string
+          uploaded_at: string
+          url: string
+          work_order_id: string
+        }
+        Insert: {
+          file_name: string
+          id?: string
+          uploaded_at?: string
+          url: string
+          work_order_id: string
+        }
+        Update: {
+          file_name?: string
+          id?: string
+          uploaded_at?: string
+          url?: string
+          work_order_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "attachments_work_order_id_fkey"
+            columns: ["work_order_id"]
+            isOneToOne: false
+            referencedRelation: "work_orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       billing_information: {
         Row: {
           billing_address: Json | null
@@ -158,6 +190,41 @@ export type Database = {
           },
           {
             foreignKeyName: "chat_messages_work_order_id_fkey"
+            columns: ["work_order_id"]
+            isOneToOne: false
+            referencedRelation: "work_orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      checklist_items: {
+        Row: {
+          completed: boolean
+          created_at: string
+          id: string
+          note: string | null
+          title: string
+          work_order_id: string
+        }
+        Insert: {
+          completed?: boolean
+          created_at?: string
+          id?: string
+          note?: string | null
+          title: string
+          work_order_id: string
+        }
+        Update: {
+          completed?: boolean
+          created_at?: string
+          id?: string
+          note?: string | null
+          title?: string
+          work_order_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "checklist_items_work_order_id_fkey"
             columns: ["work_order_id"]
             isOneToOne: false
             referencedRelation: "work_orders"
@@ -1385,6 +1452,41 @@ export type Database = {
         }
         Relationships: []
       }
+      template_checklist_items: {
+        Row: {
+          created_at: string
+          id: string
+          note: string | null
+          order_index: number
+          template_id: string
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          note?: string | null
+          order_index?: number
+          template_id: string
+          title: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          note?: string | null
+          order_index?: number
+          template_id?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "template_checklist_items_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "work_order_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tenants: {
         Row: {
           created_at: string | null
@@ -1402,6 +1504,55 @@ export type Database = {
           name?: string
         }
         Relationships: []
+      }
+      time_logs: {
+        Row: {
+          duration_minutes: number
+          id: string
+          logged_at: string
+          note: string | null
+          user_id: string
+          work_order_id: string
+        }
+        Insert: {
+          duration_minutes: number
+          id?: string
+          logged_at?: string
+          note?: string | null
+          user_id: string
+          work_order_id: string
+        }
+        Update: {
+          duration_minutes?: number
+          id?: string
+          logged_at?: string
+          note?: string | null
+          user_id?: string
+          work_order_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "time_logs_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "time_logs_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users_with_role"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "time_logs_work_order_id_fkey"
+            columns: ["work_order_id"]
+            isOneToOne: false
+            referencedRelation: "work_orders"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_roles: {
         Row: {
@@ -1470,6 +1621,52 @@ export type Database = {
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      work_order_comments: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          user_id: string
+          work_order_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          user_id: string
+          work_order_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          user_id?: string
+          work_order_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "work_order_comments_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "work_order_comments_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users_with_role"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "work_order_comments_work_order_id_fkey"
+            columns: ["work_order_id"]
+            isOneToOne: false
+            referencedRelation: "work_orders"
             referencedColumns: ["id"]
           },
         ]
@@ -1578,6 +1775,64 @@ export type Database = {
           },
         ]
       }
+      work_order_templates: {
+        Row: {
+          created_at: string
+          default_assignee: string | null
+          default_tags: string[] | null
+          description: string | null
+          id: string
+          priority: Database["public"]["Enums"]["priority_level"]
+          tenant_id: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          default_assignee?: string | null
+          default_tags?: string[] | null
+          description?: string | null
+          id?: string
+          priority?: Database["public"]["Enums"]["priority_level"]
+          tenant_id: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          default_assignee?: string | null
+          default_tags?: string[] | null
+          description?: string | null
+          id?: string
+          priority?: Database["public"]["Enums"]["priority_level"]
+          tenant_id?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "work_order_templates_default_assignee_fkey"
+            columns: ["default_assignee"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "work_order_templates_default_assignee_fkey"
+            columns: ["default_assignee"]
+            isOneToOne: false
+            referencedRelation: "users_with_role"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "work_order_templates_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       work_orders: {
         Row: {
           asset_id: string | null
@@ -1589,8 +1844,13 @@ export type Database = {
           id: string
           location_id: string | null
           parts_used: Json | null
-          priority: string | null
+          priority: Database["public"]["Enums"]["priority_level"] | null
+          recurrence_rules: Json | null
+          requester_id: string | null
+          start_date: string | null
           status: Database["public"]["Enums"]["work_order_status"]
+          tags: string[] | null
+          template_id: string | null
           tenant_id: string
           time_spent: number | null
           title: string
@@ -1607,8 +1867,13 @@ export type Database = {
           id?: string
           location_id?: string | null
           parts_used?: Json | null
-          priority?: string | null
+          priority?: Database["public"]["Enums"]["priority_level"] | null
+          recurrence_rules?: Json | null
+          requester_id?: string | null
+          start_date?: string | null
           status?: Database["public"]["Enums"]["work_order_status"]
+          tags?: string[] | null
+          template_id?: string | null
           tenant_id: string
           time_spent?: number | null
           title: string
@@ -1625,8 +1890,13 @@ export type Database = {
           id?: string
           location_id?: string | null
           parts_used?: Json | null
-          priority?: string | null
+          priority?: Database["public"]["Enums"]["priority_level"] | null
+          recurrence_rules?: Json | null
+          requester_id?: string | null
+          start_date?: string | null
           status?: Database["public"]["Enums"]["work_order_status"]
+          tags?: string[] | null
+          template_id?: string | null
           tenant_id?: string
           time_spent?: number | null
           title?: string
@@ -1660,6 +1930,27 @@ export type Database = {
             columns: ["location_id"]
             isOneToOne: false
             referencedRelation: "locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "work_orders_requester_id_fkey"
+            columns: ["requester_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "work_orders_requester_id_fkey"
+            columns: ["requester_id"]
+            isOneToOne: false
+            referencedRelation: "users_with_role"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "work_orders_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "work_order_templates"
             referencedColumns: ["id"]
           },
           {
@@ -1965,6 +2256,7 @@ export type Database = {
         | "requester"
         | "client"
         | "viewer"
+      priority_level: "low" | "medium" | "high" | "urgent"
       purchase_order_status:
         | "draft"
         | "pending"
@@ -2126,6 +2418,7 @@ export const Constants = {
         "client",
         "viewer",
       ],
+      priority_level: ["low", "medium", "high", "urgent"],
       purchase_order_status: [
         "draft",
         "pending",

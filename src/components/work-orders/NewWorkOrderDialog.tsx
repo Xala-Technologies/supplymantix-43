@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import {
@@ -36,12 +37,13 @@ import { NewWorkOrderProcedureSection } from "./NewWorkOrderProcedureSection";
 interface NewWorkOrderFormData {
   title: string;
   description: string;
-  priority: "Low" | "Medium" | "High";
+  priority: "low" | "medium" | "high" | "urgent";
   dueDate: Date;
   assignedTo: string;
   asset: string;
   location: string;
   category: string;
+  tags: string;
 }
 
 export const NewWorkOrderDialog = () => {
@@ -56,12 +58,13 @@ export const NewWorkOrderDialog = () => {
     defaultValues: {
       title: "",
       description: "",
-      priority: "Medium",
+      priority: "medium",
       dueDate: new Date(),
       assignedTo: "",
       asset: "",
       location: "",
       category: "Equipment",
+      tags: "",
     },
   });
 
@@ -86,6 +89,11 @@ export const NewWorkOrderDialog = () => {
 
       const selectedLocation = locations?.find(loc => loc.name === data.location);
       
+      // Convert tags string to array
+      const tagsArray = data.tags 
+        ? data.tags.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0)
+        : [];
+      
       await createWorkOrder.mutateAsync({
         title: data.title,
         description: data.description,
@@ -95,6 +103,10 @@ export const NewWorkOrderDialog = () => {
         location_id: selectedLocation?.id,
         tenant_id: userData.tenant_id,
         status: "open",
+        priority: data.priority,
+        category: data.category,
+        tags: tagsArray,
+        requester_id: user.id,
       });
       
       setOpen(false);
@@ -176,9 +188,10 @@ export const NewWorkOrderDialog = () => {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="Low">Low</SelectItem>
-                        <SelectItem value="Medium">Medium</SelectItem>
-                        <SelectItem value="High">High</SelectItem>
+                        <SelectItem value="low">Low</SelectItem>
+                        <SelectItem value="medium">Medium</SelectItem>
+                        <SelectItem value="high">High</SelectItem>
+                        <SelectItem value="urgent">Urgent</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -318,6 +331,23 @@ export const NewWorkOrderDialog = () => {
                         <SelectItem value="PM">Preventive Maintenance</SelectItem>
                       </SelectContent>
                     </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="tags"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Tags</FormLabel>
+                    <FormControl>
+                      <Input 
+                        placeholder="Enter tags separated by commas" 
+                        {...field} 
+                      />
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}

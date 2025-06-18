@@ -1,6 +1,7 @@
 
 import { inventoryApi } from "./inventory";
 import { workOrdersApi } from "./work-orders";
+import { workOrdersEnhancedApi } from "./work-orders-enhanced";
 import { assetsApi } from "./assets";
 import { proceduresApi } from "./procedures";
 import { procurementApi } from "./procurement";
@@ -14,6 +15,7 @@ import { integrationsApi } from "./integrations";
 
 export const databaseApi = {
   ...workOrdersApi,
+  ...workOrdersEnhancedApi,
   ...assetsApi,
   ...inventoryApi,
   ...proceduresApi,
