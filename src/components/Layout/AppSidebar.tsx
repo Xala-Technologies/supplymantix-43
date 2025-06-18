@@ -6,7 +6,7 @@ import { AppSidebarFooter } from "./SidebarFooter";
 
 export function AppSidebar() {
   return (
-    <Sidebar className="border-r-0 bg-white shadow-lg">
+    <Sidebar className="border-r-0 bg-white shadow-lg relative z-40">
       <SidebarHeader>
         <AppSidebarHeader />
       </SidebarHeader>

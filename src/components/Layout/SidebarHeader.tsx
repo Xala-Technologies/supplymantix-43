@@ -5,7 +5,7 @@ import { Zap } from "lucide-react";
 
 export function AppSidebarHeader() {
   return (
-    <BaseSidebarHeader className="h-16 p-4 border-b border-sidebar-border bg-sidebar">
+    <BaseSidebarHeader className="h-16 p-4 border-b border-sidebar-border bg-sidebar relative z-50">
       <Link to="/dashboard" className="flex items-center space-x-3 group">
         <div className="relative">
           <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-blue-600 flex items-center justify-center shadow-sm">
