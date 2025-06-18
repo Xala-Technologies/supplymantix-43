@@ -61,7 +61,7 @@ export default function CreatePurchaseOrder() {
 
   return (
     <DashboardLayout>
-      <div className="space-y-6">
+      <div>
         <div className="flex items-center gap-4">
           <Button
             variant="ghost"
