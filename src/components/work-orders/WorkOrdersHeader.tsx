@@ -1,10 +1,9 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { Search, Plus, Filter, SortAsc, FileTemplate } from 'lucide-react';
+import { Search, Plus, Filter, SortAsc, FileText } from 'lucide-react';
 import { WorkOrderFilters } from '@/types/workOrder';
 import { WorkOrderTemplatesDialog } from './WorkOrderTemplatesDialog';
 
@@ -61,7 +60,7 @@ export const WorkOrdersHeader = ({
             onClick={() => setIsTemplatesOpen(true)}
             className="border-purple-200 text-purple-600 hover:bg-purple-50"
           >
-            <FileTemplate className="h-4 w-4 mr-2" />
+            <FileText className="h-4 w-4 mr-2" />
             Templates
           </Button>
           

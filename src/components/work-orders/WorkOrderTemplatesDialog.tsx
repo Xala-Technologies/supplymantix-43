@@ -7,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Plus, Edit, Trash2, FileTemplate, X, GripVertical } from "lucide-react";
+import { Plus, Edit, Trash2, FileText, X, GripVertical } from "lucide-react";
 import { useWorkOrderTemplates, useCreateWorkOrderTemplate, useUpdateWorkOrderTemplate, useDeleteWorkOrderTemplate, useCreateWorkOrderFromTemplate } from "@/hooks/useWorkOrderTemplates";
 
 interface TemplateFormData {
@@ -93,6 +93,7 @@ export const WorkOrderTemplatesDialog = ({ isOpen, onClose }: WorkOrderTemplates
             description: formData.description,
             priority: formData.priority as any,
             default_tags: formData.default_tags,
+            tenant_id: "current-tenant-id", // This should come from auth context
           },
           checklistItems: formData.checklistItems,
         });
@@ -161,9 +162,7 @@ export const WorkOrderTemplatesDialog = ({ isOpen, onClose }: WorkOrderTemplates
 
   const handleCreateFromTemplate = async (template: any) => {
     try {
-      await createFromTemplate.mutateAsync(template.id, {
-        title: `${template.title} - ${new Date().toLocaleDateString()}`,
-      });
+      await createFromTemplate.mutateAsync(template.id);
       onClose();
     } catch (error) {
       console.error("Create from template error:", error);
@@ -210,7 +209,7 @@ export const WorkOrderTemplatesDialog = ({ isOpen, onClose }: WorkOrderTemplates
                             size="sm"
                             onClick={() => handleCreateFromTemplate(template)}
                           >
-                            <FileTemplate className="w-4 h-4" />
+                            <FileText className="w-4 h-4" />
                           </Button>
                           <Button
                             variant="ghost"
