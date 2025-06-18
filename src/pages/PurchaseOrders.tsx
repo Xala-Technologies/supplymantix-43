@@ -15,8 +15,8 @@ export default function PurchaseOrders() {
   if (isLoading) {
     return (
       <DashboardLayout>
-        <div className="flex items-center justify-center h-48 sm:h-64">
-          <div className="animate-spin rounded-full h-6 w-6 sm:h-8 sm:w-8 border-2 border-primary border-t-transparent"></div>
+        <div className="flex items-center justify-center h-64">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
         </div>
       </DashboardLayout>
     );
@@ -25,12 +25,8 @@ export default function PurchaseOrders() {
   if (error) {
     return (
       <DashboardLayout>
-        <div className="text-center py-8 sm:py-12">
-          <div className="glass-card-ultra card-padding-responsive max-w-md mx-auto">
-            <p className="text-destructive text-sm sm:text-base">
-              Error loading purchase orders: {error.message}
-            </p>
-          </div>
+        <div className="text-center text-red-600 py-8">
+          <p>Error loading purchase orders: {error.message}</p>
         </div>
       </DashboardLayout>
     );
@@ -38,7 +34,7 @@ export default function PurchaseOrders() {
 
   return (
     <DashboardLayout>
-      <div className="space-responsive">
+      <div className="space-y-6">
         <PurchaseOrdersHeader />
         <PurchaseOrdersList 
           purchaseOrders={purchaseOrders || []} 

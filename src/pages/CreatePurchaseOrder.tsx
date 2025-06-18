@@ -61,40 +61,36 @@ export default function CreatePurchaseOrder() {
 
   return (
     <DashboardLayout>
-      <div className="space-responsive max-w-4xl mx-auto">
-        <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+      <div className="space-y-6">
+        <div className="flex items-center gap-4">
           <Button
             variant="ghost"
             size="sm"
             onClick={() => navigate("/dashboard/purchase-orders")}
-            className="self-start sm:self-auto btn-responsive hover-ultra-soft"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
-            <span className="hidden sm:inline">Back to Purchase Orders</span>
-            <span className="sm:hidden">Back</span>
+            Back to Purchase Orders
           </Button>
         </div>
         
-        <div className="space-y-2 sm:space-y-3">
-          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight">Create Purchase Order</h1>
-          <p className="text-sm sm:text-base text-muted-foreground">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Create Purchase Order</h1>
+          <p className="text-muted-foreground">
             Create a new purchase order to track vendor orders and deliveries
           </p>
           {inventoryItemId && (
-            <div className="inline-flex items-center px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-xs sm:text-sm text-primary font-medium">
+            <p className="text-sm text-blue-600 mt-2">
               Pre-filled with low stock item for reordering
-            </div>
+            </p>
           )}
         </div>
 
-        <div className="glass-card-ultra card-padding-responsive">
-          <PurchaseOrderForm
-            initialLineItems={initialLineItems}
-            onSubmit={handleSubmit}
-            isLoading={createPurchaseOrder.isPending}
-            mode="create"
-          />
-        </div>
+        <PurchaseOrderForm
+          initialLineItems={initialLineItems}
+          onSubmit={handleSubmit}
+          isLoading={createPurchaseOrder.isPending}
+          mode="create"
+        />
       </div>
     </DashboardLayout>
   );

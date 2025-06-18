@@ -1,25 +1,18 @@
-
-/* Minimal app-specific styles */
 #root {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
+  text-align: center;
 }
 
-/* Logo animations for landing page */
 .logo {
   height: 6em;
   padding: 1.5em;
   will-change: filter;
   transition: filter 300ms;
 }
-
 .logo:hover {
-  filter: drop-shadow(0 0 2em oklch(0.45 0.08 250 / 0.4));
+  filter: drop-shadow(0 0 2em #646cffaa);
 }
-
 .logo.react:hover {
-  filter: drop-shadow(0 0 2em oklch(0.65 0.12 260 / 0.4));
+  filter: drop-shadow(0 0 2em #61dafbaa);
 }
 
 @keyframes logo-spin {
@@ -37,7 +30,10 @@
   }
 }
 
-/* Soft animations */
-.animate-soft-enter {
-  animation: fade-in 0.3s ease-out, scale-in 0.2s ease-out;
+.card {
+  padding: 2em;
+}
+
+.read-the-docs {
+  color: #888;
 }
