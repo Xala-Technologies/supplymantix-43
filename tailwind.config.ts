@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -18,6 +19,11 @@ export default {
 			}
 		},
 		extend: {
+			fontFamily: {
+				sans: ['var(--font-sans)'],
+				serif: ['var(--font-serif)'],
+				mono: ['var(--font-mono)'],
+			},
 			colors: {
 				border: 'hsl(var(--border))',
 				input: 'hsl(var(--input))',
@@ -61,12 +67,37 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
+				},
+				chart: {
+					'1': 'hsl(var(--chart-1))',
+					'2': 'hsl(var(--chart-2))',
+					'3': 'hsl(var(--chart-3))',
+					'4': 'hsl(var(--chart-4))',
+					'5': 'hsl(var(--chart-5))'
 				}
 			},
 			borderRadius: {
 				lg: 'var(--radius)',
 				md: 'calc(var(--radius) - 2px)',
-				sm: 'calc(var(--radius) - 4px)'
+				sm: 'calc(var(--radius) - 4px)',
+			},
+			boxShadow: {
+				'custom-2xs': 'var(--shadow-2xs)',
+				'custom-xs': 'var(--shadow-xs)',
+				'custom-sm': 'var(--shadow-sm)',
+				'custom': 'var(--shadow)',
+				'custom-md': 'var(--shadow-md)',
+				'custom-lg': 'var(--shadow-lg)',
+				'custom-xl': 'var(--shadow-xl)',
+				'custom-2xl': 'var(--shadow-2xl)',
+			},
+			letterSpacing: {
+				tighter: 'var(--tracking-tighter)',
+				tight: 'var(--tracking-tight)',
+				normal: 'var(--tracking-normal)',
+				wide: 'var(--tracking-wide)',
+				wider: 'var(--tracking-wider)',
+				widest: 'var(--tracking-widest)',
 			},
 			keyframes: {
 				'accordion-down': {
