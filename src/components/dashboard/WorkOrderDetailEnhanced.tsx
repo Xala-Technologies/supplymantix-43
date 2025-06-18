@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { WorkOrderDetailCard } from '@/components/work-orders/WorkOrderDetailCard';
 import { WorkOrderProcedureSection } from '@/components/work-orders/WorkOrderProcedureSection';
@@ -6,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { WorkOrder } from '@/types/workOrder';
 import { Clock, Users, MapPin, AlertCircle } from 'lucide-react';
+import { getAssetName, getLocationName } from '@/utils/assetUtils';
 
 interface WorkOrderDetailEnhancedProps {
   workOrder: WorkOrder;
@@ -32,7 +32,7 @@ export const WorkOrderDetailEnhanced = ({ workOrder }: WorkOrderDetailEnhancedPr
     return colors[priority.toLowerCase()] || colors.medium;
   };
 
-  const isOverdue = new Date(workOrder.dueDate) < new Date() && workOrder.status !== 'completed';
+  const isOverdue = workOrder.dueDate && new Date(workOrder.dueDate) < new Date() && workOrder.status !== 'completed';
 
   return (
     <div className="space-y-6">
@@ -45,9 +45,9 @@ export const WorkOrderDetailEnhanced = ({ workOrder }: WorkOrderDetailEnhancedPr
               <div className="flex flex-wrap items-center gap-3 text-sm text-gray-600">
                 <span>#{workOrder.id.slice(-4)}</span>
                 <span>•</span>
-                <span>{workOrder.asset.name}</span>
+                <span>{getAssetName(workOrder.asset)}</span>
                 <span>•</span>
-                <span>{workOrder.location}</span>
+                <span>{getLocationName(workOrder.location)}</span>
               </div>
             </div>
             <div className="flex flex-wrap gap-2">

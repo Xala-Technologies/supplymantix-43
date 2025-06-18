@@ -1,3 +1,4 @@
+
 import { useQuery } from "@tanstack/react-query";
 
 interface Asset {
@@ -115,20 +116,18 @@ interface UseAssetsResult {
 }
 
 export const useAssetsIntegration = (): UseAssetsResult => {
-  const { data, isLoading, error } = useQuery<Asset[]>(
-    "assets",
-    () => {
-      return new Promise((resolve) => {
+  const { data, isLoading, error } = useQuery({
+    queryKey: ["assets"],
+    queryFn: () => {
+      return new Promise<Asset[]>((resolve) => {
         setTimeout(() => {
           resolve(mockAssets);
         }, 500);
       });
     },
-    {
-      refetchOnMount: false,
-      refetchOnWindowFocus: false,
-    }
-  );
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
+  });
 
   return {
     assets: data || [],
@@ -144,20 +143,18 @@ interface UseWorkOrdersResult {
 }
 
 export const useWorkOrdersIntegration = (): UseWorkOrdersResult => {
-  const { data, isLoading, error } = useQuery<WorkOrder[]>(
-    "workOrders",
-    () => {
-      return new Promise((resolve) => {
+  const { data, isLoading, error } = useQuery({
+    queryKey: ["workOrders"],
+    queryFn: () => {
+      return new Promise<WorkOrder[]>((resolve) => {
         setTimeout(() => {
           resolve(mockWorkOrders);
         }, 500);
       });
     },
-    {
-      refetchOnMount: false,
-      refetchOnWindowFocus: false,
-    }
-  );
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
+  });
 
   return {
     workOrders: data || [],

@@ -9,6 +9,7 @@ import { WorkOrderChecklist } from './WorkOrderChecklist';
 import { WorkOrderTimeTracking } from './WorkOrderTimeTracking';
 import { WorkOrderProcedureSection } from './WorkOrderProcedureSection';
 import { TimeAndCostTracking } from './TimeAndCostTracking';
+import { getAssetName, getLocationName } from '@/utils/assetUtils';
 
 interface WorkOrderDetailCardProps {
   workOrder: WorkOrder;
@@ -51,11 +52,11 @@ export const WorkOrderDetailCard = ({ workOrder }: WorkOrderDetailCardProps) => 
               <div className="flex flex-wrap items-center gap-3 text-sm text-gray-600">
                 <span>#{workOrder.id.slice(-4)}</span>
                 <span>•</span>
-                <span>{workOrder.asset?.name || 'No asset assigned'}</span>
+                <span>{getAssetName(workOrder.asset)}</span>
                 {workOrder.location && (
                   <>
                     <span>•</span>
-                    <span>{workOrder.location}</span>
+                    <span>{getLocationName(workOrder.location)}</span>
                   </>
                 )}
               </div>

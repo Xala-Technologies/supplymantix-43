@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
 import { Clock, Users, MapPin, Search, Filter, Plus } from "lucide-react";
 import { WorkOrder, WorkOrderFilters } from "@/types/workOrder";
 import { getStatusColor, getPriorityColor, formatDueDate } from "@/services/workOrderService";
+import { getAssetName, getLocationName } from '@/utils/assetUtils';
 import { useState } from "react";
 
 interface EnhancedWorkOrdersListProps {
@@ -203,7 +204,7 @@ interface WorkOrderCardProps {
 }
 
 const WorkOrderCard = ({ workOrder, isSelected, onClick, getInitials, isTeam = false }: WorkOrderCardProps) => {
-  const isOverdue = new Date(workOrder.dueDate) < new Date() && workOrder.status !== 'completed';
+  const isOverdue = new Date(workOrder.dueDate || workOrder.due_date || '') < new Date() && workOrder.status !== 'completed';
   
   return (
     <div
@@ -243,7 +244,7 @@ const WorkOrderCard = ({ workOrder, isSelected, onClick, getInitials, isTeam = f
           
           {/* Asset and ID */}
           <div className="text-xs text-gray-600 mb-2 truncate">
-            {workOrder.asset.name} • #{workOrder.id.slice(-4)}
+            {getAssetName(workOrder.asset)} • #{workOrder.id.slice(-4)}
           </div>
           
           {/* Status and Due Date */}
@@ -256,12 +257,12 @@ const WorkOrderCard = ({ workOrder, isSelected, onClick, getInitials, isTeam = f
               isOverdue ? "text-red-600" : "text-gray-500"
             )}>
               <Clock className="w-3 h-3 flex-shrink-0" />
-              <span className="truncate">{formatDueDate(workOrder.dueDate)}</span>
+              <span className="truncate">{formatDueDate(workOrder.dueDate || workOrder.due_date || '')}</span>
               {isOverdue && <span className="text-red-600 font-medium">⚠️</span>}
             </div>
             <div className="flex items-center gap-1 text-xs text-gray-500">
               <MapPin className="w-3 h-3 flex-shrink-0" />
-              <span className="truncate">{workOrder.location}</span>
+              <span className="truncate">{getLocationName(workOrder.location)}</span>
             </div>
           </div>
           

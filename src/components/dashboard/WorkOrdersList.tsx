@@ -10,6 +10,7 @@ import { Clock, Users, MapPin, Plus, Search, Filter, ChevronDown } from "lucide-
 import { cn } from "@/lib/utils";
 import { WorkOrder } from "@/types/workOrder";
 import { format } from "date-fns";
+import { getAssetName, getLocationName } from '@/utils/assetUtils';
 
 interface WorkOrdersListProps {
   workOrders: WorkOrder[];
@@ -199,7 +200,7 @@ export const WorkOrdersList = ({
       <CardContent className="flex-1 overflow-auto p-0">
         <div className="space-y-3 p-6">
           {filteredAndSortedWorkOrders.map((workOrder) => {
-            const dueDate = formatDueDate(workOrder.dueDate);
+            const dueDate = formatDueDate(workOrder.dueDate || workOrder.due_date || '');
             const isSelected = selectedWorkOrderId === workOrder.id;
             
             return (
@@ -239,7 +240,7 @@ export const WorkOrdersList = ({
                     
                     {/* Asset and ID */}
                     <div className="text-sm text-gray-600 mb-3">
-                      {workOrder.asset.name} • #{workOrder.id.slice(-4)}
+                      {getAssetName(workOrder.asset)} • #{workOrder.id.slice(-4)}
                     </div>
                     
                     {/* Details Grid */}
@@ -251,7 +252,7 @@ export const WorkOrdersList = ({
                       
                       <div className="flex items-center gap-2 text-sm text-gray-600">
                         <MapPin className="w-4 h-4 text-gray-400 flex-shrink-0" />
-                        <span className="truncate">{workOrder.location}</span>
+                        <span className="truncate">{getLocationName(workOrder.location)}</span>
                       </div>
                       
                       <div className="flex items-center gap-2 text-sm">

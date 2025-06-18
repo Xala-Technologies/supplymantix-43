@@ -146,14 +146,16 @@ export default function Dashboard() {
         priority: data.priority || 'medium',
         category: data.category || 'maintenance',
         assignedTo: data.assignedTo || [],
-        dueDate: data.dueDate || new Date().toISOString(),
+        due_date: data.dueDate || new Date().toISOString(),
         asset: data.asset || { id: 'temp', name: 'General Asset', status: 'active' },
         location: data.location || '',
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        timeSpent: 0,
-        totalCost: 0,
-        partsUsed: []
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        tenant_id: 'sample-tenant',
+        tags: [],
+        time_spent: 0,
+        total_cost: 0,
+        parts_used: []
       };
       
       console.log('Work order created successfully:', newWorkOrder);
