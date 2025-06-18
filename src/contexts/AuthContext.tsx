@@ -18,7 +18,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const { user, session, loading } = useAuthState();
   const { signIn, signUp, signOut } = useAuthActions();
 
-  const value = {
+  const value: AuthContextType = {
     user,
     session,
     loading,
