@@ -1401,6 +1401,7 @@ export type Database = {
           features: Json | null
           id: string
           max_users: number | null
+          organization_id: string | null
           plan_id: string
           plan_name: string
           price_monthly: number | null
@@ -1420,6 +1421,7 @@ export type Database = {
           features?: Json | null
           id?: string
           max_users?: number | null
+          organization_id?: string | null
           plan_id: string
           plan_name: string
           price_monthly?: number | null
@@ -1439,6 +1441,7 @@ export type Database = {
           features?: Json | null
           id?: string
           max_users?: number | null
+          organization_id?: string | null
           plan_id?: string
           plan_name?: string
           price_monthly?: number | null
@@ -1450,7 +1453,15 @@ export type Database = {
           trial_start?: string | null
           updated_at?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "subscriptions_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       template_checklist_items: {
         Row: {
