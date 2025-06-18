@@ -38,7 +38,7 @@ export const EnhancedWorkOrderDetail = ({
 
   const getStatusColor = (status: string) => {
     const colors = {
-      'draft': 'bg-blue-50 text-blue-600 border-blue-200',
+      'draft': 'bg-slate-50 text-slate-600 border-slate-200',
       'open': 'bg-sky-50 text-sky-700 border-sky-200',
       'in_progress': 'bg-amber-50 text-amber-700 border-amber-200',
       'on_hold': 'bg-orange-50 text-orange-700 border-orange-200',
@@ -51,8 +51,8 @@ export const EnhancedWorkOrderDetail = ({
 
   const getPriorityColor = (priority: string) => {
     const colors = {
-      'low': 'text-blue-600 bg-blue-50 border-blue-200',
-      'medium': 'text-sky-600 bg-sky-50 border-sky-200',
+      'low': 'text-slate-600 bg-slate-50 border-slate-200',
+      'medium': 'text-blue-600 bg-blue-50 border-blue-200',
       'high': 'text-amber-600 bg-amber-50 border-amber-200',
       'urgent': 'text-rose-600 bg-rose-50 border-rose-200',
     };
@@ -62,33 +62,33 @@ export const EnhancedWorkOrderDetail = ({
   const isOverdue = workOrder.due_date && new Date(workOrder.due_date) < new Date() && workOrder.status !== 'completed';
 
   return (
-    <div className="fixed inset-0 bg-blue-50/30 backdrop-blur-sm z-50">
+    <div className="h-full overflow-auto">
       <Card className="h-full border-0 shadow-none rounded-none bg-white">
         {/* Elegant Header with Soft Blue Gradient */}
-        <CardHeader className="bg-gradient-to-br from-blue-50 via-sky-50 to-indigo-50 border-b border-blue-100">
+        <CardHeader className="bg-gradient-to-br from-blue-50 via-sky-50 to-slate-50 border-b border-slate-100">
           <div className="flex items-start justify-between">
             <div className="space-y-4 flex-1">
               <div className="flex items-center gap-3">
-                <CardTitle className="text-2xl font-light tracking-wide text-blue-800">{workOrder.title}</CardTitle>
+                <CardTitle className="text-2xl font-light tracking-wide text-slate-700">{workOrder.title}</CardTitle>
                 {onEdit && (
-                  <Button variant="outline" size="sm" onClick={onEdit} className="shrink-0 bg-white/80 border-blue-200 text-blue-600 hover:bg-white hover:text-blue-700 backdrop-blur-sm">
+                  <Button variant="outline" size="sm" onClick={onEdit} className="shrink-0 bg-white/80 border-slate-200 text-slate-600 hover:bg-white hover:text-slate-700 backdrop-blur-sm">
                     <Edit className="w-4 h-4 mr-2" />
                     Edit
                   </Button>
                 )}
               </div>
               
-              <div className="flex flex-wrap items-center gap-4 text-sm text-blue-600">
-                <span className="flex items-center gap-2 bg-white/70 px-3 py-1.5 rounded-full backdrop-blur-sm border border-blue-200">
+              <div className="flex flex-wrap items-center gap-4 text-sm text-slate-500">
+                <span className="flex items-center gap-2 bg-white/70 px-3 py-1.5 rounded-full backdrop-blur-sm border border-slate-200">
                   <FileText className="w-4 h-4" />
                   #{workOrder.id.slice(-8)}
                 </span>
-                <span className="flex items-center gap-2 bg-white/70 px-3 py-1.5 rounded-full backdrop-blur-sm border border-blue-200">
+                <span className="flex items-center gap-2 bg-white/70 px-3 py-1.5 rounded-full backdrop-blur-sm border border-slate-200">
                   <MapPin className="w-4 h-4" />
                   {getAssetName(workOrder.asset)}
                 </span>
                 {workOrder.location && (
-                  <span className="flex items-center gap-2 bg-white/70 px-3 py-1.5 rounded-full backdrop-blur-sm border border-blue-200">
+                  <span className="flex items-center gap-2 bg-white/70 px-3 py-1.5 rounded-full backdrop-blur-sm border border-slate-200">
                     <MapPin className="w-4 h-4" />
                     {getLocationName(workOrder.location)}
                   </span>
@@ -113,62 +113,62 @@ export const EnhancedWorkOrderDetail = ({
           </div>
 
           {workOrder.description && (
-            <div className="bg-white/50 rounded-2xl p-6 border border-blue-200 mt-6 backdrop-blur-sm">
-              <h3 className="font-medium text-blue-700 mb-3 text-lg">Description</h3>
-              <p className="text-blue-600 leading-relaxed">{workOrder.description}</p>
+            <div className="bg-white/50 rounded-2xl p-6 border border-slate-200 mt-6 backdrop-blur-sm">
+              <h3 className="font-medium text-slate-600 mb-3 text-lg">Description</h3>
+              <p className="text-slate-600 leading-relaxed">{workOrder.description}</p>
             </div>
           )}
         </CardHeader>
 
-        <CardContent className="flex-1 p-8 overflow-y-auto">
+        <CardContent className="flex-1 p-8">
           {/* Refined Overview Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
             {workOrder.due_date && (
-              <div className="flex items-center gap-4 p-6 bg-blue-50 rounded-2xl border border-blue-100">
+              <div className="flex items-center gap-4 p-6 bg-slate-50 rounded-2xl border border-slate-100">
                 <div className="p-3 bg-blue-100 rounded-xl">
                   <Calendar className="w-5 h-5 text-blue-600" />
                 </div>
                 <div>
-                  <div className="font-semibold text-blue-800 mb-1">Due Date</div>
-                  <div className={`text-sm ${isOverdue ? "text-rose-600" : "text-blue-600"}`}>
+                  <div className="font-semibold text-slate-700 mb-1">Due Date</div>
+                  <div className={`text-sm ${isOverdue ? "text-rose-600" : "text-slate-500"}`}>
                     {new Date(workOrder.due_date).toLocaleDateString()}
                   </div>
                 </div>
               </div>
             )}
             
-            <div className="flex items-center gap-4 p-6 bg-blue-50 rounded-2xl border border-blue-100">
+            <div className="flex items-center gap-4 p-6 bg-slate-50 rounded-2xl border border-slate-100">
               <div className="p-3 bg-sky-100 rounded-xl">
                 <Users className="w-5 h-5 text-sky-600" />
               </div>
               <div>
-                <div className="font-semibold text-blue-800 mb-1">Assigned To</div>
-                <div className="text-sm text-blue-600">
+                <div className="font-semibold text-slate-700 mb-1">Assigned To</div>
+                <div className="text-sm text-slate-500">
                   {workOrder.assignedTo?.length > 0 ? workOrder.assignedTo.join(', ') : 'Unassigned'}
                 </div>
               </div>
             </div>
             
             {workOrder.category && (
-              <div className="flex items-center gap-4 p-6 bg-blue-50 rounded-2xl border border-blue-100">
+              <div className="flex items-center gap-4 p-6 bg-slate-50 rounded-2xl border border-slate-100">
                 <div className="p-3 bg-indigo-100 rounded-xl">
                   <Tag className="w-5 h-5 text-indigo-600" />
                 </div>
                 <div>
-                  <div className="font-semibold text-blue-800 mb-1">Category</div>
-                  <div className="text-sm text-blue-600 capitalize">{workOrder.category}</div>
+                  <div className="font-semibold text-slate-700 mb-1">Category</div>
+                  <div className="text-sm text-slate-500 capitalize">{workOrder.category}</div>
                 </div>
               </div>
             )}
 
             {(workOrder.time_spent || workOrder.timeSpent) && (
-              <div className="flex items-center gap-4 p-6 bg-blue-50 rounded-2xl border border-blue-100">
+              <div className="flex items-center gap-4 p-6 bg-slate-50 rounded-2xl border border-slate-100">
                 <div className="p-3 bg-emerald-100 rounded-xl">
                   <Timer className="w-5 h-5 text-emerald-600" />
                 </div>
                 <div>
-                  <div className="font-semibold text-blue-800 mb-1">Time Spent</div>
-                  <div className="text-sm text-blue-600">
+                  <div className="font-semibold text-slate-700 mb-1">Time Spent</div>
+                  <div className="text-sm text-slate-500">
                     {workOrder.time_spent || workOrder.timeSpent} hours
                   </div>
                 </div>
@@ -176,13 +176,13 @@ export const EnhancedWorkOrderDetail = ({
             )}
 
             {(workOrder.total_cost || workOrder.totalCost) && (
-              <div className="flex items-center gap-4 p-6 bg-blue-50 rounded-2xl border border-blue-100">
+              <div className="flex items-center gap-4 p-6 bg-slate-50 rounded-2xl border border-slate-100">
                 <div className="p-3 bg-amber-100 rounded-xl">
                   <div className="w-5 h-5 text-amber-600 flex items-center justify-center font-bold text-sm">$</div>
                 </div>
                 <div>
-                  <div className="font-semibold text-blue-800 mb-1">Total Cost</div>
-                  <div className="text-sm text-blue-600">
+                  <div className="font-semibold text-slate-700 mb-1">Total Cost</div>
+                  <div className="text-sm text-slate-500">
                     ${(workOrder.total_cost || workOrder.totalCost)?.toFixed(2)}
                   </div>
                 </div>
@@ -192,14 +192,14 @@ export const EnhancedWorkOrderDetail = ({
 
           {/* Elegant Tags Section */}
           {workOrder.tags && workOrder.tags.length > 0 && (
-            <div className="mb-8 p-6 bg-blue-50 rounded-2xl border border-blue-100">
+            <div className="mb-8 p-6 bg-slate-50 rounded-2xl border border-slate-100">
               <div className="flex items-center gap-3 mb-4">
-                <Tag className="w-5 h-5 text-blue-400" />
-                <span className="font-semibold text-blue-800">Tags</span>
+                <Tag className="w-5 h-5 text-slate-400" />
+                <span className="font-semibold text-slate-700">Tags</span>
               </div>
               <div className="flex flex-wrap gap-2">
                 {workOrder.tags.map((tag, index) => (
-                  <Badge key={index} variant="outline" className="text-xs bg-white border-blue-200 text-blue-600 hover:bg-blue-50 px-3 py-1">
+                  <Badge key={index} variant="outline" className="text-xs bg-white border-slate-200 text-slate-600 hover:bg-slate-50 px-3 py-1">
                     {tag}
                   </Badge>
                 ))}
@@ -209,26 +209,26 @@ export const EnhancedWorkOrderDetail = ({
 
           {/* Refined Tabbed Content */}
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-            <TabsList className="grid w-full grid-cols-4 bg-blue-50 rounded-2xl p-1.5 border border-blue-100">
-              <TabsTrigger value="overview" className="flex items-center gap-2 rounded-xl data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-blue-700 text-blue-500">
+            <TabsList className="grid w-full grid-cols-4 bg-slate-50 rounded-2xl p-1.5 border border-slate-100">
+              <TabsTrigger value="overview" className="flex items-center gap-2 rounded-xl data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-slate-700 text-slate-500">
                 <CheckSquare className="w-4 h-4" />
                 Checklist
               </TabsTrigger>
-              <TabsTrigger value="status" className="flex items-center gap-2 rounded-xl data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-blue-700 text-blue-500">
+              <TabsTrigger value="status" className="flex items-center gap-2 rounded-xl data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-slate-700 text-slate-500">
                 <Clock className="w-4 h-4" />
                 Status
               </TabsTrigger>
-              <TabsTrigger value="time" className="flex items-center gap-2 rounded-xl data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-blue-700 text-blue-500">
+              <TabsTrigger value="time" className="flex items-center gap-2 rounded-xl data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-slate-700 text-slate-500">
                 <Timer className="w-4 h-4" />
                 Time & Cost
               </TabsTrigger>
-              <TabsTrigger value="activity" className="flex items-center gap-2 rounded-xl data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-blue-700 text-blue-500">
+              <TabsTrigger value="activity" className="flex items-center gap-2 rounded-xl data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-slate-700 text-slate-500">
                 <MessageSquare className="w-4 h-4" />
                 Activity
               </TabsTrigger>
             </TabsList>
 
-            <div className="bg-white rounded-2xl border border-blue-100 shadow-sm">
+            <div className="bg-white rounded-2xl border border-slate-100 shadow-sm">
               <TabsContent value="overview" className="p-6 m-0">
                 <EnhancedChecklist workOrderId={workOrder.id} />
               </TabsContent>
@@ -242,12 +242,12 @@ export const EnhancedWorkOrderDetail = ({
               </TabsContent>
 
               <TabsContent value="activity" className="p-6 m-0">
-                <div className="text-center py-16 text-blue-400">
-                  <div className="w-20 h-20 bg-blue-50 rounded-2xl flex items-center justify-center mx-auto mb-6">
-                    <MessageSquare className="w-10 h-10 text-blue-300" />
+                <div className="text-center py-16 text-slate-400">
+                  <div className="w-20 h-20 bg-slate-50 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                    <MessageSquare className="w-10 h-10 text-slate-300" />
                   </div>
-                  <p className="text-lg font-medium text-blue-600 mb-2">No activity yet</p>
-                  <p className="text-sm text-blue-400">Comments and activity logs will appear here</p>
+                  <p className="text-lg font-medium text-slate-600 mb-2">No activity yet</p>
+                  <p className="text-sm text-slate-400">Comments and activity logs will appear here</p>
                 </div>
               </TabsContent>
             </div>
