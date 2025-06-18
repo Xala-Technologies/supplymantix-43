@@ -61,8 +61,8 @@ export default function CreatePurchaseOrder() {
 
   return (
     <DashboardLayout>
-      <div>
-        <div className="flex items-center gap-4">
+      <div className="h-full">
+        <div className="flex items-center gap-4 p-4 border-b bg-white">
           <Button
             variant="ghost"
             size="sm"
@@ -71,25 +71,26 @@ export default function CreatePurchaseOrder() {
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Purchase Orders
           </Button>
-        </div>
-        
-        <div>
-          <p className="text-muted-foreground">
-            Create a new purchase order to track vendor orders and deliveries
-          </p>
-          {inventoryItemId && (
-            <p className="text-sm text-blue-600 mt-2">
-              Pre-filled with low stock item for reordering
+          <div>
+            <p className="text-sm text-muted-foreground">
+              Create a new purchase order to track vendor orders and deliveries
             </p>
-          )}
+            {inventoryItemId && (
+              <p className="text-xs text-blue-600 mt-1">
+                Pre-filled with low stock item for reordering
+              </p>
+            )}
+          </div>
         </div>
 
-        <PurchaseOrderForm
-          initialLineItems={initialLineItems}
-          onSubmit={handleSubmit}
-          isLoading={createPurchaseOrder.isPending}
-          mode="create"
-        />
+        <div className="flex-1 overflow-y-auto">
+          <PurchaseOrderForm
+            initialLineItems={initialLineItems}
+            onSubmit={handleSubmit}
+            isLoading={createPurchaseOrder.isPending}
+            mode="create"
+          />
+        </div>
       </div>
     </DashboardLayout>
   );
