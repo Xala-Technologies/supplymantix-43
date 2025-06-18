@@ -13,12 +13,12 @@ const Header = () => {
       initial={{ y: -100, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.6, ease: "easeOut" }}
-      className="border-b border-slate-200 bg-white/95 backdrop-blur-lg sticky top-0 z-50"
+      className="border-b border-slate-200 bg-white/95 backdrop-blur-lg fixed top-0 left-0 right-0 z-50"
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           <motion.div 
-            className="flex items-center space-x-3"
+            className="flex items-center space-x-3 fixed"
             whileHover={{ scale: 1.05 }}
             transition={{ type: "spring", stiffness: 400 }}
           >
