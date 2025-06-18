@@ -146,6 +146,23 @@
 }
 
 @layer components {
+  /* Page Layout Components */
+  .page-container {
+    @apply h-full;
+  }
+  
+  .page-header {
+    @apply flex items-center gap-4 p-4 border-b bg-white;
+  }
+  
+  .page-content {
+    @apply flex-1 overflow-y-auto;
+  }
+  
+  .page-content-padded {
+    @apply flex-1 overflow-y-auto p-4;
+  }
+  
   /* Modern card styles */
   .card-modern {
     @apply bg-card border border-border rounded-xl shadow-sm;

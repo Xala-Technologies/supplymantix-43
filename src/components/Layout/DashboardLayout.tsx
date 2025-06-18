@@ -15,10 +15,8 @@ export const DashboardLayout = ({ children }: DashboardLayoutProps) => {
         <AppSidebar />
         <div className="flex-1 flex flex-col overflow-hidden ml-[var(--sidebar-width)] transition-[margin-left] duration-300 ease-linear peer-data-[state=collapsed]:ml-[var(--sidebar-width-icon)]">
           <TopBar />
-          <main className="flex-1 overflow-y-auto pt-16">
-            <div className="w-full h-full px-2">
-              {children}
-            </div>
+          <main className="flex-1 overflow-hidden pt-16">
+            {children}
           </main>
         </div>
       </div>

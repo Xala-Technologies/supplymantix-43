@@ -75,8 +75,8 @@ export default function Requests() {
   if (view === "create") {
     return (
       <DashboardLayout>
-        <div className="space-y-6">
-          <div className="flex items-center gap-4">
+        <div className="h-full">
+          <div className="flex items-center gap-4 p-4 border-b bg-white">
             <Button
               variant="ghost"
               size="sm"
@@ -85,14 +85,22 @@ export default function Requests() {
               <ArrowLeft className="h-4 w-4 mr-2" />
               Back to Requests
             </Button>
+            <div>
+              <h1 className="text-xl font-semibold text-gray-900">Create New Request</h1>
+              <p className="text-sm text-muted-foreground">
+                Submit a new request for maintenance, repairs, or services
+              </p>
+            </div>
           </div>
 
-          <RequestForm
-            onSubmit={handleCreateRequest}
-            onCancel={() => setView("list")}
-            isLoading={createRequest.isPending}
-            mode="create"
-          />
+          <div className="flex-1 overflow-y-auto">
+            <RequestForm
+              onSubmit={handleCreateRequest}
+              onCancel={() => setView("list")}
+              isLoading={createRequest.isPending}
+              mode="create"
+            />
+          </div>
         </div>
       </DashboardLayout>
     );
@@ -101,8 +109,8 @@ export default function Requests() {
   if (view === "edit" && selectedRequest) {
     return (
       <DashboardLayout>
-        <div className="space-y-6">
-          <div className="flex items-center gap-4">
+        <div className="h-full">
+          <div className="flex items-center gap-4 p-4 border-b bg-white">
             <Button
               variant="ghost"
               size="sm"
@@ -114,18 +122,26 @@ export default function Requests() {
               <ArrowLeft className="h-4 w-4 mr-2" />
               Back to Requests
             </Button>
+            <div>
+              <h1 className="text-xl font-semibold text-gray-900">Edit Request</h1>
+              <p className="text-sm text-muted-foreground">
+                Update request details and information
+              </p>
+            </div>
           </div>
 
-          <RequestForm
-            onSubmit={handleEditRequest}
-            onCancel={() => {
-              setView("list");
-              setSelectedRequest(null);
-            }}
-            isLoading={updateRequest.isPending}
-            initialData={selectedRequest}
-            mode="edit"
-          />
+          <div className="flex-1 overflow-y-auto">
+            <RequestForm
+              onSubmit={handleEditRequest}
+              onCancel={() => {
+                setView("list");
+                setSelectedRequest(null);
+              }}
+              isLoading={updateRequest.isPending}
+              initialData={selectedRequest}
+              mode="edit"
+            />
+          </div>
         </div>
       </DashboardLayout>
     );
@@ -133,34 +149,47 @@ export default function Requests() {
 
   return (
     <DashboardLayout>
-      <div className="space-y-6">
-        <RequestsHeader
-          onCreateRequest={() => setView("create")}
-          searchQuery={searchQuery}
-          onSearchChange={setSearchQuery}
-          statusFilter={statusFilter}
-          onStatusFilterChange={setStatusFilter}
-          priorityFilter={priorityFilter}
-          onPriorityFilterChange={setPriorityFilter}
-        />
+      <div className="h-full">
+        <div className="flex items-center gap-4 p-4 border-b bg-white">
+          <div className="flex-1">
+            <h1 className="text-xl font-semibold text-gray-900">Requests</h1>
+            <p className="text-sm text-muted-foreground">
+              Manage and track maintenance requests and service tickets
+            </p>
+          </div>
+        </div>
 
-        {isLoading ? (
-          <div className="text-center py-8">Loading requests...</div>
-        ) : (
-          <RequestsList
-            requests={filteredRequests}
-            onEditRequest={handleEditMode}
-            onDeleteRequest={handleDeleteRequest}
-            onViewRequest={handleViewRequest}
-          />
-        )}
+        <div className="flex-1 overflow-y-auto p-4">
+          <div className="space-y-6">
+            <RequestsHeader
+              onCreateRequest={() => setView("create")}
+              searchQuery={searchQuery}
+              onSearchChange={setSearchQuery}
+              statusFilter={statusFilter}
+              onStatusFilterChange={setStatusFilter}
+              priorityFilter={priorityFilter}
+              onPriorityFilterChange={setPriorityFilter}
+            />
 
-        <RequestDetailDialog
-          request={selectedRequest}
-          open={detailDialogOpen}
-          onOpenChange={setDetailDialogOpen}
-        />
+            {isLoading ? (
+              <div className="text-center py-8">Loading requests...</div>
+            ) : (
+              <RequestsList
+                requests={filteredRequests}
+                onEditRequest={handleEditMode}
+                onDeleteRequest={handleDeleteRequest}
+                onViewRequest={handleViewRequest}
+              />
+            )}
+
+            <RequestDetailDialog
+              request={selectedRequest}
+              open={detailDialogOpen}
+              onOpenChange={setDetailDialogOpen}
+            />
+          </div>
+        </div>
       </div>
     </DashboardLayout>
   );
-};
+}
