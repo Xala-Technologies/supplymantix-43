@@ -17,6 +17,8 @@ import { useInventoryItems } from "@/hooks/useInventory";
 import { PurchaseOrder, PurchaseOrderStatus } from "@/types/purchaseOrder";
 import { formatCurrency } from "@/lib/utils";
 import { toast } from "sonner";
+import { VendorSelector } from "./VendorSelector";
+import { AddressSelector } from "./AddressSelector";
 
 interface LineItem {
   inventory_item_id: string;
@@ -61,6 +63,8 @@ export const PurchaseOrderForm = ({
       ? initialLineItems 
       : [{ inventory_item_id: '', description: '', quantity: 1, unit_price: 0 }]
   );
+  const [billingAddress, setBillingAddress] = useState('');
+  const [shippingAddress, setShippingAddress] = useState('');
 
   const { data: inventoryItems } = useInventoryItems();
 
@@ -181,6 +185,49 @@ export const PurchaseOrderForm = ({
     return validLineItems.length > 0;
   };
 
+  // Mock data for demonstration - in real app, these would come from your backend
+  const mockVendors = [
+    { id: '1', name: 'ACME Corp', contact_email: 'orders@acme.com' },
+    { id: '2', name: 'Best Supplies Ltd', contact_email: 'sales@bestsupplies.com' },
+    { id: '3', name: 'Quick Parts Inc', contact_email: 'info@quickparts.com' },
+  ];
+
+  const mockAddresses = [
+    {
+      id: '1',
+      type: 'billing' as const,
+      street: '123 Business Ave',
+      city: 'New York',
+      state: 'NY',
+      zip: '10001',
+      country: 'United States'
+    },
+    {
+      id: '2',
+      type: 'shipping' as const,
+      street: '456 Warehouse Rd',
+      city: 'Brooklyn',
+      state: 'NY',
+      zip: '11201',
+      country: 'United States'
+    }
+  ];
+
+  const handleCreateVendor = async (vendorData: any) => {
+    console.log('Creating vendor:', vendorData);
+    // In real app, this would call your API
+    return Promise.resolve();
+  };
+
+  const handleCreateAddress = async (addressData: any) => {
+    console.log('Creating address:', addressData);
+    // In real app, this would call your API and return the created address
+    return Promise.resolve({
+      id: Date.now().toString(),
+      ...addressData
+    });
+  };
+
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       {/* Header Information */}
@@ -190,16 +237,12 @@ export const PurchaseOrderForm = ({
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="vendor">Vendor *</Label>
-              <Input
-                id="vendor"
-                value={vendor}
-                onChange={(e) => setVendor(e.target.value)}
-                placeholder="Enter vendor name"
-                required
-              />
-            </div>
+            <VendorSelector
+              value={vendor}
+              onChange={setVendor}
+              vendors={mockVendors}
+              onCreateVendor={handleCreateVendor}
+            />
             <div className="space-y-2">
               <Label htmlFor="po_number">PO Number *</Label>
               <Input
@@ -250,6 +293,31 @@ export const PurchaseOrderForm = ({
               onChange={(e) => setNotes(e.target.value)}
               placeholder="Additional notes or instructions"
               rows={3}
+            />
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Addresses */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Addresses</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <AddressSelector
+              type="billing"
+              value={billingAddress}
+              onChange={setBillingAddress}
+              addresses={mockAddresses}
+              onCreateAddress={handleCreateAddress}
+            />
+            <AddressSelector
+              type="shipping"
+              value={shippingAddress}
+              onChange={setShippingAddress}
+              addresses={mockAddresses}
+              onCreateAddress={handleCreateAddress}
             />
           </div>
         </CardContent>
