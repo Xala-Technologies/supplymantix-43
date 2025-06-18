@@ -5,7 +5,7 @@ import { usePurchaseOrderByIdEnhanced } from "@/hooks/usePurchaseOrdersEnhanced"
 import { PurchaseOrderDetailHeader } from "@/components/purchase-orders/PurchaseOrderDetailHeader";
 import { PurchaseOrderInfo } from "@/components/purchase-orders/PurchaseOrderInfo";
 import { PurchaseOrderLineItems } from "@/components/purchase-orders/PurchaseOrderLineItems";
-import { PurchaseOrderApprovals } from "@/components/purchase-orders/PurchaseOrderApprovals";
+import { PurchaseOrderApprovalWorkflow } from "@/components/purchase-orders/PurchaseOrderApprovalWorkflow";
 import { PurchaseOrderAttachments } from "@/components/purchase-orders/PurchaseOrderAttachments";
 import { PurchaseOrderActions } from "@/components/purchase-orders/PurchaseOrderActions";
 
@@ -53,7 +53,7 @@ export default function PurchaseOrderDetail() {
           
           <div className="space-y-6">
             <PurchaseOrderActions purchaseOrder={purchaseOrder} />
-            <PurchaseOrderApprovals purchaseOrder={purchaseOrder} />
+            <PurchaseOrderApprovalWorkflow purchaseOrder={purchaseOrder} />
             <PurchaseOrderAttachments purchaseOrder={purchaseOrder} />
           </div>
         </div>

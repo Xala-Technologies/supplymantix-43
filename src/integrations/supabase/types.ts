@@ -1135,6 +1135,86 @@ export type Database = {
           },
         ]
       }
+      purchase_order_approval_rules: {
+        Row: {
+          created_at: string
+          id: string
+          is_active: boolean
+          max_amount: number | null
+          min_amount: number
+          name: string
+          order_index: number
+          required_approver_role: string
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          max_amount?: number | null
+          min_amount?: number
+          name: string
+          order_index?: number
+          required_approver_role?: string
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          max_amount?: number | null
+          min_amount?: number
+          name?: string
+          order_index?: number
+          required_approver_role?: string
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      purchase_order_approvals: {
+        Row: {
+          approved_at: string | null
+          approver_id: string
+          comments: string | null
+          created_at: string
+          id: string
+          purchase_order_id: string
+          rule_id: string | null
+          status: string
+        }
+        Insert: {
+          approved_at?: string | null
+          approver_id: string
+          comments?: string | null
+          created_at?: string
+          id?: string
+          purchase_order_id: string
+          rule_id?: string | null
+          status: string
+        }
+        Update: {
+          approved_at?: string | null
+          approver_id?: string
+          comments?: string | null
+          created_at?: string
+          id?: string
+          purchase_order_id?: string
+          rule_id?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "purchase_order_approvals_rule_id_fkey"
+            columns: ["rule_id"]
+            isOneToOne: false
+            referencedRelation: "purchase_order_approval_rules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       purchase_order_line_items: {
         Row: {
           created_at: string | null
@@ -2058,6 +2138,15 @@ export type Database = {
           organization_name: string
         }[]
       }
+      get_required_approvals: {
+        Args: { po_id: string; po_amount: number }
+        Returns: {
+          rule_id: string
+          required_role: string
+          min_amount: number
+          max_amount: number
+        }[]
+      }
       get_trending_documents: {
         Args:
           | { org_id: string }
@@ -2096,6 +2185,10 @@ export type Database = {
       increment_inventory_from_po: {
         Args: { po_id: string }
         Returns: undefined
+      }
+      is_purchase_order_approved: {
+        Args: { po_id: string }
+        Returns: boolean
       }
       log_search_analytics: {
         Args: {
@@ -2275,6 +2368,8 @@ export type Database = {
         | "ordered"
         | "received"
         | "cancelled"
+        | "pending_approval"
+        | "rejected"
       request_priority: "low" | "medium" | "high" | "urgent"
       request_status:
         | "pending"
@@ -2437,6 +2532,8 @@ export const Constants = {
         "ordered",
         "received",
         "cancelled",
+        "pending_approval",
+        "rejected",
       ],
       request_priority: ["low", "medium", "high", "urgent"],
       request_status: [

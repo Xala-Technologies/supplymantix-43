@@ -2,10 +2,12 @@
 export type PurchaseOrderStatus =
   | 'draft'
   | 'pending'
+  | 'pending_approval'
   | 'approved'
   | 'ordered'
   | 'received'
-  | 'cancelled';
+  | 'cancelled'
+  | 'rejected';
 
 export type ApprovalStatus = 
   | 'pending'
@@ -34,14 +36,35 @@ export interface Address {
   country: string;
 }
 
+export interface PurchaseOrderApprovalRule {
+  id: string;
+  tenant_id: string;
+  name: string;
+  min_amount: number;
+  max_amount?: number;
+  required_approver_role: string;
+  order_index: number;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface PurchaseOrderApproval {
   id: string;
   purchase_order_id: string;
   approver_id: string;
   status: ApprovalStatus;
-  approved_at?: string;
   comments?: string;
+  approved_at?: string;
   created_at: string;
+  rule_id?: string;
+  approver?: {
+    id: string;
+    first_name?: string;
+    last_name?: string;
+    email: string;
+  };
+  rule?: PurchaseOrderApprovalRule;
 }
 
 export interface PurchaseOrderAttachment {
@@ -137,6 +160,7 @@ export interface SubmitForApprovalRequest {
 
 export interface ApprovalDecisionRequest {
   purchase_order_id: string;
+  rule_id: string;
   decision: 'approved' | 'rejected';
   comments?: string;
 }

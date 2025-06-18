@@ -6,7 +6,9 @@ import {
   CheckCircle, 
   ShoppingCart, 
   Package, 
-  XCircle 
+  XCircle,
+  AlertCircle,
+  UserCheck
 } from "lucide-react";
 import type { PurchaseOrderStatus } from "@/types/purchaseOrder";
 
@@ -35,6 +37,13 @@ export const PurchaseOrderStatusBadgeEnhanced = ({
           label: 'Pending',
           className: 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200'
         };
+      case 'pending_approval':
+        return {
+          variant: 'default' as const,
+          icon: UserCheck,
+          label: 'Pending Approval',
+          className: 'bg-orange-100 text-orange-800 hover:bg-orange-200'
+        };
       case 'approved':
         return {
           variant: 'default' as const,
@@ -61,6 +70,13 @@ export const PurchaseOrderStatusBadgeEnhanced = ({
           variant: 'destructive' as const,
           icon: XCircle,
           label: 'Cancelled',
+          className: 'bg-red-100 text-red-800 hover:bg-red-200'
+        };
+      case 'rejected':
+        return {
+          variant: 'destructive' as const,
+          icon: AlertCircle,
+          label: 'Rejected',
           className: 'bg-red-100 text-red-800 hover:bg-red-200'
         };
       default:

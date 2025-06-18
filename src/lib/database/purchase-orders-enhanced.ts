@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/integrations/supabase/types";
 import type { 
@@ -6,7 +5,11 @@ import type {
   UpdatePurchaseOrderRequest,
   PurchaseOrder,
   PurchaseOrderLineItem,
-  PurchaseOrderStatus
+  PurchaseOrderStatus,
+  PurchaseOrderApproval,
+  PurchaseOrderApprovalRule,
+  SubmitForApprovalRequest,
+  ApprovalDecisionRequest
 } from "@/types/purchaseOrder";
 
 type Tables = Database["public"]["Tables"];
@@ -14,7 +17,7 @@ type PurchaseOrderRow = Tables["purchase_orders"]["Row"];
 type PurchaseOrderLineItemRow = Tables["purchase_order_line_items"]["Row"];
 
 // Valid status values from the database enum
-const validStatuses: PurchaseOrderStatus[] = ['draft', 'pending', 'approved', 'ordered', 'received', 'cancelled'];
+const validStatuses: PurchaseOrderStatus[] = ['draft', 'pending', 'pending_approval', 'approved', 'ordered', 'received', 'cancelled', 'rejected'];
 
 // Transform database line item to interface
 const transformLineItem = (dbItem: PurchaseOrderLineItemRow): PurchaseOrderLineItem => ({
@@ -170,7 +173,134 @@ export const purchaseOrdersEnhancedApi = {
     return transformPurchaseOrder(po);
   },
 
-  // Placeholder methods for future implementation
+  async getApprovalRules() {
+    const { data, error } = await supabase
+      .from("purchase_order_approval_rules")
+      .select("*")
+      .eq("is_active", true)
+      .order("order_index", { ascending: true });
+    
+    if (error) throw error;
+    return data as PurchaseOrderApprovalRule[];
+  },
+
+  async getPurchaseOrderApprovals(purchaseOrderId: string) {
+    const { data, error } = await supabase
+      .from("purchase_order_approvals")
+      .select(`
+        *,
+        approver:users!purchase_order_approvals_approver_id_fkey(id, first_name, last_name, email),
+        rule:purchase_order_approval_rules!purchase_order_approvals_rule_id_fkey(*)
+      `)
+      .eq("purchase_order_id", purchaseOrderId)
+      .order("created_at", { ascending: true });
+    
+    if (error) throw error;
+    return data as PurchaseOrderApproval[];
+  },
+
+  async submitForApproval(request: SubmitForApprovalRequest) {
+    const { data: userData, error: userError } = await supabase.auth.getUser();
+    if (userError || !userData.user) {
+      throw new Error("User not authenticated");
+    }
+
+    // Get the PO to check amount and create required approvals
+    const { data: po, error: poError } = await supabase
+      .from("purchase_orders")
+      .select("*")
+      .eq("id", request.id)
+      .single();
+    
+    if (poError) throw poError;
+
+    // Get required approval rules for this amount
+    const { data: rules, error: rulesError } = await supabase
+      .rpc("get_required_approvals", {
+        po_id: request.id,
+        po_amount: po.total_amount
+      });
+    
+    if (rulesError) throw rulesError;
+
+    if (!rules || rules.length === 0) {
+      // No approval required, mark as approved directly
+      const { error: updateError } = await supabase
+        .from("purchase_orders")
+        .update({ status: 'approved' as PurchaseOrderStatus })
+        .eq("id", request.id);
+      
+      if (updateError) throw updateError;
+      return;
+    }
+
+    // Create pending approvals for each required rule
+    const approvals = rules.map((rule: any) => ({
+      purchase_order_id: request.id,
+      approver_id: userData.user.id, // This would need to be the actual approver based on role
+      status: 'pending' as const,
+      rule_id: rule.rule_id,
+      comments: request.comment
+    }));
+
+    const { error: approvalsError } = await supabase
+      .from("purchase_order_approvals")
+      .insert(approvals);
+    
+    if (approvalsError) throw approvalsError;
+
+    // Update PO status to pending_approval
+    const { error: statusError } = await supabase
+      .from("purchase_orders")
+      .update({ status: 'pending_approval' as PurchaseOrderStatus })
+      .eq("id", request.id);
+    
+    if (statusError) throw statusError;
+  },
+
+  async approveOrRejectPurchaseOrder(request: ApprovalDecisionRequest) {
+    const { data: userData, error: userError } = await supabase.auth.getUser();
+    if (userError || !userData.user) {
+      throw new Error("User not authenticated");
+    }
+
+    const { error } = await supabase
+      .from("purchase_order_approvals")
+      .update({
+        status: request.decision,
+        comments: request.comments,
+        approved_at: request.decision === 'approved' ? new Date().toISOString() : null
+      })
+      .eq("purchase_order_id", request.purchase_order_id)
+      .eq("rule_id", request.rule_id)
+      .eq("approver_id", userData.user.id);
+    
+    if (error) throw error;
+
+    // The trigger will automatically update the PO status based on all approvals
+  },
+
+  async getRequiredApprovals(purchaseOrderId: string, amount: number) {
+    const { data, error } = await supabase
+      .rpc("get_required_approvals", {
+        po_id: purchaseOrderId,
+        po_amount: amount
+      });
+    
+    if (error) throw error;
+    return data;
+  },
+
+  async isPurchaseOrderApproved(purchaseOrderId: string) {
+    const { data, error } = await supabase
+      .rpc("is_purchase_order_approved", {
+        po_id: purchaseOrderId
+      });
+    
+    if (error) throw error;
+    return data;
+  },
+
   async getVendors() {
     return [];
   },
@@ -185,18 +315,6 @@ export const purchaseOrdersEnhancedApi = {
 
   async restorePurchaseOrder(id: string) {
     throw new Error("Restore not yet implemented");
-  },
-
-  async submitForApproval(request: any) {
-    throw new Error("Approval workflow not yet implemented");
-  },
-
-  async approveOrRejectPurchaseOrder(request: any) {
-    throw new Error("Approval workflow not yet implemented");
-  },
-
-  async fulfillLineItem(request: any) {
-    throw new Error("Fulfillment not yet implemented");
   },
 
   async uploadAttachment(purchaseOrderId: string, file: File) {
