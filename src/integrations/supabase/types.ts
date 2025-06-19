@@ -9,6 +9,53 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      asset_documents: {
+        Row: {
+          asset_id: string
+          created_at: string | null
+          file_name: string
+          file_path: string
+          file_size: number
+          file_type: string
+          id: string
+          tenant_id: string
+          updated_at: string | null
+          uploaded_by: string | null
+        }
+        Insert: {
+          asset_id: string
+          created_at?: string | null
+          file_name: string
+          file_path: string
+          file_size: number
+          file_type: string
+          id?: string
+          tenant_id: string
+          updated_at?: string | null
+          uploaded_by?: string | null
+        }
+        Update: {
+          asset_id?: string
+          created_at?: string | null
+          file_name?: string
+          file_path?: string
+          file_size?: number
+          file_type?: string
+          id?: string
+          tenant_id?: string
+          updated_at?: string | null
+          uploaded_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "asset_documents_asset_id_fkey"
+            columns: ["asset_id"]
+            isOneToOne: false
+            referencedRelation: "assets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       assets: {
         Row: {
           asset_tag: string | null
@@ -2106,6 +2153,17 @@ export type Database = {
       enum_values: {
         Args: { enum_name: string }
         Returns: string[]
+      }
+      get_asset_documents: {
+        Args: { asset_id_param: string }
+        Returns: {
+          id: string
+          file_name: string
+          file_size: number
+          file_type: string
+          download_url: string
+          created_at: string
+        }[]
       }
       get_current_user_tenant_id: {
         Args: Record<PropertyKey, never>

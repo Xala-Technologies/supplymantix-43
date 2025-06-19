@@ -107,10 +107,7 @@ export default function Assets() {
         'Weight': 'N/A',
         'Dimensions': 'N/A'
       },
-      documentation: [
-        { name: 'Manual.pdf', type: 'PDF', size: '2.5 MB' },
-        { name: 'Warranty.pdf', type: 'PDF', size: '1.2 MB' }
-      ]
+      documentation: [] // Now empty - will be loaded from database
     };
   };
 
