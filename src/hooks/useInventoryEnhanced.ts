@@ -17,6 +17,7 @@ export const useInventoryEnhanced = (params?: {
   return useQuery({
     queryKey: ["inventory-enhanced", params],
     queryFn: () => inventoryEnhancedApi.searchInventory(params || {}),
+    retry: 3,
     staleTime: 1000 * 60 * 5, // 5 minutes
   });
 };

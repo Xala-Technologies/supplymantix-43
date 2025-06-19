@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -7,7 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Plus, Edit } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { inventoryEnhancedApi } from "@/lib/database/inventory-enhanced";
+import { useCreateInventoryItem, useUpdateInventoryItem } from "@/hooks/useInventoryEnhanced";
 import type { InventoryItemWithStats } from "@/lib/database/inventory-enhanced";
 
 interface InventoryFormData {
@@ -29,7 +30,9 @@ interface InventoryFormProps {
 
 export const InventoryForm = ({ item, onSuccess, trigger, mode = 'create' }: InventoryFormProps) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  const createMutation = useCreateInventoryItem();
+  const updateMutation = useUpdateInventoryItem();
 
   const {
     register,
@@ -49,21 +52,22 @@ export const InventoryForm = ({ item, onSuccess, trigger, mode = 'create' }: Inv
   });
 
   const onSubmit = async (data: InventoryFormData) => {
-    setIsSubmitting(true);
     try {
       if (mode === 'edit' && item) {
-        await inventoryEnhancedApi.updateInventoryItem(item.id, {
-          name: data.name,
-          description: data.description,
-          sku: data.sku,
-          location: data.location,
-          quantity: data.quantity,
-          min_quantity: data.min_quantity,
-          unit_cost: data.unit_cost,
+        await updateMutation.mutateAsync({
+          id: item.id,
+          updates: {
+            name: data.name,
+            description: data.description,
+            sku: data.sku,
+            location: data.location,
+            quantity: data.quantity,
+            min_quantity: data.min_quantity,
+            unit_cost: data.unit_cost,
+          }
         });
-        toast.success('Inventory item updated successfully');
       } else {
-        await inventoryEnhancedApi.createInventoryItem({
+        await createMutation.mutateAsync({
           name: data.name,
           description: data.description,
           sku: data.sku,
@@ -72,7 +76,6 @@ export const InventoryForm = ({ item, onSuccess, trigger, mode = 'create' }: Inv
           min_quantity: data.min_quantity || 0,
           unit_cost: data.unit_cost || 0,
         });
-        toast.success('Inventory item created successfully');
       }
       
       setIsOpen(false);
@@ -81,8 +84,6 @@ export const InventoryForm = ({ item, onSuccess, trigger, mode = 'create' }: Inv
     } catch (error) {
       console.error('Error saving inventory item:', error);
       toast.error('Failed to save inventory item');
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
@@ -92,6 +93,8 @@ export const InventoryForm = ({ item, onSuccess, trigger, mode = 'create' }: Inv
       reset();
     }
   };
+
+  const isSubmitting = createMutation.isPending || updateMutation.isPending;
 
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
