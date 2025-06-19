@@ -57,10 +57,7 @@ export const inventoryEnhancedApi = {
   async getInventoryItemsWithStats(): Promise<InventoryItemWithStats[]> {
     const { data, error } = await supabase
       .from("inventory_items")
-      .select(`
-        *,
-        locations(name)
-      `)
+      .select("*")
       .order("created_at", { ascending: false });
     
     if (error) throw error;
@@ -71,7 +68,7 @@ export const inventoryEnhancedApi = {
       needs_reorder: (item.quantity || 0) <= (item.min_quantity || 0) * 1.5,
       total_value: (item.quantity || 0) * (item.unit_cost || 0),
       usage_history: [],
-      location_name: item.locations?.name
+      location_name: item.location
     }));
   },
 
@@ -79,10 +76,7 @@ export const inventoryEnhancedApi = {
   async getInventoryItemById(id: string): Promise<InventoryItemWithStats | null> {
     const { data, error } = await supabase
       .from("inventory_items")
-      .select(`
-        *,
-        locations(name)
-      `)
+      .select("*")
       .eq("id", id)
       .single();
     
@@ -99,7 +93,7 @@ export const inventoryEnhancedApi = {
       needs_reorder: (data.quantity || 0) <= (data.min_quantity || 0) * 1.5,
       total_value: (data.quantity || 0) * (data.unit_cost || 0),
       usage_history: usageHistory,
-      location_name: data.locations?.name
+      location_name: data.location
     };
   },
 
@@ -224,7 +218,7 @@ export const inventoryEnhancedApi = {
         location,
         description
       `)
-      .lte("quantity", supabase.raw("min_quantity"));
+      .filter('quantity', 'lte', 'min_quantity');
     
     if (error) throw error;
     
@@ -254,10 +248,7 @@ export const inventoryEnhancedApi = {
   }): Promise<{ items: InventoryItemWithStats[]; total: number }> {
     let query = supabase
       .from("inventory_items")
-      .select(`
-        *,
-        locations(name)
-      `, { count: 'exact' });
+      .select("*", { count: 'exact' });
 
     // Apply search filter
     if (params.search) {
@@ -269,13 +260,9 @@ export const inventoryEnhancedApi = {
       query = query.eq("location", params.location);
     }
 
-    // Apply status filter
-    if (params.status === 'low_stock') {
-      query = query.lte("quantity", supabase.raw("min_quantity"));
-    } else if (params.status === 'out_of_stock') {
+    // Apply status filter - simplified approach
+    if (params.status === 'out_of_stock') {
       query = query.eq("quantity", 0);
-    } else if (params.status === 'in_stock') {
-      query = query.gt("quantity", supabase.raw("min_quantity"));
     }
 
     // Apply sorting
@@ -301,7 +288,7 @@ export const inventoryEnhancedApi = {
       needs_reorder: (item.quantity || 0) <= (item.min_quantity || 0) * 1.5,
       total_value: (item.quantity || 0) * (item.unit_cost || 0),
       usage_history: [],
-      location_name: item.locations?.name
+      location_name: item.location
     }));
 
     return {

@@ -6,7 +6,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react";
 
 interface Column {
-  accessorKey: string;
+  accessorKey?: string;
+  id?: string;
   header: string;
   cell?: ({ row }: { row: any }) => React.ReactNode;
 }
@@ -75,7 +76,7 @@ export const DataTable = ({ columns, data, loading = false, pagination }: DataTa
                 <TableRow key={rowIndex}>
                   {columns.map((column, cellIndex) => (
                     <TableCell key={cellIndex}>
-                      {column.cell ? column.cell({ row: { original: row } }) : row[column.accessorKey]}
+                      {column.cell ? column.cell({ row: { original: row } }) : row[column.accessorKey || '']}
                     </TableCell>
                   ))}
                 </TableRow>
