@@ -16,7 +16,17 @@ export const useInventoryEnhanced = (params?: {
 }) => {
   return useQuery({
     queryKey: ["inventory-enhanced", params],
-    queryFn: () => inventoryEnhancedApi.searchInventory(params || {}),
+    queryFn: async () => {
+      console.log('useInventoryEnhanced query executing with params:', params);
+      try {
+        const result = await inventoryEnhancedApi.searchInventory(params || {});
+        console.log('useInventoryEnhanced query result:', result);
+        return result;
+      } catch (error) {
+        console.error('useInventoryEnhanced query error:', error);
+        throw error;
+      }
+    },
     retry: 3,
     staleTime: 1000 * 60 * 5, // 5 minutes
   });
@@ -46,7 +56,12 @@ export const useCreateInventoryItem = () => {
   const queryClient = useQueryClient();
   
   return useMutation({
-    mutationFn: inventoryEnhancedApi.createInventoryItem,
+    mutationFn: async (item: Parameters<typeof inventoryEnhancedApi.createInventoryItem>[0]) => {
+      console.log('Creating inventory item:', item);
+      const result = await inventoryEnhancedApi.createInventoryItem(item);
+      console.log('Create result:', result);
+      return result;
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["inventory-enhanced"] });
       queryClient.invalidateQueries({ queryKey: ["low-stock-alerts"] });
@@ -63,8 +78,12 @@ export const useUpdateInventoryItem = () => {
   const queryClient = useQueryClient();
   
   return useMutation({
-    mutationFn: ({ id, updates }: { id: string; updates: any }) => 
-      inventoryEnhancedApi.updateInventoryItem(id, updates),
+    mutationFn: async ({ id, updates }: { id: string; updates: any }) => {
+      console.log('Updating inventory item:', id, updates);
+      const result = await inventoryEnhancedApi.updateInventoryItem(id, updates);
+      console.log('Update result:', result);
+      return result;
+    },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ["inventory-enhanced"] });
       queryClient.invalidateQueries({ queryKey: ["inventory-item", variables.id] });
@@ -82,7 +101,11 @@ export const useDeleteInventoryItem = () => {
   const queryClient = useQueryClient();
   
   return useMutation({
-    mutationFn: inventoryEnhancedApi.deleteInventoryItem,
+    mutationFn: async (id: string) => {
+      console.log('Deleting inventory item:', id);
+      await inventoryEnhancedApi.deleteInventoryItem(id);
+      console.log('Delete completed for:', id);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["inventory-enhanced"] });
       queryClient.invalidateQueries({ queryKey: ["low-stock-alerts"] });

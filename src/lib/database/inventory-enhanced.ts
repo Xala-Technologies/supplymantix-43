@@ -54,144 +54,230 @@ export interface StockMovement {
 export const inventoryEnhancedApi = {
   // Get all inventory items with enhanced stats
   async getInventoryItemsWithStats(): Promise<InventoryItemWithStats[]> {
-    const { data: userData, error: userError } = await supabase.auth.getUser();
-    if (userError) throw new Error('User not authenticated');
+    console.log('Fetching inventory items...');
     
-    const { data: userRecord } = await supabase
-      .from('users')
-      .select('tenant_id')
-      .eq('id', userData.user.id)
-      .single();
-    
-    if (!userRecord) throw new Error('User tenant not found');
+    try {
+      // First check if user is authenticated
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
+      if (authError || !user) {
+        console.error('Authentication error:', authError);
+        throw new Error('User not authenticated');
+      }
+      
+      console.log('User authenticated:', user.id);
+      
+      // Get user's tenant_id
+      const { data: userRecord, error: userError } = await supabase
+        .from('users')
+        .select('tenant_id')
+        .eq('id', user.id)
+        .single();
+      
+      if (userError || !userRecord) {
+        console.error('User record error:', userError);
+        throw new Error('User tenant not found');
+      }
+      
+      console.log('User tenant_id:', userRecord.tenant_id);
 
-    const { data, error } = await supabase
-      .from("inventory_items")
-      .select("*")
-      .eq("tenant_id", userRecord.tenant_id)
-      .order("created_at", { ascending: false });
-    
-    if (error) throw error;
-    
-    return (data || []).map(item => ({
-      ...item,
-      is_low_stock: (item.quantity || 0) <= (item.min_quantity || 0),
-      needs_reorder: (item.quantity || 0) <= (item.min_quantity || 0) * 1.5,
-      total_value: (item.quantity || 0) * (item.unit_cost || 0),
-      usage_history: [],
-      location_name: item.location
-    }));
+      const { data, error } = await supabase
+        .from("inventory_items")
+        .select("*")
+        .eq("tenant_id", userRecord.tenant_id)
+        .order("created_at", { ascending: false });
+      
+      if (error) {
+        console.error('Query error:', error);
+        throw error;
+      }
+      
+      console.log('Raw inventory data:', data);
+      
+      const items = (data || []).map(item => ({
+        ...item,
+        is_low_stock: (item.quantity || 0) <= (item.min_quantity || 0),
+        needs_reorder: (item.quantity || 0) <= (item.min_quantity || 0) * 1.5,
+        total_value: (item.quantity || 0) * (item.unit_cost || 0),
+        usage_history: [],
+        location_name: item.location
+      }));
+      
+      console.log('Processed inventory items:', items);
+      return items;
+    } catch (error) {
+      console.error('Error in getInventoryItemsWithStats:', error);
+      throw error;
+    }
   },
 
   // Get single item with detailed stats
   async getInventoryItemById(id: string): Promise<InventoryItemWithStats | null> {
-    const { data: userData, error: userError } = await supabase.auth.getUser();
-    if (userError) throw new Error('User not authenticated');
+    console.log('Fetching item by ID:', id);
     
-    const { data: userRecord } = await supabase
-      .from('users')
-      .select('tenant_id')
-      .eq('id', userData.user.id)
-      .single();
-    
-    if (!userRecord) throw new Error('User tenant not found');
+    try {
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
+      if (authError || !user) {
+        throw new Error('User not authenticated');
+      }
+      
+      const { data: userRecord, error: userError } = await supabase
+        .from('users')
+        .select('tenant_id')
+        .eq('id', user.id)
+        .single();
+      
+      if (userError || !userRecord) {
+        throw new Error('User tenant not found');
+      }
 
-    const { data, error } = await supabase
-      .from("inventory_items")
-      .select("*")
-      .eq("id", id)
-      .eq("tenant_id", userRecord.tenant_id)
-      .single();
-    
-    if (error) {
-      if (error.code === 'PGRST116') return null;
+      const { data, error } = await supabase
+        .from("inventory_items")
+        .select("*")
+        .eq("id", id)
+        .eq("tenant_id", userRecord.tenant_id)
+        .single();
+      
+      if (error) {
+        if (error.code === 'PGRST116') return null;
+        throw error;
+      }
+      
+      return {
+        ...data,
+        is_low_stock: (data.quantity || 0) <= (data.min_quantity || 0),
+        needs_reorder: (data.quantity || 0) <= (data.min_quantity || 0) * 1.5,
+        total_value: (data.quantity || 0) * (data.unit_cost || 0),
+        usage_history: [],
+        location_name: data.location
+      };
+    } catch (error) {
+      console.error('Error in getInventoryItemById:', error);
       throw error;
     }
-    
-    return {
-      ...data,
-      is_low_stock: (data.quantity || 0) <= (data.min_quantity || 0),
-      needs_reorder: (data.quantity || 0) <= (data.min_quantity || 0) * 1.5,
-      total_value: (data.quantity || 0) * (data.unit_cost || 0),
-      usage_history: [],
-      location_name: data.location
-    };
   },
 
   // Create new inventory item
   async createInventoryItem(item: InventoryItemInsert): Promise<InventoryItem> {
-    const { data: userData, error: userError } = await supabase.auth.getUser();
-    if (userError) throw new Error('User not authenticated');
+    console.log('Creating inventory item:', item);
     
-    const { data: userRecord } = await supabase
-      .from('users')
-      .select('tenant_id')
-      .eq('id', userData.user.id)
-      .single();
-    
-    if (!userRecord) throw new Error('User tenant not found');
+    try {
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
+      if (authError || !user) {
+        throw new Error('User not authenticated');
+      }
+      
+      const { data: userRecord, error: userError } = await supabase
+        .from('users')
+        .select('tenant_id')
+        .eq('id', user.id)
+        .single();
+      
+      if (userError || !userRecord) {
+        throw new Error('User tenant not found');
+      }
 
-    const { data, error } = await supabase
-      .from("inventory_items")
-      .insert({
-        ...item,
-        tenant_id: userRecord.tenant_id,
-      })
-      .select()
-      .single();
-    
-    if (error) throw error;
-    return data;
+      const { data, error } = await supabase
+        .from("inventory_items")
+        .insert({
+          ...item,
+          tenant_id: userRecord.tenant_id,
+        })
+        .select()
+        .single();
+      
+      if (error) {
+        console.error('Insert error:', error);
+        throw error;
+      }
+      
+      console.log('Created item:', data);
+      return data;
+    } catch (error) {
+      console.error('Error in createInventoryItem:', error);
+      throw error;
+    }
   },
 
   // Update inventory item
   async updateInventoryItem(id: string, updates: InventoryItemUpdate): Promise<InventoryItem> {
-    const { data: userData, error: userError } = await supabase.auth.getUser();
-    if (userError) throw new Error('User not authenticated');
+    console.log('Updating inventory item:', id, updates);
     
-    const { data: userRecord } = await supabase
-      .from('users')
-      .select('tenant_id')
-      .eq('id', userData.user.id)
-      .single();
-    
-    if (!userRecord) throw new Error('User tenant not found');
+    try {
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
+      if (authError || !user) {
+        throw new Error('User not authenticated');
+      }
+      
+      const { data: userRecord, error: userError } = await supabase
+        .from('users')
+        .select('tenant_id')
+        .eq('id', user.id)
+        .single();
+      
+      if (userError || !userRecord) {
+        throw new Error('User tenant not found');
+      }
 
-    const { data, error } = await supabase
-      .from("inventory_items")
-      .update({
-        ...updates,
-        updated_at: new Date().toISOString()
-      })
-      .eq("id", id)
-      .eq("tenant_id", userRecord.tenant_id)
-      .select()
-      .single();
-    
-    if (error) throw error;
-    return data;
+      const { data, error } = await supabase
+        .from("inventory_items")
+        .update({
+          ...updates,
+          updated_at: new Date().toISOString()
+        })
+        .eq("id", id)
+        .eq("tenant_id", userRecord.tenant_id)
+        .select()
+        .single();
+      
+      if (error) {
+        console.error('Update error:', error);
+        throw error;
+      }
+      
+      console.log('Updated item:', data);
+      return data;
+    } catch (error) {
+      console.error('Error in updateInventoryItem:', error);
+      throw error;
+    }
   },
 
   // Delete inventory item
   async deleteInventoryItem(id: string): Promise<void> {
-    const { data: userData, error: userError } = await supabase.auth.getUser();
-    if (userError) throw new Error('User not authenticated');
+    console.log('Deleting inventory item:', id);
     
-    const { data: userRecord } = await supabase
-      .from('users')
-      .select('tenant_id')
-      .eq('id', userData.user.id)
-      .single();
-    
-    if (!userRecord) throw new Error('User tenant not found');
+    try {
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
+      if (authError || !user) {
+        throw new Error('User not authenticated');
+      }
+      
+      const { data: userRecord, error: userError } = await supabase
+        .from('users')
+        .select('tenant_id')
+        .eq('id', user.id)
+        .single();
+      
+      if (userError || !userRecord) {
+        throw new Error('User tenant not found');
+      }
 
-    const { error } = await supabase
-      .from("inventory_items")
-      .delete()
-      .eq("id", id)
-      .eq("tenant_id", userRecord.tenant_id);
-    
-    if (error) throw error;
+      const { error } = await supabase
+        .from("inventory_items")
+        .delete()
+        .eq("id", id)
+        .eq("tenant_id", userRecord.tenant_id);
+      
+      if (error) {
+        console.error('Delete error:', error);
+        throw error;
+      }
+      
+      console.log('Deleted item:', id);
+    } catch (error) {
+      console.error('Error in deleteInventoryItem:', error);
+      throw error;
+    }
   },
 
   // Stock movement operations
@@ -312,48 +398,57 @@ export const inventoryEnhancedApi = {
 
   // Get low stock alerts
   async getLowStockAlerts(): Promise<InventoryAlert[]> {
-    const { data: userData, error: userError } = await supabase.auth.getUser();
-    if (userError) throw new Error('User not authenticated');
-    
-    const { data: userRecord } = await supabase
-      .from('users')
-      .select('tenant_id')
-      .eq('id', userData.user.id)
-      .single();
-    
-    if (!userRecord) throw new Error('User tenant not found');
+    try {
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
+      if (authError || !user) {
+        throw new Error('User not authenticated');
+      }
+      
+      const { data: userRecord, error: userError } = await supabase
+        .from('users')
+        .select('tenant_id')
+        .eq('id', user.id)
+        .single();
+      
+      if (userError || !userRecord) {
+        throw new Error('User tenant not found');
+      }
 
-    const { data, error } = await supabase
-      .from("inventory_items")
-      .select(`
-        id,
-        name,
-        sku,
-        quantity,
-        min_quantity,
-        location,
-        description
-      `)
-      .eq("tenant_id", userRecord.tenant_id);
-    
-    if (error) throw error;
-    
-    // Filter for low stock items
-    const lowStockItems = (data || []).filter(item => 
-      (item.quantity || 0) <= (item.min_quantity || 0)
-    );
-    
-    return lowStockItems.map(item => ({
-      id: item.id,
-      item_name: item.name,
-      sku: item.sku || '',
-      current_quantity: item.quantity || 0,
-      min_quantity: item.min_quantity || 0,
-      reorder_level: item.min_quantity || 0,
-      alert_type: item.quantity === 0 ? 'out_of_stock' as const : 'low_stock' as const,
-      location: item.location || '',
-      category: item.description || ''
-    }));
+      const { data, error } = await supabase
+        .from("inventory_items")
+        .select(`
+          id,
+          name,
+          sku,
+          quantity,
+          min_quantity,
+          location,
+          description
+        `)
+        .eq("tenant_id", userRecord.tenant_id);
+      
+      if (error) throw error;
+      
+      // Filter for low stock items
+      const lowStockItems = (data || []).filter(item => 
+        (item.quantity || 0) <= (item.min_quantity || 0)
+      );
+      
+      return lowStockItems.map(item => ({
+        id: item.id,
+        item_name: item.name,
+        sku: item.sku || '',
+        current_quantity: item.quantity || 0,
+        min_quantity: item.min_quantity || 0,
+        reorder_level: item.min_quantity || 0,
+        alert_type: item.quantity === 0 ? 'out_of_stock' as const : 'low_stock' as const,
+        location: item.location || '',
+        category: item.description || ''
+      }));
+    } catch (error) {
+      console.error('Error in getLowStockAlerts:', error);
+      throw error;
+    }
   },
 
   // Search and filter inventory
@@ -367,67 +462,83 @@ export const inventoryEnhancedApi = {
     limit?: number;
     offset?: number;
   }): Promise<{ items: InventoryItemWithStats[]; total: number }> {
-    const { data: userData, error: userError } = await supabase.auth.getUser();
-    if (userError) throw new Error('User not authenticated');
+    console.log('Searching inventory with params:', params);
     
-    const { data: userRecord } = await supabase
-      .from('users')
-      .select('tenant_id')
-      .eq('id', userData.user.id)
-      .single();
-    
-    if (!userRecord) throw new Error('User tenant not found');
+    try {
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
+      if (authError || !user) {
+        throw new Error('User not authenticated');
+      }
+      
+      const { data: userRecord, error: userError } = await supabase
+        .from('users')
+        .select('tenant_id')
+        .eq('id', user.id)
+        .single();
+      
+      if (userError || !userRecord) {
+        throw new Error('User tenant not found');
+      }
 
-    let query = supabase
-      .from("inventory_items")
-      .select("*", { count: 'exact' })
-      .eq("tenant_id", userRecord.tenant_id);
+      let query = supabase
+        .from("inventory_items")
+        .select("*", { count: 'exact' })
+        .eq("tenant_id", userRecord.tenant_id);
 
-    // Apply search filter
-    if (params.search) {
-      query = query.or(`name.ilike.%${params.search}%,sku.ilike.%${params.search}%,description.ilike.%${params.search}%`);
+      // Apply search filter
+      if (params.search) {
+        query = query.or(`name.ilike.%${params.search}%,sku.ilike.%${params.search}%,description.ilike.%${params.search}%`);
+      }
+
+      // Apply location filter
+      if (params.location) {
+        query = query.eq("location", params.location);
+      }
+
+      // Apply status filter
+      if (params.status === 'out_of_stock') {
+        query = query.eq("quantity", 0);
+      }
+
+      // Apply sorting
+      const sortBy = params.sortBy || 'name';
+      const sortOrder = params.sortOrder || 'asc';
+      query = query.order(sortBy, { ascending: sortOrder === 'asc' });
+
+      // Apply pagination
+      if (params.limit) {
+        query = query.limit(params.limit);
+      }
+      if (params.offset) {
+        query = query.range(params.offset, params.offset + (params.limit || 50) - 1);
+      }
+
+      const { data, error, count } = await query;
+      
+      if (error) {
+        console.error('Search query error:', error);
+        throw error;
+      }
+      
+      const items = (data || []).map(item => ({
+        ...item,
+        is_low_stock: (item.quantity || 0) <= (item.min_quantity || 0),
+        needs_reorder: (item.quantity || 0) <= (item.min_quantity || 0) * 1.5,
+        total_value: (item.quantity || 0) * (item.unit_cost || 0),
+        usage_history: [],
+        location_name: item.location
+      }));
+
+      console.log('Search results:', { items, total: count || 0 });
+
+      return {
+        items,
+        total: count || 0
+      };
+    } catch (error) {
+      console.error('Error in searchInventory:', error);
+      throw error;
     }
-
-    // Apply location filter
-    if (params.location) {
-      query = query.eq("location", params.location);
-    }
-
-    // Apply status filter
-    if (params.status === 'out_of_stock') {
-      query = query.eq("quantity", 0);
-    }
-
-    // Apply sorting
-    const sortBy = params.sortBy || 'name';
-    const sortOrder = params.sortOrder || 'asc';
-    query = query.order(sortBy, { ascending: sortOrder === 'asc' });
-
-    // Apply pagination
-    if (params.limit) {
-      query = query.limit(params.limit);
-    }
-    if (params.offset) {
-      query = query.range(params.offset, params.offset + (params.limit || 50) - 1);
-    }
-
-    const { data, error, count } = await query;
-    
-    if (error) throw error;
-    
-    const items = (data || []).map(item => ({
-      ...item,
-      is_low_stock: (item.quantity || 0) <= (item.min_quantity || 0),
-      needs_reorder: (item.quantity || 0) <= (item.min_quantity || 0) * 1.5,
-      total_value: (item.quantity || 0) * (item.unit_cost || 0),
-      usage_history: [],
-      location_name: item.location
-    }));
-
-    return {
-      items,
-      total: count || 0
-    };
   },
 
   // Inventory logs placeholder
