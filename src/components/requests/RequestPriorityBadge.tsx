@@ -1,4 +1,5 @@
 
+import React from "react";
 import { Badge } from "@/components/ui/badge";
 import { AlertTriangle, Minus, ArrowUp, Zap } from "lucide-react";
 
@@ -55,3 +56,5 @@ export const RequestPriorityBadge = ({ priority, size = "md" }: RequestPriorityB
     </Badge>
   );
 };
+
+export default RequestPriorityBadge;

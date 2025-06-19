@@ -1,4 +1,5 @@
 
+import React from "react";
 import { Badge } from "@/components/ui/badge";
 import { CheckCircle, Clock, XCircle, Ban, AlertCircle } from "lucide-react";
 
@@ -67,3 +68,5 @@ export const RequestStatusBadge = ({ status, size = "md" }: RequestStatusBadgePr
     </Badge>
   );
 };
+
+export default RequestStatusBadge;
