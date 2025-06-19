@@ -253,7 +253,39 @@ export default function Assets() {
               </div>
             </PageLayoutContent>
           </>
+        ) : viewMode === 'detail' ? (
+          // Detail View with enhanced header
+          <>
+            <PageLayoutHeader 
+              title={selectedAsset?.name || 'Asset Details'}
+              description="View and manage asset information"
+            >
+              <Button 
+                variant="outline" 
+                onClick={handleBackToGrid}
+              >
+                <ChevronLeft className="w-4 h-4 mr-2" />
+                Back to Assets
+              </Button>
+            </PageLayoutHeader>
+            
+            <PageLayoutContent>
+              <div className="p-6 bg-white h-full overflow-y-auto">
+                {selectedAsset && (
+                  <AssetDetailCard 
+                    asset={convertToDetailAsset(selectedAsset)}
+                    onEdit={() => setViewMode('edit')}
+                    onDelete={() => {
+                      const uiAsset = convertToUIAssets([selectedAsset])[0];
+                      handleDeleteAsset(uiAsset);
+                    }}
+                  />
+                )}
+              </div>
+            </PageLayoutContent>
+          </>
         ) : (
+          // Grid View
           <>
             <PageLayoutHeader 
               title="Assets"
@@ -274,48 +306,15 @@ export default function Assets() {
             </PageFilters>
             
             <PageLayoutContent>
-              {viewMode === 'grid' ? (
-                <AssetsGrid
-                  assets={uiAssets}
-                  selectedAssetId={selectedAsset?.id || null}
-                  onSelectAsset={handleSelectAsset}
-                  onCreateAsset={handleCreateAsset}
-                  onEditAsset={handleEditAsset}
-                  onDeleteAsset={handleDeleteAsset}
-                  isLoading={isLoading}
-                />
-              ) : (
-                <div className="h-full flex flex-col">
-                  {/* Detail header with back button */}
-                  <div className="p-4 lg:p-6 border-b bg-white flex items-center gap-3">
-                    <Button 
-                      variant="ghost" 
-                      size="sm"
-                      onClick={handleBackToGrid}
-                      className="p-1 h-auto"
-                    >
-                      <ChevronLeft className="w-5 h-5" />
-                    </Button>
-                    <span className="font-medium text-gray-900 truncate">
-                      {selectedAsset?.name}
-                    </span>
-                  </div>
-                  
-                  {/* Detail view */}
-                  <div className="flex-1 p-4 lg:p-6 overflow-y-auto bg-white">
-                    {selectedAsset && (
-                      <AssetDetailCard 
-                        asset={convertToDetailAsset(selectedAsset)}
-                        onEdit={() => setViewMode('edit')}
-                        onDelete={() => {
-                          const uiAsset = convertToUIAssets([selectedAsset])[0];
-                          handleDeleteAsset(uiAsset);
-                        }}
-                      />
-                    )}
-                  </div>
-                </div>
-              )}
+              <AssetsGrid
+                assets={uiAssets}
+                selectedAssetId={selectedAsset?.id || null}
+                onSelectAsset={handleSelectAsset}
+                onCreateAsset={handleCreateAsset}
+                onEditAsset={handleEditAsset}
+                onDeleteAsset={handleDeleteAsset}
+                isLoading={isLoading}
+              />
             </PageLayoutContent>
           </>
         )}
