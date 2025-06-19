@@ -84,10 +84,6 @@ export const AssetsHeader = ({ onFiltersChange, onCreateAsset, assetsCount }: As
       </div>
 
       <div className="flex items-center gap-2">
-        <span className="text-sm text-gray-600">
-          {assetsCount} assets
-        </span>
-        
         <Button variant="outline" size="sm">
           <Upload className="h-4 w-4 mr-2" />
           Import
