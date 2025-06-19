@@ -1,10 +1,13 @@
 
-import React from "react";
+import React, { useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Plus, Search, Filter, Grid, List, Download, Upload } from "lucide-react";
+import { toast } from "sonner";
+import { exportRequestsToCSV, importRequestsFromCSV } from "@/utils/requestsImportExport";
+import type { Request } from "@/types/request";
 
 interface RequestsHeaderProps {
   onCreateRequest: () => void;
@@ -17,6 +20,8 @@ interface RequestsHeaderProps {
   viewMode: 'grid' | 'table';
   onViewModeChange: (mode: 'grid' | 'table') => void;
   userRole?: 'admin' | 'user';
+  requests?: Request[];
+  onImportRequests?: (requests: any[]) => void;
 }
 
 export const RequestsHeader = ({
@@ -29,16 +34,48 @@ export const RequestsHeader = ({
   onPriorityFilterChange,
   viewMode,
   onViewModeChange,
-  userRole = 'user'
+  userRole = 'user',
+  requests = [],
+  onImportRequests
 }: RequestsHeaderProps) => {
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   const handleExport = () => {
-    // Implement export functionality
-    console.log("Exporting requests...");
+    try {
+      exportRequestsToCSV(requests);
+      toast.success("Requests exported successfully");
+    } catch (error) {
+      console.error("Export error:", error);
+      toast.error("Failed to export requests");
+    }
   };
 
-  const handleImport = () => {
-    // Implement import functionality
-    console.log("Importing requests...");
+  const handleImportClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    if (file.type !== 'text/csv' && !file.name.endsWith('.csv')) {
+      toast.error("Please select a CSV file");
+      return;
+    }
+
+    try {
+      const importedRequests = await importRequestsFromCSV(file);
+      onImportRequests?.(importedRequests);
+      toast.success(`Imported ${importedRequests.length} requests successfully`);
+    } catch (error) {
+      console.error("Import error:", error);
+      toast.error("Failed to import requests");
+    }
+
+    // Reset file input
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
   };
 
   return (
@@ -53,7 +90,14 @@ export const RequestsHeader = ({
         <div className="flex items-center gap-2">
           {userRole === 'admin' && (
             <>
-              <Button variant="outline" size="sm" onClick={handleImport}>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".csv"
+                onChange={handleFileChange}
+                style={{ display: 'none' }}
+              />
+              <Button variant="outline" size="sm" onClick={handleImportClick}>
                 <Upload className="h-4 w-4 mr-2" />
                 Import
               </Button>

@@ -9,6 +9,7 @@ import { RequestsList } from "@/components/requests/RequestsList";
 import { RequestForm } from "@/components/requests/RequestForm";
 import { RequestDetailDialog } from "@/components/requests/RequestDetailDialog";
 import { useRequests, useCreateRequest, useUpdateRequest, useDeleteRequest } from "@/hooks/useRequests";
+import { toast } from "sonner";
 import type { Request, CreateRequestRequest } from "@/types/request";
 
 export default function Requests() {
@@ -75,6 +76,13 @@ export default function Requests() {
   const handleEditMode = (request: Request) => {
     setSelectedRequest(request);
     setView("edit");
+  };
+
+  const handleImportRequests = (importedRequests: any[]) => {
+    // Here you would typically process and create the imported requests
+    // For now, just show a success message
+    toast.success(`Ready to process ${importedRequests.length} imported requests`);
+    console.log("Imported requests:", importedRequests);
   };
 
   if (view === "create") {
@@ -152,6 +160,8 @@ export default function Requests() {
               viewMode={viewMode}
               onViewModeChange={setViewMode}
               userRole={userRole}
+              requests={requests}
+              onImportRequests={handleImportRequests}
             />
 
             {isLoading ? (
