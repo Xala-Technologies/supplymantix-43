@@ -1,11 +1,9 @@
 import React from "react";
 import { cn } from "@/lib/utils";
-
 interface PageLayoutProps {
   children: React.ReactNode;
   className?: string;
 }
-
 export const PageLayout = ({
   children,
   className
@@ -14,7 +12,6 @@ export const PageLayout = ({
       {children}
     </div>;
 };
-
 interface PageHeaderProps {
   title: string;
   description?: string;
@@ -22,7 +19,6 @@ interface PageHeaderProps {
   leftContent?: React.ReactNode;
   className?: string;
 }
-
 export const PageLayoutHeader = ({
   title,
   description,
@@ -31,26 +27,13 @@ export const PageLayoutHeader = ({
   className
 }: PageHeaderProps) => {
   return <div className={cn("bg-white border-b border-gray-200 px-6 py-4", className)}>
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          {leftContent}
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">{title}</h1>
-            {description && <p className="text-sm text-gray-600 mt-1">{description}</p>}
-          </div>
-        </div>
-        {children && <div className="flex items-center gap-3">
-            {children}
-          </div>}
-      </div>
+      
     </div>;
 };
-
 interface PageFiltersProps {
   children: React.ReactNode;
   className?: string;
 }
-
 export const PageFilters = ({
   children,
   className
@@ -59,12 +42,10 @@ export const PageFilters = ({
       {children}
     </div>;
 };
-
 interface PageContentProps {
   children: React.ReactNode;
   className?: string;
 }
-
 export const PageLayoutContent = ({
   children,
   className
