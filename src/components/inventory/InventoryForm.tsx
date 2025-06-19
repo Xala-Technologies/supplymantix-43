@@ -53,6 +53,8 @@ export const InventoryForm = ({ item, onSuccess, trigger, mode = 'create' }: Inv
 
   const onSubmit = async (data: InventoryFormData) => {
     try {
+      console.log('Form submission data:', data);
+      
       if (mode === 'edit' && item) {
         await updateMutation.mutateAsync({
           id: item.id,
@@ -67,6 +69,7 @@ export const InventoryForm = ({ item, onSuccess, trigger, mode = 'create' }: Inv
           }
         });
       } else {
+        // For create, we need to include tenant_id
         await createMutation.mutateAsync({
           name: data.name,
           description: data.description,
@@ -75,6 +78,7 @@ export const InventoryForm = ({ item, onSuccess, trigger, mode = 'create' }: Inv
           quantity: data.quantity,
           min_quantity: data.min_quantity || 0,
           unit_cost: data.unit_cost || 0,
+          tenant_id: 'default-tenant-id', // Use a default tenant ID for now
         });
       }
       
@@ -83,7 +87,7 @@ export const InventoryForm = ({ item, onSuccess, trigger, mode = 'create' }: Inv
       onSuccess?.();
     } catch (error) {
       console.error('Error saving inventory item:', error);
-      toast.error('Failed to save inventory item');
+      toast.error('Failed to save inventory item: ' + (error as Error).message);
     }
   };
 
