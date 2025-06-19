@@ -256,22 +256,17 @@ export default function Assets() {
           // Detail View with enhanced header design
           <>
             <PageLayoutHeader 
-              title={
-                <div className="flex items-center gap-3">
-                  <Button 
-                    variant="ghost" 
-                    size="sm"
-                    onClick={handleBackToGrid}
-                    className="text-gray-600 hover:text-gray-900 hover:bg-gray-100 -ml-2"
-                  >
-                    <ChevronLeft className="w-4 h-4 mr-1" />
-                    Back to Assets
-                  </Button>
-                  <div className="h-5 w-px bg-gray-300" />
-                  <span className="font-semibold text-gray-900">{selectedAsset?.name}</span>
-                </div>
-              }
+              title={selectedAsset?.name || 'Asset Details'}
             >
+              <Button 
+                variant="ghost" 
+                size="sm"
+                onClick={handleBackToGrid}
+                className="text-gray-600 hover:text-gray-900 hover:bg-gray-100"
+              >
+                <ChevronLeft className="w-4 h-4 mr-2" />
+                Back to Assets
+              </Button>
             </PageLayoutHeader>
             
             <PageLayoutContent>
