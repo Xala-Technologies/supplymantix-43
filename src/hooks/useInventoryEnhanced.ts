@@ -40,6 +40,60 @@ export const useLowStockAlerts = () => {
   });
 };
 
+// CRUD mutations
+export const useCreateInventoryItem = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: inventoryEnhancedApi.createInventoryItem,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["inventory-enhanced"] });
+      queryClient.invalidateQueries({ queryKey: ["low-stock-alerts"] });
+      toast.success("Inventory item created successfully");
+    },
+    onError: (error) => {
+      console.error("Failed to create inventory item:", error);
+      toast.error("Failed to create inventory item");
+    },
+  });
+};
+
+export const useUpdateInventoryItem = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: ({ id, updates }: { id: string; updates: any }) => 
+      inventoryEnhancedApi.updateInventoryItem(id, updates),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["inventory-enhanced"] });
+      queryClient.invalidateQueries({ queryKey: ["inventory-item", variables.id] });
+      queryClient.invalidateQueries({ queryKey: ["low-stock-alerts"] });
+      toast.success("Inventory item updated successfully");
+    },
+    onError: (error) => {
+      console.error("Failed to update inventory item:", error);
+      toast.error("Failed to update inventory item");
+    },
+  });
+};
+
+export const useDeleteInventoryItem = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: inventoryEnhancedApi.deleteInventoryItem,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["inventory-enhanced"] });
+      queryClient.invalidateQueries({ queryKey: ["low-stock-alerts"] });
+      toast.success("Inventory item deleted successfully");
+    },
+    onError: (error) => {
+      console.error("Failed to delete inventory item:", error);
+      toast.error("Failed to delete inventory item");
+    },
+  });
+};
+
 // Stock movement mutations
 export const useAddStock = () => {
   const queryClient = useQueryClient();

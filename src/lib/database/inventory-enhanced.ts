@@ -53,7 +53,7 @@ export interface StockMovement {
 }
 
 export const inventoryEnhancedApi = {
-  // Enhanced inventory items with statistics
+  // Get all inventory items with enhanced stats
   async getInventoryItemsWithStats(): Promise<InventoryItemWithStats[]> {
     const { data, error } = await supabase
       .from("inventory_items")
@@ -95,6 +95,58 @@ export const inventoryEnhancedApi = {
       usage_history: usageHistory,
       location_name: data.location
     };
+  },
+
+  // Create new inventory item
+  async createInventoryItem(item: InventoryItemInsert): Promise<InventoryItem> {
+    const { data: userData, error: userError } = await supabase.auth.getUser();
+    if (userError) throw new Error('User not authenticated');
+    
+    const { data: userRecord } = await supabase
+      .from('users')
+      .select('tenant_id')
+      .eq('id', userData.user.id)
+      .single();
+    
+    if (!userRecord) throw new Error('User tenant not found');
+
+    const { data, error } = await supabase
+      .from("inventory_items")
+      .insert({
+        ...item,
+        tenant_id: userRecord.tenant_id,
+      })
+      .select()
+      .single();
+    
+    if (error) throw error;
+    return data;
+  },
+
+  // Update inventory item
+  async updateInventoryItem(id: string, updates: InventoryItemUpdate): Promise<InventoryItem> {
+    const { data, error } = await supabase
+      .from("inventory_items")
+      .update({
+        ...updates,
+        updated_at: new Date().toISOString()
+      })
+      .eq("id", id)
+      .select()
+      .single();
+    
+    if (error) throw error;
+    return data;
+  },
+
+  // Delete inventory item
+  async deleteInventoryItem(id: string): Promise<void> {
+    const { error } = await supabase
+      .from("inventory_items")
+      .delete()
+      .eq("id", id);
+    
+    if (error) throw error;
   },
 
   // Stock movement operations

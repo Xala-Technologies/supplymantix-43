@@ -8,8 +8,8 @@ import { Badge } from "@/components/ui/badge";
 import { DataTable } from "@/components/ui/data-table";
 import { InventoryStatusBadge } from "./InventoryStatusBadge";
 import { StockMovementModal } from "./StockMovementModal";
-import { LowStockBanner } from "./LowStockBanner";
-import { useInventoryEnhanced, useLowStockAlerts, useExportInventory } from "@/hooks/useInventoryEnhanced";
+import { InventoryForm } from "./InventoryForm";
+import { useInventoryEnhanced, useLowStockAlerts, useExportInventory, useDeleteInventoryItem } from "@/hooks/useInventoryEnhanced";
 import { useLocations } from "@/hooks/useLocations";
 import { 
   Search, 
@@ -18,8 +18,10 @@ import {
   Package, 
   TrendingUp, 
   DollarSign,
-  Filter,
-  RefreshCw
+  RefreshCw,
+  Plus,
+  Edit,
+  Trash2
 } from "lucide-react";
 import type { InventoryItemWithStats } from "@/lib/database/inventory-enhanced";
 
@@ -45,6 +47,7 @@ export const InventoryDashboard = () => {
   const { data: lowStockAlerts } = useLowStockAlerts();
   const { data: locations } = useLocations();
   const exportMutation = useExportInventory();
+  const deleteItemMutation = useDeleteInventoryItem();
 
   const handleExport = () => {
     exportMutation.mutate();
@@ -52,6 +55,12 @@ export const InventoryDashboard = () => {
 
   const handleRefresh = () => {
     refetch();
+  };
+
+  const handleDelete = (item: InventoryItemWithStats) => {
+    if (window.confirm(`Are you sure you want to delete "${item.name}"?`)) {
+      deleteItemMutation.mutate(item.id);
+    }
   };
 
   // Calculate dashboard metrics
@@ -101,7 +110,7 @@ export const InventoryDashboard = () => {
       accessorKey: "location",
       header: "Location",
       cell: ({ row }: { row: any }) => (
-        <span className="text-sm">{row.original.location || row.original.location_name || 'Not assigned'}</span>
+        <span className="text-sm">{row.original.location || 'Not assigned'}</span>
       ),
     },
     {
@@ -122,14 +131,34 @@ export const InventoryDashboard = () => {
       id: "actions",
       header: "Actions",
       cell: ({ row }: { row: any }) => (
-        <StockMovementModal
-          item={row.original}
-          trigger={
-            <Button variant="outline" size="sm">
-              Manage Stock
-            </Button>
-          }
-        />
+        <div className="flex items-center gap-2">
+          <InventoryForm
+            item={row.original}
+            mode="edit"
+            onSuccess={refetch}
+            trigger={
+              <Button variant="outline" size="sm">
+                <Edit className="w-4 h-4" />
+              </Button>
+            }
+          />
+          <StockMovementModal
+            item={row.original}
+            trigger={
+              <Button variant="outline" size="sm">
+                Manage Stock
+              </Button>
+            }
+          />
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={() => handleDelete(row.original)}
+            disabled={deleteItemMutation.isPending}
+          >
+            <Trash2 className="w-4 h-4" />
+          </Button>
+        </div>
       ),
     },
   ];
@@ -192,7 +221,7 @@ export const InventoryDashboard = () => {
         </div>
       )}
 
-      {/* Filters and Search */}
+      {/* Inventory Items */}
       <Card>
         <CardHeader>
           <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
@@ -201,6 +230,15 @@ export const InventoryDashboard = () => {
               Inventory Items
             </CardTitle>
             <div className="flex flex-wrap gap-2">
+              <InventoryForm 
+                onSuccess={refetch}
+                trigger={
+                  <Button className="flex items-center gap-2">
+                    <Plus className="w-4 h-4" />
+                    Add Item
+                  </Button>
+                }
+              />
               <Button
                 variant="outline"
                 size="sm"
