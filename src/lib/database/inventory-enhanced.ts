@@ -55,9 +55,21 @@ export interface StockMovement {
 export const inventoryEnhancedApi = {
   // Get all inventory items with enhanced stats
   async getInventoryItemsWithStats(): Promise<InventoryItemWithStats[]> {
+    const { data: userData, error: userError } = await supabase.auth.getUser();
+    if (userError) throw new Error('User not authenticated');
+    
+    const { data: userRecord } = await supabase
+      .from('users')
+      .select('tenant_id')
+      .eq('id', userData.user.id)
+      .single();
+    
+    if (!userRecord) throw new Error('User tenant not found');
+
     const { data, error } = await supabase
       .from("inventory_items")
       .select("*")
+      .eq("tenant_id", userRecord.tenant_id)
       .order("created_at", { ascending: false });
     
     if (error) throw error;
@@ -74,10 +86,22 @@ export const inventoryEnhancedApi = {
 
   // Get single item with detailed stats
   async getInventoryItemById(id: string): Promise<InventoryItemWithStats | null> {
+    const { data: userData, error: userError } = await supabase.auth.getUser();
+    if (userError) throw new Error('User not authenticated');
+    
+    const { data: userRecord } = await supabase
+      .from('users')
+      .select('tenant_id')
+      .eq('id', userData.user.id)
+      .single();
+    
+    if (!userRecord) throw new Error('User tenant not found');
+
     const { data, error } = await supabase
       .from("inventory_items")
       .select("*")
       .eq("id", id)
+      .eq("tenant_id", userRecord.tenant_id)
       .single();
     
     if (error) {
@@ -85,14 +109,12 @@ export const inventoryEnhancedApi = {
       throw error;
     }
     
-    const usageHistory = await this.getInventoryLogs(id);
-    
     return {
       ...data,
       is_low_stock: (data.quantity || 0) <= (data.min_quantity || 0),
       needs_reorder: (data.quantity || 0) <= (data.min_quantity || 0) * 1.5,
       total_value: (data.quantity || 0) * (data.unit_cost || 0),
-      usage_history: usageHistory,
+      usage_history: [],
       location_name: data.location
     };
   },
@@ -125,6 +147,17 @@ export const inventoryEnhancedApi = {
 
   // Update inventory item
   async updateInventoryItem(id: string, updates: InventoryItemUpdate): Promise<InventoryItem> {
+    const { data: userData, error: userError } = await supabase.auth.getUser();
+    if (userError) throw new Error('User not authenticated');
+    
+    const { data: userRecord } = await supabase
+      .from('users')
+      .select('tenant_id')
+      .eq('id', userData.user.id)
+      .single();
+    
+    if (!userRecord) throw new Error('User tenant not found');
+
     const { data, error } = await supabase
       .from("inventory_items")
       .update({
@@ -132,6 +165,7 @@ export const inventoryEnhancedApi = {
         updated_at: new Date().toISOString()
       })
       .eq("id", id)
+      .eq("tenant_id", userRecord.tenant_id)
       .select()
       .single();
     
@@ -141,36 +175,104 @@ export const inventoryEnhancedApi = {
 
   // Delete inventory item
   async deleteInventoryItem(id: string): Promise<void> {
+    const { data: userData, error: userError } = await supabase.auth.getUser();
+    if (userError) throw new Error('User not authenticated');
+    
+    const { data: userRecord } = await supabase
+      .from('users')
+      .select('tenant_id')
+      .eq('id', userData.user.id)
+      .single();
+    
+    if (!userRecord) throw new Error('User tenant not found');
+
     const { error } = await supabase
       .from("inventory_items")
       .delete()
-      .eq("id", id);
+      .eq("id", id)
+      .eq("tenant_id", userRecord.tenant_id);
     
     if (error) throw error;
   },
 
   // Stock movement operations
   async addStock(inventoryId: string, quantity: number, note?: string): Promise<void> {
-    const movement: StockMovement = {
-      inventory_item_id: inventoryId,
-      change_quantity: quantity,
-      type: 'added',
-      note
-    };
+    const { data: userData, error: userError } = await supabase.auth.getUser();
+    if (userError) throw new Error('User not authenticated');
     
-    await this.processStockMovement(movement);
+    const { data: userRecord } = await supabase
+      .from('users')
+      .select('tenant_id')
+      .eq('id', userData.user.id)
+      .single();
+    
+    if (!userRecord) throw new Error('User tenant not found');
+
+    // Get current quantity
+    const { data: item, error: fetchError } = await supabase
+      .from("inventory_items")
+      .select("quantity")
+      .eq("id", inventoryId)
+      .eq("tenant_id", userRecord.tenant_id)
+      .single();
+    
+    if (fetchError) throw fetchError;
+    
+    const newQuantity = (item.quantity || 0) + quantity;
+    
+    // Update inventory quantity
+    const { error: updateError } = await supabase
+      .from("inventory_items")
+      .update({ 
+        quantity: newQuantity,
+        updated_at: new Date().toISOString()
+      })
+      .eq("id", inventoryId)
+      .eq("tenant_id", userRecord.tenant_id);
+    
+    if (updateError) throw updateError;
   },
 
   async removeStock(inventoryId: string, quantity: number, note?: string, workOrderId?: string): Promise<void> {
-    const movement: StockMovement = {
-      inventory_item_id: inventoryId,
-      change_quantity: -quantity,
-      type: 'removed',
-      note,
-      work_order_id: workOrderId
-    };
+    const { data: userData, error: userError } = await supabase.auth.getUser();
+    if (userError) throw new Error('User not authenticated');
     
-    await this.processStockMovement(movement);
+    const { data: userRecord } = await supabase
+      .from('users')
+      .select('tenant_id')
+      .eq('id', userData.user.id)
+      .single();
+    
+    if (!userRecord) throw new Error('User tenant not found');
+
+    // Get current quantity
+    const { data: item, error: fetchError } = await supabase
+      .from("inventory_items")
+      .select("quantity")
+      .eq("id", inventoryId)
+      .eq("tenant_id", userRecord.tenant_id)
+      .single();
+    
+    if (fetchError) throw fetchError;
+    
+    const currentQuantity = item.quantity || 0;
+    if (currentQuantity < quantity) {
+      throw new Error('Insufficient inventory quantity');
+    }
+    
+    const newQuantity = Math.max(0, currentQuantity - quantity);
+    
+    // Update inventory quantity
+    const { error: updateError } = await supabase
+      .from("inventory_items")
+      .update({ 
+        quantity: newQuantity,
+        updated_at: new Date().toISOString()
+      })
+      .eq("id", inventoryId)
+      .eq("tenant_id", userRecord.tenant_id);
+    
+    if (updateError) throw updateError;
   },
 
   async transferStock(
@@ -180,85 +282,48 @@ export const inventoryEnhancedApi = {
     toLocationId: string, 
     note?: string
   ): Promise<void> {
-    const movement: StockMovement = {
-      inventory_item_id: inventoryId,
-      change_quantity: 0, // Transfer doesn't change total quantity
-      type: 'transferred',
-      note,
-      from_location_id: fromLocationId,
-      to_location_id: toLocationId
-    };
-    
-    await this.processStockMovement(movement);
+    // For now, this is a placeholder - transfer doesn't change total quantity
+    console.log('Transfer stock:', { inventoryId, quantity, fromLocationId, toLocationId, note });
   },
 
   async adjustStock(inventoryId: string, newQuantity: number, note?: string): Promise<void> {
-    // Get current quantity
-    const { data: item, error } = await supabase
-      .from("inventory_items")
-      .select("quantity")
-      .eq("id", inventoryId)
-      .single();
-    
-    if (error) throw error;
-    
-    const changeQuantity = newQuantity - (item.quantity || 0);
-    
-    const movement: StockMovement = {
-      inventory_item_id: inventoryId,
-      change_quantity: changeQuantity,
-      type: 'adjusted',
-      note
-    };
-    
-    await this.processStockMovement(movement);
-  },
-
-  // Process stock movement with logging
-  async processStockMovement(movement: StockMovement): Promise<void> {
     const { data: userData, error: userError } = await supabase.auth.getUser();
     if (userError) throw new Error('User not authenticated');
-
-    // Get current item state
-    const { data: currentItem, error: fetchError } = await supabase
-      .from("inventory_items")
-      .select("quantity")
-      .eq("id", movement.inventory_item_id)
+    
+    const { data: userRecord } = await supabase
+      .from('users')
+      .select('tenant_id')
+      .eq('id', userData.user.id)
       .single();
     
-    if (fetchError) throw fetchError;
+    if (!userRecord) throw new Error('User tenant not found');
+
+    // Update inventory quantity
+    const { error: updateError } = await supabase
+      .from("inventory_items")
+      .update({ 
+        quantity: Math.max(0, newQuantity),
+        updated_at: new Date().toISOString()
+      })
+      .eq("id", inventoryId)
+      .eq("tenant_id", userRecord.tenant_id);
     
-    const previousQuantity = currentItem.quantity || 0;
-    const newQuantity = Math.max(0, previousQuantity + movement.change_quantity);
-    
-    // Update inventory quantity (if not a transfer)
-    if (movement.type !== 'transferred') {
-      const { error: updateError } = await supabase
-        .from("inventory_items")
-        .update({ 
-          quantity: newQuantity,
-          updated_at: new Date().toISOString()
-        })
-        .eq("id", movement.inventory_item_id);
-      
-      if (updateError) throw updateError;
-    }
-    
-    // Log the movement
-    await this.createInventoryLog({
-      inventory_item_id: movement.inventory_item_id,
-      user_id: userData.user.id,
-      type: movement.type,
-      change_quantity: movement.change_quantity,
-      previous_quantity: previousQuantity,
-      new_quantity: newQuantity,
-      work_order_id: movement.work_order_id,
-      note: movement.note
-    });
+    if (updateError) throw updateError;
   },
 
   // Get low stock alerts
   async getLowStockAlerts(): Promise<InventoryAlert[]> {
+    const { data: userData, error: userError } = await supabase.auth.getUser();
+    if (userError) throw new Error('User not authenticated');
+    
+    const { data: userRecord } = await supabase
+      .from('users')
+      .select('tenant_id')
+      .eq('id', userData.user.id)
+      .single();
+    
+    if (!userRecord) throw new Error('User tenant not found');
+
     const { data, error } = await supabase
       .from("inventory_items")
       .select(`
@@ -270,18 +335,23 @@ export const inventoryEnhancedApi = {
         location,
         description
       `)
-      .filter('quantity', 'lte', 'min_quantity');
+      .eq("tenant_id", userRecord.tenant_id);
     
     if (error) throw error;
     
-    return (data || []).map(item => ({
+    // Filter for low stock items
+    const lowStockItems = (data || []).filter(item => 
+      (item.quantity || 0) <= (item.min_quantity || 0)
+    );
+    
+    return lowStockItems.map(item => ({
       id: item.id,
       item_name: item.name,
       sku: item.sku || '',
       current_quantity: item.quantity || 0,
       min_quantity: item.min_quantity || 0,
       reorder_level: item.min_quantity || 0,
-      alert_type: item.quantity === 0 ? 'out_of_stock' : 'low_stock',
+      alert_type: item.quantity === 0 ? 'out_of_stock' as const : 'low_stock' as const,
       location: item.location || '',
       category: item.description || ''
     }));
@@ -298,9 +368,21 @@ export const inventoryEnhancedApi = {
     limit?: number;
     offset?: number;
   }): Promise<{ items: InventoryItemWithStats[]; total: number }> {
+    const { data: userData, error: userError } = await supabase.auth.getUser();
+    if (userError) throw new Error('User not authenticated');
+    
+    const { data: userRecord } = await supabase
+      .from('users')
+      .select('tenant_id')
+      .eq('id', userData.user.id)
+      .single();
+    
+    if (!userRecord) throw new Error('User tenant not found');
+
     let query = supabase
       .from("inventory_items")
-      .select("*", { count: 'exact' });
+      .select("*", { count: 'exact' })
+      .eq("tenant_id", userRecord.tenant_id);
 
     // Apply search filter
     if (params.search) {
@@ -312,7 +394,7 @@ export const inventoryEnhancedApi = {
       query = query.eq("location", params.location);
     }
 
-    // Apply status filter - simplified approach
+    // Apply status filter
     if (params.status === 'out_of_stock') {
       query = query.eq("quantity", 0);
     }
@@ -349,16 +431,12 @@ export const inventoryEnhancedApi = {
     };
   },
 
-  // Inventory logs
+  // Inventory logs placeholder
   async getInventoryLogs(inventoryItemId: string): Promise<InventoryLog[]> {
-    // Since we don't have an inventory_logs table yet, return empty array
-    // This would be implemented once the logs table is created
     return [];
   },
 
   async createInventoryLog(log: Omit<InventoryLog, 'id' | 'created_at' | 'user_name'>): Promise<void> {
-    // Since we don't have an inventory_logs table yet, this is a placeholder
-    // This would be implemented once the logs table is created
     console.log('Inventory log created:', log);
   },
 
