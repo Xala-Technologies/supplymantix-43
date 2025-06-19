@@ -3,7 +3,8 @@ import React from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, Filter, Download, Upload } from "lucide-react";
+import { Search, Download, Upload } from "lucide-react";
+import { toast } from "sonner";
 
 interface AssetsHeaderProps {
   onFiltersChange: (filters: any) => void;
@@ -27,6 +28,27 @@ export const AssetsHeader = ({ onFiltersChange, onCreateAsset, assetsCount }: As
     };
     onFiltersChange(filters);
   }, [searchQuery, statusFilter, categoryFilter, criticalityFilter, onFiltersChange]);
+
+  const handleImport = () => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.csv,.xlsx';
+    input.onchange = (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0];
+      if (file) {
+        toast.success(`Importing ${file.name}...`);
+        // TODO: Implement actual import logic
+        console.log('Importing file:', file);
+      }
+    };
+    input.click();
+  };
+
+  const handleExport = () => {
+    toast.success('Exporting assets...');
+    // TODO: Implement actual export logic
+    console.log('Exporting assets');
+  };
 
   return (
     <div className="flex items-center justify-between w-full">
@@ -84,12 +106,12 @@ export const AssetsHeader = ({ onFiltersChange, onCreateAsset, assetsCount }: As
       </div>
 
       <div className="flex items-center gap-2">
-        <Button variant="outline" size="sm">
+        <Button variant="outline" size="sm" onClick={handleImport}>
           <Upload className="h-4 w-4 mr-2" />
           Import
         </Button>
         
-        <Button variant="outline" size="sm">
+        <Button variant="outline" size="sm" onClick={handleExport}>
           <Download className="h-4 w-4 mr-2" />
           Export
         </Button>
