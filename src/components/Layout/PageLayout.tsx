@@ -26,9 +26,7 @@ export const PageLayoutHeader = ({
   leftContent,
   className
 }: PageHeaderProps) => {
-  return <div className={cn("bg-white border-b border-gray-200 px-6 py-4", className)}>
-      
-    </div>;
+  return;
 };
 interface PageFiltersProps {
   children: React.ReactNode;
