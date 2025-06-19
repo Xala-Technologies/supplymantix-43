@@ -230,7 +230,6 @@ export default function Assets() {
           <>
             <PageLayoutHeader 
               title={viewMode === 'create' ? 'Create Asset' : 'Edit Asset'}
-              description={viewMode === 'create' ? 'Add a new asset to your inventory' : 'Update asset information'}
             >
               <Button 
                 variant="outline" 
@@ -258,7 +257,6 @@ export default function Assets() {
           <>
             <PageLayoutHeader 
               title={selectedAsset?.name || 'Asset Details'}
-              description="View and manage asset information"
             >
               <Button 
                 variant="outline" 
@@ -289,7 +287,6 @@ export default function Assets() {
           <>
             <PageLayoutHeader 
               title="Assets"
-              description="Manage and track your organization's assets"
             >
               <Button onClick={handleCreateAsset} className="bg-blue-600 hover:bg-blue-700">
                 <Plus className="h-4 w-4 mr-2" />
