@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/integrations/supabase/types";
 
@@ -15,6 +14,8 @@ export const assetsApi = {
     location?: string[];
     criticality?: string[];
   }) {
+    console.log('Fetching assets with filters:', filters);
+    
     let query = supabase
       .from("assets")
       .select("*")
@@ -47,6 +48,8 @@ export const assetsApi = {
       console.error('Error fetching assets:', error);
       throw error;
     }
+    
+    console.log('Fetched assets:', data);
     return data || [];
   },
 
@@ -61,52 +64,6 @@ export const assetsApi = {
       console.error('Error fetching asset:', error);
       throw error;
     }
-    return data;
-  },
-
-  async createAsset(asset: Omit<AssetInsert, 'tenant_id'>) {
-    console.log('Creating asset with data:', asset);
-    
-    // Get current user's tenant_id
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
-      console.error('No authenticated user found');
-      throw new Error('User must be authenticated');
-    }
-
-    const { data: userData, error: userError } = await supabase
-      .from("users")
-      .select("tenant_id")
-      .eq("id", user.id)
-      .single();
-
-    if (userError) {
-      console.error('Error fetching user tenant_id:', userError);
-      throw userError;
-    }
-
-    if (!userData?.tenant_id) {
-      console.error('No tenant_id found for user');
-      throw new Error('User tenant not found');
-    }
-
-    const assetWithTenant = {
-      ...asset,
-      tenant_id: userData.tenant_id
-    };
-    
-    const { data, error } = await supabase
-      .from("assets")
-      .insert(assetWithTenant)
-      .select()
-      .single();
-    
-    if (error) {
-      console.error('Database error creating asset:', error);
-      throw error;
-    }
-    
-    console.log('Asset created successfully:', data);
     return data;
   },
 
@@ -197,6 +154,24 @@ export const assetsApi = {
     });
     
     return stats;
+  },
+
+  async createAsset(asset: Omit<AssetInsert, 'tenant_id'>) {
+    console.log('Creating asset with data:', asset);
+    
+    const { data, error } = await supabase
+      .from("assets")
+      .insert(asset)
+      .select()
+      .single();
+    
+    if (error) {
+      console.error('Database error creating asset:', error);
+      throw error;
+    }
+    
+    console.log('Asset created successfully:', data);
+    return data;
   },
 
   async exportAssets(format: 'csv' | 'json' = 'csv') {

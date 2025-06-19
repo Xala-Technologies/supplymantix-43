@@ -1,17 +1,16 @@
 
 import { DashboardLayout } from "@/components/Layout/DashboardLayout";
 import { AssetsHeader } from "@/components/assets/AssetsHeader";
-import { AssetsList } from "@/components/assets/AssetsList";
+import { AssetsGrid } from "@/components/assets/AssetsGrid";
 import { AssetDetailCard } from "@/components/assets/AssetDetailCard";
 import { AssetForm } from "@/components/assets/AssetForm";
 import { useState } from "react";
 import { ChevronLeft, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAssets, useCreateAsset, useUpdateAsset, useDeleteAsset, type Asset as DatabaseAsset } from "@/hooks/useAssets";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
 
-// UI Asset type for AssetsList component
+// UI Asset type for AssetsGrid component
 interface UIAsset {
   id: string;
   name: string;
@@ -46,11 +45,11 @@ interface DetailAsset {
   documentation: Array<{ name: string; type: string; size: string }>;
 }
 
-type ViewMode = 'list' | 'detail' | 'create' | 'edit';
+type ViewMode = 'grid' | 'detail' | 'create' | 'edit';
 
 export default function Assets() {
   const [selectedAsset, setSelectedAsset] = useState<DatabaseAsset | null>(null);
-  const [viewMode, setViewMode] = useState<ViewMode>('list');
+  const [viewMode, setViewMode] = useState<ViewMode>('grid');
   const [filters, setFilters] = useState({
     search: "",
     status: [] as string[],
@@ -60,10 +59,12 @@ export default function Assets() {
   });
 
   // API hooks
-  const { data: assets = [], isLoading, error } = useAssets(filters);
+  const { data: assets = [], isLoading, error, refetch } = useAssets(filters);
   const createAsset = useCreateAsset();
   const updateAsset = useUpdateAsset();
   const deleteAsset = useDeleteAsset();
+
+  console.log('Assets data:', assets); // Debug log
 
   // Convert database assets to UI assets
   const convertToUIAssets = (dbAssets: DatabaseAsset[]): UIAsset[] => {
@@ -126,19 +127,24 @@ export default function Assets() {
     setViewMode('create');
   };
 
-  const handleEditAsset = (asset: DatabaseAsset) => {
-    setSelectedAsset(asset);
-    setViewMode('edit');
+  const handleEditAsset = (uiAsset: UIAsset) => {
+    const asset = assets.find(a => a.id === uiAsset.id);
+    if (asset) {
+      setSelectedAsset(asset);
+      setViewMode('edit');
+    }
   };
 
-  const handleDeleteAsset = (asset: DatabaseAsset) => {
-    if (confirm(`Are you sure you want to delete "${asset.name}"?`)) {
+  const handleDeleteAsset = (uiAsset: UIAsset) => {
+    const asset = assets.find(a => a.id === uiAsset.id);
+    if (asset && confirm(`Are you sure you want to delete "${asset.name}"?`)) {
       deleteAsset.mutate(asset.id, {
         onSuccess: () => {
           if (selectedAsset?.id === asset.id) {
-            setViewMode('list');
+            setViewMode('grid');
             setSelectedAsset(null);
           }
+          refetch();
         },
         onError: (error) => {
           console.error('Failed to delete asset:', error);
@@ -153,9 +159,10 @@ export default function Assets() {
     
     if (viewMode === 'create') {
       createAsset.mutate(data, {
-        onSuccess: () => {
-          console.log('Asset created successfully');
-          setViewMode('list');
+        onSuccess: (newAsset) => {
+          console.log('Asset created successfully:', newAsset);
+          setViewMode('grid');
+          refetch();
           toast.success('Asset created successfully');
         },
         onError: (error) => {
@@ -166,9 +173,10 @@ export default function Assets() {
     } else if (viewMode === 'edit' && selectedAsset) {
       updateAsset.mutate({ id: selectedAsset.id, updates: data }, {
         onSuccess: (updatedAsset) => {
-          console.log('Asset updated successfully');
+          console.log('Asset updated successfully:', updatedAsset);
           setSelectedAsset(updatedAsset);
           setViewMode('detail');
+          refetch();
           toast.success('Asset updated successfully');
         },
         onError: (error) => {
@@ -183,13 +191,13 @@ export default function Assets() {
     if (selectedAsset && (viewMode === 'edit')) {
       setViewMode('detail');
     } else {
-      setViewMode('list');
+      setViewMode('grid');
       setSelectedAsset(null);
     }
   };
 
-  const handleBackToList = () => {
-    setViewMode('list');
+  const handleBackToGrid = () => {
+    setViewMode('grid');
     setSelectedAsset(null);
   };
 
@@ -203,22 +211,9 @@ export default function Assets() {
         <div className="h-full flex items-center justify-center">
           <div className="text-center">
             <p className="text-red-600 mb-4">Error loading assets: {error.message}</p>
-            <Button onClick={() => window.location.reload()}>
+            <Button onClick={() => refetch()}>
               Retry
             </Button>
-          </div>
-        </div>
-      </DashboardLayout>
-    );
-  }
-
-  if (isLoading) {
-    return (
-      <DashboardLayout>
-        <div className="h-full flex items-center justify-center">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-            <p className="text-gray-600">Loading assets...</p>
           </div>
         </div>
       </DashboardLayout>
@@ -259,78 +254,49 @@ export default function Assets() {
               assetsCount={assets.length}
             />
             
-            <div className="flex-1 flex overflow-hidden">
-              {/* Desktop Layout */}
-              <div className="hidden md:flex w-full">
-                {/* Sidebar */}
-                <AssetsList 
+            <div className="flex-1 overflow-hidden">
+              {viewMode === 'grid' ? (
+                <AssetsGrid
                   assets={uiAssets}
                   selectedAssetId={selectedAsset?.id || null}
                   onSelectAsset={handleSelectAsset}
+                  onCreateAsset={handleCreateAsset}
+                  onEditAsset={handleEditAsset}
+                  onDeleteAsset={handleDeleteAsset}
+                  isLoading={isLoading}
                 />
-                
-                {/* Detail view */}
-                <div className="flex-1 bg-white overflow-y-auto">
-                  {selectedAsset ? (
-                    <div className="p-4 lg:p-6">
+              ) : (
+                <div className="h-full flex flex-col">
+                  {/* Detail header with back button */}
+                  <div className="p-4 lg:p-6 border-b bg-white flex items-center gap-3">
+                    <Button 
+                      variant="ghost" 
+                      size="sm"
+                      onClick={handleBackToGrid}
+                      className="p-1 h-auto"
+                    >
+                      <ChevronLeft className="w-5 h-5" />
+                    </Button>
+                    <span className="font-medium text-gray-900 truncate">
+                      {selectedAsset?.name}
+                    </span>
+                  </div>
+                  
+                  {/* Detail view */}
+                  <div className="flex-1 p-4 lg:p-6 overflow-y-auto bg-white">
+                    {selectedAsset && (
                       <AssetDetailCard 
-                        asset={convertToDetailAsset(selectedAsset)} 
-                        onEdit={() => handleEditAsset(selectedAsset)}
-                        onDelete={() => handleDeleteAsset(selectedAsset)}
+                        asset={convertToDetailAsset(selectedAsset)}
+                        onEdit={() => setViewMode('edit')}
+                        onDelete={() => {
+                          const uiAsset = convertToUIAssets([selectedAsset])[0];
+                          handleDeleteAsset(uiAsset);
+                        }}
                       />
-                    </div>
-                  ) : (
-                    <div className="flex items-center justify-center h-full text-gray-500">
-                      <div className="text-center">
-                        <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                          <Plus className="w-8 h-8 text-gray-400" />
-                        </div>
-                        <p className="text-lg font-medium mb-2">No Asset Selected</p>
-                        <p className="text-sm">Select an asset from the list to view details</p>
-                      </div>
-                    </div>
-                  )}
+                    )}
+                  </div>
                 </div>
-              </div>
-              
-              {/* Mobile Layout */}
-              <div className="md:hidden w-full flex flex-col">
-                {viewMode === 'list' ? (
-                  <AssetsList 
-                    assets={uiAssets}
-                    selectedAssetId={selectedAsset?.id || null}
-                    onSelectAsset={handleSelectAsset}
-                  />
-                ) : (
-                  <>
-                    {/* Mobile header with back button */}
-                    <div className="p-3 border-b bg-white flex items-center gap-3">
-                      <Button 
-                        variant="ghost" 
-                        size="sm"
-                        onClick={handleBackToList}
-                        className="p-1 h-auto"
-                      >
-                        <ChevronLeft className="w-5 h-5" />
-                      </Button>
-                      <span className="font-medium text-gray-900 truncate">
-                        {selectedAsset?.name}
-                      </span>
-                    </div>
-                    
-                    {/* Mobile detail view */}
-                    <div className="flex-1 p-3 overflow-y-auto bg-white">
-                      {selectedAsset && (
-                        <AssetDetailCard 
-                          asset={convertToDetailAsset(selectedAsset)}
-                          onEdit={() => handleEditAsset(selectedAsset)}
-                          onDelete={() => handleDeleteAsset(selectedAsset)}
-                        />
-                      )}
-                    </div>
-                  </>
-                )}
-              </div>
+              )}
             </div>
           </>
         )}

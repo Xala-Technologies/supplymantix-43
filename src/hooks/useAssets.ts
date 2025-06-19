@@ -1,4 +1,3 @@
-
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { assetsApi, type Asset, type AssetInsert, type AssetUpdate } from "@/lib/database/assets";
 import { toast } from "sonner";
@@ -14,6 +13,8 @@ export const useAssets = (filters?: {
   return useQuery({
     queryKey: ["assets", filters],
     queryFn: () => assetsApi.getAssets(filters),
+    staleTime: 1000 * 60 * 5, // 5 minutes
+    refetchOnWindowFocus: false,
   });
 };
 
@@ -36,9 +37,10 @@ export const useCreateAsset = () => {
       queryClient.invalidateQueries({ queryKey: ["assets"] });
       toast.success(`Asset "${newAsset.name}" created successfully`);
     },
-    onError: (error) => {
+    onError: (error: any) => {
       console.error("Failed to create asset:", error);
-      toast.error("Failed to create asset");
+      const errorMessage = error?.message || "Failed to create asset";
+      toast.error(errorMessage);
     },
   });
 };
