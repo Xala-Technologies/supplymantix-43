@@ -7,14 +7,28 @@ import { AssetForm } from "@/components/assets/AssetForm";
 import { useState } from "react";
 import { ChevronLeft, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useAssets, useCreateAsset, useUpdateAsset, useDeleteAsset, type Asset } from "@/hooks/useAssets";
+import { useAssets, useCreateAsset, useUpdateAsset, useDeleteAsset, type Asset as DatabaseAsset } from "@/hooks/useAssets";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
+
+// UI Asset type for AssetsList component
+interface UIAsset {
+  id: string;
+  name: string;
+  tag: string;
+  status: string;
+  location: string;
+  category: string;
+  criticality: string;
+  nextMaintenance: string;
+  workOrders: number;
+  totalDowntime: string;
+}
 
 type ViewMode = 'list' | 'detail' | 'create' | 'edit';
 
 export default function Assets() {
-  const [selectedAsset, setSelectedAsset] = useState<Asset | null>(null);
+  const [selectedAsset, setSelectedAsset] = useState<DatabaseAsset | null>(null);
   const [viewMode, setViewMode] = useState<ViewMode>('list');
   const [filters, setFilters] = useState({
     search: "",
@@ -30,9 +44,30 @@ export default function Assets() {
   const updateAsset = useUpdateAsset();
   const deleteAsset = useDeleteAsset();
 
-  const handleSelectAsset = (asset: Asset) => {
-    setSelectedAsset(asset);
-    setViewMode('detail');
+  // Convert database assets to UI assets
+  const convertToUIAssets = (dbAssets: DatabaseAsset[]): UIAsset[] => {
+    return dbAssets.map(asset => ({
+      id: asset.id,
+      name: asset.name,
+      tag: asset.asset_tag || `AST-${asset.id.slice(-6)}`,
+      status: asset.status,
+      location: asset.location || 'Unassigned',
+      category: asset.category || 'Equipment',
+      criticality: asset.criticality || 'Medium',
+      nextMaintenance: '2024-07-01', // Placeholder - would come from maintenance schedules
+      workOrders: 0, // Placeholder - would come from work orders
+      totalDowntime: '0h' // Placeholder - would come from downtime tracking
+    }));
+  };
+
+  const uiAssets = convertToUIAssets(assets);
+
+  const handleSelectAsset = (assetId: string) => {
+    const asset = assets.find(a => a.id === assetId);
+    if (asset) {
+      setSelectedAsset(asset);
+      setViewMode('detail');
+    }
   };
 
   const handleCreateAsset = () => {
@@ -40,12 +75,12 @@ export default function Assets() {
     setViewMode('create');
   };
 
-  const handleEditAsset = (asset: Asset) => {
+  const handleEditAsset = (asset: DatabaseAsset) => {
     setSelectedAsset(asset);
     setViewMode('edit');
   };
 
-  const handleDeleteAsset = (asset: Asset) => {
+  const handleDeleteAsset = (asset: DatabaseAsset) => {
     if (confirm(`Are you sure you want to delete "${asset.name}"?`)) {
       deleteAsset.mutate(asset.id);
       if (selectedAsset?.id === asset.id) {
@@ -142,7 +177,7 @@ export default function Assets() {
               <div className="hidden md:flex w-full">
                 {/* Sidebar */}
                 <AssetsList 
-                  assets={assets}
+                  assets={uiAssets}
                   selectedAssetId={selectedAsset?.id || null}
                   onSelectAsset={handleSelectAsset}
                 />
@@ -175,7 +210,7 @@ export default function Assets() {
               <div className="md:hidden w-full flex flex-col">
                 {viewMode === 'list' ? (
                   <AssetsList 
-                    assets={assets}
+                    assets={uiAssets}
                     selectedAssetId={selectedAsset?.id || null}
                     onSelectAsset={handleSelectAsset}
                   />
