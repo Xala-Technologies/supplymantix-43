@@ -1,4 +1,3 @@
-
 import { DashboardLayout } from "@/components/Layout/DashboardLayout";
 import { AssetsHeader } from "@/components/assets/AssetsHeader";
 import { AssetsList } from "@/components/assets/AssetsList";
@@ -23,6 +22,27 @@ interface UIAsset {
   nextMaintenance: string;
   workOrders: number;
   totalDowntime: string;
+}
+
+// Asset type expected by AssetDetailCard
+interface DetailAsset {
+  id: string;
+  name: string;
+  tag: string;
+  status: string;
+  location: string;
+  category: string;
+  criticality: string;
+  manufacturer: string;
+  model: string;
+  serialNumber: string;
+  installDate: string;
+  lastMaintenance: string;
+  nextMaintenance: string;
+  workOrders: number;
+  totalDowntime: string;
+  specifications: Record<string, string>;
+  documentation: Array<{ name: string; type: string; size: string }>;
 }
 
 type ViewMode = 'list' | 'detail' | 'create' | 'edit';
@@ -58,6 +78,36 @@ export default function Assets() {
       workOrders: 0, // Placeholder - would come from work orders
       totalDowntime: '0h' // Placeholder - would come from downtime tracking
     }));
+  };
+
+  // Convert database asset to detail asset format
+  const convertToDetailAsset = (dbAsset: DatabaseAsset): DetailAsset => {
+    return {
+      id: dbAsset.id,
+      name: dbAsset.name,
+      tag: dbAsset.asset_tag || `AST-${dbAsset.id.slice(-6)}`,
+      status: dbAsset.status,
+      location: dbAsset.location || 'Unassigned',
+      category: dbAsset.category || 'Equipment',
+      criticality: dbAsset.criticality || 'Medium',
+      manufacturer: 'Unknown', // Placeholder - would be added to database schema
+      model: 'Unknown', // Placeholder - would be added to database schema
+      serialNumber: dbAsset.asset_tag || 'N/A', // Using asset_tag as placeholder
+      installDate: dbAsset.created_at?.split('T')[0] || '2024-01-01',
+      lastMaintenance: '2024-06-01', // Placeholder - would come from maintenance records
+      nextMaintenance: '2024-07-01', // Placeholder - would come from maintenance schedules
+      workOrders: 0, // Placeholder - would come from work orders
+      totalDowntime: '0h', // Placeholder - would come from downtime tracking
+      specifications: {
+        'Power': 'N/A',
+        'Weight': 'N/A',
+        'Dimensions': 'N/A'
+      },
+      documentation: [
+        { name: 'Manual.pdf', type: 'PDF', size: '2.5 MB' },
+        { name: 'Warranty.pdf', type: 'PDF', size: '1.2 MB' }
+      ]
+    };
   };
 
   const uiAssets = convertToUIAssets(assets);
@@ -187,7 +237,7 @@ export default function Assets() {
                   {selectedAsset ? (
                     <div className="p-4 lg:p-6">
                       <AssetDetailCard 
-                        asset={selectedAsset} 
+                        asset={convertToDetailAsset(selectedAsset)} 
                         onEdit={() => handleEditAsset(selectedAsset)}
                         onDelete={() => handleDeleteAsset(selectedAsset)}
                       />
@@ -235,7 +285,7 @@ export default function Assets() {
                     <div className="flex-1 p-3 overflow-y-auto bg-white">
                       {selectedAsset && (
                         <AssetDetailCard 
-                          asset={selectedAsset}
+                          asset={convertToDetailAsset(selectedAsset)}
                           onEdit={() => handleEditAsset(selectedAsset)}
                           onDelete={() => handleDeleteAsset(selectedAsset)}
                         />
