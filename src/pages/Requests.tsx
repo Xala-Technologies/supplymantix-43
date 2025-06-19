@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { DashboardLayout } from "@/components/Layout/DashboardLayout";
 import { PageContainer } from "@/components/Layout/PageContainer";
-import { PageHeader } from "@/components/Layout/PageHeader";
+import { PageLayout, PageLayoutHeader } from "@/components/Layout/PageLayout";
 import { PageContent } from "@/components/Layout/PageContent";
 import { RequestsHeader } from "@/components/requests/RequestsHeader";
 import { RequestsList } from "@/components/requests/RequestsList";
@@ -10,6 +10,8 @@ import { RequestForm } from "@/components/requests/RequestForm";
 import { RequestDetailDialog } from "@/components/requests/RequestDetailDialog";
 import { useRequests, useCreateRequest, useUpdateRequest, useDeleteRequest } from "@/hooks/useRequests";
 import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { ArrowLeft } from "lucide-react";
 import type { Request, CreateRequestRequest } from "@/types/request";
 
 export default function Requests() {
@@ -89,21 +91,31 @@ export default function Requests() {
     return (
       <DashboardLayout>
         <PageContainer>
-          <PageHeader
-            title="Create New Request"
-            description="Submit a new request for maintenance, repairs, or services"
-            showBackButton
-            onBack={() => setView("list")}
-            backButtonText="Back to Requests"
-          />
-          <PageContent>
-            <RequestForm
-              onSubmit={handleCreateRequest}
-              onCancel={() => setView("list")}
-              isLoading={createRequest.isPending}
-              mode="create"
+          <PageLayout>
+            <PageLayoutHeader
+              title="Create New Request"
+              description="Submit a new request for maintenance, repairs, or services"
+              leftContent={
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setView("list")}
+                  className="text-gray-600 hover:text-gray-900 hover:bg-gray-100"
+                >
+                  <ArrowLeft className="w-4 h-4 mr-2" />
+                  Back to Requests
+                </Button>
+              }
             />
-          </PageContent>
+            <PageContent>
+              <RequestForm
+                onSubmit={handleCreateRequest}
+                onCancel={() => setView("list")}
+                isLoading={createRequest.isPending}
+                mode="create"
+              />
+            </PageContent>
+          </PageLayout>
         </PageContainer>
       </DashboardLayout>
     );
@@ -113,28 +125,38 @@ export default function Requests() {
     return (
       <DashboardLayout>
         <PageContainer>
-          <PageHeader
-            title="Edit Request"
-            description="Update request details and information"
-            showBackButton
-            onBack={() => {
-              setView("list");
-              setSelectedRequest(null);
-            }}
-            backButtonText="Back to Requests"
-          />
-          <PageContent>
-            <RequestForm
-              onSubmit={handleEditRequest}
-              onCancel={() => {
-                setView("list");
-                setSelectedRequest(null);
-              }}
-              isLoading={updateRequest.isPending}
-              initialData={selectedRequest}
-              mode="edit"
+          <PageLayout>
+            <PageLayoutHeader
+              title="Edit Request"
+              description="Update request details and information"
+              leftContent={
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    setView("list");
+                    setSelectedRequest(null);
+                  }}
+                  className="text-gray-600 hover:text-gray-900 hover:bg-gray-100"
+                >
+                  <ArrowLeft className="w-4 h-4 mr-2" />
+                  Back to Requests
+                </Button>
+              }
             />
-          </PageContent>
+            <PageContent>
+              <RequestForm
+                onSubmit={handleEditRequest}
+                onCancel={() => {
+                  setView("list");
+                  setSelectedRequest(null);
+                }}
+                isLoading={updateRequest.isPending}
+                initialData={selectedRequest}
+                mode="edit"
+              />
+            </PageContent>
+          </PageLayout>
         </PageContainer>
       </DashboardLayout>
     );
@@ -143,47 +165,49 @@ export default function Requests() {
   return (
     <DashboardLayout>
       <PageContainer>
-        <PageHeader
-          title="Requests"
-          description="Manage and track maintenance requests and service tickets"
-        />
-        <PageContent>
-          <div className="space-y-6">
-            <RequestsHeader
-              onCreateRequest={() => setView("create")}
-              searchQuery={searchQuery}
-              onSearchChange={setSearchQuery}
-              statusFilter={statusFilter}
-              onStatusFilterChange={setStatusFilter}
-              priorityFilter={priorityFilter}
-              onPriorityFilterChange={setPriorityFilter}
-              viewMode={viewMode}
-              onViewModeChange={setViewMode}
-              userRole={userRole}
-              requests={requests}
-              onImportRequests={handleImportRequests}
-            />
-
-            {isLoading ? (
-              <div className="text-center py-8">Loading requests...</div>
-            ) : (
-              <RequestsList
-                requests={filteredRequests}
-                onEditRequest={handleEditMode}
-                onDeleteRequest={handleDeleteRequest}
-                onViewRequest={handleViewRequest}
+        <PageLayout>
+          <PageLayoutHeader
+            title="Requests"
+            description="Manage and track maintenance requests and service tickets"
+          />
+          <PageContent>
+            <div className="space-y-6">
+              <RequestsHeader
+                onCreateRequest={() => setView("create")}
+                searchQuery={searchQuery}
+                onSearchChange={setSearchQuery}
+                statusFilter={statusFilter}
+                onStatusFilterChange={setStatusFilter}
+                priorityFilter={priorityFilter}
+                onPriorityFilterChange={setPriorityFilter}
                 viewMode={viewMode}
+                onViewModeChange={setViewMode}
                 userRole={userRole}
+                requests={requests}
+                onImportRequests={handleImportRequests}
               />
-            )}
 
-            <RequestDetailDialog
-              request={selectedRequest}
-              open={detailDialogOpen}
-              onOpenChange={setDetailDialogOpen}
-            />
-          </div>
-        </PageContent>
+              {isLoading ? (
+                <div className="text-center py-8">Loading requests...</div>
+              ) : (
+                <RequestsList
+                  requests={filteredRequests}
+                  onEditRequest={handleEditMode}
+                  onDeleteRequest={handleDeleteRequest}
+                  onViewRequest={handleViewRequest}
+                  viewMode={viewMode}
+                  userRole={userRole}
+                />
+              )}
+
+              <RequestDetailDialog
+                request={selectedRequest}
+                open={detailDialogOpen}
+                onOpenChange={setDetailDialogOpen}
+              />
+            </div>
+          </PageContent>
+        </PageLayout>
       </PageContainer>
     </DashboardLayout>
   );
