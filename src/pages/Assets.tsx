@@ -5,10 +5,11 @@ import { AssetsGrid } from "@/components/assets/AssetsGrid";
 import { AssetDetailCard } from "@/components/assets/AssetDetailCard";
 import { AssetForm } from "@/components/assets/AssetForm";
 import { useState } from "react";
-import { ChevronLeft, Plus } from "lucide-react";
+import { ChevronLeft, Plus, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAssets, useCreateAsset, useUpdateAsset, useDeleteAsset, type Asset as DatabaseAsset } from "@/hooks/useAssets";
 import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
 
 // UI Asset type for AssetsGrid component
 interface UIAsset {
@@ -48,6 +49,7 @@ interface DetailAsset {
 type ViewMode = 'grid' | 'detail' | 'create' | 'edit';
 
 export default function Assets() {
+  const navigate = useNavigate();
   const [selectedAsset, setSelectedAsset] = useState<DatabaseAsset | null>(null);
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
   const [filters, setFilters] = useState({
@@ -201,6 +203,10 @@ export default function Assets() {
     setSelectedAsset(null);
   };
 
+  const handleBackToDashboard = () => {
+    navigate('/dashboard');
+  };
+
   const handleFiltersChange = (newFilters: typeof filters) => {
     setFilters(newFilters);
   };
@@ -235,6 +241,7 @@ export default function Assets() {
                   variant="outline" 
                   size="sm"
                   onClick={handleFormCancel}
+                  className="text-gray-600 hover:text-gray-900 hover:bg-gray-100"
                 >
                   <ChevronLeft className="w-4 h-4 mr-2" />
                   Back
@@ -255,7 +262,7 @@ export default function Assets() {
             </PageLayoutContent>
           </>
         ) : viewMode === 'detail' ? (
-          // Detail View with enhanced header design
+          // Detail View
           <>
             <PageLayoutHeader 
               title={selectedAsset?.name || 'Asset Details'}
@@ -288,7 +295,7 @@ export default function Assets() {
             </PageLayoutContent>
           </>
         ) : (
-          // Grid View
+          // Grid View with enhanced Back to Dashboard button
           <>
             <PageLayoutHeader 
               title="Assets"
@@ -296,15 +303,15 @@ export default function Assets() {
                 <Button 
                   variant="ghost" 
                   size="sm"
-                  onClick={() => window.history.back()}
-                  className="text-gray-600 hover:text-gray-900 hover:bg-gray-100"
+                  onClick={handleBackToDashboard}
+                  className="text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-colors duration-200 flex items-center gap-2 px-3 py-2 rounded-lg border border-gray-200 hover:border-gray-300 hover:shadow-sm"
                 >
-                  <ChevronLeft className="w-4 h-4 mr-2" />
-                  Back to Dashboard
+                  <ArrowLeft className="w-4 h-4" />
+                  <span className="font-medium">Dashboard</span>
                 </Button>
               }
             >
-              <Button onClick={handleCreateAsset} className="bg-blue-600 hover:bg-blue-700">
+              <Button onClick={handleCreateAsset} className="bg-blue-600 hover:bg-blue-700 shadow-sm">
                 <Plus className="h-4 w-4 mr-2" />
                 New Asset
               </Button>
