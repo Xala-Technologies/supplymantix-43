@@ -26,7 +26,7 @@ export const assetsApi = {
     }
     
     if (filters?.status && filters.status.length > 0) {
-      query = query.in("status", filters.status);
+      query = query.in("status", filters.status as ("active" | "maintenance" | "out_of_service" | "retired")[]);
     }
     
     if (filters?.category && filters.category.length > 0) {

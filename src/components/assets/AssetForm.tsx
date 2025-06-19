@@ -7,10 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { CalendarIcon, Loader2 } from "lucide-react";
-import { format } from "date-fns";
+import { Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Asset, AssetInsert, AssetUpdate } from "@/hooks/useAssets";
 
@@ -21,7 +18,7 @@ interface AssetFormData {
   location?: string;
   category: string;
   criticality: string;
-  status: string;
+  status: "active" | "maintenance" | "out_of_service" | "retired";
 }
 
 interface AssetFormProps {
@@ -34,10 +31,10 @@ interface AssetFormProps {
 
 const statusOptions = [
   { value: "active", label: "Active" },
-  { value: "inactive", label: "Inactive" },
   { value: "maintenance", label: "Maintenance" },
+  { value: "out_of_service", label: "Out of Service" },
   { value: "retired", label: "Retired" }
-];
+] as const;
 
 const categoryOptions = [
   { value: "equipment", label: "Equipment" },
@@ -96,7 +93,7 @@ export const AssetForm = ({
   const handleFormSubmit = (data: AssetFormData) => {
     const submitData = {
       ...data,
-      tenant_id: "default-tenant", // This should come from your auth context
+      tenant_id: "default-tenant",
     };
 
     onSubmit(submitData);
@@ -215,7 +212,7 @@ export const AssetForm = ({
                 <Label>Status *</Label>
                 <Select
                   value={watchedStatus}
-                  onValueChange={(value) => setValue("status", value)}
+                  onValueChange={(value: "active" | "maintenance" | "out_of_service" | "retired") => setValue("status", value)}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Select status" />
