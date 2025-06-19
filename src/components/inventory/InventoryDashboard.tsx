@@ -144,9 +144,10 @@ export const InventoryDashboard = () => {
           />
           <StockMovementModal
             item={row.original}
+            onSuccess={refetch}
             trigger={
               <Button variant="outline" size="sm">
-                Manage Stock
+                Stock
               </Button>
             }
           />
@@ -233,8 +234,8 @@ export const InventoryDashboard = () => {
               <InventoryForm 
                 onSuccess={refetch}
                 trigger={
-                  <Button className="flex items-center gap-2">
-                    <Plus className="w-4 h-4" />
+                  <Button>
+                    <Plus className="w-4 h-4 mr-2" />
                     Add Item
                   </Button>
                 }
