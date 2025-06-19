@@ -230,15 +230,17 @@ export default function Assets() {
           <>
             <PageLayoutHeader 
               title={viewMode === 'create' ? 'Create Asset' : 'Edit Asset'}
-            >
-              <Button 
-                variant="outline" 
-                onClick={handleFormCancel}
-              >
-                <ChevronLeft className="w-4 h-4 mr-2" />
-                Back
-              </Button>
-            </PageLayoutHeader>
+              leftContent={
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={handleFormCancel}
+                >
+                  <ChevronLeft className="w-4 h-4 mr-2" />
+                  Back
+                </Button>
+              }
+            />
             
             <PageLayoutContent>
               <div className="p-6 bg-white">
@@ -257,17 +259,18 @@ export default function Assets() {
           <>
             <PageLayoutHeader 
               title={selectedAsset?.name || 'Asset Details'}
-            >
-              <Button 
-                variant="ghost" 
-                size="sm"
-                onClick={handleBackToGrid}
-                className="text-gray-600 hover:text-gray-900 hover:bg-gray-100"
-              >
-                <ChevronLeft className="w-4 h-4 mr-2" />
-                Back to Assets
-              </Button>
-            </PageLayoutHeader>
+              leftContent={
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  onClick={handleBackToGrid}
+                  className="text-gray-600 hover:text-gray-900 hover:bg-gray-100"
+                >
+                  <ChevronLeft className="w-4 h-4 mr-2" />
+                  Back to Assets
+                </Button>
+              }
+            />
             
             <PageLayoutContent>
               <div className="p-6 bg-white h-full overflow-y-auto">
