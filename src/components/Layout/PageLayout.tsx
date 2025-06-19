@@ -1,10 +1,11 @@
-
 import React from "react";
 import { cn } from "@/lib/utils";
+
 interface PageLayoutProps {
   children: React.ReactNode;
   className?: string;
 }
+
 export const PageLayout = ({
   children,
   className
@@ -13,6 +14,7 @@ export const PageLayout = ({
       {children}
     </div>;
 };
+
 interface PageHeaderProps {
   title: string;
   description?: string;
@@ -20,6 +22,7 @@ interface PageHeaderProps {
   leftContent?: React.ReactNode;
   className?: string;
 }
+
 export const PageLayoutHeader = ({
   title,
   description,
@@ -42,10 +45,12 @@ export const PageLayoutHeader = ({
       </div>
     </div>;
 };
+
 interface PageFiltersProps {
   children: React.ReactNode;
   className?: string;
 }
+
 export const PageFilters = ({
   children,
   className
@@ -54,10 +59,12 @@ export const PageFilters = ({
       {children}
     </div>;
 };
+
 interface PageContentProps {
   children: React.ReactNode;
   className?: string;
 }
+
 export const PageLayoutContent = ({
   children,
   className
