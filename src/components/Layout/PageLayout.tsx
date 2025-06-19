@@ -49,7 +49,7 @@ interface PageFiltersProps {
 
 export const PageFilters = ({ children, className }: PageFiltersProps) => {
   return (
-    <div className={cn("bg-white border-b border-gray-100 px-6 py-4", className)}>
+    <div className={cn("bg-white border-b border-gray-100", className)}>
       {children}
     </div>
   );

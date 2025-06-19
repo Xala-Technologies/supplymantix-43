@@ -269,7 +269,7 @@ export default function Assets() {
               <AssetsHeader 
                 onFiltersChange={handleFiltersChange}
                 onCreateAsset={handleCreateAsset}
-                assetsCount={assets.length}
+                assets={assets}
               />
             </PageFilters>
             
