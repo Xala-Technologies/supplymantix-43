@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/integrations/supabase/types";
 
@@ -159,9 +160,27 @@ export const assetsApi = {
   async createAsset(asset: Omit<AssetInsert, 'tenant_id'>) {
     console.log('Creating asset with data:', asset);
     
+    // Get the current user's tenant_id
+    const { data: userData, error: userError } = await supabase
+      .from("users")
+      .select("tenant_id")
+      .eq("id", (await supabase.auth.getUser()).data.user?.id)
+      .single();
+    
+    if (userError || !userData?.tenant_id) {
+      console.error('Error getting user tenant:', userError);
+      throw new Error('Unable to determine user tenant');
+    }
+
+    // Add tenant_id to the asset data
+    const assetWithTenant = {
+      ...asset,
+      tenant_id: userData.tenant_id
+    };
+    
     const { data, error } = await supabase
       .from("assets")
-      .insert(asset)
+      .insert(assetWithTenant)
       .select()
       .single();
     
