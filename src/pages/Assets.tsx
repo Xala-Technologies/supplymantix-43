@@ -1,3 +1,4 @@
+
 import { DashboardLayout } from "@/components/Layout/DashboardLayout";
 import { PageLayout, PageLayoutHeader, PageFilters, PageLayoutContent } from "@/components/Layout/PageLayout";
 import { AssetsHeader } from "@/components/assets/AssetsHeader";
@@ -292,6 +293,17 @@ export default function Assets() {
           <>
             <PageLayoutHeader 
               title="Assets"
+              leftContent={
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  onClick={() => window.history.back()}
+                  className="text-gray-600 hover:text-gray-900 hover:bg-gray-100"
+                >
+                  <ChevronLeft className="w-4 h-4 mr-2" />
+                  Back to Assets
+                </Button>
+              }
             >
               <Button onClick={handleCreateAsset} className="bg-blue-600 hover:bg-blue-700">
                 <Plus className="h-4 w-4 mr-2" />
