@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { MapPin, Calendar, Wrench, AlertTriangle, FileText, BarChart3, Settings, Edit } from "lucide-react";
+import { MapPin, Calendar, Wrench, AlertTriangle, FileText, BarChart3, Settings, Edit, Trash2 } from "lucide-react";
 
 interface AssetDetailCardProps {
   asset: {
@@ -25,17 +25,23 @@ interface AssetDetailCardProps {
     specifications: Record<string, string>;
     documentation: Array<{ name: string; type: string; size: string }>;
   };
+  onEdit?: () => void;
+  onDelete?: () => void;
 }
 
-export const AssetDetailCard = ({ asset }: AssetDetailCardProps) => {
+export const AssetDetailCard = ({ asset, onEdit, onDelete }: AssetDetailCardProps) => {
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
       case 'online':
+      case 'active':
         return 'bg-green-100 text-green-800 border-green-200';
       case 'offline':
+      case 'out_of_service':
         return 'bg-red-100 text-red-800 border-red-200';
       case 'maintenance':
         return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+      case 'retired':
+        return 'bg-gray-100 text-gray-800 border-gray-200';
       default:
         return 'bg-gray-100 text-gray-800 border-gray-200';
     }
@@ -75,10 +81,18 @@ export const AssetDetailCard = ({ asset }: AssetDetailCardProps) => {
           <Badge className={`border ${getStatusColor(asset.status)}`}>
             {asset.status}
           </Badge>
-          <Button variant="outline" size="sm">
-            <Edit className="w-4 h-4 mr-2" />
-            Edit
-          </Button>
+          {onEdit && (
+            <Button variant="outline" size="sm" onClick={onEdit}>
+              <Edit className="w-4 h-4 mr-2" />
+              Edit
+            </Button>
+          )}
+          {onDelete && (
+            <Button variant="outline" size="sm" onClick={onDelete} className="text-red-600 hover:text-red-700">
+              <Trash2 className="w-4 h-4 mr-2" />
+              Delete
+            </Button>
+          )}
         </div>
       </div>
 
