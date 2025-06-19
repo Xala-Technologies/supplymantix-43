@@ -1,329 +1,387 @@
 
+import React, { useState } from "react";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-  DropdownMenuCheckboxItem,
-} from "@/components/ui/dropdown-menu";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Search, Plus, Filter, Download, MapPin, Tag, AlertTriangle, ChevronDown, X } from "lucide-react";
-import { useState } from "react";
-
-interface FilterState {
-  search: string;
-  status: string[];
-  category: string[];
-  location: string[];
-  criticality: string[];
-}
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Plus, Filter, Search, Download, FileText, FileSpreadsheet } from "lucide-react";
+import { assetsApi } from "@/lib/database/assets";
+import { toast } from "sonner";
 
 interface AssetsHeaderProps {
-  onFiltersChange: (filters: FilterState) => void;
+  onFiltersChange: (filters: {
+    search: string;
+    status: string[];
+    category: string[];
+    location: string[];
+    criticality: string[];
+  }) => void;
   onCreateAsset: () => void;
   assetsCount: number;
 }
 
+const statusOptions = [
+  { value: "active", label: "Active" },
+  { value: "maintenance", label: "Maintenance" },
+  { value: "out_of_service", label: "Out of Service" },
+  { value: "retired", label: "Retired" }
+];
+
+const categoryOptions = [
+  { value: "equipment", label: "Equipment" },
+  { value: "production_equipment", label: "Production Equipment" },
+  { value: "material_handling", label: "Material Handling" },
+  { value: "hvac", label: "HVAC" },
+  { value: "electrical", label: "Electrical" },
+  { value: "safety", label: "Safety" }
+];
+
+const locationOptions = [
+  { value: "production_line_1", label: "Production Line 1" },
+  { value: "production_line_2", label: "Production Line 2" },
+  { value: "production_line_3", label: "Production Line 3" },
+  { value: "warehouse", label: "Warehouse" },
+  { value: "utility_room", label: "Utility Room" },
+  { value: "office", label: "Office" }
+];
+
+const criticalityOptions = [
+  { value: "low", label: "Low" },
+  { value: "medium", label: "Medium" },
+  { value: "high", label: "High" }
+];
+
 export const AssetsHeader = ({ onFiltersChange, onCreateAsset, assetsCount }: AssetsHeaderProps) => {
-  const [filters, setFilters] = useState<FilterState>({
-    search: "",
-    status: [],
-    category: [],
-    location: [],
-    criticality: [],
-  });
+  const [search, setSearch] = useState("");
+  const [selectedStatus, setSelectedStatus] = useState<string[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState<string[]>([]);
+  const [selectedLocation, setSelectedLocation] = useState<string[]>([]);
+  const [selectedCriticality, setSelectedCriticality] = useState<string[]>([]);
+  const [isExporting, setIsExporting] = useState(false);
 
-  const statusOptions = ["active", "maintenance", "out_of_service", "retired"];
-  const categoryOptions = ["equipment", "production_equipment", "material_handling", "hvac", "electrical", "safety"];
-  const locationOptions = ["production_line_1", "production_line_2", "production_line_3", "utility_room", "warehouse"];
-  const criticalityOptions = ["high", "medium", "low"];
-
-  const handleMultiSelectFilter = (filterType: keyof FilterState, value: string, checked: boolean) => {
-    setFilters(prev => {
-      const currentValues = prev[filterType] as string[];
-      const newFilters = {
-        ...prev,
-        [filterType]: checked 
-          ? [...currentValues, value]
-          : currentValues.filter(v => v !== value)
-      };
-      onFiltersChange(newFilters);
-      return newFilters;
+  const updateFilters = () => {
+    onFiltersChange({
+      search,
+      status: selectedStatus,
+      category: selectedCategory,
+      location: selectedLocation,
+      criticality: selectedCriticality
     });
   };
 
-  const handleSearchChange = (search: string) => {
-    const newFilters = { ...filters, search };
-    setFilters(newFilters);
-    onFiltersChange(newFilters);
+  const handleSearchChange = (value: string) => {
+    setSearch(value);
+    onFiltersChange({
+      search: value,
+      status: selectedStatus,
+      category: selectedCategory,
+      location: selectedLocation,
+      criticality: selectedCriticality
+    });
+  };
+
+  const toggleFilter = (
+    filterArray: string[],
+    setterFunction: React.Dispatch<React.SetStateAction<string[]>>,
+    value: string
+  ) => {
+    let newArray;
+    if (filterArray.includes(value)) {
+      newArray = filterArray.filter(item => item !== value);
+    } else {
+      newArray = [...filterArray, value];
+    }
+    setterFunction(newArray);
+    
+    // Update filters immediately
+    const updatedFilters = {
+      search,
+      status: filterArray === selectedStatus ? newArray : selectedStatus,
+      category: filterArray === selectedCategory ? newArray : selectedCategory,
+      location: filterArray === selectedLocation ? newArray : selectedLocation,
+      criticality: filterArray === selectedCriticality ? newArray : selectedCriticality
+    };
+    onFiltersChange(updatedFilters);
   };
 
   const clearAllFilters = () => {
-    const clearedFilters = {
+    setSearch("");
+    setSelectedStatus([]);
+    setSelectedCategory([]);
+    setSelectedLocation([]);
+    setSelectedCriticality([]);
+    onFiltersChange({
       search: "",
       status: [],
       category: [],
       location: [],
-      criticality: [],
-    };
-    setFilters(clearedFilters);
-    onFiltersChange(clearedFilters);
-  };
-
-  const removeFilter = (filterType: string, value: string) => {
-    setFilters(prev => {
-      const newFilters = {
-        ...prev,
-        [filterType]: (prev[filterType as keyof FilterState] as string[]).filter(v => v !== value)
-      };
-      onFiltersChange(newFilters);
-      return newFilters;
+      criticality: []
     });
   };
 
-  const getActiveFilterCount = () => {
-    let count = 0;
-    if (filters.search) count++;
-    if (filters.status.length > 0) count++;
-    if (filters.category.length > 0) count++;
-    if (filters.location.length > 0) count++;
-    if (filters.criticality.length > 0) count++;
-    return count;
+  const getTotalActiveFilters = () => {
+    return selectedStatus.length + selectedCategory.length + selectedLocation.length + selectedCriticality.length + (search ? 1 : 0);
+  };
+
+  const handleExport = async (format: 'csv' | 'json') => {
+    setIsExporting(true);
+    try {
+      const exportData = await assetsApi.exportAssets(format);
+      
+      // Create and download file
+      const blob = new Blob([exportData], { 
+        type: format === 'csv' ? 'text/csv' : 'application/json' 
+      });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `assets-export-${new Date().toISOString().split('T')[0]}.${format}`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+      
+      toast.success(`Assets exported as ${format.toUpperCase()}`);
+    } catch (error) {
+      console.error('Export failed:', error);
+      toast.error('Failed to export assets');
+    } finally {
+      setIsExporting(false);
+    }
   };
 
   return (
-    <div className="border-b bg-white shadow-sm">
-      <div className="p-4 lg:p-6">
-        {/* Top row */}
-        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6">
-          <div className="flex items-center space-x-4">
+    <div className="bg-white border-b border-gray-200 px-4 py-4 lg:px-6">
+      <div className="flex flex-col gap-4">
+        {/* Title and Actions */}
+        <div className="flex items-center justify-between">
+          <div>
             <h1 className="text-2xl font-bold text-gray-900">Assets</h1>
-            <div className="hidden sm:flex items-center space-x-2">
-              <Badge variant="outline" className="text-xs">{assetsCount} Total</Badge>
-            </div>
+            <p className="text-sm text-gray-600 mt-1">
+              Manage your organization's assets ({assetsCount} total)
+            </p>
           </div>
-          
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-              <Input 
-                placeholder="Search Assets" 
-                className="pl-10 w-full sm:w-64"
-                value={filters.search}
-                onChange={(e) => handleSearchChange(e.target.value)}
-              />
-            </div>
-            <div className="flex gap-2">
-              <Button variant="outline" size="sm">
-                <Download className="h-4 w-4 mr-2" />
-                Export
-              </Button>
-              <Button onClick={onCreateAsset}>
-                <Plus className="h-4 w-4 mr-2" />
-                New Asset
-              </Button>
-            </div>
+          <div className="flex items-center gap-3">
+            {/* Export Dropdown */}
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="outline" disabled={isExporting}>
+                  <Download className="w-4 h-4 mr-2" />
+                  Export
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-48" align="end">
+                <div className="space-y-2">
+                  <Button
+                    variant="ghost"
+                    className="w-full justify-start"
+                    onClick={() => handleExport('csv')}
+                    disabled={isExporting}
+                  >
+                    <FileSpreadsheet className="w-4 h-4 mr-2" />
+                    Export as CSV
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    className="w-full justify-start"
+                    onClick={() => handleExport('json')}
+                    disabled={isExporting}
+                  >
+                    <FileText className="w-4 h-4 mr-2" />
+                    Export as JSON
+                  </Button>
+                </div>
+              </PopoverContent>
+            </Popover>
+
+            <Button onClick={onCreateAsset}>
+              <Plus className="w-4 h-4 mr-2" />
+              New Asset
+            </Button>
           </div>
         </div>
-        
-        {/* Filter row */}
-        <div className="space-y-4">
-          <div className="flex flex-wrap items-center gap-3 text-sm">
-            {/* Status Filter */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="h-9 px-3 text-gray-600 hover:text-gray-900">
-                  <AlertTriangle className="h-4 w-4 mr-2" />
-                  Status
-                  {filters.status.length > 0 && (
-                    <Badge variant="secondary" className="ml-2 h-5 px-2 text-xs">
-                      {filters.status.length}
-                    </Badge>
-                  )}
-                  <ChevronDown className="h-4 w-4 ml-1" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-56">
-                <DropdownMenuLabel>Status</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                {statusOptions.map((status) => (
-                  <DropdownMenuCheckboxItem
-                    key={status}
-                    checked={filters.status.includes(status)}
-                    onCheckedChange={(checked) => handleMultiSelectFilter('status', status, checked)}
-                  >
-                    {status.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}
-                  </DropdownMenuCheckboxItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
 
-            {/* Category Filter */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="h-9 px-3 text-gray-600 hover:text-gray-900">
-                  <Tag className="h-4 w-4 mr-2" />
-                  Category
-                  {filters.category.length > 0 && (
-                    <Badge variant="secondary" className="ml-2 h-5 px-2 text-xs">
-                      {filters.category.length}
-                    </Badge>
-                  )}
-                  <ChevronDown className="h-4 w-4 ml-1" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-56">
-                <DropdownMenuLabel>Category</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                {categoryOptions.map((category) => (
-                  <DropdownMenuCheckboxItem
-                    key={category}
-                    checked={filters.category.includes(category)}
-                    onCheckedChange={(checked) => handleMultiSelectFilter('category', category, checked)}
-                  >
-                    {category.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}
-                  </DropdownMenuCheckboxItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
+        {/* Search and Filters */}
+        <div className="flex flex-col sm:flex-row gap-4">
+          {/* Search */}
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+            <Input
+              placeholder="Search assets by name or tag..."
+              value={search}
+              onChange={(e) => handleSearchChange(e.target.value)}
+              className="pl-10"
+            />
+          </div>
 
-            {/* Location Filter */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="h-9 px-3 text-gray-600 hover:text-gray-900">
-                  <MapPin className="h-4 w-4 mr-2" />
-                  Location
-                  {filters.location.length > 0 && (
-                    <Badge variant="secondary" className="ml-2 h-5 px-2 text-xs">
-                      {filters.location.length}
+          {/* Filters */}
+          <div className="flex items-center gap-3">
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="outline" className="relative">
+                  <Filter className="w-4 h-4 mr-2" />
+                  Filters
+                  {getTotalActiveFilters() > 0 && (
+                    <Badge className="ml-2 h-5 w-5 p-0 text-xs bg-blue-600">
+                      {getTotalActiveFilters()}
                     </Badge>
                   )}
-                  <ChevronDown className="h-4 w-4 ml-1" />
                 </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-56">
-                <DropdownMenuLabel>Location</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                {locationOptions.map((location) => (
-                  <DropdownMenuCheckboxItem
-                    key={location}
-                    checked={filters.location.includes(location)}
-                    onCheckedChange={(checked) => handleMultiSelectFilter('location', location, checked)}
-                  >
-                    {location.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}
-                  </DropdownMenuCheckboxItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
+              </PopoverTrigger>
+              <PopoverContent className="w-80" align="end">
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <h4 className="font-medium">Filters</h4>
+                    {getTotalActiveFilters() > 0 && (
+                      <Button variant="ghost" size="sm" onClick={clearAllFilters}>
+                        Clear all
+                      </Button>
+                    )}
+                  </div>
 
-            {/* Criticality Filter */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="h-9 px-3 text-gray-600 hover:text-gray-900">
-                  <Filter className="h-4 w-4 mr-2" />
-                  Criticality
-                  {filters.criticality.length > 0 && (
-                    <Badge variant="secondary" className="ml-2 h-5 px-2 text-xs">
-                      {filters.criticality.length}
-                    </Badge>
-                  )}
-                  <ChevronDown className="h-4 w-4 ml-1" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-56">
-                <DropdownMenuLabel>Criticality</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                {criticalityOptions.map((criticality) => (
-                  <DropdownMenuCheckboxItem
-                    key={criticality}
-                    checked={filters.criticality.includes(criticality)}
-                    onCheckedChange={(checked) => handleMultiSelectFilter('criticality', criticality, checked)}
-                  >
-                    {criticality.charAt(0).toUpperCase() + criticality.slice(1)}
-                  </DropdownMenuCheckboxItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
-            
-            {getActiveFilterCount() > 0 && (
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                onClick={clearAllFilters}
-                className="text-gray-500 hover:text-gray-700"
-              >
-                Clear All ({getActiveFilterCount()})
-              </Button>
+                  {/* Status Filter */}
+                  <div>
+                    <label className="text-sm font-medium mb-2 block">Status</label>
+                    <div className="space-y-2">
+                      {statusOptions.map((option) => (
+                        <div key={option.value} className="flex items-center space-x-2">
+                          <Checkbox
+                            id={`status-${option.value}`}
+                            checked={selectedStatus.includes(option.value)}
+                            onCheckedChange={() => toggleFilter(selectedStatus, setSelectedStatus, option.value)}
+                          />
+                          <label htmlFor={`status-${option.value}`} className="text-sm">
+                            {option.label}
+                          </label>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Category Filter */}
+                  <div>
+                    <label className="text-sm font-medium mb-2 block">Category</label>
+                    <div className="space-y-2">
+                      {categoryOptions.map((option) => (
+                        <div key={option.value} className="flex items-center space-x-2">
+                          <Checkbox
+                            id={`category-${option.value}`}
+                            checked={selectedCategory.includes(option.value)}
+                            onCheckedChange={() => toggleFilter(selectedCategory, setSelectedCategory, option.value)}
+                          />
+                          <label htmlFor={`category-${option.value}`} className="text-sm">
+                            {option.label}
+                          </label>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Location Filter */}
+                  <div>
+                    <label className="text-sm font-medium mb-2 block">Location</label>
+                    <div className="space-y-2">
+                      {locationOptions.map((option) => (
+                        <div key={option.value} className="flex items-center space-x-2">
+                          <Checkbox
+                            id={`location-${option.value}`}
+                            checked={selectedLocation.includes(option.value)}
+                            onCheckedChange={() => toggleFilter(selectedLocation, setSelectedLocation, option.value)}
+                          />
+                          <label htmlFor={`location-${option.value}`} className="text-sm">
+                            {option.label}
+                          </label>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Criticality Filter */}
+                  <div>
+                    <label className="text-sm font-medium mb-2 block">Criticality</label>
+                    <div className="space-y-2">
+                      {criticalityOptions.map((option) => (
+                        <div key={option.value} className="flex items-center space-x-2">
+                          <Checkbox
+                            id={`criticality-${option.value}`}
+                            checked={selectedCriticality.includes(option.value)}
+                            onCheckedChange={() => toggleFilter(selectedCriticality, setSelectedCriticality, option.value)}
+                          />
+                          <label htmlFor={`criticality-${option.value}`} className="text-sm">
+                            {option.label}
+                          </label>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </PopoverContent>
+            </Popover>
+          </div>
+        </div>
+
+        {/* Active Filters Display */}
+        {getTotalActiveFilters() > 0 && (
+          <div className="flex flex-wrap gap-2">
+            {search && (
+              <Badge variant="secondary" className="flex items-center gap-1">
+                Search: "{search}"
+                <button
+                  onClick={() => handleSearchChange("")}
+                  className="ml-1 hover:bg-gray-300 rounded-full w-4 h-4 flex items-center justify-center"
+                >
+                  ×
+                </button>
+              </Badge>
             )}
+            {selectedStatus.map((status) => (
+              <Badge key={`status-${status}`} variant="secondary" className="flex items-center gap-1">
+                Status: {statusOptions.find(s => s.value === status)?.label}
+                <button
+                  onClick={() => toggleFilter(selectedStatus, setSelectedStatus, status)}
+                  className="ml-1 hover:bg-gray-300 rounded-full w-4 h-4 flex items-center justify-center"
+                >
+                  ×
+                </button>
+              </Badge>
+            ))}
+            {selectedCategory.map((category) => (
+              <Badge key={`category-${category}`} variant="secondary" className="flex items-center gap-1">
+                Category: {categoryOptions.find(c => c.value === category)?.label}
+                <button
+                  onClick={() => toggleFilter(selectedCategory, setSelectedCategory, category)}
+                  className="ml-1 hover:bg-gray-300 rounded-full w-4 h-4 flex items-center justify-center"
+                >
+                  ×
+                </button>
+              </Badge>
+            ))}
+            {selectedLocation.map((location) => (
+              <Badge key={`location-${location}`} variant="secondary" className="flex items-center gap-1">
+                Location: {locationOptions.find(l => l.value === location)?.label}
+                <button
+                  onClick={() => toggleFilter(selectedLocation, setSelectedLocation, location)}
+                  className="ml-1 hover:bg-gray-300 rounded-full w-4 h-4 flex items-center justify-center"
+                >
+                  ×
+                </button>
+              </Badge>
+            ))}
+            {selectedCriticality.map((criticality) => (
+              <Badge key={`criticality-${criticality}`} variant="secondary" className="flex items-center gap-1">
+                Criticality: {criticalityOptions.find(c => c.value === criticality)?.label}
+                <button
+                  onClick={() => toggleFilter(selectedCriticality, setSelectedCriticality, criticality)}
+                  className="ml-1 hover:bg-gray-300 rounded-full w-4 h-4 flex items-center justify-center"
+                >
+                  ×
+                </button>
+              </Badge>
+            ))}
           </div>
-
-          {/* Active Filters Display */}
-          {(filters.status.length > 0 || filters.category.length > 0 || 
-            filters.location.length > 0 || filters.criticality.length > 0) && (
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="text-sm text-gray-500 mr-2">Active filters:</span>
-              
-              {filters.status.map((status) => (
-                <Badge key={status} variant="secondary" className="text-xs">
-                  Status: {status.replace('_', ' ')}
-                  <button 
-                    onClick={() => removeFilter('status', status)}
-                    className="ml-1 hover:text-red-600"
-                  >
-                    <X className="h-3 w-3" />
-                  </button>
-                </Badge>
-              ))}
-              
-              {filters.category.map((category) => (
-                <Badge key={category} variant="secondary" className="text-xs">
-                  Category: {category.replace('_', ' ')}
-                  <button 
-                    onClick={() => removeFilter('category', category)}
-                    className="ml-1 hover:text-red-600"
-                  >
-                    <X className="h-3 w-3" />
-                  </button>
-                </Badge>
-              ))}
-              
-              {filters.location.map((location) => (
-                <Badge key={location} variant="secondary" className="text-xs">
-                  Location: {location.replace('_', ' ')}
-                  <button 
-                    onClick={() => removeFilter('location', location)}
-                    className="ml-1 hover:text-red-600"
-                  >
-                    <X className="h-3 w-3" />
-                  </button>
-                </Badge>
-              ))}
-              
-              {filters.criticality.map((criticality) => (
-                <Badge key={criticality} variant="secondary" className="text-xs">
-                  Criticality: {criticality}
-                  <button 
-                    onClick={() => removeFilter('criticality', criticality)}
-                    className="ml-1 hover:text-red-600"
-                  >
-                    <X className="h-3 w-3" />
-                  </button>
-                </Badge>
-              ))}
-            </div>
-          )}
-        </div>
+        )}
       </div>
     </div>
   );

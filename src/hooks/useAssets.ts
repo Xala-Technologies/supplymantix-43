@@ -31,7 +31,7 @@ export const useCreateAsset = () => {
   const queryClient = useQueryClient();
   
   return useMutation({
-    mutationFn: (asset: AssetInsert) => assetsApi.createAsset(asset),
+    mutationFn: (asset: Omit<AssetInsert, 'tenant_id'>) => assetsApi.createAsset(asset),
     onSuccess: (newAsset) => {
       queryClient.invalidateQueries({ queryKey: ["assets"] });
       toast.success(`Asset "${newAsset.name}" created successfully`);
@@ -48,7 +48,7 @@ export const useUpdateAsset = () => {
   const queryClient = useQueryClient();
   
   return useMutation({
-    mutationFn: ({ id, updates }: { id: string; updates: AssetUpdate }) => 
+    mutationFn: ({ id, updates }: { id: string; updates: Omit<AssetUpdate, 'tenant_id'> }) => 
       assetsApi.updateAsset(id, updates),
     onSuccess: (updatedAsset) => {
       queryClient.invalidateQueries({ queryKey: ["assets"] });
