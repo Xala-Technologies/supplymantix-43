@@ -29,6 +29,8 @@ export const StockMovementModal = ({ item, onSuccess, trigger }: StockMovementMo
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    console.log('Stock movement form submitted:', { operationType, quantity, notes });
+    
     if (quantity <= 0 && operationType !== 'adjust') {
       toast.error('Quantity must be greater than 0');
       return;
@@ -37,6 +39,7 @@ export const StockMovementModal = ({ item, onSuccess, trigger }: StockMovementMo
     try {
       switch (operationType) {
         case 'add':
+          console.log('Adding stock:', quantity);
           await addStockMutation.mutateAsync({
             inventoryId: item.id,
             quantity,
@@ -44,6 +47,7 @@ export const StockMovementModal = ({ item, onSuccess, trigger }: StockMovementMo
           });
           break;
         case 'remove':
+          console.log('Removing stock:', quantity);
           await removeStockMutation.mutateAsync({
             inventoryId: item.id,
             quantity,
@@ -51,6 +55,7 @@ export const StockMovementModal = ({ item, onSuccess, trigger }: StockMovementMo
           });
           break;
         case 'adjust':
+          console.log('Adjusting stock to:', quantity);
           await adjustStockMutation.mutateAsync({
             inventoryId: item.id,
             newQuantity: quantity,
@@ -59,21 +64,48 @@ export const StockMovementModal = ({ item, onSuccess, trigger }: StockMovementMo
           break;
       }
       
+      console.log('Stock movement successful');
       setIsOpen(false);
       setQuantity(0);
       setNotes('');
       onSuccess?.();
+      toast.success('Stock updated successfully');
     } catch (error) {
       console.error('Stock movement error:', error);
+      toast.error('Failed to update stock: ' + (error as Error).message);
+    }
+  };
+
+  const handleTriggerClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    console.log('Stock movement trigger clicked');
+    setIsOpen(true);
+  };
+
+  const handleOpenChange = (open: boolean) => {
+    console.log('Stock modal open state changed:', open);
+    setIsOpen(open);
+    if (!open) {
+      setQuantity(0);
+      setNotes('');
     }
   };
 
   const isLoading = addStockMutation.isPending || removeStockMutation.isPending || adjustStockMutation.isPending;
 
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+    <Dialog open={isOpen} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
-        {trigger || <Button variant="outline">Manage Stock</Button>}
+        {trigger ? (
+          <div onClick={handleTriggerClick}>
+            {trigger}
+          </div>
+        ) : (
+          <Button variant="outline" onClick={handleTriggerClick}>
+            Manage Stock
+          </Button>
+        )}
       </DialogTrigger>
       <DialogContent className="max-w-md">
         <DialogHeader>
@@ -87,7 +119,10 @@ export const StockMovementModal = ({ item, onSuccess, trigger }: StockMovementMo
 
           <div>
             <Label htmlFor="operation">Operation</Label>
-            <Select value={operationType} onValueChange={(value: 'add' | 'remove' | 'adjust') => setOperationType(value)}>
+            <Select value={operationType} onValueChange={(value: 'add' | 'remove' | 'adjust') => {
+              console.log('Operation type changed:', value);
+              setOperationType(value);
+            }}>
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
@@ -108,7 +143,11 @@ export const StockMovementModal = ({ item, onSuccess, trigger }: StockMovementMo
               type="number"
               min="0"
               value={quantity}
-              onChange={(e) => setQuantity(parseInt(e.target.value) || 0)}
+              onChange={(e) => {
+                const value = parseInt(e.target.value) || 0;
+                console.log('Quantity changed:', value);
+                setQuantity(value);
+              }}
               placeholder={operationType === 'adjust' ? 'New total quantity' : 'Quantity to add/remove'}
             />
           </div>

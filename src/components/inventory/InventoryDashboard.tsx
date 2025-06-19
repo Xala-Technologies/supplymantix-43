@@ -4,7 +4,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
 import { DataTable } from "@/components/ui/data-table";
 import { InventoryStatusBadge } from "./InventoryStatusBadge";
 import { StockMovementModal } from "./StockMovementModal";
@@ -50,14 +49,17 @@ export const InventoryDashboard = () => {
   const deleteItemMutation = useDeleteInventoryItem();
 
   const handleExport = () => {
+    console.log('Export button clicked');
     exportMutation.mutate();
   };
 
   const handleRefresh = () => {
+    console.log('Refresh button clicked');
     refetch();
   };
 
   const handleDelete = (item: InventoryItemWithStats) => {
+    console.log('Delete button clicked for item:', item.id);
     if (window.confirm(`Are you sure you want to delete "${item.name}"?`)) {
       deleteItemMutation.mutate(item.id);
     }
@@ -137,7 +139,7 @@ export const InventoryDashboard = () => {
             mode="edit"
             onSuccess={refetch}
             trigger={
-              <Button variant="outline" size="sm">
+              <Button variant="outline" size="sm" onClick={() => console.log('Edit button clicked')}>
                 <Edit className="w-4 h-4" />
               </Button>
             }
@@ -146,7 +148,7 @@ export const InventoryDashboard = () => {
             item={row.original}
             onSuccess={refetch}
             trigger={
-              <Button variant="outline" size="sm">
+              <Button variant="outline" size="sm" onClick={() => console.log('Stock button clicked')}>
                 Stock
               </Button>
             }
@@ -232,9 +234,12 @@ export const InventoryDashboard = () => {
             </CardTitle>
             <div className="flex flex-wrap gap-2">
               <InventoryForm 
-                onSuccess={refetch}
+                onSuccess={() => {
+                  console.log('Add item success callback');
+                  refetch();
+                }}
                 trigger={
-                  <Button>
+                  <Button onClick={() => console.log('Add Item button clicked')}>
                     <Plus className="w-4 h-4 mr-2" />
                     Add Item
                   </Button>
@@ -270,13 +275,19 @@ export const InventoryDashboard = () => {
                 <Input
                   placeholder="Search items by name, SKU, or description..."
                   value={search}
-                  onChange={(e) => setSearch(e.target.value)}
+                  onChange={(e) => {
+                    console.log('Search input changed:', e.target.value);
+                    setSearch(e.target.value);
+                  }}
                   className="pl-10"
                 />
               </div>
             </div>
             
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <Select value={statusFilter} onValueChange={(value) => {
+              console.log('Status filter changed:', value);
+              setStatusFilter(value);
+            }}>
               <SelectTrigger className="w-full sm:w-48">
                 <SelectValue placeholder="Filter by status" />
               </SelectTrigger>
@@ -288,7 +299,10 @@ export const InventoryDashboard = () => {
               </SelectContent>
             </Select>
             
-            <Select value={locationFilter} onValueChange={setLocationFilter}>
+            <Select value={locationFilter} onValueChange={(value) => {
+              console.log('Location filter changed:', value);
+              setLocationFilter(value);
+            }}>
               <SelectTrigger className="w-full sm:w-48">
                 <SelectValue placeholder="Filter by location" />
               </SelectTrigger>

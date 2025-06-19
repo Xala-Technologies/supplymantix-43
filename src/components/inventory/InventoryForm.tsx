@@ -53,9 +53,10 @@ export const InventoryForm = ({ item, onSuccess, trigger, mode = 'create' }: Inv
 
   const onSubmit = async (data: InventoryFormData) => {
     try {
-      console.log('Form submission data:', data);
+      console.log('Form submission started with data:', data);
       
       if (mode === 'edit' && item) {
+        console.log('Updating item:', item.id);
         await updateMutation.mutateAsync({
           id: item.id,
           updates: {
@@ -68,7 +69,9 @@ export const InventoryForm = ({ item, onSuccess, trigger, mode = 'create' }: Inv
             unit_cost: data.unit_cost,
           }
         });
+        console.log('Update successful');
       } else {
+        console.log('Creating new item');
         await createMutation.mutateAsync({
           name: data.name,
           description: data.description,
@@ -78,11 +81,13 @@ export const InventoryForm = ({ item, onSuccess, trigger, mode = 'create' }: Inv
           min_quantity: data.min_quantity || 0,
           unit_cost: data.unit_cost || 0,
         });
+        console.log('Create successful');
       }
       
       setIsOpen(false);
       reset();
       onSuccess?.();
+      toast.success(mode === 'edit' ? 'Item updated successfully' : 'Item created successfully');
     } catch (error) {
       console.error('Error saving inventory item:', error);
       toast.error('Failed to save inventory item: ' + (error as Error).message);
@@ -90,10 +95,18 @@ export const InventoryForm = ({ item, onSuccess, trigger, mode = 'create' }: Inv
   };
 
   const handleOpenChange = (open: boolean) => {
+    console.log('Dialog open state changed:', open);
     setIsOpen(open);
     if (!open) {
       reset();
     }
+  };
+
+  const handleTriggerClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    console.log('Trigger clicked, opening dialog');
+    setIsOpen(true);
   };
 
   const isSubmitting = createMutation.isPending || updateMutation.isPending;
@@ -101,8 +114,12 @@ export const InventoryForm = ({ item, onSuccess, trigger, mode = 'create' }: Inv
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
-        {trigger || (
-          <Button className="flex items-center gap-2">
+        {trigger ? (
+          <div onClick={handleTriggerClick}>
+            {trigger}
+          </div>
+        ) : (
+          <Button className="flex items-center gap-2" onClick={handleTriggerClick}>
             {mode === 'edit' ? <Edit className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
             {mode === 'edit' ? 'Edit Item' : 'Add Item'}
           </Button>
