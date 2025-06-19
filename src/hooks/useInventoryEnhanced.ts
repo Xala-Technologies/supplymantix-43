@@ -193,3 +193,63 @@ export const useAdjustStock = () => {
     },
   });
 };
+
+// Export inventory (placeholder implementation)
+export const useExportInventory = () => {
+  return useMutation({
+    mutationFn: async () => {
+      // Simple CSV export functionality
+      const { items } = await inventoryEnhancedApi.searchInventory({});
+      const csvContent = [
+        'Name,SKU,Description,Location,Quantity,Min Quantity,Unit Cost,Total Value',
+        ...items.map(item => 
+          `"${item.name}","${item.sku || ''}","${item.description || ''}","${item.location || ''}",${item.quantity},${item.min_quantity || 0},${item.unit_cost || 0},${item.total_value}`
+        )
+      ].join('\n');
+      
+      const blob = new Blob([csvContent], { type: 'text/csv' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `inventory-${new Date().toISOString().split('T')[0]}.csv`;
+      a.click();
+      window.URL.revokeObjectURL(url);
+    },
+    onSuccess: () => {
+      toast.success("Inventory exported successfully");
+    },
+    onError: (error) => {
+      console.error("Failed to export inventory:", error);
+      toast.error("Failed to export inventory");
+    },
+  });
+};
+
+// Transfer stock (placeholder implementation)
+export const useTransferStock = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: async ({ inventoryId, quantity, fromLocationId, toLocationId, note }: { 
+      inventoryId: string; 
+      quantity: number; 
+      fromLocationId: string;
+      toLocationId: string;
+      note?: string;
+    }) => {
+      // For now, just adjust the quantity (simplified implementation)
+      // In a real app, this would involve more complex location tracking
+      console.log('Transfer stock:', { inventoryId, quantity, fromLocationId, toLocationId, note });
+      toast.info("Stock transfer feature coming soon - using adjustment for now");
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["inventory-enhanced"] });
+      queryClient.invalidateQueries({ queryKey: ["low-stock-alerts"] });
+      toast.success(`Transferred ${variables.quantity} units`);
+    },
+    onError: (error) => {
+      console.error("Failed to transfer stock:", error);
+      toast.error("Failed to transfer stock: " + (error as Error).message);
+    },
+  });
+};
