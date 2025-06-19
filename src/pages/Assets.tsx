@@ -1,5 +1,5 @@
-
 import { DashboardLayout } from "@/components/Layout/DashboardLayout";
+import { PageLayout, PageLayoutHeader, PageFilters, PageLayoutContent } from "@/components/Layout/PageLayout";
 import { AssetsHeader } from "@/components/assets/AssetsHeader";
 import { AssetsGrid } from "@/components/assets/AssetsGrid";
 import { AssetDetailCard } from "@/components/assets/AssetDetailCard";
@@ -208,53 +208,72 @@ export default function Assets() {
   if (error) {
     return (
       <DashboardLayout>
-        <div className="h-full flex items-center justify-center">
-          <div className="text-center">
-            <p className="text-red-600 mb-4">Error loading assets: {error.message}</p>
-            <Button onClick={() => refetch()}>
-              Retry
-            </Button>
+        <PageLayout>
+          <div className="h-full flex items-center justify-center">
+            <div className="text-center">
+              <p className="text-red-600 mb-4">Error loading assets: {error.message}</p>
+              <Button onClick={() => refetch()}>
+                Retry
+              </Button>
+            </div>
           </div>
-        </div>
+        </PageLayout>
       </DashboardLayout>
     );
   }
 
   return (
     <DashboardLayout>
-      <div className="h-full flex flex-col bg-gray-50">
+      <PageLayout>
         {(viewMode === 'create' || viewMode === 'edit') ? (
           // Form View
-          <div className="flex-1 overflow-auto">
-            <div className="p-4 lg:p-6">
-              <div className="mb-6">
-                <Button 
-                  variant="ghost" 
-                  onClick={handleFormCancel}
-                  className="mb-4"
-                >
-                  <ChevronLeft className="w-4 h-4 mr-2" />
-                  Back
-                </Button>
+          <>
+            <PageLayoutHeader 
+              title={viewMode === 'create' ? 'Create Asset' : 'Edit Asset'}
+              description={viewMode === 'create' ? 'Add a new asset to your inventory' : 'Update asset information'}
+            >
+              <Button 
+                variant="outline" 
+                onClick={handleFormCancel}
+              >
+                <ChevronLeft className="w-4 h-4 mr-2" />
+                Back
+              </Button>
+            </PageLayoutHeader>
+            
+            <PageLayoutContent>
+              <div className="p-6 bg-white">
+                <AssetForm
+                  initialData={selectedAsset}
+                  onSubmit={handleFormSubmit}
+                  onCancel={handleFormCancel}
+                  isLoading={createAsset.isPending || updateAsset.isPending}
+                  mode={viewMode === 'create' ? 'create' : 'edit'}
+                />
               </div>
-              <AssetForm
-                initialData={selectedAsset}
-                onSubmit={handleFormSubmit}
-                onCancel={handleFormCancel}
-                isLoading={createAsset.isPending || updateAsset.isPending}
-                mode={viewMode === 'create' ? 'create' : 'edit'}
-              />
-            </div>
-          </div>
+            </PageLayoutContent>
+          </>
         ) : (
           <>
-            <AssetsHeader 
-              onFiltersChange={handleFiltersChange}
-              onCreateAsset={handleCreateAsset}
-              assetsCount={assets.length}
-            />
+            <PageLayoutHeader 
+              title="Assets"
+              description="Manage and track your organization's assets"
+            >
+              <Button onClick={handleCreateAsset} className="bg-blue-600 hover:bg-blue-700">
+                <Plus className="h-4 w-4 mr-2" />
+                New Asset
+              </Button>
+            </PageLayoutHeader>
+
+            <PageFilters>
+              <AssetsHeader 
+                onFiltersChange={handleFiltersChange}
+                onCreateAsset={handleCreateAsset}
+                assetsCount={assets.length}
+              />
+            </PageFilters>
             
-            <div className="flex-1 overflow-hidden">
+            <PageLayoutContent>
               {viewMode === 'grid' ? (
                 <AssetsGrid
                   assets={uiAssets}
@@ -297,10 +316,10 @@ export default function Assets() {
                   </div>
                 </div>
               )}
-            </div>
+            </PageLayoutContent>
           </>
         )}
-      </div>
+      </PageLayout>
     </DashboardLayout>
   );
 }
