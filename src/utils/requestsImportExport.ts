@@ -69,10 +69,11 @@ export const importRequestsFromCSV = (file: File): Promise<any[]> => {
               
               // Convert specific fields
               if (cleanHeader === 'estimated_cost' || cleanHeader === 'actual_cost') {
-                value = parseFloat(value) || 0;
+                request[cleanHeader] = parseFloat(value) || 0;
+              } else {
+                // All other fields remain as strings
+                request[cleanHeader] = value || '';
               }
-              
-              request[cleanHeader] = value;
             });
             
             return request;
