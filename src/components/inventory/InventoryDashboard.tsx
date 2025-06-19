@@ -2,23 +2,17 @@
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { DataTable } from "@/components/ui/data-table";
 import { InventoryStatusBadge } from "./InventoryStatusBadge";
 import { StockMovementModal } from "./StockMovementModal";
 import { InventoryForm } from "./InventoryForm";
-import { useInventoryEnhanced, useLowStockAlerts, useExportInventory, useDeleteInventoryItem } from "@/hooks/useInventoryEnhanced";
+import { InventoryHeader } from "./InventoryHeader";
+import { useInventoryEnhanced, useLowStockAlerts, useDeleteInventoryItem } from "@/hooks/useInventoryEnhanced";
 import { useLocations } from "@/hooks/useLocations";
 import { 
-  Search, 
-  Download, 
   AlertTriangle, 
   Package, 
-  TrendingUp, 
   DollarSign,
-  RefreshCw,
-  Plus,
   Edit,
   Trash2
 } from "lucide-react";
@@ -45,18 +39,7 @@ export const InventoryDashboard = () => {
 
   const { data: lowStockAlerts } = useLowStockAlerts();
   const { data: locations } = useLocations();
-  const exportMutation = useExportInventory();
   const deleteItemMutation = useDeleteInventoryItem();
-
-  const handleExport = () => {
-    console.log('Export button clicked');
-    exportMutation.mutate();
-  };
-
-  const handleRefresh = () => {
-    console.log('Refresh button clicked');
-    refetch();
-  };
 
   const handleDelete = (item: InventoryItemWithStats) => {
     console.log('Delete button clicked for item:', item.id);
@@ -168,8 +151,20 @@ export const InventoryDashboard = () => {
 
   return (
     <div className="space-y-6">
+      {/* Header Component */}
+      <InventoryHeader
+        onSearchChange={setSearch}
+        onStatusFilterChange={setStatusFilter}
+        onLocationFilterChange={setLocationFilter}
+        onRefresh={refetch}
+        searchValue={search}
+        statusFilter={statusFilter}
+        locationFilter={locationFilter}
+        locations={locations}
+      />
+
       {/* Dashboard Metrics */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 px-6">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Items</CardTitle>
@@ -203,7 +198,7 @@ export const InventoryDashboard = () => {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Out of Stock</CardTitle>
-            <TrendingUp className="h-4 w-4 text-orange-500" />
+            <AlertTriangle className="h-4 w-4 text-orange-500" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-orange-600">{outOfStockItems}</div>
@@ -213,7 +208,7 @@ export const InventoryDashboard = () => {
 
       {/* Low Stock Alerts */}
       {lowStockItems > 0 && (
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4 mx-6">
           <div className="flex items-center gap-2 text-red-800 mb-2">
             <AlertTriangle className="w-5 h-5" />
             <span className="font-medium">Low Stock Alert</span>
@@ -225,96 +220,14 @@ export const InventoryDashboard = () => {
       )}
 
       {/* Inventory Items */}
-      <Card>
+      <Card className="mx-6">
         <CardHeader>
-          <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
-            <CardTitle className="flex items-center gap-2">
-              <Package className="w-5 h-5" />
-              Inventory Items
-            </CardTitle>
-            <div className="flex flex-wrap gap-2">
-              <InventoryForm 
-                onSuccess={refetch}
-                trigger={
-                  <Button>
-                    <Plus className="w-4 h-4 mr-2" />
-                    Add Item
-                  </Button>
-                }
-              />
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleRefresh}
-                disabled={isLoading}
-              >
-                <RefreshCw className={`w-4 h-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
-                Refresh
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleExport}
-                disabled={exportMutation.isPending}
-              >
-                <Download className="w-4 h-4 mr-2" />
-                Export CSV
-              </Button>
-            </div>
-          </div>
+          <CardTitle className="flex items-center gap-2">
+            <Package className="w-5 h-5" />
+            Inventory Items
+          </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
-          {/* Search and Filter Controls */}
-          <div className="flex flex-col sm:flex-row gap-4">
-            <div className="flex-1">
-              <div className="relative">
-                <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                <Input
-                  placeholder="Search items by name, SKU, or description..."
-                  value={search}
-                  onChange={(e) => {
-                    console.log('Search input changed:', e.target.value);
-                    setSearch(e.target.value);
-                  }}
-                  className="pl-10"
-                />
-              </div>
-            </div>
-            
-            <Select value={statusFilter} onValueChange={(value) => {
-              console.log('Status filter changed:', value);
-              setStatusFilter(value);
-            }}>
-              <SelectTrigger className="w-full sm:w-48">
-                <SelectValue placeholder="Filter by status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="">All Status</SelectItem>
-                <SelectItem value="in_stock">In Stock</SelectItem>
-                <SelectItem value="low_stock">Low Stock</SelectItem>
-                <SelectItem value="out_of_stock">Out of Stock</SelectItem>
-              </SelectContent>
-            </Select>
-            
-            <Select value={locationFilter} onValueChange={(value) => {
-              console.log('Location filter changed:', value);
-              setLocationFilter(value);
-            }}>
-              <SelectTrigger className="w-full sm:w-48">
-                <SelectValue placeholder="Filter by location" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="">All Locations</SelectItem>
-                {locations?.map((location) => (
-                  <SelectItem key={location.id} value={location.id}>
-                    {location.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          {/* Data Table */}
+        <CardContent>
           <DataTable
             columns={columns}
             data={inventoryData?.items || []}
