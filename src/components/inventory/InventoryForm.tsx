@@ -29,7 +29,7 @@ interface InventoryFormProps {
 }
 
 export const InventoryForm = ({ item, onSuccess, trigger, mode = 'create' }: InventoryFormProps) => {
-  const [isOpen, setIsOpen] = useState(false);
+  const [open, setOpen] = useState(false);
   
   const createMutation = useCreateInventoryItem();
   const updateMutation = useUpdateInventoryItem();
@@ -84,7 +84,7 @@ export const InventoryForm = ({ item, onSuccess, trigger, mode = 'create' }: Inv
         console.log('Create successful');
       }
       
-      setIsOpen(false);
+      setOpen(false);
       reset();
       onSuccess?.();
       toast.success(mode === 'edit' ? 'Item updated successfully' : 'Item created successfully');
@@ -94,32 +94,13 @@ export const InventoryForm = ({ item, onSuccess, trigger, mode = 'create' }: Inv
     }
   };
 
-  const handleOpenChange = (open: boolean) => {
-    console.log('Dialog open state changed:', open);
-    setIsOpen(open);
-    if (!open) {
-      reset();
-    }
-  };
-
-  const handleTriggerClick = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    console.log('Trigger clicked, opening dialog');
-    setIsOpen(true);
-  };
-
   const isSubmitting = createMutation.isPending || updateMutation.isPending;
 
   return (
-    <Dialog open={isOpen} onOpenChange={handleOpenChange}>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        {trigger ? (
-          <div onClick={handleTriggerClick}>
-            {trigger}
-          </div>
-        ) : (
-          <Button className="flex items-center gap-2" onClick={handleTriggerClick}>
+        {trigger || (
+          <Button className="flex items-center gap-2">
             {mode === 'edit' ? <Edit className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
             {mode === 'edit' ? 'Edit Item' : 'Add Item'}
           </Button>
@@ -232,7 +213,7 @@ export const InventoryForm = ({ item, onSuccess, trigger, mode = 'create' }: Inv
             <Button
               type="button"
               variant="outline"
-              onClick={() => setIsOpen(false)}
+              onClick={() => setOpen(false)}
               disabled={isSubmitting}
             >
               Cancel

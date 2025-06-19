@@ -67,12 +67,13 @@ export const inventoryEnhancedApi = {
       query = query.eq("location", params.location);
     }
 
-    // Apply status filter - Fixed: removed invalid COALESCE RPC call
+    // Apply status filter
     if (params.status === 'out_of_stock') {
       query = query.eq("quantity", 0);
     } else if (params.status === 'low_stock') {
-      // Use a different approach for low stock filtering
-      query = query.or("quantity.lte.min_quantity,and(quantity.is.null,min_quantity.gt.0)");
+      query = query.not("quantity", "gt", "min_quantity");
+    } else if (params.status === 'in_stock') {
+      query = query.gt("quantity", 0);
     }
 
     // Apply sorting
@@ -166,12 +167,12 @@ export const inventoryEnhancedApi = {
     console.log('Deleted item:', id);
   },
 
-  // Get low stock alerts - Fixed: removed invalid COALESCE RPC call
+  // Get low stock alerts
   async getLowStockAlerts() {
     const { data, error } = await supabase
       .from("inventory_items")
       .select("id, name, sku, quantity, min_quantity, location")
-      .or("quantity.lte.min_quantity,and(quantity.is.null,min_quantity.gt.0)");
+      .filter("quantity", "lte", "min_quantity");
     
     if (error) {
       console.error('Low stock query error:', error);

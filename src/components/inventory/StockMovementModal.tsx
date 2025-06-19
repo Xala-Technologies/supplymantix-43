@@ -17,7 +17,7 @@ interface StockMovementModalProps {
 }
 
 export const StockMovementModal = ({ item, onSuccess, trigger }: StockMovementModalProps) => {
-  const [isOpen, setIsOpen] = useState(false);
+  const [open, setOpen] = useState(false);
   const [operationType, setOperationType] = useState<'add' | 'remove' | 'adjust'>('add');
   const [quantity, setQuantity] = useState(0);
   const [notes, setNotes] = useState('');
@@ -65,7 +65,7 @@ export const StockMovementModal = ({ item, onSuccess, trigger }: StockMovementMo
       }
       
       console.log('Stock movement successful');
-      setIsOpen(false);
+      setOpen(false);
       setQuantity(0);
       setNotes('');
       onSuccess?.();
@@ -76,33 +76,13 @@ export const StockMovementModal = ({ item, onSuccess, trigger }: StockMovementMo
     }
   };
 
-  const handleTriggerClick = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    console.log('Stock movement trigger clicked');
-    setIsOpen(true);
-  };
-
-  const handleOpenChange = (open: boolean) => {
-    console.log('Stock modal open state changed:', open);
-    setIsOpen(open);
-    if (!open) {
-      setQuantity(0);
-      setNotes('');
-    }
-  };
-
   const isLoading = addStockMutation.isPending || removeStockMutation.isPending || adjustStockMutation.isPending;
 
   return (
-    <Dialog open={isOpen} onOpenChange={handleOpenChange}>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        {trigger ? (
-          <div onClick={handleTriggerClick}>
-            {trigger}
-          </div>
-        ) : (
-          <Button variant="outline" onClick={handleTriggerClick}>
+        {trigger || (
+          <Button variant="outline">
             Manage Stock
           </Button>
         )}
@@ -167,7 +147,7 @@ export const StockMovementModal = ({ item, onSuccess, trigger }: StockMovementMo
             <Button
               type="button"
               variant="outline"
-              onClick={() => setIsOpen(false)}
+              onClick={() => setOpen(false)}
               disabled={isLoading}
             >
               Cancel

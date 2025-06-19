@@ -194,11 +194,10 @@ export const useAdjustStock = () => {
   });
 };
 
-// Export inventory (placeholder implementation)
+// Export inventory
 export const useExportInventory = () => {
   return useMutation({
     mutationFn: async () => {
-      // Simple CSV export functionality
       const { items } = await inventoryEnhancedApi.searchInventory({});
       const csvContent = [
         'Name,SKU,Description,Location,Quantity,Min Quantity,Unit Cost,Total Value',
@@ -225,7 +224,7 @@ export const useExportInventory = () => {
   });
 };
 
-// Transfer stock (placeholder implementation)
+// Transfer stock 
 export const useTransferStock = () => {
   const queryClient = useQueryClient();
   
@@ -237,8 +236,6 @@ export const useTransferStock = () => {
       toLocationId: string;
       note?: string;
     }) => {
-      // For now, just adjust the quantity (simplified implementation)
-      // In a real app, this would involve more complex location tracking
       console.log('Transfer stock:', { inventoryId, quantity, fromLocationId, toLocationId, note });
       toast.info("Stock transfer feature coming soon - using adjustment for now");
     },

@@ -139,7 +139,7 @@ export const InventoryDashboard = () => {
             mode="edit"
             onSuccess={refetch}
             trigger={
-              <Button variant="outline" size="sm" onClick={() => console.log('Edit button clicked')}>
+              <Button variant="outline" size="sm">
                 <Edit className="w-4 h-4" />
               </Button>
             }
@@ -148,7 +148,7 @@ export const InventoryDashboard = () => {
             item={row.original}
             onSuccess={refetch}
             trigger={
-              <Button variant="outline" size="sm" onClick={() => console.log('Stock button clicked')}>
+              <Button variant="outline" size="sm">
                 Stock
               </Button>
             }
@@ -234,12 +234,9 @@ export const InventoryDashboard = () => {
             </CardTitle>
             <div className="flex flex-wrap gap-2">
               <InventoryForm 
-                onSuccess={() => {
-                  console.log('Add item success callback');
-                  refetch();
-                }}
+                onSuccess={refetch}
                 trigger={
-                  <Button onClick={() => console.log('Add Item button clicked')}>
+                  <Button>
                     <Plus className="w-4 h-4 mr-2" />
                     Add Item
                   </Button>
