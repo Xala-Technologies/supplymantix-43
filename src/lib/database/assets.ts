@@ -15,9 +15,23 @@ export const assetsApi = {
     location?: string[];
     criticality?: string[];
   }) {
+    // Get current user's tenant_id first
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error('No authenticated user');
+
+    const { data: userData, error: userError } = await supabase
+      .from("users")
+      .select("tenant_id")
+      .eq("id", user.id)
+      .single();
+
+    if (userError) throw userError;
+    if (!userData?.tenant_id) throw new Error('No tenant_id found');
+
     let query = supabase
       .from("assets")
       .select("*")
+      .eq("tenant_id", userData.tenant_id)
       .order("created_at", { ascending: false });
 
     // Apply filters if provided
@@ -48,10 +62,24 @@ export const assetsApi = {
   },
 
   async getAsset(id: string) {
+    // Get current user's tenant_id first
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error('No authenticated user');
+
+    const { data: userData, error: userError } = await supabase
+      .from("users")
+      .select("tenant_id")
+      .eq("id", user.id)
+      .single();
+
+    if (userError) throw userError;
+    if (!userData?.tenant_id) throw new Error('No tenant_id found');
+
     const { data, error } = await supabase
       .from("assets")
       .select("*")
       .eq("id", id)
+      .eq("tenant_id", userData.tenant_id)
       .single();
     
     if (error) throw error;
@@ -59,17 +87,37 @@ export const assetsApi = {
   },
 
   async createAsset(asset: AssetInsert) {
+    console.log('Creating asset with data:', asset);
+    
     const { data, error } = await supabase
       .from("assets")
       .insert(asset)
       .select()
       .single();
     
-    if (error) throw error;
+    if (error) {
+      console.error('Database error creating asset:', error);
+      throw error;
+    }
+    
+    console.log('Asset created successfully:', data);
     return data;
   },
 
   async updateAsset(id: string, updates: AssetUpdate) {
+    // Get current user's tenant_id for security
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error('No authenticated user');
+
+    const { data: userData, error: userError } = await supabase
+      .from("users")
+      .select("tenant_id")
+      .eq("id", user.id)
+      .single();
+
+    if (userError) throw userError;
+    if (!userData?.tenant_id) throw new Error('No tenant_id found');
+
     const { data, error } = await supabase
       .from("assets")
       .update({
@@ -77,6 +125,7 @@ export const assetsApi = {
         updated_at: new Date().toISOString()
       })
       .eq("id", id)
+      .eq("tenant_id", userData.tenant_id)
       .select()
       .single();
     
@@ -85,19 +134,47 @@ export const assetsApi = {
   },
 
   async deleteAsset(id: string) {
+    // Get current user's tenant_id for security
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error('No authenticated user');
+
+    const { data: userData, error: userError } = await supabase
+      .from("users")
+      .select("tenant_id")
+      .eq("id", user.id)
+      .single();
+
+    if (userError) throw userError;
+    if (!userData?.tenant_id) throw new Error('No tenant_id found');
+
     const { error } = await supabase
       .from("assets")
       .delete()
-      .eq("id", id);
+      .eq("id", id)
+      .eq("tenant_id", userData.tenant_id);
     
     if (error) throw error;
   },
 
   async getAssetsByLocation(location: string) {
+    // Get current user's tenant_id first
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error('No authenticated user');
+
+    const { data: userData, error: userError } = await supabase
+      .from("users")
+      .select("tenant_id")
+      .eq("id", user.id)
+      .single();
+
+    if (userError) throw userError;
+    if (!userData?.tenant_id) throw new Error('No tenant_id found');
+
     const { data, error } = await supabase
       .from("assets")
       .select("*")
       .eq("location", location)
+      .eq("tenant_id", userData.tenant_id)
       .order("name", { ascending: true });
     
     if (error) throw error;
@@ -105,10 +182,24 @@ export const assetsApi = {
   },
 
   async getAssetsByCategory(category: string) {
+    // Get current user's tenant_id first
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error('No authenticated user');
+
+    const { data: userData, error: userError } = await supabase
+      .from("users")
+      .select("tenant_id")
+      .eq("id", user.id)
+      .single();
+
+    if (userError) throw userError;
+    if (!userData?.tenant_id) throw new Error('No tenant_id found');
+
     const { data, error } = await supabase
       .from("assets")
       .select("*")
       .eq("category", category)
+      .eq("tenant_id", userData.tenant_id)
       .order("name", { ascending: true });
     
     if (error) throw error;
@@ -116,9 +207,23 @@ export const assetsApi = {
   },
 
   async getAssetStatistics() {
+    // Get current user's tenant_id first
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error('No authenticated user');
+
+    const { data: userData, error: userError } = await supabase
+      .from("users")
+      .select("tenant_id")
+      .eq("id", user.id)
+      .single();
+
+    if (userError) throw userError;
+    if (!userData?.tenant_id) throw new Error('No tenant_id found');
+
     const { data, error } = await supabase
       .from("assets")
-      .select("status, category, criticality");
+      .select("status, category, criticality")
+      .eq("tenant_id", userData.tenant_id);
     
     if (error) throw error;
     

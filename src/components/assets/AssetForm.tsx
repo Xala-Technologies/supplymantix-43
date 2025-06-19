@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { supabase } from "@/integrations/supabase/client";
 import type { Asset, AssetInsert, AssetUpdate } from "@/hooks/useAssets";
 
 interface AssetFormData {
@@ -90,13 +91,41 @@ export const AssetForm = ({
   const watchedCriticality = watch("criticality");
   const watchedLocation = watch("location");
 
-  const handleFormSubmit = (data: AssetFormData) => {
-    const submitData = {
-      ...data,
-      tenant_id: "default-tenant",
-    };
+  const handleFormSubmit = async (data: AssetFormData) => {
+    try {
+      // Get the current user's tenant_id from the users table
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        console.error('No authenticated user found');
+        return;
+      }
 
-    onSubmit(submitData);
+      const { data: userData, error: userError } = await supabase
+        .from('users')
+        .select('tenant_id')
+        .eq('id', user.id)
+        .single();
+
+      if (userError) {
+        console.error('Error fetching user tenant_id:', userError);
+        return;
+      }
+
+      if (!userData?.tenant_id) {
+        console.error('No tenant_id found for user');
+        return;
+      }
+
+      const submitData = {
+        ...data,
+        tenant_id: userData.tenant_id,
+      };
+
+      console.log('Submitting asset data:', submitData);
+      onSubmit(submitData);
+    } catch (error) {
+      console.error('Error preparing asset data:', error);
+    }
   };
 
   return (

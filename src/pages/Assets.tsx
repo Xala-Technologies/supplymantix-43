@@ -1,3 +1,4 @@
+
 import { DashboardLayout } from "@/components/Layout/DashboardLayout";
 import { AssetsHeader } from "@/components/assets/AssetsHeader";
 import { AssetsList } from "@/components/assets/AssetsList";
@@ -59,7 +60,7 @@ export default function Assets() {
   });
 
   // API hooks
-  const { data: assets = [], isLoading } = useAssets(filters);
+  const { data: assets = [], isLoading, error } = useAssets(filters);
   const createAsset = useCreateAsset();
   const updateAsset = useUpdateAsset();
   const deleteAsset = useDeleteAsset();
@@ -132,26 +133,47 @@ export default function Assets() {
 
   const handleDeleteAsset = (asset: DatabaseAsset) => {
     if (confirm(`Are you sure you want to delete "${asset.name}"?`)) {
-      deleteAsset.mutate(asset.id);
-      if (selectedAsset?.id === asset.id) {
-        setViewMode('list');
-        setSelectedAsset(null);
-      }
+      deleteAsset.mutate(asset.id, {
+        onSuccess: () => {
+          if (selectedAsset?.id === asset.id) {
+            setViewMode('list');
+            setSelectedAsset(null);
+          }
+        },
+        onError: (error) => {
+          console.error('Failed to delete asset:', error);
+          toast.error('Failed to delete asset');
+        }
+      });
     }
   };
 
   const handleFormSubmit = (data: any) => {
+    console.log('Form submitted with data:', data);
+    
     if (viewMode === 'create') {
       createAsset.mutate(data, {
         onSuccess: () => {
+          console.log('Asset created successfully');
           setViewMode('list');
+          toast.success('Asset created successfully');
+        },
+        onError: (error) => {
+          console.error('Failed to create asset:', error);
+          toast.error('Failed to create asset. Please check the console for details.');
         }
       });
     } else if (viewMode === 'edit' && selectedAsset) {
       updateAsset.mutate({ id: selectedAsset.id, updates: data }, {
         onSuccess: (updatedAsset) => {
+          console.log('Asset updated successfully');
           setSelectedAsset(updatedAsset);
           setViewMode('detail');
+          toast.success('Asset updated successfully');
+        },
+        onError: (error) => {
+          console.error('Failed to update asset:', error);
+          toast.error('Failed to update asset');
         }
       });
     }
@@ -174,6 +196,21 @@ export default function Assets() {
   const handleFiltersChange = (newFilters: typeof filters) => {
     setFilters(newFilters);
   };
+
+  if (error) {
+    return (
+      <DashboardLayout>
+        <div className="h-full flex items-center justify-center">
+          <div className="text-center">
+            <p className="text-red-600 mb-4">Error loading assets: {error.message}</p>
+            <Button onClick={() => window.location.reload()}>
+              Retry
+            </Button>
+          </div>
+        </div>
+      </DashboardLayout>
+    );
+  }
 
   if (isLoading) {
     return (
