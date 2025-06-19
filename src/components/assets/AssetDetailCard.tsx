@@ -3,7 +3,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { MapPin, Calendar, Wrench, AlertTriangle, FileText, BarChart3, Settings, Edit, Trash2 } from "lucide-react";
+import { MapPin, Calendar, Wrench, AlertTriangle, FileText, BarChart3, Settings, Edit, Trash2, Download } from "lucide-react";
+import { toast } from "sonner";
 
 interface AssetDetailCardProps {
   asset: {
@@ -57,6 +58,31 @@ export const AssetDetailCard = ({ asset, onEdit, onDelete }: AssetDetailCardProp
         return 'bg-green-500';
       default:
         return 'bg-gray-500';
+    }
+  };
+
+  const handleDownload = (fileName: string) => {
+    try {
+      // Create a sample PDF content (in a real app, you'd fetch the actual file)
+      const sampleContent = `Sample ${fileName} for ${asset.name}`;
+      const blob = new Blob([sampleContent], { type: 'application/pdf' });
+      const url = URL.createObjectURL(blob);
+      
+      // Create a temporary link and trigger download
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = fileName;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      // Clean up the URL object
+      URL.revokeObjectURL(url);
+      
+      toast.success(`${fileName} downloaded successfully`);
+    } catch (error) {
+      console.error('Download failed:', error);
+      toast.error(`Failed to download ${fileName}`);
     }
   };
 
@@ -262,7 +288,15 @@ export const AssetDetailCard = ({ asset, onEdit, onDelete }: AssetDetailCardProp
                         <p className="text-sm text-gray-600">{doc.type} • {doc.size}</p>
                       </div>
                     </div>
-                    <Button variant="outline" size="sm">Download</Button>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={() => handleDownload(doc.name)}
+                      className="flex items-center gap-2"
+                    >
+                      <Download className="w-4 h-4" />
+                      Download
+                    </Button>
                   </div>
                 ))}
               </div>
