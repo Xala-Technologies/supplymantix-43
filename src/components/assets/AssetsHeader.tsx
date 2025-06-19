@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,19 +5,20 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Search, Download, Upload } from "lucide-react";
 import { toast } from "sonner";
 import { exportAssetsToCSV, importAssetsFromCSV } from "@/utils/assetsImportExport";
-
 interface AssetsHeaderProps {
   onFiltersChange: (filters: any) => void;
   onCreateAsset: () => void;
   assets?: any[]; // Add assets prop for export
 }
-
-export const AssetsHeader = ({ onFiltersChange, onCreateAsset, assets = [] }: AssetsHeaderProps) => {
+export const AssetsHeader = ({
+  onFiltersChange,
+  onCreateAsset,
+  assets = []
+}: AssetsHeaderProps) => {
   const [searchQuery, setSearchQuery] = React.useState("");
   const [statusFilter, setStatusFilter] = React.useState("all");
   const [categoryFilter, setCategoryFilter] = React.useState("all");
   const [criticalityFilter, setCriticalityFilter] = React.useState("all");
-
   React.useEffect(() => {
     const filters = {
       search: searchQuery,
@@ -29,12 +29,11 @@ export const AssetsHeader = ({ onFiltersChange, onCreateAsset, assets = [] }: As
     };
     onFiltersChange(filters);
   }, [searchQuery, statusFilter, categoryFilter, criticalityFilter, onFiltersChange]);
-
   const handleImport = () => {
     const input = document.createElement('input');
     input.type = 'file';
     input.accept = '.csv';
-    input.onchange = async (e) => {
+    input.onchange = async e => {
       const file = (e.target as HTMLInputElement).files?.[0];
       if (file) {
         try {
@@ -51,13 +50,11 @@ export const AssetsHeader = ({ onFiltersChange, onCreateAsset, assets = [] }: As
     };
     input.click();
   };
-
   const handleExport = () => {
     if (assets.length === 0) {
       toast.error('No assets to export');
       return;
     }
-    
     try {
       exportAssetsToCSV(assets);
       toast.success(`Exported ${assets.length} assets to CSV`);
@@ -66,20 +63,13 @@ export const AssetsHeader = ({ onFiltersChange, onCreateAsset, assets = [] }: As
       toast.error('Failed to export assets');
     }
   };
-
-  return (
-    <div className="px-6 py-4">
+  return <div className="py-4 mx-0 px-0">
       <div className="flex items-center justify-between w-full">
         <div className="flex items-center gap-4 flex-1">
           {/* Search */}
           <div className="relative max-w-sm">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-            <Input
-              placeholder="Search assets..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 h-9"
-            />
+            <Input placeholder="Search assets..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} className="pl-10 h-9" />
           </div>
 
           {/* Filters */}
@@ -135,6 +125,5 @@ export const AssetsHeader = ({ onFiltersChange, onCreateAsset, assets = [] }: As
           </Button>
         </div>
       </div>
-    </div>
-  );
+    </div>;
 };
