@@ -4,7 +4,7 @@ import type { Database } from "@/integrations/supabase/types";
 
 type Tables = Database["public"]["Tables"];
 type InventoryItem = Tables["inventory_items"]["Row"];
-type InventoryItemInsert = Tables["inventory_items"]["Insert"];
+type InventoryItemInsert = Omit<Tables["inventory_items"]["Insert"], "tenant_id">;
 type InventoryItemUpdate = Tables["inventory_items"]["Update"];
 
 export interface InventoryItemWithStats extends InventoryItem {
