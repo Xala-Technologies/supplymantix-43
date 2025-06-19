@@ -1,5 +1,4 @@
-
-import { useState } from "react";
+import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -224,3 +223,5 @@ export const RequestForm = ({ onSubmit, onCancel, isLoading, initialData, mode }
     </Card>
   );
 };
+
+export default RequestForm;

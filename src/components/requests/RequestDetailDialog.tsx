@@ -1,5 +1,4 @@
-
-import { useState } from "react";
+import React, { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -222,3 +221,5 @@ export const RequestDetailDialog = ({ request, open, onOpenChange }: RequestDeta
     </Dialog>
   );
 };
+
+export default RequestDetailDialog;
