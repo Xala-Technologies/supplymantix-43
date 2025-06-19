@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -20,8 +19,8 @@ import type { InventoryItemWithStats } from "@/lib/database/inventory-enhanced";
 
 export const InventoryDashboard = () => {
   const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState<string>("");
-  const [locationFilter, setLocationFilter] = useState<string>("");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [locationFilter, setLocationFilter] = useState<string>("all");
   const [sortBy, setSortBy] = useState<string>("name");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
   const [currentPage, setCurrentPage] = useState(1);
@@ -29,8 +28,8 @@ export const InventoryDashboard = () => {
 
   const { data: inventoryData, isLoading, refetch } = useInventoryEnhanced({
     search: search || undefined,
-    status: statusFilter as any || undefined,
-    location: locationFilter || undefined,
+    status: statusFilter === "all" ? undefined : statusFilter as any,
+    location: locationFilter === "all" ? undefined : locationFilter,
     sortBy: sortBy as any,
     sortOrder,
     limit: itemsPerPage,

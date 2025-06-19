@@ -23,8 +23,8 @@ export const InventoryHeader = ({
   onLocationFilterChange,
   onRefresh,
   searchValue = "",
-  statusFilter = "",
-  locationFilter = "",
+  statusFilter = "all",
+  locationFilter = "all",
   locations = []
 }: InventoryHeaderProps) => {
   const exportMutation = useExportInventory();
@@ -84,7 +84,7 @@ export const InventoryHeader = ({
             <SelectValue placeholder="Filter by status" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">All Status</SelectItem>
+            <SelectItem value="all">All Status</SelectItem>
             <SelectItem value="in_stock">In Stock</SelectItem>
             <SelectItem value="low_stock">Low Stock</SelectItem>
             <SelectItem value="out_of_stock">Out of Stock</SelectItem>
@@ -96,7 +96,7 @@ export const InventoryHeader = ({
             <SelectValue placeholder="Filter by location" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">All Locations</SelectItem>
+            <SelectItem value="all">All Locations</SelectItem>
             {locations.map((location) => (
               <SelectItem key={location.id} value={location.id}>
                 {location.name}
