@@ -295,21 +295,10 @@ export default function Assets() {
             </PageLayoutContent>
           </>
         ) : (
-          // Grid View with enhanced Back to Dashboard button
+          // Grid View - Clean without back button
           <>
             <PageLayoutHeader 
               title="Assets"
-              leftContent={
-                <Button 
-                  variant="ghost" 
-                  size="sm"
-                  onClick={handleBackToDashboard}
-                  className="text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-colors duration-200 flex items-center gap-2 px-3 py-2 rounded-lg border border-gray-200 hover:border-gray-300 hover:shadow-sm"
-                >
-                  <ArrowLeft className="w-4 h-4" />
-                  <span className="font-medium">Dashboard</span>
-                </Button>
-              }
             >
               <Button onClick={handleCreateAsset} className="bg-blue-600 hover:bg-blue-700 shadow-sm">
                 <Plus className="h-4 w-4 mr-2" />
