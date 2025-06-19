@@ -1,4 +1,3 @@
-
 import { DashboardLayout } from "@/components/Layout/DashboardLayout";
 import { PageLayout, PageLayoutHeader, PageFilters, PageLayoutContent } from "@/components/Layout/PageLayout";
 import { AssetsHeader } from "@/components/assets/AssetsHeader";
@@ -301,7 +300,7 @@ export default function Assets() {
                   className="text-gray-600 hover:text-gray-900 hover:bg-gray-100"
                 >
                   <ChevronLeft className="w-4 h-4 mr-2" />
-                  Back to Assets
+                  Back to Dashboard
                 </Button>
               }
             >
