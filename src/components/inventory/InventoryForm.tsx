@@ -69,7 +69,6 @@ export const InventoryForm = ({ item, onSuccess, trigger, mode = 'create' }: Inv
           }
         });
       } else {
-        // For create, we need to include tenant_id
         await createMutation.mutateAsync({
           name: data.name,
           description: data.description,
@@ -78,7 +77,6 @@ export const InventoryForm = ({ item, onSuccess, trigger, mode = 'create' }: Inv
           quantity: data.quantity,
           min_quantity: data.min_quantity || 0,
           unit_cost: data.unit_cost || 0,
-          tenant_id: 'default-tenant-id', // Use a default tenant ID for now
         });
       }
       

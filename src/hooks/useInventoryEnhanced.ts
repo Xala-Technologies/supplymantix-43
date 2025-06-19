@@ -1,15 +1,17 @@
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { inventoryEnhancedApi, type InventoryItemWithStats, type InventoryAlert } from "@/lib/database/inventory-enhanced";
+import { inventoryEnhancedApi, type InventoryItemWithStats } from "@/lib/database/inventory-enhanced";
 import { toast } from "sonner";
+
+// Get current user's tenant ID (simplified for now)
+const getCurrentTenantId = () => 'default-tenant-id';
 
 // Enhanced inventory items query
 export const useInventoryEnhanced = (params?: {
   search?: string;
-  category?: string;
   location?: string;
   status?: 'low_stock' | 'in_stock' | 'out_of_stock';
-  sortBy?: 'name' | 'quantity' | 'updated_at' | 'value';
+  sortBy?: 'name' | 'quantity' | 'updated_at';
   sortOrder?: 'asc' | 'desc';
   limit?: number;
   offset?: number;
@@ -18,26 +20,11 @@ export const useInventoryEnhanced = (params?: {
     queryKey: ["inventory-enhanced", params],
     queryFn: async () => {
       console.log('useInventoryEnhanced query executing with params:', params);
-      try {
-        const result = await inventoryEnhancedApi.searchInventory(params || {});
-        console.log('useInventoryEnhanced query result:', result);
-        return result;
-      } catch (error) {
-        console.error('useInventoryEnhanced query error:', error);
-        throw error;
-      }
+      const result = await inventoryEnhancedApi.searchInventory(params || {});
+      console.log('useInventoryEnhanced query result:', result);
+      return result;
     },
-    retry: 3,
-    staleTime: 1000 * 60 * 5, // 5 minutes
-  });
-};
-
-// Single inventory item with stats
-export const useInventoryItem = (id: string) => {
-  return useQuery({
-    queryKey: ["inventory-item", id],
-    queryFn: () => inventoryEnhancedApi.getInventoryItemById(id),
-    enabled: !!id,
+    retry: 2,
     staleTime: 1000 * 60 * 2, // 2 minutes
   });
 };
@@ -47,18 +34,31 @@ export const useLowStockAlerts = () => {
   return useQuery({
     queryKey: ["low-stock-alerts"],
     queryFn: inventoryEnhancedApi.getLowStockAlerts,
-    staleTime: 1000 * 60 * 10, // 10 minutes
+    staleTime: 1000 * 60 * 5, // 5 minutes
   });
 };
 
-// CRUD mutations
+// Create inventory item
 export const useCreateInventoryItem = () => {
   const queryClient = useQueryClient();
   
   return useMutation({
-    mutationFn: async (item: Parameters<typeof inventoryEnhancedApi.createInventoryItem>[0]) => {
+    mutationFn: async (item: {
+      name: string;
+      description?: string;
+      sku?: string;
+      location?: string;
+      quantity: number;
+      min_quantity?: number;
+      unit_cost?: number;
+    }) => {
       console.log('Creating inventory item:', item);
-      const result = await inventoryEnhancedApi.createInventoryItem(item);
+      const result = await inventoryEnhancedApi.createInventoryItem({
+        ...item,
+        tenant_id: getCurrentTenantId(),
+        min_quantity: item.min_quantity || 0,
+        unit_cost: item.unit_cost || 0
+      });
       console.log('Create result:', result);
       return result;
     },
@@ -69,34 +69,46 @@ export const useCreateInventoryItem = () => {
     },
     onError: (error) => {
       console.error("Failed to create inventory item:", error);
-      toast.error("Failed to create inventory item");
+      toast.error("Failed to create inventory item: " + (error as Error).message);
     },
   });
 };
 
+// Update inventory item
 export const useUpdateInventoryItem = () => {
   const queryClient = useQueryClient();
   
   return useMutation({
-    mutationFn: async ({ id, updates }: { id: string; updates: any }) => {
+    mutationFn: async ({ id, updates }: { 
+      id: string; 
+      updates: {
+        name?: string;
+        description?: string;
+        sku?: string;
+        location?: string;
+        quantity?: number;
+        min_quantity?: number;
+        unit_cost?: number;
+      }
+    }) => {
       console.log('Updating inventory item:', id, updates);
       const result = await inventoryEnhancedApi.updateInventoryItem(id, updates);
       console.log('Update result:', result);
       return result;
     },
-    onSuccess: (_, variables) => {
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["inventory-enhanced"] });
-      queryClient.invalidateQueries({ queryKey: ["inventory-item", variables.id] });
       queryClient.invalidateQueries({ queryKey: ["low-stock-alerts"] });
       toast.success("Inventory item updated successfully");
     },
     onError: (error) => {
       console.error("Failed to update inventory item:", error);
-      toast.error("Failed to update inventory item");
+      toast.error("Failed to update inventory item: " + (error as Error).message);
     },
   });
 };
 
+// Delete inventory item
 export const useDeleteInventoryItem = () => {
   const queryClient = useQueryClient();
   
@@ -113,7 +125,7 @@ export const useDeleteInventoryItem = () => {
     },
     onError: (error) => {
       console.error("Failed to delete inventory item:", error);
-      toast.error("Failed to delete inventory item");
+      toast.error("Failed to delete inventory item: " + (error as Error).message);
     },
   });
 };
@@ -130,13 +142,12 @@ export const useAddStock = () => {
     }) => inventoryEnhancedApi.addStock(inventoryId, quantity, note),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ["inventory-enhanced"] });
-      queryClient.invalidateQueries({ queryKey: ["inventory-item", variables.inventoryId] });
       queryClient.invalidateQueries({ queryKey: ["low-stock-alerts"] });
       toast.success(`Added ${variables.quantity} units to stock`);
     },
     onError: (error) => {
       console.error("Failed to add stock:", error);
-      toast.error("Failed to add stock");
+      toast.error("Failed to add stock: " + (error as Error).message);
     },
   });
 };
@@ -145,50 +156,19 @@ export const useRemoveStock = () => {
   const queryClient = useQueryClient();
   
   return useMutation({
-    mutationFn: ({ inventoryId, quantity, note, workOrderId }: { 
+    mutationFn: ({ inventoryId, quantity, note }: { 
       inventoryId: string; 
       quantity: number; 
       note?: string;
-      workOrderId?: string;
-    }) => inventoryEnhancedApi.removeStock(inventoryId, quantity, note, workOrderId),
+    }) => inventoryEnhancedApi.removeStock(inventoryId, quantity, note),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ["inventory-enhanced"] });
-      queryClient.invalidateQueries({ queryKey: ["inventory-item", variables.inventoryId] });
       queryClient.invalidateQueries({ queryKey: ["low-stock-alerts"] });
       toast.success(`Removed ${variables.quantity} units from stock`);
     },
     onError: (error) => {
       console.error("Failed to remove stock:", error);
-      toast.error("Failed to remove stock");
-    },
-  });
-};
-
-export const useTransferStock = () => {
-  const queryClient = useQueryClient();
-  
-  return useMutation({
-    mutationFn: ({ 
-      inventoryId, 
-      quantity, 
-      fromLocationId, 
-      toLocationId, 
-      note 
-    }: { 
-      inventoryId: string; 
-      quantity: number; 
-      fromLocationId: string; 
-      toLocationId: string; 
-      note?: string; 
-    }) => inventoryEnhancedApi.transferStock(inventoryId, quantity, fromLocationId, toLocationId, note),
-    onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ["inventory-enhanced"] });
-      queryClient.invalidateQueries({ queryKey: ["inventory-item", variables.inventoryId] });
-      toast.success(`Transferred ${variables.quantity} units between locations`);
-    },
-    onError: (error) => {
-      console.error("Failed to transfer stock:", error);
-      toast.error("Failed to transfer stock");
+      toast.error("Failed to remove stock: " + (error as Error).message);
     },
   });
 };
@@ -204,54 +184,12 @@ export const useAdjustStock = () => {
     }) => inventoryEnhancedApi.adjustStock(inventoryId, newQuantity, note),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ["inventory-enhanced"] });
-      queryClient.invalidateQueries({ queryKey: ["inventory-item", variables.inventoryId] });
       queryClient.invalidateQueries({ queryKey: ["low-stock-alerts"] });
       toast.success(`Adjusted stock to ${variables.newQuantity} units`);
     },
     onError: (error) => {
       console.error("Failed to adjust stock:", error);
-      toast.error("Failed to adjust stock");
-    },
-  });
-};
-
-export const useBulkUpdateStock = () => {
-  const queryClient = useQueryClient();
-  
-  return useMutation({
-    mutationFn: (updates: Array<{ id: string; quantity: number; note?: string }>) => 
-      inventoryEnhancedApi.bulkUpdateStock(updates),
-    onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ["inventory-enhanced"] });
-      queryClient.invalidateQueries({ queryKey: ["low-stock-alerts"] });
-      toast.success(`Updated ${variables.length} inventory items`);
-    },
-    onError: (error) => {
-      console.error("Failed to bulk update stock:", error);
-      toast.error("Failed to bulk update stock");
-    },
-  });
-};
-
-// Export functionality
-export const useExportInventory = () => {
-  return useMutation({
-    mutationFn: inventoryEnhancedApi.exportInventoryToCsv,
-    onSuccess: (csvData) => {
-      const blob = new Blob([csvData], { type: 'text/csv' });
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `inventory-export-${new Date().toISOString().split('T')[0]}.csv`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      window.URL.revokeObjectURL(url);
-      toast.success("Inventory exported successfully");
-    },
-    onError: (error) => {
-      console.error("Failed to export inventory:", error);
-      toast.error("Failed to export inventory");
+      toast.error("Failed to adjust stock: " + (error as Error).message);
     },
   });
 };
