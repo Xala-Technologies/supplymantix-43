@@ -1,46 +1,179 @@
 
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
-import { inventoryApi } from "@/lib/database/inventory";
-import { useCheckOrCreateLowStockPO } from "./useLowStockHelper";
-import type { Database } from "@/integrations/supabase/types";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { inventoryEnhancedApi, type InventoryItemWithStats, type InventoryAlert } from "@/lib/database/inventory-enhanced";
+import { toast } from "sonner";
 
-type Tables = Database["public"]["Tables"];
+// Enhanced inventory items query
+export const useInventoryEnhanced = (params?: {
+  search?: string;
+  category?: string;
+  location?: string;
+  status?: 'low_stock' | 'in_stock' | 'out_of_stock';
+  sortBy?: 'name' | 'quantity' | 'updated_at' | 'value';
+  sortOrder?: 'asc' | 'desc';
+  limit?: number;
+  offset?: number;
+}) => {
+  return useQuery({
+    queryKey: ["inventory-enhanced", params],
+    queryFn: () => inventoryEnhancedApi.searchInventory(params || {}),
+    staleTime: 1000 * 60 * 5, // 5 minutes
+  });
+};
 
-export const useUpdateInventoryItemEnhanced = () => {
+// Single inventory item with stats
+export const useInventoryItem = (id: string) => {
+  return useQuery({
+    queryKey: ["inventory-item", id],
+    queryFn: () => inventoryEnhancedApi.getInventoryItemById(id),
+    enabled: !!id,
+    staleTime: 1000 * 60 * 2, // 2 minutes
+  });
+};
+
+// Low stock alerts
+export const useLowStockAlerts = () => {
+  return useQuery({
+    queryKey: ["low-stock-alerts"],
+    queryFn: inventoryEnhancedApi.getLowStockAlerts,
+    staleTime: 1000 * 60 * 10, // 10 minutes
+  });
+};
+
+// Stock movement mutations
+export const useAddStock = () => {
   const queryClient = useQueryClient();
-  const checkLowStockMutation = useCheckOrCreateLowStockPO();
-
+  
   return useMutation({
-    mutationFn: async ({ 
-      id, 
-      updates 
-    }: { 
-      id: string; 
-      updates: Tables["inventory_items"]["Update"] 
-    }) => {
-      console.log("Updating inventory item:", { id, updates });
-      
-      // First update the item
-      const { data, error } = await supabase
-        .from("inventory_items")
-        .update(updates)
-        .eq("id", id)
-        .select()
-        .single();
-
-      if (error) throw error;
-      
-      // Check for low stock after update
-      if (data && typeof updates.quantity === 'number') {
-        const updatedItem = { ...data, quantity: updates.quantity };
-        await checkLowStockMutation.mutateAsync(updatedItem);
-      }
-      
-      return data;
+    mutationFn: ({ inventoryId, quantity, note }: { 
+      inventoryId: string; 
+      quantity: number; 
+      note?: string; 
+    }) => inventoryEnhancedApi.addStock(inventoryId, quantity, note),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["inventory-enhanced"] });
+      queryClient.invalidateQueries({ queryKey: ["inventory-item", variables.inventoryId] });
+      queryClient.invalidateQueries({ queryKey: ["low-stock-alerts"] });
+      toast.success(`Added ${variables.quantity} units to stock`);
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["inventory"] });
+    onError: (error) => {
+      console.error("Failed to add stock:", error);
+      toast.error("Failed to add stock");
+    },
+  });
+};
+
+export const useRemoveStock = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: ({ inventoryId, quantity, note, workOrderId }: { 
+      inventoryId: string; 
+      quantity: number; 
+      note?: string;
+      workOrderId?: string;
+    }) => inventoryEnhancedApi.removeStock(inventoryId, quantity, note, workOrderId),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["inventory-enhanced"] });
+      queryClient.invalidateQueries({ queryKey: ["inventory-item", variables.inventoryId] });
+      queryClient.invalidateQueries({ queryKey: ["low-stock-alerts"] });
+      toast.success(`Removed ${variables.quantity} units from stock`);
+    },
+    onError: (error) => {
+      console.error("Failed to remove stock:", error);
+      toast.error("Failed to remove stock");
+    },
+  });
+};
+
+export const useTransferStock = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: ({ 
+      inventoryId, 
+      quantity, 
+      fromLocationId, 
+      toLocationId, 
+      note 
+    }: { 
+      inventoryId: string; 
+      quantity: number; 
+      fromLocationId: string; 
+      toLocationId: string; 
+      note?: string; 
+    }) => inventoryEnhancedApi.transferStock(inventoryId, quantity, fromLocationId, toLocationId, note),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["inventory-enhanced"] });
+      queryClient.invalidateQueries({ queryKey: ["inventory-item", variables.inventoryId] });
+      toast.success(`Transferred ${variables.quantity} units between locations`);
+    },
+    onError: (error) => {
+      console.error("Failed to transfer stock:", error);
+      toast.error("Failed to transfer stock");
+    },
+  });
+};
+
+export const useAdjustStock = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: ({ inventoryId, newQuantity, note }: { 
+      inventoryId: string; 
+      newQuantity: number; 
+      note?: string; 
+    }) => inventoryEnhancedApi.adjustStock(inventoryId, newQuantity, note),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["inventory-enhanced"] });
+      queryClient.invalidateQueries({ queryKey: ["inventory-item", variables.inventoryId] });
+      queryClient.invalidateQueries({ queryKey: ["low-stock-alerts"] });
+      toast.success(`Adjusted stock to ${variables.newQuantity} units`);
+    },
+    onError: (error) => {
+      console.error("Failed to adjust stock:", error);
+      toast.error("Failed to adjust stock");
+    },
+  });
+};
+
+export const useBulkUpdateStock = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: (updates: Array<{ id: string; quantity: number; note?: string }>) => 
+      inventoryEnhancedApi.bulkUpdateStock(updates),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["inventory-enhanced"] });
+      queryClient.invalidateQueries({ queryKey: ["low-stock-alerts"] });
+      toast.success(`Updated ${variables.length} inventory items`);
+    },
+    onError: (error) => {
+      console.error("Failed to bulk update stock:", error);
+      toast.error("Failed to bulk update stock");
+    },
+  });
+};
+
+// Export functionality
+export const useExportInventory = () => {
+  return useMutation({
+    mutationFn: inventoryEnhancedApi.exportInventoryToCsv,
+    onSuccess: (csvData) => {
+      const blob = new Blob([csvData], { type: 'text/csv' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `inventory-export-${new Date().toISOString().split('T')[0]}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
+      toast.success("Inventory exported successfully");
+    },
+    onError: (error) => {
+      console.error("Failed to export inventory:", error);
+      toast.error("Failed to export inventory");
     },
   });
 };
