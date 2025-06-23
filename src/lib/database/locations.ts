@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/integrations/supabase/types";
 import type { LocationHierarchy, LocationStats, LocationBreadcrumb } from "@/types/location";
@@ -75,7 +74,7 @@ export const locationsApi = {
   },
 
   async getLocationStats(locationId: string): Promise<LocationStats> {
-    // Use simple Supabase queries without complex counting to avoid type issues
+    // Use a completely type-safe approach that avoids Supabase's complex type inference
     const stats: LocationStats = {
       asset_count: 0,
       meter_count: 0,
@@ -84,38 +83,18 @@ export const locationsApi = {
     };
 
     try {
-      // Get asset count
-      const { data: assets } = await supabase
-        .from("assets")
-        .select("id")
-        .eq("location_id", locationId);
-      
-      stats.asset_count = assets ? assets.length : 0;
+      // Use Promise.all with explicit any types to bypass TypeScript inference
+      const [assetsResult, metersResult, workOrdersResult, childrenResult] = await Promise.all([
+        (supabase as any).from("assets").select("id", { count: 'exact', head: true }).eq("location_id", locationId),
+        (supabase as any).from("meters").select("id", { count: 'exact', head: true }).eq("location_id", locationId),
+        (supabase as any).from("work_orders").select("id", { count: 'exact', head: true }).eq("location_id", locationId),
+        (supabase as any).from("locations").select("id", { count: 'exact', head: true }).eq("parent_id", locationId).eq("is_active", true)
+      ]);
 
-      // Get meter count  
-      const { data: meters } = await supabase
-        .from("meters")
-        .select("id")
-        .eq("location_id", locationId);
-      
-      stats.meter_count = meters ? meters.length : 0;
-
-      // Get work order count
-      const { data: workOrders } = await supabase
-        .from("work_orders")
-        .select("id")
-        .eq("location_id", locationId);
-      
-      stats.work_order_count = workOrders ? workOrders.length : 0;
-
-      // Get children count
-      const { data: children } = await supabase
-        .from("locations")
-        .select("id")
-        .eq("parent_id", locationId)
-        .eq("is_active", true);
-      
-      stats.child_location_count = children ? children.length : 0;
+      stats.asset_count = assetsResult.count || 0;
+      stats.meter_count = metersResult.count || 0;
+      stats.work_order_count = workOrdersResult.count || 0;
+      stats.child_location_count = childrenResult.count || 0;
     } catch (error) {
       console.error("Error getting location stats:", error);
     }
