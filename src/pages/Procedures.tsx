@@ -457,9 +457,12 @@ const Procedures = () => {
         </div>
       </div>
 
-      {/* Create Dialog - Full Screen */}
+      {/* Create Dialog */}
       <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
-        <DialogContent className="max-w-[98vw] w-[98vw] h-[95vh] p-0 overflow-hidden">
+        <DialogContent className="max-w-5xl h-[85vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Create New Procedure</DialogTitle>
+          </DialogHeader>
           <ProcedureFormBuilder
             onSave={handleCreateProcedure}
             onCancel={() => setShowCreateDialog(false)}
@@ -468,9 +471,12 @@ const Procedures = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Edit Dialog - Full Screen */}
+      {/* Edit Dialog */}
       <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
-        <DialogContent className="max-w-[98vw] w-[98vw] h-[95vh] p-0 overflow-hidden">
+        <DialogContent className="max-w-5xl h-[85vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Edit Procedure</DialogTitle>
+          </DialogHeader>
           {selectedProcedure && (
             <ProcedureFormBuilder
               initialData={selectedProcedure}
@@ -485,11 +491,11 @@ const Procedures = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Execution Dialog - Full Screen */}
+      {/* Execution Dialog */}
       <Dialog open={showExecutionDialog} onOpenChange={setShowExecutionDialog}>
-        <DialogContent className="max-w-[100vw] w-[100vw] h-[100vh] p-0 overflow-hidden border-0 bg-transparent shadow-none">
+        <DialogContent className="max-w-4xl w-[95vw] h-[95vh] p-0 overflow-hidden border-0 bg-transparent shadow-2xl">
           {selectedProcedure && (
-            <div className="h-full bg-white overflow-hidden">
+            <div className="h-full bg-white rounded-lg overflow-hidden shadow-xl">
               <ProcedureExecution
                 procedure={selectedProcedure}
                 executionId={currentExecutionId || undefined}
