@@ -24,31 +24,38 @@ interface EnhancedMeter {
 
 export const useMeters = () => {
   return useQuery({
-    queryKey: ["meters-enhanced"],
+    queryKey: ["meters"],
     queryFn: async (): Promise<EnhancedMeter[]> => {
-      const meters = await databaseApi.getMeters();
-      
-      return meters?.map(meter => ({
-        id: meter.id,
-        name: meter.name,
-        type: meter.type,
-        unit: meter.unit,
-        current_value: Number(meter.current_value) || 0,
-        asset_name: meter.assets?.name,
-        location: meter.location || meter.assets?.location,
-        status: meter.status as 'active' | 'warning' | 'critical' | 'inactive',
-        last_reading: meter.last_reading_at || new Date().toISOString(),
-        target_range: meter.target_min && meter.target_max ? {
-          min: Number(meter.target_min),
-          max: Number(meter.target_max)
-        } : undefined,
-        asset_id: meter.asset_id,
-        description: meter.description,
-        reading_frequency: meter.reading_frequency,
-        target_min: meter.target_min ? Number(meter.target_min) : undefined,
-        target_max: meter.target_max ? Number(meter.target_max) : undefined,
-        last_reading_at: meter.last_reading_at,
-      })) || [];
+      console.log("Fetching meters...");
+      try {
+        const meters = await databaseApi.getMeters();
+        console.log("Raw meters data:", meters);
+        
+        return meters?.map(meter => ({
+          id: meter.id,
+          name: meter.name,
+          type: meter.type,
+          unit: meter.unit,
+          current_value: Number(meter.current_value) || 0,
+          asset_name: meter.assets?.name,
+          location: meter.location || meter.assets?.location,
+          status: meter.status as 'active' | 'warning' | 'critical' | 'inactive',
+          last_reading: meter.last_reading_at || new Date().toISOString(),
+          target_range: meter.target_min && meter.target_max ? {
+            min: Number(meter.target_min),
+            max: Number(meter.target_max)
+          } : undefined,
+          asset_id: meter.asset_id,
+          description: meter.description,
+          reading_frequency: meter.reading_frequency,
+          target_min: meter.target_min ? Number(meter.target_min) : undefined,
+          target_max: meter.target_max ? Number(meter.target_max) : undefined,
+          last_reading_at: meter.last_reading_at,
+        })) || [];
+      } catch (error) {
+        console.error("Error fetching meters:", error);
+        return [];
+      }
     },
   });
 };

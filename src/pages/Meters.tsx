@@ -14,7 +14,9 @@ const Meters = () => {
   const [typeFilter, setTypeFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
 
-  const { data: meters, isLoading } = useMeters();
+  const { data: meters, isLoading, error } = useMeters();
+
+  console.log("Meters page data:", { meters, isLoading, error });
 
   const filteredMeters = meters?.filter(meter => {
     const matchesSearch = meter.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -37,6 +39,15 @@ const Meters = () => {
           statusFilter={statusFilter}
           onStatusFilterChange={setStatusFilter}
         />
+
+        {error && (
+          <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+            <h3 className="text-red-800 font-medium">Error loading meters</h3>
+            <p className="text-red-600 text-sm mt-1">
+              {error instanceof Error ? error.message : "An unknown error occurred"}
+            </p>
+          </div>
+        )}
 
         <MetersList
           meters={filteredMeters}
