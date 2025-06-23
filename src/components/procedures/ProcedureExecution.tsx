@@ -229,7 +229,7 @@ export const ProcedureExecution: React.FC<ProcedureExecutionProps> = ({
               </div>
               <div>
                 <h2 className="text-sm font-semibold text-gray-900">Summary</h2>
-                <p className="text-xs text-gray-600">{procedure.title}</p>
+                <p className="text-xs text-gray-600 mb-2 text-center">{procedure.title}</p>
               </div>
             </div>
             <div className="flex items-center gap-1">
@@ -297,9 +297,9 @@ export const ProcedureExecution: React.FC<ProcedureExecutionProps> = ({
   }
 
   return (
-    <div className="flex flex-col h-full max-w-3xl mx-auto">
+    <div className="flex flex-col h-full bg-gradient-to-b from-slate-50 to-white">
       {/* Ultra Compact Timeline */}
-      <div className="flex-shrink-0 p-1 border-b bg-white">
+      <div className="flex-shrink-0 border-b bg-white shadow-sm">
         <ExecutionTimeline
           startTime={executionStartTime}
           scheduledDate={scheduledDate}
@@ -313,105 +313,113 @@ export const ProcedureExecution: React.FC<ProcedureExecutionProps> = ({
         />
       </div>
 
-      {/* Ultra Compact Header */}
-      <div className="flex-shrink-0 border-b bg-gradient-to-r from-blue-50 to-indigo-50 p-2">
-        <div className="flex justify-between items-center mb-1">
-          <div className="flex items-center gap-2 flex-1 min-w-0">
-            <div className="p-1 rounded bg-blue-100">
-              <Play className="h-3 w-3 text-blue-600" />
+      {/* Modern Header with Gradient */}
+      <div className="flex-shrink-0 bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 text-white">
+        <div className="flex justify-between items-center p-3">
+          <div className="flex items-center gap-3 flex-1 min-w-0">
+            <div className="p-2 rounded-lg bg-white/20 backdrop-blur-sm">
+              <Play className="h-4 w-4 text-white" />
             </div>
             <div className="min-w-0 flex-1">
-              <h2 className="text-sm font-semibold text-gray-900 truncate">{procedure.title}</h2>
+              <h2 className="text-lg font-bold text-white truncate">{procedure.title}</h2>
               {procedure.description && (
-                <p className="text-xs text-gray-600 truncate">{procedure.description}</p>
+                <p className="text-sm text-white/80 truncate">{procedure.description}</p>
               )}
             </div>
           </div>
           
-          <div className="flex items-center gap-1 shrink-0">
-            <Badge variant="outline" className="border-blue-300 text-blue-700 text-xs px-1 py-0">
-              {procedure.category}
-            </Badge>
-            <Badge variant="secondary" className="text-xs px-1 py-0">
-              {currentStep + 1}/{totalSteps}
-            </Badge>
-            <Button variant="ghost" size="sm" onClick={onCancel} className="text-gray-500 hover:text-gray-700 p-1 h-6 w-6">
-              <X className="h-3 w-3" />
+          <div className="flex items-center gap-2 shrink-0">
+            <div className="bg-white/20 backdrop-blur-sm rounded-lg px-3 py-1">
+              <span className="text-sm font-semibold text-white">
+                {currentStep + 1}/{totalSteps}
+              </span>
+            </div>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={onCancel} 
+              className="text-white hover:bg-white/20 p-1.5 h-auto w-auto rounded-lg"
+            >
+              <X className="h-4 w-4" />
             </Button>
           </div>
         </div>
         
-        <div className="space-y-0.5">
-          <div className="flex justify-between text-xs text-gray-600">
+        {/* Modern Progress Bar */}
+        <div className="px-3 pb-3">
+          <div className="bg-white/20 rounded-full h-2 overflow-hidden">
+            <div 
+              className="h-full bg-gradient-to-r from-white to-yellow-200 transition-all duration-500 ease-out"
+              style={{ width: `${progress}%` }}
+            />
+          </div>
+          <div className="flex justify-between text-xs text-white/80 mt-1">
             <span>Progress</span>
             <span>{Math.round(progress)}%</span>
           </div>
-          <Progress value={progress} className="h-1" />
         </div>
       </div>
 
-      {/* Current Field - Ultra Compact */}
-      <div className="flex-1 overflow-y-auto p-2">
+      {/* Current Field - Full Height */}
+      <div className="flex-1 overflow-y-auto bg-gradient-to-b from-slate-50 to-white p-4">
         {currentField && (
-          <ExecutionFieldRenderer 
-            field={currentField}
-            value={answers[currentField.id || `field_${currentStep}`] || ''} 
-            onChange={value => handleAnswerChange(currentField.id || `field_${currentStep}`, value)} 
-            error={errors[currentField.id || `field_${currentStep}`]} 
-            fieldId={currentField.id || `field_${currentStep}`} 
-          />
+          <div className="max-w-2xl mx-auto">
+            <ExecutionFieldRenderer 
+              field={currentField}
+              value={answers[currentField.id || `field_${currentStep}`] || ''} 
+              onChange={value => handleAnswerChange(currentField.id || `field_${currentStep}`, value)} 
+              error={errors[currentField.id || `field_${currentStep}`]} 
+              fieldId={currentField.id || `field_${currentStep}`} 
+            />
+          </div>
         )}
       </div>
 
-      {/* Ultra Compact Navigation */}
-      <div className="flex-shrink-0 border-t bg-gray-50 p-2">
-        <div className="flex justify-between items-center">
-          <Button variant="outline" onClick={currentStep === 0 ? onCancel : goToPreviousStep} size="sm" className="h-7 px-2 text-xs">
-            <ArrowLeft className="h-3 w-3 mr-1" />
+      {/* Modern Navigation Footer */}
+      <div className="flex-shrink-0 bg-white border-t shadow-lg">
+        <div className="flex justify-between items-center p-4">
+          <Button 
+            variant="outline" 
+            onClick={currentStep === 0 ? onCancel : goToPreviousStep} 
+            className="flex items-center gap-2 hover:bg-gray-50 transition-colors"
+          >
+            <ArrowLeft className="h-4 w-4" />
             {currentStep === 0 ? 'Cancel' : 'Previous'}
           </Button>
 
-          <Button onClick={goToNextStep} className="bg-blue-600 hover:bg-blue-700 h-7 px-2 text-xs" size="sm">
-            {currentStep === totalSteps - 1 ? (
-              <>
-                <FileText className="h-3 w-3 mr-1" />
-                Review
-              </>
-            ) : (
-              <>
-                Next
-                <ArrowRight className="h-3 w-3 ml-1" />
-              </>
-            )}
-          </Button>
-        </div>
-      </div>
-
-      {/* Ultra Compact Progress Summary */}
-      {Object.keys(answers).length > 0 && (
-        <div className="flex-shrink-0 border-t bg-gray-50 p-1">
-          <div className="text-center">
-            <p className="text-xs text-gray-600 mb-0.5 flex items-center justify-center gap-1">
-              <Clock className="h-2 w-2" />
-              {Object.keys(answers).length}/{totalSteps} completed
-            </p>
-            <div className="flex justify-center space-x-0.5">
-              {fields.map((field, index) => {
-                const fieldId = field.id || `field_${index}`;
-                return (
-                  <div 
-                    key={index} 
-                    className={`w-1 h-1 rounded-full ${
-                      answers[fieldId] ? 'bg-green-500' : 
-                      index === currentStep ? 'bg-blue-500' : 'bg-gray-300'
-                    }`} 
-                  />
-                );
-              })}
+          <div className="flex items-center gap-4">
+            {/* Step Indicator */}
+            <div className="flex gap-1">
+              {fields.map((_, index) => (
+                <div 
+                  key={index} 
+                  className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                    answers[fields[index].id || `field_${index}`] ? 'bg-green-500 scale-110' : 
+                    index === currentStep ? 'bg-blue-500 scale-110' : 'bg-gray-300'
+                  }`} 
+                />
+              ))}
             </div>
+            
+            <Button 
+              onClick={goToNextStep} 
+              className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transition-all duration-200 flex items-center gap-2"
+            >
+              {currentStep === totalSteps - 1 ? (
+                <>
+                  <FileText className="h-4 w-4" />
+                  Review
+                </>
+              ) : (
+                <>
+                  Next
+                  <ArrowRight className="h-4 w-4" />
+                </>
+              )}
+            </Button>
           </div>
         </div>
-      )}
+      </div>
     </div>
   );
 };

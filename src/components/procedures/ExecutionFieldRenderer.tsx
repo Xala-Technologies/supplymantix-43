@@ -67,18 +67,18 @@ export const ExecutionFieldRenderer: React.FC<ExecutionFieldRendererProps> = ({
 
   console.log(`Rendering field ${field.field_type} with value:`, value);
 
-  // Section fields are displayed differently
+  // Section fields with enhanced design
   if (field.field_type === 'section') {
     return (
-      <Card className="bg-gradient-to-r from-gray-50 to-slate-50 border border-dashed border-gray-300">
-        <CardContent className="p-2 text-center">
-          <div className="flex items-center justify-center gap-1 mb-0.5">
-            <Heading className="h-3 w-3 text-gray-600" />
-            <h3 className="text-sm font-semibold text-gray-900">{field.label}</h3>
+      <div className="bg-gradient-to-r from-indigo-50 via-purple-50 to-pink-50 rounded-xl border border-purple-200 p-6 text-center shadow-sm">
+        <div className="flex items-center justify-center gap-3 mb-3">
+          <div className="p-3 rounded-full bg-gradient-to-r from-purple-500 to-indigo-600">
+            <Heading className="h-5 w-5 text-white" />
           </div>
-          <p className="text-xs text-gray-600">Section header - click Next to continue</p>
-        </CardContent>
-      </Card>
+          <h3 className="text-xl font-bold text-gray-900">{field.label}</h3>
+        </div>
+        <p className="text-gray-600">Section header - click Next to continue</p>
+      </div>
     );
   }
 
@@ -94,7 +94,7 @@ export const ExecutionFieldRenderer: React.FC<ExecutionFieldRendererProps> = ({
               onChange(e.target.value);
             }}
             placeholder={`Enter ${field.label.toLowerCase()}`}
-            className="text-xs w-full h-7"
+            className="text-base h-12 border-2 focus:border-blue-500 transition-colors"
           />
         );
 
@@ -110,7 +110,7 @@ export const ExecutionFieldRenderer: React.FC<ExecutionFieldRendererProps> = ({
               onChange(numValue);
             }}
             placeholder={`Enter ${field.label.toLowerCase()}`}
-            className="text-xs w-full h-7"
+            className="text-base h-12 border-2 focus:border-blue-500 transition-colors"
             step="any"
           />
         );
@@ -125,13 +125,13 @@ export const ExecutionFieldRenderer: React.FC<ExecutionFieldRendererProps> = ({
               console.log(`Date field ${fieldId} changed to:`, e.target.value);
               onChange(e.target.value);
             }}
-            className="text-xs w-full h-7"
+            className="text-base h-12 border-2 focus:border-blue-500 transition-colors"
           />
         );
 
       case 'checkbox':
         return (
-          <div className="flex items-center space-x-2 p-1">
+          <div className="flex items-center space-x-4 p-4 bg-gray-50 rounded-lg border-2 hover:bg-gray-100 transition-colors">
             <Checkbox
               id={fieldId}
               checked={Boolean(value)}
@@ -139,9 +139,9 @@ export const ExecutionFieldRenderer: React.FC<ExecutionFieldRendererProps> = ({
                 console.log(`Checkbox field ${fieldId} changed to:`, checked);
                 onChange(checked === true);
               }}
-              className="h-4 w-4"
+              className="h-6 w-6"
             />
-            <Label htmlFor={fieldId} className="cursor-pointer text-xs font-medium">
+            <Label htmlFor={fieldId} className="cursor-pointer text-base font-medium">
               {field.label}
             </Label>
           </div>
@@ -157,15 +157,15 @@ export const ExecutionFieldRenderer: React.FC<ExecutionFieldRendererProps> = ({
               onChange(selectedValue);
             }}
           >
-            <SelectTrigger className="text-xs w-full h-7">
+            <SelectTrigger className="text-base h-12 border-2 focus:border-blue-500 transition-colors">
               <SelectValue placeholder={`Select ${field.label.toLowerCase()}`} />
             </SelectTrigger>
-            <SelectContent className="bg-white border shadow-lg z-50">
+            <SelectContent className="bg-white border-2 shadow-xl z-50">
               {choices.length === 0 ? (
                 <SelectItem value="" disabled>No options available</SelectItem>
               ) : (
                 choices.map((choice: string, index: number) => (
-                  <SelectItem key={`${choice}-${index}`} value={choice} className="text-xs">
+                  <SelectItem key={`${choice}-${index}`} value={choice} className="text-base">
                     {choice}
                   </SelectItem>
                 ))
@@ -256,8 +256,8 @@ export const ExecutionFieldRenderer: React.FC<ExecutionFieldRendererProps> = ({
               onChange(e.target.value);
             }}
             placeholder={`Enter ${field.label.toLowerCase()}`}
-            rows={2}
-            className="resize-none text-xs w-full"
+            rows={4}
+            className="resize-none text-base border-2 focus:border-blue-500 transition-colors"
           />
         );
     }
@@ -265,48 +265,73 @@ export const ExecutionFieldRenderer: React.FC<ExecutionFieldRendererProps> = ({
 
   return (
     <div className="w-full">
-      <Card className={`border-l-2 ${getFieldTypeColor(field.field_type)} shadow-none`}>
-        <CardContent className="p-2">
-          <div className="space-y-2">
-            {/* Ultra Compact Field Header */}
-            <div className="flex items-center gap-1">
-              <div className="p-0.5 rounded bg-gray-100">
-                <FieldIcon className="h-2 w-2 text-gray-600" />
-              </div>
-              <div className="flex-1">
-                <div className="flex items-center gap-1">
-                  <Label htmlFor={fieldId} className="text-xs font-medium text-gray-900">
-                    {field.label}
-                  </Label>
-                  {field.is_required && (
-                    <Badge variant="destructive" className="text-xs px-1 py-0">
-                      Required
-                    </Badge>
-                  )}
-                </div>
-                {field.field_type !== 'checkbox' && (
-                  <Badge variant="outline" className="text-xs mt-0.5 px-1 py-0">
-                    {field.field_type}
+      <div className="bg-white rounded-xl shadow-lg border-2 border-gray-100 hover:shadow-xl transition-all duration-200 overflow-hidden">
+        {/* Modern Field Header */}
+        <div className={`p-4 bg-gradient-to-r ${
+          field.field_type === 'text' ? 'from-blue-50 to-indigo-50 border-b-blue-200' :
+          field.field_type === 'number' ? 'from-green-50 to-emerald-50 border-b-green-200' :
+          field.field_type === 'date' ? 'from-purple-50 to-violet-50 border-b-purple-200' :
+          field.field_type === 'checkbox' ? 'from-orange-50 to-amber-50 border-b-orange-200' :
+          field.field_type === 'select' ? 'from-pink-50 to-rose-50 border-b-pink-200' :
+          field.field_type === 'multiselect' ? 'from-indigo-50 to-blue-50 border-b-indigo-200' :
+          field.field_type === 'file' ? 'from-red-50 to-pink-50 border-b-red-200' :
+          'from-gray-50 to-slate-50 border-b-gray-200'
+        } border-b-2`}>
+          <div className="flex items-center gap-3">
+            <div className={`p-2 rounded-lg ${
+              field.field_type === 'text' ? 'bg-blue-100' :
+              field.field_type === 'number' ? 'bg-green-100' :
+              field.field_type === 'date' ? 'bg-purple-100' :
+              field.field_type === 'checkbox' ? 'bg-orange-100' :
+              field.field_type === 'select' ? 'bg-pink-100' :
+              field.field_type === 'multiselect' ? 'bg-indigo-100' :
+              field.field_type === 'file' ? 'bg-red-100' :
+              'bg-gray-100'
+            }`}>
+              <FieldIcon className={`h-5 w-5 ${
+                field.field_type === 'text' ? 'text-blue-600' :
+                field.field_type === 'number' ? 'text-green-600' :
+                field.field_type === 'date' ? 'text-purple-600' :
+                field.field_type === 'checkbox' ? 'text-orange-600' :
+                field.field_type === 'select' ? 'text-pink-600' :
+                field.field_type === 'multiselect' ? 'text-indigo-600' :
+                field.field_type === 'file' ? 'text-red-600' :
+                'text-gray-600'
+              }`} />
+            </div>
+            <div className="flex-1">
+              <div className="flex items-center gap-2">
+                <Label htmlFor={fieldId} className="text-lg font-semibold text-gray-900">
+                  {field.label}
+                </Label>
+                {field.is_required && (
+                  <Badge variant="destructive" className="text-sm">
+                    Required
                   </Badge>
                 )}
               </div>
+              {field.field_type !== 'checkbox' && (
+                <Badge variant="outline" className="text-sm mt-1">
+                  {field.field_type}
+                </Badge>
+              )}
             </div>
-
-            {/* Ultra Compact Field Input */}
-            <div className="bg-white rounded border p-1">
-              {renderInput()}
-            </div>
-
-            {/* Error Message */}
-            {error && (
-              <div className="flex items-center gap-1 text-red-600 text-xs bg-red-50 p-1 rounded border border-red-200">
-                <AlertCircle className="h-2 w-2 flex-shrink-0" />
-                <span className="text-xs">{error}</span>
-              </div>
-            )}
           </div>
-        </CardContent>
-      </Card>
+        </div>
+
+        {/* Field Input Area */}
+        <div className="p-6">
+          {renderInput()}
+        </div>
+
+        {/* Error Message */}
+        {error && (
+          <div className="mx-6 mb-6 flex items-center gap-2 text-red-700 bg-red-50 p-3 rounded-lg border border-red-200">
+            <AlertCircle className="h-4 w-4 flex-shrink-0" />
+            <span className="text-sm font-medium">{error}</span>
+          </div>
+        )}
+      </div>
     </div>
   );
 };
