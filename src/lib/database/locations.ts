@@ -143,20 +143,21 @@ export const locationsApi = {
   },
 
   async getLocationStats(locationId: string): Promise<LocationStats> {
-    // Get stats by counting related records
-    const [assetsResult, metersResult, workOrdersResult, childrenResult] = await Promise.all([
-      supabase.from("assets").select("id", { count: 'exact' }).eq("location_id", locationId),
-      supabase.from("meters").select("id", { count: 'exact' }).eq("location_id", locationId),
-      supabase.from("work_orders").select("id", { count: 'exact' }).eq("location_id", locationId),
-      supabase.from("locations").select("id", { count: 'exact' }).eq("parent_id", locationId).eq("is_active", true)
-    ]);
+    // Simplify by using individual queries instead of Promise.all to avoid deep type inference
+    const assetsResult = await supabase.from("assets").select("id", { count: 'exact' }).eq("location_id", locationId);
+    const metersResult = await supabase.from("meters").select("id", { count: 'exact' }).eq("location_id", locationId);
+    const workOrdersResult = await supabase.from("work_orders").select("id", { count: 'exact' }).eq("location_id", locationId);
+    const childrenResult = await supabase.from("locations").select("id", { count: 'exact' }).eq("parent_id", locationId).eq("is_active", true);
     
-    return {
+    // Explicit return object
+    const stats: LocationStats = {
       asset_count: assetsResult.count || 0,
       meter_count: metersResult.count || 0,
       work_order_count: workOrdersResult.count || 0,
       child_location_count: childrenResult.count || 0,
     };
+    
+    return stats;
   },
 
   async searchLocations(query: string): Promise<LocationRow[]> {
@@ -232,7 +233,7 @@ export const locationsApi = {
     }
 
     // Use simple object without complex typing
-    const nodesMap = new Map<string, SimpleNode>();
+    const nodesMap = new Map<string, any>();
     
     // Create all nodes first with explicit simple structure
     for (const loc of locations) {
