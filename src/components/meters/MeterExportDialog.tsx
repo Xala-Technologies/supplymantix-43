@@ -109,7 +109,7 @@ export const MeterExportDialog = ({ open, onClose, selectedMeters }: MeterExport
                 <Checkbox 
                   id="readings" 
                   checked={includeReadings}
-                  onCheckedChange={setIncludeReadings}
+                  onCheckedChange={(checked) => setIncludeReadings(checked === true)}
                 />
                 <Label htmlFor="readings">Reading History</Label>
               </div>
@@ -117,7 +117,7 @@ export const MeterExportDialog = ({ open, onClose, selectedMeters }: MeterExport
                 <Checkbox 
                   id="triggers" 
                   checked={includeTriggers}
-                  onCheckedChange={setIncludeTriggers}
+                  onCheckedChange={(checked) => setIncludeTriggers(checked === true)}
                 />
                 <Label htmlFor="triggers">Triggers & Rules</Label>
               </div>

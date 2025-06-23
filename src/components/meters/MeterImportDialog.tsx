@@ -8,6 +8,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Progress } from "@/components/ui/progress";
 import { useCreateMeter } from "@/hooks/useMetersEnhanced";
 import { Upload, FileSpreadsheet, AlertTriangle, CheckCircle } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 interface MeterImportDialogProps {
   open: boolean;
@@ -51,6 +52,18 @@ export const MeterImportDialog = ({ open, onClose }: MeterImportDialogProps) => 
     setProgress(0);
     
     try {
+      // Get current user's tenant_id
+      const { data: userData } = await supabase.auth.getUser();
+      const { data: userTenant } = await supabase
+        .from("users")
+        .select("tenant_id")
+        .eq("id", userData.user?.id)
+        .single();
+
+      if (!userTenant?.tenant_id) {
+        throw new Error('Unable to determine tenant context');
+      }
+
       const text = await file.text();
       const meterData = parseCSV(text);
       
@@ -69,6 +82,7 @@ export const MeterImportDialog = ({ open, onClose }: MeterImportDialogProps) => 
             target_min: meter.target_min ? Number(meter.target_min) : null,
             target_max: meter.target_max ? Number(meter.target_max) : null,
             reading_frequency: meter.reading_frequency || 'none',
+            tenant_id: userTenant.tenant_id,
           });
           successCount++;
         } catch (error) {
