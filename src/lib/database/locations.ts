@@ -160,56 +160,35 @@ export const locationsApi = {
       return [];
     }
 
-    const result: LocationHierarchy[] = [];
-    const locationMap = new Map<string, any>();
+    // Use a simple object structure to avoid TypeScript recursion issues
+    const nodeMap: { [key: string]: any } = {};
+    const result: any[] = [];
     
-    // First pass: create all location objects with simple assignment
-    for (let i = 0; i < locations.length; i++) {
-      const location = locations[i] as LocationRow;
-      const hierarchyNode = {
-        id: location.id,
-        name: location.name,
-        description: location.description,
-        tenant_id: location.tenant_id,
-        parent_id: location.parent_id,
-        location_code: location.location_code,
-        location_type: location.location_type,
-        address: location.address,
-        coordinates: location.coordinates,
-        is_active: location.is_active,
-        metadata: location.metadata,
-        created_at: location.created_at,
-        updated_at: location.updated_at,
-        children: [] as LocationHierarchy[],
+    // Create all nodes first
+    locations.forEach(location => {
+      nodeMap[location.id] = {
+        ...location,
+        children: [],
         level: 0,
-        path: [] as string[]
-      } as LocationHierarchy;
-      locationMap.set(location.id, hierarchyNode);
-    }
+        path: []
+      };
+    });
     
-    // Second pass: build hierarchy with simple for loop
-    for (let i = 0; i < locations.length; i++) {
-      const location = locations[i] as LocationRow;
-      const node = locationMap.get(location.id) as LocationHierarchy;
-      if (!node) continue;
+    // Build hierarchy
+    locations.forEach(location => {
+      const node = nodeMap[location.id];
       
-      if (location.parent_id && locationMap.has(location.parent_id)) {
-        const parent = locationMap.get(location.parent_id) as LocationHierarchy;
-        if (parent) {
-          node.level = parent.level + 1;
-          node.path = [...parent.path, parent.name];
-          if (!parent.children) {
-            parent.children = [] as LocationHierarchy[];
-          }
-          parent.children.push(node);
-        }
+      if (location.parent_id && nodeMap[location.parent_id]) {
+        const parent = nodeMap[location.parent_id];
+        node.level = parent.level + 1;
+        node.path = [...parent.path, parent.name];
+        parent.children.push(node);
       } else {
-        // Root node
-        node.path = [] as string[];
         result.push(node);
       }
-    }
+    });
     
-    return result;
+    // Return with proper typing
+    return result as LocationHierarchy[];
   },
 };
