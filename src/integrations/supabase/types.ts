@@ -1121,39 +1121,237 @@ export type Database = {
           },
         ]
       }
+      procedure_executions: {
+        Row: {
+          answers: Json | null
+          completed_at: string | null
+          created_at: string | null
+          id: string
+          procedure_id: string
+          score: number | null
+          started_at: string | null
+          status: string | null
+          tenant_id: string
+          updated_at: string | null
+          user_id: string | null
+          work_order_id: string | null
+        }
+        Insert: {
+          answers?: Json | null
+          completed_at?: string | null
+          created_at?: string | null
+          id?: string
+          procedure_id: string
+          score?: number | null
+          started_at?: string | null
+          status?: string | null
+          tenant_id: string
+          updated_at?: string | null
+          user_id?: string | null
+          work_order_id?: string | null
+        }
+        Update: {
+          answers?: Json | null
+          completed_at?: string | null
+          created_at?: string | null
+          id?: string
+          procedure_id?: string
+          score?: number | null
+          started_at?: string | null
+          status?: string | null
+          tenant_id?: string
+          updated_at?: string | null
+          user_id?: string | null
+          work_order_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "procedure_executions_procedure_id_fkey"
+            columns: ["procedure_id"]
+            isOneToOne: false
+            referencedRelation: "procedures"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "procedure_executions_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "procedure_executions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "procedure_executions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users_with_role"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "procedure_executions_work_order_id_fkey"
+            columns: ["work_order_id"]
+            isOneToOne: false
+            referencedRelation: "work_orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      procedure_fields: {
+        Row: {
+          created_at: string | null
+          field_order: number | null
+          field_type: string
+          id: string
+          is_required: boolean | null
+          label: string
+          options: Json | null
+          procedure_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          field_order?: number | null
+          field_type?: string
+          id?: string
+          is_required?: boolean | null
+          label: string
+          options?: Json | null
+          procedure_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          field_order?: number | null
+          field_type?: string
+          id?: string
+          is_required?: boolean | null
+          label?: string
+          options?: Json | null
+          procedure_id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "procedure_fields_procedure_id_fkey"
+            columns: ["procedure_id"]
+            isOneToOne: false
+            referencedRelation: "procedures"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      procedure_templates: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          id: string
+          is_public: boolean | null
+          name: string
+          tags: string[] | null
+          template_data: Json
+          tenant_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_public?: boolean | null
+          name: string
+          tags?: string[] | null
+          template_data?: Json
+          tenant_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_public?: boolean | null
+          name?: string
+          tags?: string[] | null
+          template_data?: Json
+          tenant_id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "procedure_templates_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "procedure_templates_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "users_with_role"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "procedure_templates_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       procedures: {
         Row: {
           asset_type: string | null
+          category: string | null
           created_at: string | null
           created_by: string | null
           description: string | null
           estimated_duration: number | null
           id: string
+          is_global: boolean | null
           steps: Json | null
+          tags: string[] | null
+          template_data: Json | null
           tenant_id: string
           title: string
           updated_at: string | null
         }
         Insert: {
           asset_type?: string | null
+          category?: string | null
           created_at?: string | null
           created_by?: string | null
           description?: string | null
           estimated_duration?: number | null
           id?: string
+          is_global?: boolean | null
           steps?: Json | null
+          tags?: string[] | null
+          template_data?: Json | null
           tenant_id: string
           title: string
           updated_at?: string | null
         }
         Update: {
           asset_type?: string | null
+          category?: string | null
           created_at?: string | null
           created_by?: string | null
           description?: string | null
           estimated_duration?: number | null
           id?: string
+          is_global?: boolean | null
           steps?: Json | null
+          tags?: string[] | null
+          template_data?: Json | null
           tenant_id?: string
           title?: string
           updated_at?: string | null
