@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -189,10 +188,10 @@ export const ProcedureExecution: React.FC<ProcedureExecutionProps> = ({
 
   if (totalSteps === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-12">
-        <AlertCircle className="h-10 w-10 text-yellow-500 mb-3" />
-        <h3 className="text-lg font-semibold mb-2">No Fields Configured</h3>
-        <p className="text-sm text-gray-600 mb-4 text-center">This procedure has no fields to execute.</p>
+      <div className="flex flex-col items-center justify-center py-4">
+        <AlertCircle className="h-6 w-6 text-yellow-500 mb-2" />
+        <h3 className="text-sm font-semibold mb-1">No Fields Configured</h3>
+        <p className="text-xs text-gray-600 mb-2 text-center">This procedure has no fields to execute.</p>
         <Button onClick={onCancel} variant="outline" size="sm">
           Go Back
         </Button>
@@ -205,9 +204,9 @@ export const ProcedureExecution: React.FC<ProcedureExecutionProps> = ({
     const score = calculateScore();
     
     return (
-      <div className="flex flex-col h-full max-w-4xl mx-auto">
-        {/* Compact Timeline */}
-        <div className="flex-shrink-0 p-3 border-b bg-white">
+      <div className="flex flex-col h-full max-w-3xl mx-auto">
+        {/* Ultra Compact Timeline */}
+        <div className="flex-shrink-0 p-1 border-b bg-white">
           <ExecutionTimeline
             startTime={executionStartTime}
             scheduledDate={scheduledDate}
@@ -221,41 +220,41 @@ export const ProcedureExecution: React.FC<ProcedureExecutionProps> = ({
           />
         </div>
 
-        {/* Compact Header */}
-        <div className="flex-shrink-0 border-b bg-gradient-to-r from-green-50 to-emerald-50 p-3">
+        {/* Ultra Compact Header */}
+        <div className="flex-shrink-0 border-b bg-gradient-to-r from-green-50 to-emerald-50 p-2">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-green-100">
-                <FileText className="h-4 w-4 text-green-600" />
+            <div className="flex items-center gap-2">
+              <div className="p-1 rounded bg-green-100">
+                <FileText className="h-3 w-3 text-green-600" />
               </div>
               <div>
-                <h2 className="text-base font-semibold text-gray-900">Execution Summary</h2>
+                <h2 className="text-sm font-semibold text-gray-900">Summary</h2>
                 <p className="text-xs text-gray-600">{procedure.title}</p>
               </div>
             </div>
-            <div className="flex items-center gap-2">
-              <Badge variant="outline" className="border-green-300 text-green-700 text-xs px-2 py-1">
-                {score}% Complete
+            <div className="flex items-center gap-1">
+              <Badge variant="outline" className="border-green-300 text-green-700 text-xs px-1 py-0">
+                {score}%
               </Badge>
-              <Badge variant="secondary" className="text-xs px-2 py-1">
+              <Badge variant="secondary" className="text-xs px-1 py-0">
                 {formattedAnswers.length}/{totalSteps}
               </Badge>
             </div>
           </div>
         </div>
 
-        {/* Compact Summary Content */}
-        <div className="flex-1 overflow-y-auto p-3 space-y-2">
+        {/* Ultra Compact Summary Content */}
+        <div className="flex-1 overflow-y-auto p-2 space-y-1">
           {formattedAnswers.length > 0 ? (
             formattedAnswers.map((answer, index) => (
-              <Card key={index} className="border-l-3 border-l-blue-400 shadow-sm">
-                <CardContent className="p-3">
-                  <div className="flex justify-between items-start gap-3">
+              <Card key={index} className="border-l-2 border-l-blue-400 shadow-none border-gray-200">
+                <CardContent className="p-2">
+                  <div className="flex justify-between items-start gap-2">
                     <div className="flex-1 min-w-0">
-                      <h4 className="font-medium text-gray-900 text-sm truncate">{answer.label}</h4>
-                      <p className="text-xs text-gray-600 mt-1 break-words">{formatAnswerValue(answer)}</p>
+                      <h4 className="font-medium text-gray-900 text-xs truncate">{answer.label}</h4>
+                      <p className="text-xs text-gray-600 mt-0.5 break-words">{formatAnswerValue(answer)}</p>
                     </div>
-                    <Badge variant="outline" className="text-xs shrink-0">
+                    <Badge variant="outline" className="text-xs px-1 py-0 shrink-0">
                       {answer.fieldType}
                     </Badge>
                   </div>
@@ -263,27 +262,27 @@ export const ProcedureExecution: React.FC<ProcedureExecutionProps> = ({
               </Card>
             ))
           ) : (
-            <div className="text-center py-8">
-              <AlertCircle className="h-6 w-6 text-yellow-500 mx-auto mb-2" />
-              <p className="text-sm text-gray-600">No fields completed</p>
+            <div className="text-center py-4">
+              <AlertCircle className="h-4 w-4 text-yellow-500 mx-auto mb-1" />
+              <p className="text-xs text-gray-600">No fields completed</p>
             </div>
           )}
         </div>
 
-        {/* Compact Navigation */}
-        <div className="flex-shrink-0 border-t bg-gray-50 p-3">
+        {/* Ultra Compact Navigation */}
+        <div className="flex-shrink-0 border-t bg-gray-50 p-2">
           <div className="flex justify-between items-center">
-            <Button variant="outline" onClick={goToPreviousStep} size="sm">
+            <Button variant="outline" onClick={goToPreviousStep} size="sm" className="h-7 px-2 text-xs">
               <ArrowLeft className="h-3 w-3 mr-1" />
               Back
             </Button>
-            <div className="flex gap-2">
-              <Button variant="ghost" onClick={onCancel} size="sm">
+            <div className="flex gap-1">
+              <Button variant="ghost" onClick={onCancel} size="sm" className="h-7 px-2 text-xs">
                 Cancel
               </Button>
               <Button 
                 onClick={completeExecution} 
-                className="bg-green-600 hover:bg-green-700" 
+                className="bg-green-600 hover:bg-green-700 h-7 px-2 text-xs" 
                 size="sm"
                 disabled={submitExecution.isPending}
               >
@@ -298,9 +297,9 @@ export const ProcedureExecution: React.FC<ProcedureExecutionProps> = ({
   }
 
   return (
-    <div className="flex flex-col h-full max-w-4xl mx-auto">
-      {/* Compact Timeline */}
-      <div className="flex-shrink-0 p-3 border-b bg-white">
+    <div className="flex flex-col h-full max-w-3xl mx-auto">
+      {/* Ultra Compact Timeline */}
+      <div className="flex-shrink-0 p-1 border-b bg-white">
         <ExecutionTimeline
           startTime={executionStartTime}
           scheduledDate={scheduledDate}
@@ -314,45 +313,45 @@ export const ProcedureExecution: React.FC<ProcedureExecutionProps> = ({
         />
       </div>
 
-      {/* Compact Header */}
-      <div className="flex-shrink-0 border-b bg-gradient-to-r from-blue-50 to-indigo-50 p-3">
-        <div className="flex justify-between items-center mb-2">
-          <div className="flex items-center gap-3 flex-1 min-w-0">
-            <div className="p-2 rounded-lg bg-blue-100">
-              <Play className="h-4 w-4 text-blue-600" />
+      {/* Ultra Compact Header */}
+      <div className="flex-shrink-0 border-b bg-gradient-to-r from-blue-50 to-indigo-50 p-2">
+        <div className="flex justify-between items-center mb-1">
+          <div className="flex items-center gap-2 flex-1 min-w-0">
+            <div className="p-1 rounded bg-blue-100">
+              <Play className="h-3 w-3 text-blue-600" />
             </div>
             <div className="min-w-0 flex-1">
-              <h2 className="text-base font-semibold text-gray-900 truncate">{procedure.title}</h2>
+              <h2 className="text-sm font-semibold text-gray-900 truncate">{procedure.title}</h2>
               {procedure.description && (
                 <p className="text-xs text-gray-600 truncate">{procedure.description}</p>
               )}
             </div>
           </div>
           
-          <div className="flex items-center gap-2 shrink-0">
-            <Badge variant="outline" className="border-blue-300 text-blue-700 text-xs px-2 py-1">
+          <div className="flex items-center gap-1 shrink-0">
+            <Badge variant="outline" className="border-blue-300 text-blue-700 text-xs px-1 py-0">
               {procedure.category}
             </Badge>
-            <Badge variant="secondary" className="text-xs px-2 py-1">
+            <Badge variant="secondary" className="text-xs px-1 py-0">
               {currentStep + 1}/{totalSteps}
             </Badge>
-            <Button variant="ghost" size="sm" onClick={onCancel} className="text-gray-500 hover:text-gray-700 p-1">
+            <Button variant="ghost" size="sm" onClick={onCancel} className="text-gray-500 hover:text-gray-700 p-1 h-6 w-6">
               <X className="h-3 w-3" />
             </Button>
           </div>
         </div>
         
-        <div className="space-y-1">
+        <div className="space-y-0.5">
           <div className="flex justify-between text-xs text-gray-600">
             <span>Progress</span>
             <span>{Math.round(progress)}%</span>
           </div>
-          <Progress value={progress} className="h-1.5" />
+          <Progress value={progress} className="h-1" />
         </div>
       </div>
 
-      {/* Current Field - More Compact */}
-      <div className="flex-1 overflow-y-auto p-3">
+      {/* Current Field - Ultra Compact */}
+      <div className="flex-1 overflow-y-auto p-2">
         {currentField && (
           <ExecutionFieldRenderer 
             field={currentField}
@@ -364,15 +363,15 @@ export const ProcedureExecution: React.FC<ProcedureExecutionProps> = ({
         )}
       </div>
 
-      {/* Compact Navigation */}
-      <div className="flex-shrink-0 border-t bg-gray-50 p-3">
+      {/* Ultra Compact Navigation */}
+      <div className="flex-shrink-0 border-t bg-gray-50 p-2">
         <div className="flex justify-between items-center">
-          <Button variant="outline" onClick={currentStep === 0 ? onCancel : goToPreviousStep} size="sm">
+          <Button variant="outline" onClick={currentStep === 0 ? onCancel : goToPreviousStep} size="sm" className="h-7 px-2 text-xs">
             <ArrowLeft className="h-3 w-3 mr-1" />
             {currentStep === 0 ? 'Cancel' : 'Previous'}
           </Button>
 
-          <Button onClick={goToNextStep} className="bg-blue-600 hover:bg-blue-700" size="sm">
+          <Button onClick={goToNextStep} className="bg-blue-600 hover:bg-blue-700 h-7 px-2 text-xs" size="sm">
             {currentStep === totalSteps - 1 ? (
               <>
                 <FileText className="h-3 w-3 mr-1" />
@@ -388,21 +387,21 @@ export const ProcedureExecution: React.FC<ProcedureExecutionProps> = ({
         </div>
       </div>
 
-      {/* Compact Progress Summary */}
+      {/* Ultra Compact Progress Summary */}
       {Object.keys(answers).length > 0 && (
-        <div className="flex-shrink-0 border-t bg-gray-50 p-2">
+        <div className="flex-shrink-0 border-t bg-gray-50 p-1">
           <div className="text-center">
-            <p className="text-xs text-gray-600 mb-1 flex items-center justify-center gap-1">
-              <Clock className="h-3 w-3" />
+            <p className="text-xs text-gray-600 mb-0.5 flex items-center justify-center gap-1">
+              <Clock className="h-2 w-2" />
               {Object.keys(answers).length}/{totalSteps} completed
             </p>
-            <div className="flex justify-center space-x-1">
+            <div className="flex justify-center space-x-0.5">
               {fields.map((field, index) => {
                 const fieldId = field.id || `field_${index}`;
                 return (
                   <div 
                     key={index} 
-                    className={`w-1.5 h-1.5 rounded-full ${
+                    className={`w-1 h-1 rounded-full ${
                       answers[fieldId] ? 'bg-green-500' : 
                       index === currentStep ? 'bg-blue-500' : 'bg-gray-300'
                     }`} 

@@ -70,11 +70,11 @@ export const ExecutionFieldRenderer: React.FC<ExecutionFieldRendererProps> = ({
   // Section fields are displayed differently
   if (field.field_type === 'section') {
     return (
-      <Card className="bg-gradient-to-r from-gray-50 to-slate-50 border-2 border-dashed border-gray-300">
-        <CardContent className="p-4 text-center">
-          <div className="flex items-center justify-center gap-2 mb-1">
-            <Heading className="h-4 w-4 text-gray-600" />
-            <h3 className="text-lg font-semibold text-gray-900">{field.label}</h3>
+      <Card className="bg-gradient-to-r from-gray-50 to-slate-50 border border-dashed border-gray-300">
+        <CardContent className="p-2 text-center">
+          <div className="flex items-center justify-center gap-1 mb-0.5">
+            <Heading className="h-3 w-3 text-gray-600" />
+            <h3 className="text-sm font-semibold text-gray-900">{field.label}</h3>
           </div>
           <p className="text-xs text-gray-600">Section header - click Next to continue</p>
         </CardContent>
@@ -94,7 +94,7 @@ export const ExecutionFieldRenderer: React.FC<ExecutionFieldRendererProps> = ({
               onChange(e.target.value);
             }}
             placeholder={`Enter ${field.label.toLowerCase()}`}
-            className="text-sm w-full"
+            className="text-xs w-full h-7"
           />
         );
 
@@ -110,7 +110,7 @@ export const ExecutionFieldRenderer: React.FC<ExecutionFieldRendererProps> = ({
               onChange(numValue);
             }}
             placeholder={`Enter ${field.label.toLowerCase()}`}
-            className="text-sm w-full"
+            className="text-xs w-full h-7"
             step="any"
           />
         );
@@ -125,13 +125,13 @@ export const ExecutionFieldRenderer: React.FC<ExecutionFieldRendererProps> = ({
               console.log(`Date field ${fieldId} changed to:`, e.target.value);
               onChange(e.target.value);
             }}
-            className="text-sm w-full"
+            className="text-xs w-full h-7"
           />
         );
 
       case 'checkbox':
         return (
-          <div className="flex items-center space-x-3 p-3">
+          <div className="flex items-center space-x-2 p-1">
             <Checkbox
               id={fieldId}
               checked={Boolean(value)}
@@ -139,9 +139,9 @@ export const ExecutionFieldRenderer: React.FC<ExecutionFieldRendererProps> = ({
                 console.log(`Checkbox field ${fieldId} changed to:`, checked);
                 onChange(checked === true);
               }}
-              className="h-5 w-5"
+              className="h-4 w-4"
             />
-            <Label htmlFor={fieldId} className="cursor-pointer text-sm font-medium">
+            <Label htmlFor={fieldId} className="cursor-pointer text-xs font-medium">
               {field.label}
             </Label>
           </div>
@@ -157,7 +157,7 @@ export const ExecutionFieldRenderer: React.FC<ExecutionFieldRendererProps> = ({
               onChange(selectedValue);
             }}
           >
-            <SelectTrigger className="text-sm w-full">
+            <SelectTrigger className="text-xs w-full h-7">
               <SelectValue placeholder={`Select ${field.label.toLowerCase()}`} />
             </SelectTrigger>
             <SelectContent className="bg-white border shadow-lg z-50">
@@ -165,7 +165,7 @@ export const ExecutionFieldRenderer: React.FC<ExecutionFieldRendererProps> = ({
                 <SelectItem value="" disabled>No options available</SelectItem>
               ) : (
                 choices.map((choice: string, index: number) => (
-                  <SelectItem key={`${choice}-${index}`} value={choice} className="text-sm">
+                  <SelectItem key={`${choice}-${index}`} value={choice} className="text-xs">
                     {choice}
                   </SelectItem>
                 ))
@@ -179,12 +179,12 @@ export const ExecutionFieldRenderer: React.FC<ExecutionFieldRendererProps> = ({
         const selectedValues = Array.isArray(value) ? value : [];
         
         return (
-          <div className="space-y-2 max-h-48 overflow-y-auto border rounded-lg p-2 bg-white">
+          <div className="space-y-1 max-h-32 overflow-y-auto border rounded p-1 bg-white">
             {multiselectChoices.length === 0 ? (
-              <div className="text-sm text-gray-500 p-3">No options available</div>
+              <div className="text-xs text-gray-500 p-2">No options available</div>
             ) : (
               multiselectChoices.map((choice: string, index: number) => (
-                <div key={`${choice}-${index}`} className="flex items-center space-x-3 p-2 hover:bg-gray-50 rounded">
+                <div key={`${choice}-${index}`} className="flex items-center space-x-2 p-1 hover:bg-gray-50 rounded">
                   <Checkbox
                     id={`${fieldId}_${choice}_${index}`}
                     checked={selectedValues.includes(choice)}
@@ -199,9 +199,9 @@ export const ExecutionFieldRenderer: React.FC<ExecutionFieldRendererProps> = ({
                       console.log(`Multiselect field ${fieldId} changed to:`, newValues);
                       onChange(newValues);
                     }}
-                    className="h-4 w-4"
+                    className="h-3 w-3"
                   />
-                  <Label htmlFor={`${fieldId}_${choice}_${index}`} className="cursor-pointer text-sm">
+                  <Label htmlFor={`${fieldId}_${choice}_${index}`} className="cursor-pointer text-xs">
                     {choice}
                   </Label>
                 </div>
@@ -212,7 +212,7 @@ export const ExecutionFieldRenderer: React.FC<ExecutionFieldRendererProps> = ({
 
       case 'file':
         return (
-          <div className="space-y-3">
+          <div className="space-y-2">
             <Input
               id={fieldId}
               type="file"
@@ -231,12 +231,12 @@ export const ExecutionFieldRenderer: React.FC<ExecutionFieldRendererProps> = ({
                   onChange(null);
                 }
               }}
-              className="text-sm w-full"
+              className="text-xs w-full h-7"
               accept="*/*"
             />
             {value && typeof value === 'object' && value.name && (
-              <div className="p-3 bg-gray-50 rounded border">
-                <p className="font-medium text-sm text-gray-900">{value.name}</p>
+              <div className="p-2 bg-gray-50 rounded border">
+                <p className="font-medium text-xs text-gray-900">{value.name}</p>
                 <p className="text-gray-600 text-xs">
                   {value.size ? `${(value.size / 1024).toFixed(1)} KB` : 'Unknown size'} 
                   {value.type && ` • ${value.type}`}
@@ -256,8 +256,8 @@ export const ExecutionFieldRenderer: React.FC<ExecutionFieldRendererProps> = ({
               onChange(e.target.value);
             }}
             placeholder={`Enter ${field.label.toLowerCase()}`}
-            rows={3}
-            className="resize-none text-sm w-full"
+            rows={2}
+            className="resize-none text-xs w-full"
           />
         );
     }
@@ -265,42 +265,42 @@ export const ExecutionFieldRenderer: React.FC<ExecutionFieldRendererProps> = ({
 
   return (
     <div className="w-full">
-      <Card className={`border-l-4 ${getFieldTypeColor(field.field_type)} shadow-sm`}>
-        <CardContent className="p-4">
-          <div className="space-y-3">
-            {/* Compact Field Header */}
-            <div className="flex items-center gap-2">
-              <div className="p-1.5 rounded-md bg-gray-100">
-                <FieldIcon className="h-3 w-3 text-gray-600" />
+      <Card className={`border-l-2 ${getFieldTypeColor(field.field_type)} shadow-none`}>
+        <CardContent className="p-2">
+          <div className="space-y-2">
+            {/* Ultra Compact Field Header */}
+            <div className="flex items-center gap-1">
+              <div className="p-0.5 rounded bg-gray-100">
+                <FieldIcon className="h-2 w-2 text-gray-600" />
               </div>
               <div className="flex-1">
-                <div className="flex items-center gap-2">
-                  <Label htmlFor={fieldId} className="text-sm font-medium text-gray-900">
+                <div className="flex items-center gap-1">
+                  <Label htmlFor={fieldId} className="text-xs font-medium text-gray-900">
                     {field.label}
                   </Label>
                   {field.is_required && (
-                    <Badge variant="destructive" className="text-xs px-1.5 py-0.5">
+                    <Badge variant="destructive" className="text-xs px-1 py-0">
                       Required
                     </Badge>
                   )}
                 </div>
                 {field.field_type !== 'checkbox' && (
-                  <Badge variant="outline" className="text-xs mt-0.5">
+                  <Badge variant="outline" className="text-xs mt-0.5 px-1 py-0">
                     {field.field_type}
                   </Badge>
                 )}
               </div>
             </div>
 
-            {/* Compact Field Input */}
-            <div className="bg-white rounded-md border p-3">
+            {/* Ultra Compact Field Input */}
+            <div className="bg-white rounded border p-1">
               {renderInput()}
             </div>
 
             {/* Error Message */}
             {error && (
-              <div className="flex items-center gap-2 text-red-600 text-sm bg-red-50 p-2 rounded-md border border-red-200">
-                <AlertCircle className="h-3 w-3 flex-shrink-0" />
+              <div className="flex items-center gap-1 text-red-600 text-xs bg-red-50 p-1 rounded border border-red-200">
+                <AlertCircle className="h-2 w-2 flex-shrink-0" />
                 <span className="text-xs">{error}</span>
               </div>
             )}
