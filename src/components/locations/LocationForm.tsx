@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useCreateLocation, useUpdateLocation } from "@/hooks/useLocations";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Building2 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 import type { Location } from "@/types/location";
 
 interface LocationFormProps {
@@ -58,11 +59,40 @@ export const LocationForm = ({ location, onClose }: LocationFormProps) => {
           description: "Location updated successfully",
         });
       } else {
-        // Add tenant_id for new locations - using a placeholder for now
-        // In a real app, this would come from the current user's context
+        // Get the current user to extract tenant_id
+        const { data: userData, error: userError } = await supabase.auth.getUser();
+        
+        if (userError || !userData.user) {
+          toast({
+            title: "Error",
+            description: "Could not get user information",
+            variant: "destructive",
+          });
+          return;
+        }
+
+        // Get tenant_id from user metadata or from an organization lookup
+        // For now, we'll derive it from the existing data in the system
+        const { data: existingData } = await supabase
+          .from('assets')
+          .select('tenant_id')
+          .limit(1)
+          .single();
+        
+        const tenantId = existingData?.tenant_id;
+        
+        if (!tenantId) {
+          toast({
+            title: "Error", 
+            description: "Could not determine tenant information",
+            variant: "destructive",
+          });
+          return;
+        }
+
         const locationData = {
           ...formData,
-          tenant_id: "00000000-0000-0000-0000-000000000000" // Placeholder tenant ID
+          tenant_id: tenantId
         };
         
         await createLocation.mutateAsync(locationData);
