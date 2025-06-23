@@ -8,6 +8,26 @@ type LocationRow = Tables["locations"]["Row"];
 type LocationInsert = Tables["locations"]["Insert"];
 type LocationUpdate = Tables["locations"]["Update"];
 
+// Simple interface to avoid deep type inference
+interface SimpleNode {
+  id: string;
+  name: string;
+  description: string | null;
+  tenant_id: string;
+  parent_id: string | null;
+  location_code: string | null;
+  location_type: string;
+  address: string | null;
+  coordinates: any | null;
+  is_active: boolean;
+  metadata: any;
+  created_at: string;
+  updated_at: string;
+  children: SimpleNode[];
+  level: number;
+  path: string[];
+}
+
 export const locationsApi = {
   async getLocations(): Promise<LocationRow[]> {
     const { data, error } = await supabase
@@ -160,49 +180,62 @@ export const locationsApi = {
       return [];
     }
 
-    // Create a flat map of nodes first
-    const nodes: Record<string, any> = {};
-    const rootNodes: any[] = [];
+    // Use simple object without complex typing
+    const nodesMap = new Map<string, SimpleNode>();
     
-    // Initialize all nodes
-    for (const location of locations) {
-      const node = {
-        id: location.id,
-        name: location.name,
-        description: location.description,
-        tenant_id: location.tenant_id,
-        parent_id: location.parent_id,
-        location_code: location.location_code,
-        location_type: location.location_type,
-        address: location.address,
-        coordinates: location.coordinates,
-        is_active: location.is_active,
-        metadata: location.metadata,
-        created_at: location.created_at,
-        updated_at: location.updated_at,
+    // Create all nodes first with explicit simple structure
+    for (let i = 0; i < locations.length; i++) {
+      const loc = locations[i];
+      const simpleNode: SimpleNode = {
+        id: loc.id,
+        name: loc.name,
+        description: loc.description,
+        tenant_id: loc.tenant_id,
+        parent_id: loc.parent_id,
+        location_code: loc.location_code,
+        location_type: loc.location_type,
+        address: loc.address,
+        coordinates: loc.coordinates,
+        is_active: loc.is_active,
+        metadata: loc.metadata,
+        created_at: loc.created_at,
+        updated_at: loc.updated_at,
         children: [],
         level: 0,
         path: []
       };
-      nodes[location.id] = node;
+      nodesMap.set(loc.id, simpleNode);
     }
     
-    // Build the hierarchy
-    for (const location of locations) {
-      const node = nodes[location.id];
+    // Build hierarchy with simple operations
+    const rootNodes: SimpleNode[] = [];
+    
+    for (let i = 0; i < locations.length; i++) {
+      const loc = locations[i];
+      const node = nodesMap.get(loc.id);
+      if (!node) continue;
       
-      if (location.parent_id && nodes[location.parent_id]) {
-        const parent = nodes[location.parent_id];
-        node.level = parent.level + 1;
-        const parentPath = parent.path || [];
-        node.path = parentPath.concat(parent.name);
-        parent.children.push(node);
+      if (loc.parent_id) {
+        const parent = nodesMap.get(loc.parent_id);
+        if (parent) {
+          node.level = parent.level + 1;
+          // Simple path building
+          const newPath: string[] = [];
+          for (let j = 0; j < parent.path.length; j++) {
+            newPath.push(parent.path[j]);
+          }
+          newPath.push(parent.name);
+          node.path = newPath;
+          parent.children.push(node);
+        } else {
+          rootNodes.push(node);
+        }
       } else {
-        node.path = [];
         rootNodes.push(node);
       }
     }
     
-    return rootNodes;
+    // Convert to LocationHierarchy[] with explicit cast
+    return rootNodes as unknown as LocationHierarchy[];
   },
 };
