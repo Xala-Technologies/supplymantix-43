@@ -8,8 +8,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Trash2, GripVertical, Save } from "lucide-react";
+import { Plus, Save, Globe, Building, Sparkles } from "lucide-react";
 import { ProcedureField } from "@/lib/database/procedures-enhanced";
+import { FieldEditor } from "./FieldEditor";
 
 interface ProcedureFormBuilderProps {
   initialData?: {
@@ -32,17 +33,6 @@ interface ProcedureFormBuilderProps {
   isLoading?: boolean;
 }
 
-const FIELD_TYPES = [
-  { value: 'text', label: 'Text Input' },
-  { value: 'number', label: 'Number Input' },
-  { value: 'date', label: 'Date Input' },
-  { value: 'checkbox', label: 'Checkbox' },
-  { value: 'select', label: 'Dropdown' },
-  { value: 'multiselect', label: 'Multi-Select' },
-  { value: 'file', label: 'File Upload' },
-  { value: 'section', label: 'Section Header' }
-];
-
 const CATEGORIES = [
   'Inspection',
   'Safety',
@@ -53,6 +43,20 @@ const CATEGORIES = [
   'Training',
   'Other'
 ];
+
+const getCategoryColor = (category: string) => {
+  const colors: Record<string, string> = {
+    "Inspection": "bg-blue-100 text-blue-700",
+    "Safety": "bg-green-100 text-green-700", 
+    "Calibration": "bg-purple-100 text-purple-700",
+    "Reactive Maintenance": "bg-red-100 text-red-700",
+    "Preventive Maintenance": "bg-orange-100 text-orange-700",
+    "Quality Control": "bg-indigo-100 text-indigo-700",
+    "Training": "bg-yellow-100 text-yellow-700",
+    "Other": "bg-gray-100 text-gray-700"
+  };
+  return colors[category] || "bg-gray-100 text-gray-700";
+};
 
 export const ProcedureFormBuilder: React.FC<ProcedureFormBuilderProps> = ({
   initialData,
@@ -137,212 +141,194 @@ export const ProcedureFormBuilder: React.FC<ProcedureFormBuilderProps> = ({
   };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
-      <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Procedure Metadata */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Procedure Information</CardTitle>
+    <div className="max-w-6xl mx-auto space-y-8">
+      <form onSubmit={handleSubmit} className="space-y-8">
+        {/* Header Section */}
+        <div className="text-center space-y-2">
+          <div className="flex items-center justify-center gap-2 mb-2">
+            <Sparkles className="h-6 w-6 text-blue-600" />
+            <h2 className="text-2xl font-bold text-gray-900">
+              {initialData ? 'Edit Procedure' : 'Create New Procedure'}
+            </h2>
+          </div>
+          <p className="text-gray-600">
+            Build standardized procedures with custom fields and validation
+          </p>
+        </div>
+
+        {/* Basic Information */}
+        <Card className="shadow-lg">
+          <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50">
+            <CardTitle className="flex items-center gap-2">
+              <Building className="h-5 w-5 text-blue-600" />
+              Basic Information
+            </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div>
-              <Label htmlFor="title">Title *</Label>
-              <Input
-                id="title"
-                value={formData.title}
-                onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
-                placeholder="Enter procedure title"
-                required
-              />
-            </div>
+          <CardContent className="p-6 space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <Label htmlFor="title" className="text-base font-medium">
+                  Procedure Title *
+                </Label>
+                <Input
+                  id="title"
+                  value={formData.title}
+                  onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
+                  placeholder="Enter procedure title"
+                  required
+                  className="h-12 text-lg"
+                />
+              </div>
 
-            <div>
-              <Label htmlFor="description">Description</Label>
-              <Textarea
-                id="description"
-                value={formData.description}
-                onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                placeholder="Enter procedure description"
-                rows={3}
-              />
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="category">Category</Label>
+              <div className="space-y-2">
+                <Label htmlFor="category" className="text-base font-medium">
+                  Category
+                </Label>
                 <Select
                   value={formData.category}
                   onValueChange={(value) => setFormData(prev => ({ ...prev, category: value }))}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className="h-12">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
                     {CATEGORIES.map(category => (
                       <SelectItem key={category} value={category}>
-                        {category}
+                        <div className="flex items-center gap-2">
+                          <div className={`w-3 h-3 rounded-full ${getCategoryColor(category)}`}></div>
+                          {category}
+                        </div>
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
+            </div>
 
-              <div className="flex items-center space-x-2">
+            <div className="space-y-2">
+              <Label htmlFor="description" className="text-base font-medium">
+                Description
+              </Label>
+              <Textarea
+                id="description"
+                value={formData.description}
+                onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+                placeholder="Describe what this procedure covers and when to use it"
+                rows={4}
+                className="resize-none"
+              />
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div className="space-y-3">
+                <Label className="text-base font-medium">Tags</Label>
+                <div className="flex flex-wrap gap-2 min-h-[40px] p-3 border rounded-lg bg-gray-50">
+                  {formData.tags.map(tag => (
+                    <Badge 
+                      key={tag} 
+                      variant="secondary" 
+                      className="cursor-pointer hover:bg-red-100 hover:text-red-700" 
+                      onClick={() => removeTag(tag)}
+                    >
+                      {tag} ×
+                    </Badge>
+                  ))}
+                  {formData.tags.length === 0 && (
+                    <span className="text-gray-500 text-sm">No tags added</span>
+                  )}
+                </div>
+                <div className="flex gap-2">
+                  <Input
+                    value={newTag}
+                    onChange={(e) => setNewTag(e.target.value)}
+                    placeholder="Add tag"
+                    onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addTag())}
+                    className="flex-1"
+                  />
+                  <Button type="button" onClick={addTag} size="sm" variant="outline">
+                    Add
+                  </Button>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between p-4 bg-blue-50 rounded-lg border border-blue-200">
+                <div className="flex items-center gap-3">
+                  <Globe className="h-5 w-5 text-blue-600" />
+                  <div>
+                    <Label htmlFor="is_global" className="font-medium">
+                      Global Procedure
+                    </Label>
+                    <p className="text-sm text-gray-600">
+                      Available to all users in your organization
+                    </p>
+                  </div>
+                </div>
                 <Switch
                   id="is_global"
                   checked={formData.is_global}
                   onCheckedChange={(checked) => setFormData(prev => ({ ...prev, is_global: checked }))}
                 />
-                <Label htmlFor="is_global">Global Procedure</Label>
-              </div>
-            </div>
-
-            <div>
-              <Label>Tags</Label>
-              <div className="flex flex-wrap gap-2 mt-2">
-                {formData.tags.map(tag => (
-                  <Badge key={tag} variant="secondary" className="cursor-pointer" onClick={() => removeTag(tag)}>
-                    {tag} ×
-                  </Badge>
-                ))}
-              </div>
-              <div className="flex gap-2 mt-2">
-                <Input
-                  value={newTag}
-                  onChange={(e) => setNewTag(e.target.value)}
-                  placeholder="Add tag"
-                  onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addTag())}
-                />
-                <Button type="button" onClick={addTag} size="sm">
-                  Add
-                </Button>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        {/* Procedure Fields */}
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle>Procedure Fields</CardTitle>
-            <Button type="button" onClick={addField} size="sm">
-              <Plus className="h-4 w-4 mr-2" />
-              Add Field
-            </Button>
+        {/* Fields Section */}
+        <Card className="shadow-lg">
+          <CardHeader className="bg-gradient-to-r from-green-50 to-emerald-50">
+            <div className="flex items-center justify-between">
+              <CardTitle className="flex items-center gap-2">
+                <Sparkles className="h-5 w-5 text-green-600" />
+                Procedure Fields ({formData.fields.length})
+              </CardTitle>
+              <Button type="button" onClick={addField} size="sm" className="bg-green-600 hover:bg-green-700">
+                <Plus className="h-4 w-4 mr-2" />
+                Add Field
+              </Button>
+            </div>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="p-6">
             {formData.fields.length === 0 ? (
-              <p className="text-gray-500 text-center py-8">
-                No fields added yet. Click "Add Field" to get started.
-              </p>
+              <div className="text-center py-12 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
+                <Sparkles className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                <h3 className="text-lg font-medium text-gray-900 mb-2">No fields added yet</h3>
+                <p className="text-gray-600 mb-4">
+                  Add fields to create a structured procedure that guides users through each step
+                </p>
+                <Button type="button" onClick={addField} variant="outline">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Your First Field
+                </Button>
+              </div>
             ) : (
-              formData.fields.map((field, index) => (
-                <Card key={index} className="border-l-4 border-l-blue-500">
-                  <CardContent className="pt-4">
-                    <div className="flex items-start gap-4">
-                      <div className="flex flex-col gap-1">
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => moveField(index, 'up')}
-                          disabled={index === 0}
-                        >
-                          ↑
-                        </Button>
-                        <GripVertical className="h-4 w-4 text-gray-400" />
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => moveField(index, 'down')}
-                          disabled={index === formData.fields.length - 1}
-                        >
-                          ↓
-                        </Button>
-                      </div>
-
-                      <div className="flex-1 space-y-3">
-                        <div className="grid grid-cols-2 gap-4">
-                          <div>
-                            <Label>Field Label *</Label>
-                            <Input
-                              value={field.label}
-                              onChange={(e) => updateField(index, { label: e.target.value })}
-                              placeholder="Field label"
-                              required
-                            />
-                          </div>
-                          <div>
-                            <Label>Field Type</Label>
-                            <Select
-                              value={field.field_type}
-                              onValueChange={(value) =>
-                                updateField(index, { field_type: value as ProcedureField['field_type'] })
-                              }
-                            >
-                              <SelectTrigger>
-                                <SelectValue />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {FIELD_TYPES.map(type => (
-                                  <SelectItem key={type.value} value={type.value}>
-                                    {type.label}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                          </div>
-                        </div>
-
-                        {(field.field_type === 'select' || field.field_type === 'multiselect') && (
-                          <div>
-                            <Label>Options (one per line)</Label>
-                            <Textarea
-                              value={field.options?.choices?.join('\n') || ''}
-                              onChange={(e) =>
-                                updateField(index, {
-                                  options: { ...field.options, choices: e.target.value.split('\n').filter(Boolean) }
-                                })
-                              }
-                              placeholder="Option 1&#10;Option 2&#10;Option 3"
-                              rows={3}
-                            />
-                          </div>
-                        )}
-
-                        <div className="flex items-center space-x-2">
-                          <Switch
-                            checked={field.is_required}
-                            onCheckedChange={(checked) => updateField(index, { is_required: checked })}
-                          />
-                          <Label>Required Field</Label>
-                        </div>
-                      </div>
-
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => removeField(index)}
-                        className="text-red-600 hover:text-red-700"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))
+              <div className="space-y-4">
+                {formData.fields.map((field, index) => (
+                  <FieldEditor
+                    key={index}
+                    field={field}
+                    index={index}
+                    totalFields={formData.fields.length}
+                    onUpdate={(updates) => updateField(index, updates)}
+                    onDelete={() => removeField(index)}
+                    onMove={(direction) => moveField(index, direction)}
+                  />
+                ))}
+              </div>
             )}
           </CardContent>
         </Card>
 
         {/* Actions */}
-        <div className="flex justify-end space-x-4">
-          <Button type="button" variant="outline" onClick={onCancel}>
+        <div className="flex justify-end space-x-4 pt-6">
+          <Button type="button" variant="outline" onClick={onCancel} size="lg">
             Cancel
           </Button>
-          <Button type="submit" disabled={isLoading || !formData.title}>
+          <Button 
+            type="submit" 
+            disabled={isLoading || !formData.title}
+            size="lg"
+            className="bg-blue-600 hover:bg-blue-700"
+          >
             <Save className="h-4 w-4 mr-2" />
             {isLoading ? 'Saving...' : 'Save Procedure'}
           </Button>

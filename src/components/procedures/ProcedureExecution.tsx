@@ -1,16 +1,12 @@
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { CheckCircle, AlertCircle, Clock, ArrowLeft, ArrowRight } from "lucide-react";
+import { CheckCircle, AlertCircle, Clock, ArrowLeft, ArrowRight, Play } from "lucide-react";
 import { ProcedureField, ProcedureWithFields } from "@/lib/database/procedures-enhanced";
+import { ExecutionFieldRenderer } from "./ExecutionFieldRenderer";
 
 interface ProcedureExecutionProps {
   procedure: ProcedureWithFields;
@@ -84,7 +80,6 @@ export const ProcedureExecution: React.FC<ProcedureExecutionProps> = ({
   };
 
   const calculateScore = (): number => {
-    // Simple scoring: percentage of completed required fields
     const requiredFields = fields.filter(f => f.is_required);
     if (requiredFields.length === 0) return 100;
 
@@ -102,161 +97,14 @@ export const ProcedureExecution: React.FC<ProcedureExecutionProps> = ({
     onComplete(answers, score);
   };
 
-  const renderField = (field: ProcedureField, index: number) => {
-    const fieldId = `field_${index}`;
-    const value = answers[fieldId] || '';
-    const error = errors[fieldId];
-
-    switch (field.field_type) {
-      case 'text':
-        return (
-          <div>
-            <Label htmlFor={fieldId}>{field.label}</Label>
-            <Input
-              id={fieldId}
-              value={value}
-              onChange={(e) => handleAnswerChange(fieldId, e.target.value)}
-              placeholder={`Enter ${field.label.toLowerCase()}`}
-            />
-          </div>
-        );
-
-      case 'number':
-        return (
-          <div>
-            <Label htmlFor={fieldId}>{field.label}</Label>
-            <Input
-              id={fieldId}
-              type="number"
-              value={value}
-              onChange={(e) => handleAnswerChange(fieldId, e.target.value)}
-              placeholder={`Enter ${field.label.toLowerCase()}`}
-            />
-          </div>
-        );
-
-      case 'date':
-        return (
-          <div>
-            <Label htmlFor={fieldId}>{field.label}</Label>
-            <Input
-              id={fieldId}
-              type="date"
-              value={value}
-              onChange={(e) => handleAnswerChange(fieldId, e.target.value)}
-            />
-          </div>
-        );
-
-      case 'checkbox':
-        return (
-          <div className="flex items-center space-x-2">
-            <Checkbox
-              id={fieldId}
-              checked={value === true}
-              onCheckedChange={(checked) => handleAnswerChange(fieldId, checked)}
-            />
-            <Label htmlFor={fieldId}>{field.label}</Label>
-          </div>
-        );
-
-      case 'select':
-        return (
-          <div>
-            <Label htmlFor={fieldId}>{field.label}</Label>
-            <Select value={value} onValueChange={(val) => handleAnswerChange(fieldId, val)}>
-              <SelectTrigger>
-                <SelectValue placeholder={`Select ${field.label.toLowerCase()}`} />
-              </SelectTrigger>
-              <SelectContent>
-                {field.options?.choices?.map((choice: string) => (
-                  <SelectItem key={choice} value={choice}>
-                    {choice}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        );
-
-      case 'multiselect':
-        return (
-          <div>
-            <Label>{field.label}</Label>
-            <div className="space-y-2 mt-2">
-              {field.options?.choices?.map((choice: string) => (
-                <div key={choice} className="flex items-center space-x-2">
-                  <Checkbox
-                    id={`${fieldId}_${choice}`}
-                    checked={(value || []).includes(choice)}
-                    onCheckedChange={(checked) => {
-                      const currentValues = value || [];
-                      const newValues = checked
-                        ? [...currentValues, choice]
-                        : currentValues.filter((v: string) => v !== choice);
-                      handleAnswerChange(fieldId, newValues);
-                    }}
-                  />
-                  <Label htmlFor={`${fieldId}_${choice}`}>{choice}</Label>
-                </div>
-              ))}
-            </div>
-          </div>
-        );
-
-      case 'file':
-        return (
-          <div>
-            <Label htmlFor={fieldId}>{field.label}</Label>
-            <Input
-              id={fieldId}
-              type="file"
-              onChange={(e) => {
-                const file = e.target.files?.[0];
-                if (file) {
-                  handleAnswerChange(fieldId, {
-                    name: file.name,
-                    size: file.size,
-                    type: file.type
-                  });
-                }
-              }}
-            />
-          </div>
-        );
-
-      case 'section':
-        return (
-          <div className="text-center">
-            <h3 className="text-lg font-semibold text-gray-900">{field.label}</h3>
-            <p className="text-gray-600 mt-2">Section header - click Next to continue</p>
-          </div>
-        );
-
-      default:
-        return (
-          <div>
-            <Label htmlFor={fieldId}>{field.label}</Label>
-            <Textarea
-              id={fieldId}
-              value={value}
-              onChange={(e) => handleAnswerChange(fieldId, e.target.value)}
-              placeholder={`Enter ${field.label.toLowerCase()}`}
-              rows={3}
-            />
-          </div>
-        );
-    }
-  };
-
   if (totalSteps === 0) {
     return (
-      <Card>
-        <CardContent className="text-center py-8">
-          <AlertCircle className="h-12 w-12 text-yellow-500 mx-auto mb-4" />
-          <h3 className="text-lg font-semibold">No Fields Configured</h3>
-          <p className="text-gray-600 mt-2">This procedure has no fields to execute.</p>
-          <Button onClick={onCancel} className="mt-4">
+      <Card className="max-w-2xl mx-auto">
+        <CardContent className="text-center py-12">
+          <AlertCircle className="h-16 w-16 text-yellow-500 mx-auto mb-4" />
+          <h3 className="text-xl font-semibold mb-2">No Fields Configured</h3>
+          <p className="text-gray-600 mb-6">This procedure has no fields to execute.</p>
+          <Button onClick={onCancel} variant="outline">
             Go Back
           </Button>
         </CardContent>
@@ -265,96 +113,113 @@ export const ProcedureExecution: React.FC<ProcedureExecutionProps> = ({
   }
 
   return (
-    <div className="max-w-2xl mx-auto space-y-6">
+    <div className="max-w-4xl mx-auto space-y-6">
       {/* Header */}
-      <Card>
+      <Card className="bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200">
         <CardHeader>
           <div className="flex justify-between items-start">
-            <div>
-              <CardTitle>{procedure.title}</CardTitle>
-              <p className="text-gray-600 mt-1">{procedure.description}</p>
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <Play className="h-6 w-6 text-blue-600" />
+                <CardTitle className="text-2xl">{procedure.title}</CardTitle>
+              </div>
+              {procedure.description && (
+                <p className="text-gray-700 text-lg">{procedure.description}</p>
+              )}
+              <div className="flex items-center gap-2">
+                <Badge variant="outline" className="border-blue-300 text-blue-700">
+                  {procedure.category}
+                </Badge>
+                <Badge variant="secondary">
+                  Step {currentStep + 1} of {totalSteps}
+                </Badge>
+              </div>
             </div>
-            <Badge variant="outline">
-              Step {currentStep + 1} of {totalSteps}
-            </Badge>
           </div>
-          <div className="mt-4">
-            <div className="flex justify-between text-sm text-gray-600 mb-2">
+          
+          <div className="mt-6">
+            <div className="flex justify-between text-sm text-gray-700 mb-2">
               <span>Progress</span>
-              <span>{Math.round(progress)}%</span>
+              <span>{Math.round(progress)}% Complete</span>
             </div>
-            <Progress value={progress} className="h-2" />
+            <Progress value={progress} className="h-3 bg-white" />
           </div>
         </CardHeader>
       </Card>
 
       {/* Current Field */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Clock className="h-5 w-5" />
-            {currentField?.label}
-            {currentField?.is_required && <span className="text-red-500">*</span>}
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {currentField && renderField(currentField, currentStep)}
-          
-          {errors[`field_${currentStep}`] && (
-            <div className="flex items-center gap-2 text-red-600 text-sm">
-              <AlertCircle className="h-4 w-4" />
-              {errors[`field_${currentStep}`]}
-            </div>
-          )}
-        </CardContent>
-      </Card>
+      {currentField && (
+        <ExecutionFieldRenderer
+          field={currentField}
+          value={answers[`field_${currentStep}`] || ''}
+          onChange={(value) => handleAnswerChange(`field_${currentStep}`, value)}
+          error={errors[`field_${currentStep}`]}
+          fieldId={`field_${currentStep}`}
+        />
+      )}
 
       {/* Navigation */}
-      <div className="flex justify-between">
-        <Button
-          variant="outline"
-          onClick={currentStep === 0 ? onCancel : goToPreviousStep}
-        >
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          {currentStep === 0 ? 'Cancel' : 'Previous'}
-        </Button>
+      <Card>
+        <CardContent className="p-6">
+          <div className="flex justify-between items-center">
+            <Button
+              variant="outline"
+              onClick={currentStep === 0 ? onCancel : goToPreviousStep}
+              size="lg"
+            >
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              {currentStep === 0 ? 'Cancel' : 'Previous'}
+            </Button>
 
-        <Button onClick={goToNextStep}>
-          {currentStep === totalSteps - 1 ? (
-            <>
-              <CheckCircle className="h-4 w-4 mr-2" />
-              Complete
-            </>
-          ) : (
-            <>
-              Next
-              <ArrowRight className="h-4 w-4 ml-2" />
-            </>
-          )}
-        </Button>
-      </div>
+            <div className="text-center">
+              <p className="text-sm text-gray-600">
+                {fields.filter(f => f.is_required).length} required fields
+              </p>
+            </div>
+
+            <Button onClick={goToNextStep} size="lg" className="bg-blue-600 hover:bg-blue-700">
+              {currentStep === totalSteps - 1 ? (
+                <>
+                  <CheckCircle className="h-4 w-4 mr-2" />
+                  Complete Procedure
+                </>
+              ) : (
+                <>
+                  Next Step
+                  <ArrowRight className="h-4 w-4 ml-2" />
+                </>
+              )}
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Summary of answers */}
       {Object.keys(answers).length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle className="text-sm">Answers Summary</CardTitle>
+            <CardTitle className="text-lg flex items-center gap-2">
+              <Clock className="h-5 w-5" />
+              Current Answers
+            </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-2 text-sm">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {Object.entries(answers).map(([fieldId, value]) => {
                 const fieldIndex = parseInt(fieldId.split('_')[1]);
                 const field = fields[fieldIndex];
                 if (!field || !value) return null;
 
                 return (
-                  <div key={fieldId} className="flex justify-between">
-                    <span className="text-gray-600">{field.label}:</span>
-                    <span className="font-medium">
+                  <div key={fieldId} className="p-3 bg-gray-50 rounded-lg">
+                    <div className="text-sm font-medium text-gray-700 mb-1">
+                      {field.label}
+                    </div>
+                    <div className="text-gray-900">
                       {Array.isArray(value) ? value.join(', ') : 
                        typeof value === 'object' ? value.name || JSON.stringify(value) :
                        value.toString()}
-                    </span>
+                    </div>
                   </div>
                 );
               })}
