@@ -59,28 +59,17 @@ export const inventoryEnhancedApi = {
 
     console.log('Base query created');
 
-    // Apply search filter
-    if (params.search) {
-      console.log('Applying search filter:', params.search);
-      query = query.or(`name.ilike.%${params.search}%,sku.ilike.%${params.search}%,description.ilike.%${params.search}%`);
+    // Apply search filter - search in name, SKU, and description
+    if (params.search && params.search.trim()) {
+      const searchTerm = params.search.trim();
+      console.log('Applying search filter:', searchTerm);
+      query = query.or(`name.ilike.%${searchTerm}%,sku.ilike.%${searchTerm}%,description.ilike.%${searchTerm}%`);
     }
 
     // Apply location filter
     if (params.location && params.location !== 'all') {
       console.log('Applying location filter:', params.location);
       query = query.eq("location", params.location);
-    }
-
-    // Apply status filter
-    if (params.status) {
-      console.log('Applying status filter:', params.status);
-      if (params.status === 'out_of_stock') {
-        query = query.eq("quantity", 0);
-      } else if (params.status === 'low_stock') {
-        query = query.not("quantity", "gt", "min_quantity");
-      } else if (params.status === 'in_stock') {
-        query = query.gt("quantity", 0);
-      }
     }
 
     // Apply sorting
@@ -114,11 +103,24 @@ export const inventoryEnhancedApi = {
       total_value: (item.quantity || 0) * (item.unit_cost || 0),
     }));
 
-    console.log('Processed search results:', items);
+    // Apply status filter after processing (since it depends on calculated fields)
+    let filteredItems = items;
+    if (params.status) {
+      console.log('Applying status filter:', params.status);
+      if (params.status === 'out_of_stock') {
+        filteredItems = items.filter(item => item.quantity === 0);
+      } else if (params.status === 'low_stock') {
+        filteredItems = items.filter(item => item.is_low_stock && item.quantity > 0);
+      } else if (params.status === 'in_stock') {
+        filteredItems = items.filter(item => item.quantity > 0 && !item.is_low_stock);
+      }
+    }
+
+    console.log('Processed and filtered search results:', filteredItems);
 
     return {
-      items,
-      total: count || 0
+      items: filteredItems,
+      total: params.status ? filteredItems.length : (count || 0)
     };
   },
 
@@ -183,9 +185,13 @@ export const inventoryEnhancedApi = {
 
   // Get low stock alerts
   async getLowStockAlerts() {
+    console.log('Fetching low stock alerts...');
+    
     const { data, error } = await supabase
       .from("inventory_items")
       .select("id, name, sku, quantity, min_quantity, location")
+      .not("min_quantity", "is", null)
+      .gt("min_quantity", 0)
       .filter("quantity", "lte", "min_quantity");
     
     if (error) {
@@ -193,7 +199,9 @@ export const inventoryEnhancedApi = {
       throw error;
     }
     
-    return (data || []).map(item => ({
+    console.log('Low stock alerts raw data:', data);
+    
+    const alerts = (data || []).map(item => ({
       id: item.id,
       item_name: item.name,
       sku: item.sku || '',
@@ -204,10 +212,15 @@ export const inventoryEnhancedApi = {
       location: item.location || '',
       category: ''
     }));
+    
+    console.log('Processed low stock alerts:', alerts);
+    return alerts;
   },
 
   // Stock operations
   async addStock(inventoryId: string, quantity: number, note?: string): Promise<void> {
+    console.log('Adding stock:', inventoryId, quantity, note);
+    
     const { data: item, error: fetchError } = await supabase
       .from("inventory_items")
       .select("quantity")
@@ -230,6 +243,8 @@ export const inventoryEnhancedApi = {
   },
 
   async removeStock(inventoryId: string, quantity: number, note?: string): Promise<void> {
+    console.log('Removing stock:', inventoryId, quantity, note);
+    
     const { data: item, error: fetchError } = await supabase
       .from("inventory_items")
       .select("quantity")
@@ -257,6 +272,8 @@ export const inventoryEnhancedApi = {
   },
 
   async adjustStock(inventoryId: string, newQuantity: number, note?: string): Promise<void> {
+    console.log('Adjusting stock:', inventoryId, newQuantity, note);
+    
     const { error } = await supabase
       .from("inventory_items")
       .update({ 

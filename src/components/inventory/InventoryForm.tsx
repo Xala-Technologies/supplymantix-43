@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -51,45 +51,65 @@ export const InventoryForm = ({ item, onSuccess, trigger, mode = 'create' }: Inv
     },
   });
 
+  // Reset form when item changes (for edit mode)
+  useEffect(() => {
+    if (item && mode === 'edit') {
+      reset({
+        name: item.name || '',
+        description: item.description || '',
+        sku: item.sku || '',
+        location: item.location || '',
+        quantity: item.quantity || 0,
+        min_quantity: item.min_quantity || 0,
+        unit_cost: item.unit_cost || 0,
+      });
+    }
+  }, [item, mode, reset]);
+
   const onSubmit = async (data: InventoryFormData) => {
     try {
       console.log('InventoryForm: Form submission started with data:', data);
+      console.log('InventoryForm: Mode:', mode, 'Item ID:', item?.id);
       
       if (mode === 'edit' && item) {
         console.log('InventoryForm: Updating item:', item.id);
-        await updateMutation.mutateAsync({
+        const result = await updateMutation.mutateAsync({
           id: item.id,
           updates: {
             name: data.name,
-            description: data.description,
-            sku: data.sku,
-            location: data.location,
-            quantity: data.quantity,
-            min_quantity: data.min_quantity,
-            unit_cost: data.unit_cost,
+            description: data.description || '',
+            sku: data.sku || '',
+            location: data.location || '',
+            quantity: Number(data.quantity),
+            min_quantity: Number(data.min_quantity) || 0,
+            unit_cost: Number(data.unit_cost) || 0,
           }
         });
-        console.log('InventoryForm: Update successful');
+        console.log('InventoryForm: Update successful:', result);
         toast.success('Item updated successfully');
       } else {
         console.log('InventoryForm: Creating new item');
         const result = await createMutation.mutateAsync({
           name: data.name,
-          description: data.description,
-          sku: data.sku,
-          location: data.location,
-          quantity: data.quantity,
-          min_quantity: data.min_quantity || 0,
-          unit_cost: data.unit_cost || 0,
+          description: data.description || '',
+          sku: data.sku || '',
+          location: data.location || '',
+          quantity: Number(data.quantity),
+          min_quantity: Number(data.min_quantity) || 0,
+          unit_cost: Number(data.unit_cost) || 0,
         });
         console.log('InventoryForm: Create successful, result:', result);
         toast.success('Item created successfully');
       }
       
       setOpen(false);
-      reset();
       
-      // Give a small delay before calling onSuccess to ensure mutations are complete
+      // Reset form only for create mode
+      if (mode === 'create') {
+        reset();
+      }
+      
+      // Call success callback after a short delay to ensure mutation is complete
       setTimeout(() => {
         console.log('InventoryForm: Calling onSuccess callback');
         onSuccess?.();
@@ -103,8 +123,16 @@ export const InventoryForm = ({ item, onSuccess, trigger, mode = 'create' }: Inv
 
   const isSubmitting = createMutation.isPending || updateMutation.isPending;
 
+  const handleOpenChange = (newOpen: boolean) => {
+    setOpen(newOpen);
+    if (!newOpen && mode === 'create') {
+      // Reset form when closing create dialog
+      reset();
+    }
+  };
+
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
         {trigger || (
           <Button className="flex items-center gap-2">
@@ -127,6 +155,7 @@ export const InventoryForm = ({ item, onSuccess, trigger, mode = 'create' }: Inv
               id="name"
               {...register("name", { required: "Item name is required" })}
               placeholder="Enter item name"
+              disabled={isSubmitting}
             />
             {errors.name && (
               <span className="text-sm text-red-500">{errors.name.message}</span>
@@ -139,6 +168,7 @@ export const InventoryForm = ({ item, onSuccess, trigger, mode = 'create' }: Inv
               id="sku"
               {...register("sku")}
               placeholder="Enter SKU"
+              disabled={isSubmitting}
             />
           </div>
 
@@ -149,6 +179,7 @@ export const InventoryForm = ({ item, onSuccess, trigger, mode = 'create' }: Inv
               {...register("description")}
               placeholder="Enter item description"
               rows={3}
+              disabled={isSubmitting}
             />
           </div>
 
@@ -158,6 +189,7 @@ export const InventoryForm = ({ item, onSuccess, trigger, mode = 'create' }: Inv
               id="location"
               {...register("location")}
               placeholder="Enter location"
+              disabled={isSubmitting}
             />
           </div>
 
@@ -174,6 +206,7 @@ export const InventoryForm = ({ item, onSuccess, trigger, mode = 'create' }: Inv
                   min: { value: 0, message: "Quantity must be 0 or greater" }
                 })}
                 placeholder="0"
+                disabled={isSubmitting}
               />
               {errors.quantity && (
                 <span className="text-sm text-red-500">{errors.quantity.message}</span>
@@ -191,6 +224,7 @@ export const InventoryForm = ({ item, onSuccess, trigger, mode = 'create' }: Inv
                   min: { value: 0, message: "Min quantity must be 0 or greater" }
                 })}
                 placeholder="0"
+                disabled={isSubmitting}
               />
               {errors.min_quantity && (
                 <span className="text-sm text-red-500">{errors.min_quantity.message}</span>
@@ -210,6 +244,7 @@ export const InventoryForm = ({ item, onSuccess, trigger, mode = 'create' }: Inv
                 min: { value: 0, message: "Unit cost must be 0 or greater" }
               })}
               placeholder="0.00"
+              disabled={isSubmitting}
             />
             {errors.unit_cost && (
               <span className="text-sm text-red-500">{errors.unit_cost.message}</span>
@@ -220,7 +255,7 @@ export const InventoryForm = ({ item, onSuccess, trigger, mode = 'create' }: Inv
             <Button
               type="button"
               variant="outline"
-              onClick={() => setOpen(false)}
+              onClick={() => handleOpenChange(false)}
               disabled={isSubmitting}
             >
               Cancel

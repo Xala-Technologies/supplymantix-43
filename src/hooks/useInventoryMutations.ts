@@ -46,6 +46,11 @@ export const useCreateInventoryItem = () => {
         type: 'active'
       });
       
+      queryClient.refetchQueries({ 
+        queryKey: ["low-stock-alerts"],
+        type: 'active'
+      });
+      
       console.log('useCreateInventoryItem: Queries invalidated and refetched');
       toast.success("Inventory item created successfully");
     },
@@ -80,12 +85,19 @@ export const useUpdateInventoryItem = () => {
     },
     onSuccess: (data) => {
       console.log('useUpdateInventoryItem: Item updated successfully:', data);
+      
+      // Invalidate all inventory-related queries
       queryClient.invalidateQueries({ queryKey: ["inventory-enhanced"] });
       queryClient.invalidateQueries({ queryKey: ["low-stock-alerts"] });
       
       // Force immediate refetch
       queryClient.refetchQueries({ 
         queryKey: ["inventory-enhanced"],
+        type: 'active'
+      });
+      
+      queryClient.refetchQueries({ 
+        queryKey: ["low-stock-alerts"],
         type: 'active'
       });
       
@@ -110,12 +122,19 @@ export const useDeleteInventoryItem = () => {
     },
     onSuccess: () => {
       console.log('useDeleteInventoryItem: Item deleted successfully');
+      
+      // Invalidate all inventory-related queries
       queryClient.invalidateQueries({ queryKey: ["inventory-enhanced"] });
       queryClient.invalidateQueries({ queryKey: ["low-stock-alerts"] });
       
       // Force immediate refetch
       queryClient.refetchQueries({ 
         queryKey: ["inventory-enhanced"],
+        type: 'active'
+      });
+      
+      queryClient.refetchQueries({ 
+        queryKey: ["low-stock-alerts"],
         type: 'active'
       });
       

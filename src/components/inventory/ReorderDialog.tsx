@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { ShoppingCart, Package, AlertTriangle } from "lucide-react";
 import { useCreateReorderPO, useCalculateReorderQuantity } from "@/hooks/useInventoryReorder";
 import { Badge } from "@/components/ui/badge";
+import { toast } from "sonner";
 import type { InventoryItemWithStats } from "@/lib/database/inventory-enhanced";
 
 interface ReorderDialogProps {
@@ -21,12 +22,23 @@ export const ReorderDialog = ({ items, trigger }: ReorderDialogProps) => {
   const createReorderPO = useCreateReorderPO();
   const calculateReorderQty = useCalculateReorderQuantity();
   
-  // Filter low stock items
-  const lowStockItems = items.filter(item => 
-    item.quantity <= (item.min_quantity || 0) && (item.min_quantity || 0) > 0
-  );
+  // Filter low stock items - items where current quantity <= minimum quantity
+  const lowStockItems = items.filter(item => {
+    const minQty = item.min_quantity || 0;
+    const currentQty = item.quantity || 0;
+    return minQty > 0 && currentQty <= minQty;
+  });
+  
+  console.log('ReorderDialog: Total items:', items.length);
+  console.log('ReorderDialog: Low stock items:', lowStockItems.length);
+  console.log('ReorderDialog: Low stock items details:', lowStockItems.map(item => ({
+    name: item.name,
+    current: item.quantity,
+    min: item.min_quantity
+  })));
   
   const handleQuantityChange = (itemId: string, quantity: number) => {
+    if (quantity < 1) return;
     setCustomQuantities(prev => ({
       ...prev,
       [itemId]: quantity
@@ -38,6 +50,13 @@ export const ReorderDialog = ({ items, trigger }: ReorderDialogProps) => {
   };
   
   const handleCreateReorderPO = async () => {
+    if (lowStockItems.length === 0) {
+      toast.error("No items need reordering");
+      return;
+    }
+
+    console.log('Creating reorder PO for items:', lowStockItems);
+    
     const reorderItems = lowStockItems.map(item => ({
       id: item.id,
       name: item.name,
@@ -47,12 +66,16 @@ export const ReorderDialog = ({ items, trigger }: ReorderDialogProps) => {
       reorder_quantity: getReorderQuantity(item)
     }));
     
+    console.log('Reorder items payload:', reorderItems);
+    
     try {
       await createReorderPO.mutateAsync(reorderItems);
       setOpen(false);
       setCustomQuantities({});
+      toast.success(`Reorder PO created for ${reorderItems.length} items`);
     } catch (error) {
       console.error('Failed to create reorder PO:', error);
+      toast.error("Failed to create reorder PO: " + (error as Error).message);
     }
   };
   
@@ -61,7 +84,40 @@ export const ReorderDialog = ({ items, trigger }: ReorderDialogProps) => {
   );
   
   if (lowStockItems.length === 0) {
-    return null;
+    return (
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogTrigger asChild>
+          {trigger || (
+            <Button className="flex items-center gap-2" variant="outline" disabled>
+              <ShoppingCart className="w-4 h-4" />
+              No Items to Reorder
+            </Button>
+          )}
+        </DialogTrigger>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Package className="w-5 h-5 text-green-500" />
+              No Reorder Needed
+            </DialogTitle>
+          </DialogHeader>
+          
+          <div className="text-center py-8">
+            <Package className="w-16 h-16 mx-auto text-gray-400 mb-4" />
+            <h3 className="text-lg font-medium text-gray-900 mb-2">All Stock Levels Good</h3>
+            <p className="text-gray-600">
+              All your inventory items are currently above their minimum stock levels.
+            </p>
+          </div>
+          
+          <div className="flex justify-end">
+            <Button variant="outline" onClick={() => setOpen(false)}>
+              Close
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+    );
   }
   
   return (
@@ -118,7 +174,7 @@ export const ReorderDialog = ({ items, trigger }: ReorderDialogProps) => {
                       type="number"
                       min="1"
                       value={getReorderQuantity(item)}
-                      onChange={(e) => handleQuantityChange(item.id, parseInt(e.target.value) || 0)}
+                      onChange={(e) => handleQuantityChange(item.id, parseInt(e.target.value) || 1)}
                       className="mt-1"
                     />
                   </div>

@@ -30,25 +30,25 @@ export const InventoryDashboard = () => {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [locationFilter, setLocationFilter] = useState<string>("all");
-  const [sortBy, setSortBy] = useState<string>("name");
-  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
   const [currentPage, setCurrentPage] = useState(1);
   const [activeTab, setActiveTab] = useState("inventory");
   const itemsPerPage = 20;
 
-  console.log('InventoryDashboard: Current filters:', { search, statusFilter, locationFilter, sortBy, sortOrder });
+  console.log('InventoryDashboard: Current filters:', { search, statusFilter, locationFilter });
 
-  const { data: inventoryData, isLoading, refetch, error } = useInventoryEnhanced({
-    search: search || undefined,
+  // Build query parameters properly
+  const queryParams = {
+    search: search.trim() || undefined,
     status: statusFilter === "all" ? undefined : statusFilter as any,
     location: locationFilter === "all" ? undefined : locationFilter,
-    sortBy: sortBy as any,
-    sortOrder,
+    sortBy: 'name' as any,
+    sortOrder: 'asc' as const,
     limit: itemsPerPage,
     offset: (currentPage - 1) * itemsPerPage
-  });
+  };
 
-  const { data: lowStockAlerts } = useLowStockAlerts();
+  const { data: inventoryData, isLoading, refetch, error } = useInventoryEnhanced(queryParams);
+  const { data: lowStockAlerts, refetch: refetchAlerts } = useLowStockAlerts();
   const { data: locations } = useLocations();
   const deleteItemMutation = useDeleteInventoryItem();
   const autoReorderCheck = useAutoReorderCheck();
@@ -57,29 +57,61 @@ export const InventoryDashboard = () => {
   console.log('InventoryDashboard: Is loading:', isLoading);
   console.log('InventoryDashboard: Error:', error);
 
-  const handleDelete = (item: InventoryItemWithStats) => {
+  const handleDelete = async (item: InventoryItemWithStats) => {
     console.log('Delete button clicked for item:', item.id);
     if (window.confirm(`Are you sure you want to delete "${item.name}"?`)) {
-      deleteItemMutation.mutate(item.id);
+      try {
+        await deleteItemMutation.mutateAsync(item.id);
+        // Force refresh after deletion
+        await refetch();
+        await refetchAlerts();
+      } catch (error) {
+        console.error('Delete failed:', error);
+      }
     }
   };
 
-  const handleRefresh = () => {
+  const handleRefresh = async () => {
     console.log('Manual refresh triggered');
-    refetch();
+    try {
+      await refetch();
+      await refetchAlerts();
+    } catch (error) {
+      console.error('Refresh failed:', error);
+    }
   };
 
-  const handleAutoReorder = () => {
+  const handleAutoReorder = async () => {
     if (inventoryData?.items) {
-      autoReorderCheck.mutate(inventoryData.items);
+      console.log('Auto reorder triggered for items:', inventoryData.items);
+      try {
+        await autoReorderCheck.mutateAsync(inventoryData.items);
+        // Refresh data after reorder
+        await refetch();
+        await refetchAlerts();
+      } catch (error) {
+        console.error('Auto reorder failed:', error);
+      }
+    }
+  };
+
+  const handleSuccess = async () => {
+    console.log('Item operation successful, refreshing all data...');
+    try {
+      await refetch();
+      await refetchAlerts();
+      // Reset to first page to see new/updated items
+      setCurrentPage(1);
+    } catch (error) {
+      console.error('Refresh after success failed:', error);
     }
   };
 
   // Calculate dashboard metrics
   const totalItems = inventoryData?.total || 0;
   const lowStockItems = lowStockAlerts?.length || 0;
-  const totalValue = inventoryData?.items.reduce((sum, item) => sum + item.total_value, 0) || 0;
-  const outOfStockItems = inventoryData?.items.filter(item => item.quantity === 0).length || 0;
+  const totalValue = inventoryData?.items?.reduce((sum, item) => sum + item.total_value, 0) || 0;
+  const outOfStockItems = inventoryData?.items?.filter(item => item.quantity === 0).length || 0;
 
   const columns = [
     {
@@ -147,10 +179,7 @@ export const InventoryDashboard = () => {
           <InventoryForm
             item={row.original}
             mode="edit"
-            onSuccess={() => {
-              console.log('Item edited, refreshing data...');
-              refetch();
-            }}
+            onSuccess={handleSuccess}
             trigger={
               <Button variant="outline" size="sm">
                 <Edit className="w-4 h-4" />
@@ -159,10 +188,7 @@ export const InventoryDashboard = () => {
           />
           <StockMovementModal
             item={row.original}
-            onSuccess={() => {
-              console.log('Stock movement completed, refreshing data...');
-              refetch();
-            }}
+            onSuccess={handleSuccess}
             trigger={
               <Button variant="outline" size="sm">
                 Stock
@@ -190,9 +216,21 @@ export const InventoryDashboard = () => {
     <div className="space-y-6">
       {/* Header Component */}
       <InventoryHeader
-        onSearchChange={setSearch}
-        onStatusFilterChange={setStatusFilter}
-        onLocationFilterChange={setLocationFilter}
+        onSearchChange={(value) => {
+          console.log('Search changed:', value);
+          setSearch(value);
+          setCurrentPage(1); // Reset to first page on search
+        }}
+        onStatusFilterChange={(value) => {
+          console.log('Status filter changed:', value);
+          setStatusFilter(value);
+          setCurrentPage(1);
+        }}
+        onLocationFilterChange={(value) => {
+          console.log('Location filter changed:', value);
+          setLocationFilter(value);
+          setCurrentPage(1);
+        }}
         onRefresh={handleRefresh}
         searchValue={search}
         statusFilter={statusFilter}
@@ -200,24 +238,24 @@ export const InventoryDashboard = () => {
         locations={locations}
         extraActions={
           <div className="flex items-center gap-2">
-            <BulkInventoryImport onSuccess={refetch} />
+            <BulkInventoryImport onSuccess={handleSuccess} />
             <ReorderDialog 
               items={inventoryData?.items || []}
               trigger={
                 <Button variant="outline" className="flex items-center gap-2">
                   <ShoppingCart className="w-4 h-4" />
-                  Auto Reorder ({lowStockItems})
+                  Reorder ({lowStockItems})
                 </Button>
               }
             />
             <Button 
               onClick={handleAutoReorder}
-              disabled={autoReorderCheck.isPending}
+              disabled={autoReorderCheck.isPending || !inventoryData?.items?.length}
               variant="outline"
               className="flex items-center gap-2"
             >
               <Package className="w-4 h-4" />
-              {autoReorderCheck.isPending ? 'Checking...' : 'Smart Reorder'}
+              {autoReorderCheck.isPending ? 'Processing...' : 'Auto Reorder'}
             </Button>
           </div>
         }
@@ -233,7 +271,7 @@ export const InventoryDashboard = () => {
           <CardContent>
             <div className="text-2xl font-bold">{totalItems}</div>
             <p className="text-xs text-muted-foreground">
-              {inventoryData?.items.length || 0} displayed
+              {inventoryData?.items?.length || 0} displayed
             </p>
           </CardContent>
         </Card>
@@ -353,10 +391,7 @@ export const InventoryDashboard = () => {
                 </p>
                 <div className="flex items-center justify-center gap-3">
                   <InventoryForm 
-                    onSuccess={() => {
-                      console.log('New item created, refreshing data...');
-                      refetch();
-                    }}
+                    onSuccess={handleSuccess}
                     trigger={
                       <Button>
                         <Package className="w-4 h-4 mr-2" />
@@ -364,7 +399,7 @@ export const InventoryDashboard = () => {
                       </Button>
                     }
                   />
-                  <BulkInventoryImport onSuccess={refetch} />
+                  <BulkInventoryImport onSuccess={handleSuccess} />
                 </div>
               </div>
             )}
@@ -378,8 +413,8 @@ export const InventoryDashboard = () => {
                       <Package className="w-5 h-5" />
                       Inventory Items
                     </CardTitle>
-                    <Button onClick={handleRefresh} variant="outline" size="sm">
-                      <RefreshCw className="w-4 h-4 mr-2" />
+                    <Button onClick={handleRefresh} variant="outline" size="sm" disabled={isLoading}>
+                      <RefreshCw className={`w-4 h-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
                       Refresh
                     </Button>
                   </div>
