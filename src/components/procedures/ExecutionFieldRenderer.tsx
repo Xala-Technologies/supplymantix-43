@@ -44,16 +44,16 @@ const getFieldIcon = (fieldType: string) => {
 
 const getFieldTypeColor = (fieldType: string) => {
   const colors: Record<string, string> = {
-    'text': 'bg-blue-50 border-blue-200',
-    'number': 'bg-green-50 border-green-200',
-    'date': 'bg-purple-50 border-purple-200',
-    'checkbox': 'bg-orange-50 border-orange-200',
-    'select': 'bg-pink-50 border-pink-200',
-    'multiselect': 'bg-indigo-50 border-indigo-200',
-    'file': 'bg-red-50 border-red-200',
-    'section': 'bg-gray-50 border-gray-200'
+    'text': 'border-l-blue-400',
+    'number': 'border-l-green-400',
+    'date': 'border-l-purple-400',
+    'checkbox': 'border-l-orange-400',
+    'select': 'border-l-pink-400',
+    'multiselect': 'border-l-indigo-400',
+    'file': 'border-l-red-400',
+    'section': 'border-l-gray-400'
   };
-  return colors[fieldType] || 'bg-gray-50 border-gray-200';
+  return colors[fieldType] || 'border-l-gray-400';
 };
 
 export const ExecutionFieldRenderer: React.FC<ExecutionFieldRendererProps> = ({
@@ -68,52 +68,49 @@ export const ExecutionFieldRenderer: React.FC<ExecutionFieldRendererProps> = ({
   if (field.field_type === 'section') {
     return (
       <Card className="bg-gradient-to-r from-gray-50 to-slate-50 border-2 border-dashed border-gray-300">
-        <CardContent className="p-8 text-center">
-          <div className="flex items-center justify-center gap-3 mb-2">
-            <Heading className="h-6 w-6 text-gray-600" />
-            <h3 className="text-xl font-semibold text-gray-900">{field.label}</h3>
+        <CardContent className="p-6 text-center">
+          <div className="flex items-center justify-center gap-2 mb-1">
+            <Heading className="h-5 w-5 text-gray-600" />
+            <h3 className="text-lg font-semibold text-gray-900">{field.label}</h3>
           </div>
-          <p className="text-gray-600">Section header - click Next to continue</p>
+          <p className="text-sm text-gray-600">Section header - click Next to continue</p>
         </CardContent>
       </Card>
     );
   }
 
   return (
-    <Card className={`${getFieldTypeColor(field.field_type)} transition-all duration-200`}>
-      <CardContent className="p-6">
-        <div className="space-y-4">
+    <Card className={`border-l-4 ${getFieldTypeColor(field.field_type)} transition-all duration-200`}>
+      <CardContent className="p-4">
+        <div className="space-y-3">
           {/* Field Header */}
-          <div className="flex items-center gap-3 mb-4">
-            <div className="p-2 rounded-lg bg-white shadow-sm">
-              <FieldIcon className="h-5 w-5 text-gray-600" />
+          <div className="flex items-center gap-2 mb-3">
+            <div className="p-1.5 rounded bg-gray-100">
+              <FieldIcon className="h-4 w-4 text-gray-600" />
             </div>
             <div className="flex-1">
               <div className="flex items-center gap-2">
-                <Label htmlFor={fieldId} className="text-lg font-medium text-gray-900">
+                <Label htmlFor={fieldId} className="font-medium text-gray-900">
                   {field.label}
                 </Label>
                 {field.is_required && (
-                  <Badge variant="destructive" className="text-xs">
+                  <Badge variant="destructive" className="text-xs px-1.5 py-0">
                     Required
                   </Badge>
                 )}
               </div>
-              <p className="text-sm text-gray-600 mt-1">
-                {getFieldDescription(field.field_type)}
-              </p>
             </div>
           </div>
 
           {/* Field Input */}
-          <div className="bg-white rounded-lg p-4 border">
+          <div className="bg-white rounded border p-3">
             {renderFieldInput(field, value, onChange, fieldId)}
           </div>
 
           {/* Error Message */}
           {error && (
-            <div className="flex items-center gap-2 text-red-600 text-sm bg-red-50 p-3 rounded-lg border border-red-200">
-              <AlertCircle className="h-4 w-4 flex-shrink-0" />
+            <div className="flex items-center gap-2 text-red-600 text-sm bg-red-50 p-2 rounded border border-red-200">
+              <AlertCircle className="h-3 w-3 flex-shrink-0" />
               <span>{error}</span>
             </div>
           )}
@@ -121,19 +118,6 @@ export const ExecutionFieldRenderer: React.FC<ExecutionFieldRendererProps> = ({
       </CardContent>
     </Card>
   );
-};
-
-const getFieldDescription = (fieldType: string): string => {
-  const descriptions: Record<string, string> = {
-    'text': 'Enter text information',
-    'number': 'Enter a numeric value',
-    'date': 'Select a date',
-    'checkbox': 'Check if applicable',
-    'select': 'Choose one option',
-    'multiselect': 'Choose multiple options',
-    'file': 'Upload a file or document'
-  };
-  return descriptions[fieldType] || '';
 };
 
 const renderFieldInput = (field: ProcedureField, value: any, onChange: (value: any) => void, fieldId: string) => {
@@ -145,7 +129,7 @@ const renderFieldInput = (field: ProcedureField, value: any, onChange: (value: a
           value={value || ''}
           onChange={(e) => onChange(e.target.value)}
           placeholder={`Enter ${field.label.toLowerCase()}`}
-          className="text-lg h-12"
+          className="h-9"
         />
       );
 
@@ -157,7 +141,7 @@ const renderFieldInput = (field: ProcedureField, value: any, onChange: (value: a
           value={value || ''}
           onChange={(e) => onChange(e.target.value)}
           placeholder={`Enter ${field.label.toLowerCase()}`}
-          className="text-lg h-12"
+          className="h-9"
         />
       );
 
@@ -168,20 +152,20 @@ const renderFieldInput = (field: ProcedureField, value: any, onChange: (value: a
           type="date"
           value={value || ''}
           onChange={(e) => onChange(e.target.value)}
-          className="text-lg h-12"
+          className="h-9"
         />
       );
 
     case 'checkbox':
       return (
-        <div className="flex items-center space-x-3 p-2">
+        <div className="flex items-center space-x-2 p-1">
           <Checkbox
             id={fieldId}
             checked={value === true}
             onCheckedChange={(checked) => onChange(checked)}
-            className="h-5 w-5"
+            className="h-4 w-4"
           />
-          <Label htmlFor={fieldId} className="text-lg cursor-pointer">
+          <Label htmlFor={fieldId} className="cursor-pointer">
             {field.label}
           </Label>
         </div>
@@ -190,12 +174,12 @@ const renderFieldInput = (field: ProcedureField, value: any, onChange: (value: a
     case 'select':
       return (
         <Select value={value || ''} onValueChange={onChange}>
-          <SelectTrigger className="h-12 text-lg">
+          <SelectTrigger className="h-9">
             <SelectValue placeholder={`Select ${field.label.toLowerCase()}`} />
           </SelectTrigger>
           <SelectContent>
             {field.options?.choices?.map((choice: string) => (
-              <SelectItem key={choice} value={choice} className="text-lg">
+              <SelectItem key={choice} value={choice}>
                 {choice}
               </SelectItem>
             ))}
@@ -205,9 +189,9 @@ const renderFieldInput = (field: ProcedureField, value: any, onChange: (value: a
 
     case 'multiselect':
       return (
-        <div className="space-y-3">
+        <div className="space-y-2">
           {field.options?.choices?.map((choice: string) => (
-            <div key={choice} className="flex items-center space-x-3 p-2 hover:bg-gray-50 rounded">
+            <div key={choice} className="flex items-center space-x-2 p-1 hover:bg-gray-50 rounded">
               <Checkbox
                 id={`${fieldId}_${choice}`}
                 checked={(value || []).includes(choice)}
@@ -220,7 +204,7 @@ const renderFieldInput = (field: ProcedureField, value: any, onChange: (value: a
                 }}
                 className="h-4 w-4"
               />
-              <Label htmlFor={`${fieldId}_${choice}`} className="cursor-pointer">
+              <Label htmlFor={`${fieldId}_${choice}`} className="cursor-pointer text-sm">
                 {choice}
               </Label>
             </div>
@@ -230,7 +214,7 @@ const renderFieldInput = (field: ProcedureField, value: any, onChange: (value: a
 
     case 'file':
       return (
-        <div className="space-y-3">
+        <div className="space-y-2">
           <Input
             id={fieldId}
             type="file"
@@ -244,11 +228,11 @@ const renderFieldInput = (field: ProcedureField, value: any, onChange: (value: a
                 });
               }
             }}
-            className="h-12 text-lg"
+            className="h-9"
           />
           {value && (
-            <div className="p-3 bg-gray-50 rounded border">
-              <p className="text-sm font-medium">{value.name}</p>
+            <div className="p-2 bg-gray-50 rounded border text-sm">
+              <p className="font-medium">{value.name}</p>
               <p className="text-xs text-gray-600">
                 {(value.size / 1024).toFixed(1)} KB • {value.type}
               </p>
@@ -264,8 +248,8 @@ const renderFieldInput = (field: ProcedureField, value: any, onChange: (value: a
           value={value || ''}
           onChange={(e) => onChange(e.target.value)}
           placeholder={`Enter ${field.label.toLowerCase()}`}
-          rows={4}
-          className="resize-none text-lg"
+          rows={3}
+          className="resize-none"
         />
       );
   }

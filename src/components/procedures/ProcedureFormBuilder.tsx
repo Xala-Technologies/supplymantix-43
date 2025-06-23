@@ -141,33 +141,33 @@ export const ProcedureFormBuilder: React.FC<ProcedureFormBuilderProps> = ({
   };
 
   return (
-    <div className="max-w-6xl mx-auto space-y-8">
-      <form onSubmit={handleSubmit} className="space-y-8">
+    <div className="max-w-4xl mx-auto space-y-6">
+      <form onSubmit={handleSubmit} className="space-y-6">
         {/* Header Section */}
-        <div className="text-center space-y-2">
-          <div className="flex items-center justify-center gap-2 mb-2">
-            <Sparkles className="h-6 w-6 text-blue-600" />
-            <h2 className="text-2xl font-bold text-gray-900">
+        <div className="text-center space-y-1">
+          <div className="flex items-center justify-center gap-2 mb-1">
+            <Sparkles className="h-5 w-5 text-blue-600" />
+            <h2 className="text-xl font-bold text-gray-900">
               {initialData ? 'Edit Procedure' : 'Create New Procedure'}
             </h2>
           </div>
-          <p className="text-gray-600">
+          <p className="text-sm text-gray-600">
             Build standardized procedures with custom fields and validation
           </p>
         </div>
 
         {/* Basic Information */}
-        <Card className="shadow-lg">
-          <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50">
-            <CardTitle className="flex items-center gap-2">
-              <Building className="h-5 w-5 text-blue-600" />
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center gap-2 text-base">
+              <Building className="h-4 w-4 text-blue-600" />
               Basic Information
             </CardTitle>
           </CardHeader>
-          <CardContent className="p-6 space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <div className="space-y-2">
-                <Label htmlFor="title" className="text-base font-medium">
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <div className="space-y-1">
+                <Label htmlFor="title" className="text-sm font-medium">
                   Procedure Title *
                 </Label>
                 <Input
@@ -176,26 +176,26 @@ export const ProcedureFormBuilder: React.FC<ProcedureFormBuilderProps> = ({
                   onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
                   placeholder="Enter procedure title"
                   required
-                  className="h-12 text-lg"
+                  className="h-9"
                 />
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="category" className="text-base font-medium">
+              <div className="space-y-1">
+                <Label htmlFor="category" className="text-sm font-medium">
                   Category
                 </Label>
                 <Select
                   value={formData.category}
                   onValueChange={(value) => setFormData(prev => ({ ...prev, category: value }))}
                 >
-                  <SelectTrigger className="h-12">
+                  <SelectTrigger className="h-9">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
                     {CATEGORIES.map(category => (
                       <SelectItem key={category} value={category}>
                         <div className="flex items-center gap-2">
-                          <div className={`w-3 h-3 rounded-full ${getCategoryColor(category)}`}></div>
+                          <div className={`w-2 h-2 rounded-full ${getCategoryColor(category)}`}></div>
                           {category}
                         </div>
                       </SelectItem>
@@ -205,8 +205,8 @@ export const ProcedureFormBuilder: React.FC<ProcedureFormBuilderProps> = ({
               </div>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="description" className="text-base font-medium">
+            <div className="space-y-1">
+              <Label htmlFor="description" className="text-sm font-medium">
                 Description
               </Label>
               <Textarea
@@ -214,27 +214,27 @@ export const ProcedureFormBuilder: React.FC<ProcedureFormBuilderProps> = ({
                 value={formData.description}
                 onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
                 placeholder="Describe what this procedure covers and when to use it"
-                rows={4}
+                rows={3}
                 className="resize-none"
               />
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <div className="space-y-3">
-                <Label className="text-base font-medium">Tags</Label>
-                <div className="flex flex-wrap gap-2 min-h-[40px] p-3 border rounded-lg bg-gray-50">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">Tags</Label>
+                <div className="flex flex-wrap gap-1 min-h-[32px] p-2 border rounded bg-gray-50">
                   {formData.tags.map(tag => (
                     <Badge 
                       key={tag} 
                       variant="secondary" 
-                      className="cursor-pointer hover:bg-red-100 hover:text-red-700" 
+                      className="text-xs cursor-pointer hover:bg-red-100 hover:text-red-700" 
                       onClick={() => removeTag(tag)}
                     >
                       {tag} ×
                     </Badge>
                   ))}
                   {formData.tags.length === 0 && (
-                    <span className="text-gray-500 text-sm">No tags added</span>
+                    <span className="text-gray-500 text-xs">No tags added</span>
                   )}
                 </div>
                 <div className="flex gap-2">
@@ -243,23 +243,23 @@ export const ProcedureFormBuilder: React.FC<ProcedureFormBuilderProps> = ({
                     onChange={(e) => setNewTag(e.target.value)}
                     placeholder="Add tag"
                     onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addTag())}
-                    className="flex-1"
+                    className="flex-1 h-8"
                   />
-                  <Button type="button" onClick={addTag} size="sm" variant="outline">
+                  <Button type="button" onClick={addTag} size="sm" variant="outline" className="h-8">
                     Add
                   </Button>
                 </div>
               </div>
 
-              <div className="flex items-center justify-between p-4 bg-blue-50 rounded-lg border border-blue-200">
-                <div className="flex items-center gap-3">
-                  <Globe className="h-5 w-5 text-blue-600" />
+              <div className="flex items-center justify-between p-3 bg-blue-50 rounded border border-blue-200">
+                <div className="flex items-center gap-2">
+                  <Globe className="h-4 w-4 text-blue-600" />
                   <div>
-                    <Label htmlFor="is_global" className="font-medium">
+                    <Label htmlFor="is_global" className="text-sm font-medium">
                       Global Procedure
                     </Label>
-                    <p className="text-sm text-gray-600">
-                      Available to all users in your organization
+                    <p className="text-xs text-gray-600">
+                      Available to all users
                     </p>
                   </div>
                 </div>
@@ -274,34 +274,34 @@ export const ProcedureFormBuilder: React.FC<ProcedureFormBuilderProps> = ({
         </Card>
 
         {/* Fields Section */}
-        <Card className="shadow-lg">
-          <CardHeader className="bg-gradient-to-r from-green-50 to-emerald-50">
+        <Card>
+          <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
-              <CardTitle className="flex items-center gap-2">
-                <Sparkles className="h-5 w-5 text-green-600" />
+              <CardTitle className="flex items-center gap-2 text-base">
+                <Sparkles className="h-4 w-4 text-green-600" />
                 Procedure Fields ({formData.fields.length})
               </CardTitle>
-              <Button type="button" onClick={addField} size="sm" className="bg-green-600 hover:bg-green-700">
-                <Plus className="h-4 w-4 mr-2" />
+              <Button type="button" onClick={addField} size="sm" className="h-8 bg-green-600 hover:bg-green-700">
+                <Plus className="h-3 w-3 mr-1" />
                 Add Field
               </Button>
             </div>
           </CardHeader>
-          <CardContent className="p-6">
+          <CardContent>
             {formData.fields.length === 0 ? (
-              <div className="text-center py-12 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
-                <Sparkles className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-gray-900 mb-2">No fields added yet</h3>
-                <p className="text-gray-600 mb-4">
-                  Add fields to create a structured procedure that guides users through each step
+              <div className="text-center py-8 bg-gray-50 rounded border-2 border-dashed border-gray-300">
+                <Sparkles className="h-8 w-8 text-gray-400 mx-auto mb-2" />
+                <h3 className="text-sm font-medium text-gray-900 mb-1">No fields added yet</h3>
+                <p className="text-xs text-gray-600 mb-3">
+                  Add fields to create a structured procedure
                 </p>
-                <Button type="button" onClick={addField} variant="outline">
-                  <Plus className="h-4 w-4 mr-2" />
+                <Button type="button" onClick={addField} variant="outline" size="sm">
+                  <Plus className="h-3 w-3 mr-1" />
                   Add Your First Field
                 </Button>
               </div>
             ) : (
-              <div className="space-y-4">
+              <div className="space-y-3">
                 {formData.fields.map((field, index) => (
                   <FieldEditor
                     key={index}
@@ -319,14 +319,13 @@ export const ProcedureFormBuilder: React.FC<ProcedureFormBuilderProps> = ({
         </Card>
 
         {/* Actions */}
-        <div className="flex justify-end space-x-4 pt-6">
-          <Button type="button" variant="outline" onClick={onCancel} size="lg">
+        <div className="flex justify-end space-x-3 pt-4">
+          <Button type="button" variant="outline" onClick={onCancel}>
             Cancel
           </Button>
           <Button 
             type="submit" 
             disabled={isLoading || !formData.title}
-            size="lg"
             className="bg-blue-600 hover:bg-blue-700"
           >
             <Save className="h-4 w-4 mr-2" />

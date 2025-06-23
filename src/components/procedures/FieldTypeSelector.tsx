@@ -1,7 +1,6 @@
 
 import React from 'react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
 import { 
   Type, 
   Hash, 
@@ -21,59 +20,59 @@ interface FieldTypeSelectorProps {
 const FIELD_TYPES = [
   { 
     value: 'text', 
-    label: 'Text Input', 
+    label: 'Text', 
     icon: Type, 
-    description: 'Single line text input',
-    color: 'bg-blue-100 text-blue-700'
+    description: 'Single line text',
+    color: 'text-blue-600'
   },
   { 
     value: 'number', 
-    label: 'Number Input', 
+    label: 'Number', 
     icon: Hash, 
-    description: 'Numeric values only',
-    color: 'bg-green-100 text-green-700'
+    description: 'Numeric values',
+    color: 'text-green-600'
   },
   { 
     value: 'date', 
-    label: 'Date Input', 
+    label: 'Date', 
     icon: Calendar, 
     description: 'Date picker',
-    color: 'bg-purple-100 text-purple-700'
+    color: 'text-purple-600'
   },
   { 
     value: 'checkbox', 
     label: 'Checkbox', 
     icon: CheckSquare, 
-    description: 'Yes/no or true/false',
-    color: 'bg-orange-100 text-orange-700'
+    description: 'Yes/no',
+    color: 'text-orange-600'
   },
   { 
     value: 'select', 
     label: 'Dropdown', 
     icon: ChevronDown, 
-    description: 'Single choice from options',
-    color: 'bg-pink-100 text-pink-700'
+    description: 'Single choice',
+    color: 'text-pink-600'
   },
   { 
     value: 'multiselect', 
     label: 'Multi-Select', 
     icon: List, 
-    description: 'Multiple choices from options',
-    color: 'bg-indigo-100 text-indigo-700'
+    description: 'Multiple choices',
+    color: 'text-indigo-600'
   },
   { 
     value: 'file', 
     label: 'File Upload', 
     icon: Upload, 
-    description: 'Upload documents or images',
-    color: 'bg-red-100 text-red-700'
+    description: 'Upload files',
+    color: 'text-red-600'
   },
   { 
     value: 'section', 
-    label: 'Section Header', 
+    label: 'Section', 
     icon: Heading, 
-    description: 'Organize fields into sections',
-    color: 'bg-gray-100 text-gray-700'
+    description: 'Organize fields',
+    color: 'text-gray-600'
   }
 ];
 
@@ -81,37 +80,30 @@ export const FieldTypeSelector: React.FC<FieldTypeSelectorProps> = ({ value, onC
   const selectedType = FIELD_TYPES.find(type => type.value === value);
 
   return (
-    <div className="space-y-2">
-      <Select value={value} onValueChange={onChange}>
-        <SelectTrigger className="h-12">
-          <SelectValue>
-            {selectedType && (
-              <div className="flex items-center gap-3">
-                <selectedType.icon className="h-4 w-4" />
-                <div className="flex flex-col items-start">
-                  <span className="font-medium">{selectedType.label}</span>
-                  <span className="text-xs text-gray-500">{selectedType.description}</span>
-                </div>
+    <Select value={value} onValueChange={onChange}>
+      <SelectTrigger className="h-8">
+        <SelectValue>
+          {selectedType && (
+            <div className="flex items-center gap-2">
+              <selectedType.icon className="h-3 w-3" />
+              <span className="text-sm font-medium">{selectedType.label}</span>
+            </div>
+          )}
+        </SelectValue>
+      </SelectTrigger>
+      <SelectContent className="max-h-64">
+        {FIELD_TYPES.map(type => (
+          <SelectItem key={type.value} value={type.value} className="py-2">
+            <div className="flex items-center gap-2 w-full">
+              <type.icon className={`h-4 w-4 ${type.color}`} />
+              <div className="flex-1">
+                <div className="font-medium text-sm">{type.label}</div>
+                <div className="text-xs text-gray-500">{type.description}</div>
               </div>
-            )}
-          </SelectValue>
-        </SelectTrigger>
-        <SelectContent className="max-h-80">
-          {FIELD_TYPES.map(type => (
-            <SelectItem key={type.value} value={type.value} className="p-3">
-              <div className="flex items-center gap-3 w-full">
-                <div className={`p-2 rounded-lg ${type.color}`}>
-                  <type.icon className="h-4 w-4" />
-                </div>
-                <div className="flex-1">
-                  <div className="font-medium">{type.label}</div>
-                  <div className="text-sm text-gray-500">{type.description}</div>
-                </div>
-              </div>
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-    </div>
+            </div>
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
   );
 };

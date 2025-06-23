@@ -30,38 +30,38 @@ export const FieldEditor: React.FC<FieldEditorProps> = ({
 }) => {
   const getFieldTypeColor = (type: string) => {
     const colors: Record<string, string> = {
-      'text': 'bg-blue-100 text-blue-700 border-blue-200',
-      'number': 'bg-green-100 text-green-700 border-green-200',
-      'date': 'bg-purple-100 text-purple-700 border-purple-200',
-      'checkbox': 'bg-orange-100 text-orange-700 border-orange-200',
-      'select': 'bg-pink-100 text-pink-700 border-pink-200',
-      'multiselect': 'bg-indigo-100 text-indigo-700 border-indigo-200',
-      'file': 'bg-red-100 text-red-700 border-red-200',
-      'section': 'bg-gray-100 text-gray-700 border-gray-200'
+      'text': 'border-l-blue-400',
+      'number': 'border-l-green-400',
+      'date': 'border-l-purple-400',
+      'checkbox': 'border-l-orange-400',
+      'select': 'border-l-pink-400',
+      'multiselect': 'border-l-indigo-400',
+      'file': 'border-l-red-400',
+      'section': 'border-l-gray-400'
     };
-    return colors[type] || 'bg-gray-100 text-gray-700 border-gray-200';
+    return colors[type] || 'border-l-gray-400';
   };
 
   return (
-    <Card className={`${getFieldTypeColor(field.field_type)} transition-all duration-200 hover:shadow-md`}>
-      <CardContent className="p-6">
-        <div className="flex items-start gap-4">
+    <Card className={`border-l-4 ${getFieldTypeColor(field.field_type)} hover:shadow-md transition-shadow`}>
+      <CardContent className="p-4">
+        <div className="flex items-start gap-3">
           {/* Drag Handle & Order Controls */}
-          <div className="flex flex-col items-center gap-1 pt-2">
+          <div className="flex flex-col items-center gap-0.5 pt-1">
             <Button
               type="button"
               variant="ghost"
               size="sm"
               onClick={() => onMove('up')}
               disabled={index === 0}
-              className="h-8 w-8 p-0"
+              className="h-6 w-6 p-0"
             >
-              <ChevronUp className="h-4 w-4" />
+              <ChevronUp className="h-3 w-3" />
             </Button>
             
             <div className="flex items-center gap-1">
-              <GripVertical className="h-4 w-4 text-gray-400" />
-              <Badge variant="outline" className="text-xs">
+              <GripVertical className="h-3 w-3 text-gray-400" />
+              <Badge variant="outline" className="text-xs px-1 py-0">
                 {index + 1}
               </Badge>
             </div>
@@ -72,22 +72,22 @@ export const FieldEditor: React.FC<FieldEditorProps> = ({
               size="sm"
               onClick={() => onMove('down')}
               disabled={index === totalFields - 1}
-              className="h-8 w-8 p-0"
+              className="h-6 w-6 p-0"
             >
-              <ChevronDown className="h-4 w-4" />
+              <ChevronDown className="h-3 w-3" />
             </Button>
           </div>
 
           {/* Field Configuration */}
-          <div className="flex-1 space-y-4">
+          <div className="flex-1 space-y-3">
             {/* Header */}
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <h4 className="font-semibold text-gray-900">
+              <div className="flex items-center gap-2">
+                <h4 className="font-medium text-gray-900 text-sm">
                   {field.label || 'New Field'}
                 </h4>
                 {field.is_required && (
-                  <Badge variant="secondary" className="text-xs">
+                  <Badge variant="destructive" className="text-xs px-1.5 py-0">
                     Required
                   </Badge>
                 )}
@@ -98,27 +98,27 @@ export const FieldEditor: React.FC<FieldEditorProps> = ({
                 variant="ghost"
                 size="sm"
                 onClick={onDelete}
-                className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                className="h-6 w-6 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
               >
-                <Trash2 className="h-4 w-4" />
+                <Trash2 className="h-3 w-3" />
               </Button>
             </div>
 
             {/* Field Settings */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor={`field-${index}-label`}>Field Label *</Label>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div className="space-y-1">
+                <Label htmlFor={`field-${index}-label`} className="text-xs font-medium">Field Label *</Label>
                 <Input
                   id={`field-${index}-label`}
                   value={field.label}
                   onChange={(e) => onUpdate({ label: e.target.value })}
                   placeholder="Enter field label"
-                  className="bg-white"
+                  className="h-8 text-sm"
                 />
               </div>
               
-              <div className="space-y-2">
-                <Label>Field Type</Label>
+              <div className="space-y-1">
+                <Label className="text-xs font-medium">Field Type</Label>
                 <FieldTypeSelector
                   value={field.field_type}
                   onChange={(value) => onUpdate({ field_type: value as ProcedureField['field_type'] })}
@@ -128,8 +128,8 @@ export const FieldEditor: React.FC<FieldEditorProps> = ({
 
             {/* Options for Select/Multiselect */}
             {(field.field_type === 'select' || field.field_type === 'multiselect') && (
-              <div className="space-y-2">
-                <Label>Options (one per line)</Label>
+              <div className="space-y-1">
+                <Label className="text-xs font-medium">Options (one per line)</Label>
                 <Textarea
                   value={field.options?.choices?.join('\n') || ''}
                   onChange={(e) =>
@@ -141,23 +141,20 @@ export const FieldEditor: React.FC<FieldEditorProps> = ({
                     })
                   }
                   placeholder="Option 1&#10;Option 2&#10;Option 3"
-                  rows={4}
-                  className="bg-white"
+                  rows={3}
+                  className="text-sm resize-none"
                 />
-                <p className="text-sm text-gray-600">
-                  Enter each option on a new line
-                </p>
               </div>
             )}
 
             {/* Required Toggle */}
-            <div className="flex items-center justify-between p-3 bg-white/60 rounded-lg border">
+            <div className="flex items-center justify-between p-2 bg-gray-50 rounded border">
               <div>
-                <Label htmlFor={`field-${index}-required`} className="font-medium">
+                <Label htmlFor={`field-${index}-required`} className="text-xs font-medium">
                   Required Field
                 </Label>
-                <p className="text-sm text-gray-600">
-                  Users must fill this field to complete the procedure
+                <p className="text-xs text-gray-600">
+                  Must be filled to complete
                 </p>
               </div>
               <Switch

@@ -99,11 +99,11 @@ export const ProcedureExecution: React.FC<ProcedureExecutionProps> = ({
 
   if (totalSteps === 0) {
     return (
-      <Card className="max-w-2xl mx-auto">
-        <CardContent className="text-center py-12">
-          <AlertCircle className="h-16 w-16 text-yellow-500 mx-auto mb-4" />
-          <h3 className="text-xl font-semibold mb-2">No Fields Configured</h3>
-          <p className="text-gray-600 mb-6">This procedure has no fields to execute.</p>
+      <Card className="max-w-lg mx-auto">
+        <CardContent className="text-center py-8">
+          <AlertCircle className="h-12 w-12 text-yellow-500 mx-auto mb-3" />
+          <h3 className="text-lg font-semibold mb-2">No Fields Configured</h3>
+          <p className="text-gray-600 mb-4">This procedure has no fields to execute.</p>
           <Button onClick={onCancel} variant="outline">
             Go Back
           </Button>
@@ -113,36 +113,36 @@ export const ProcedureExecution: React.FC<ProcedureExecutionProps> = ({
   }
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
+    <div className="max-w-2xl mx-auto space-y-4">
       {/* Header */}
       <Card className="bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200">
-        <CardHeader>
+        <CardHeader className="pb-3">
           <div className="flex justify-between items-start">
-            <div className="space-y-2">
+            <div className="space-y-1">
               <div className="flex items-center gap-2">
-                <Play className="h-6 w-6 text-blue-600" />
-                <CardTitle className="text-2xl">{procedure.title}</CardTitle>
+                <Play className="h-5 w-5 text-blue-600" />
+                <CardTitle className="text-lg">{procedure.title}</CardTitle>
               </div>
               {procedure.description && (
-                <p className="text-gray-700 text-lg">{procedure.description}</p>
+                <p className="text-sm text-gray-700">{procedure.description}</p>
               )}
-              <div className="flex items-center gap-2">
-                <Badge variant="outline" className="border-blue-300 text-blue-700">
+              <div className="flex items-center gap-2 pt-1">
+                <Badge variant="outline" className="border-blue-300 text-blue-700 text-xs">
                   {procedure.category}
                 </Badge>
-                <Badge variant="secondary">
+                <Badge variant="secondary" className="text-xs">
                   Step {currentStep + 1} of {totalSteps}
                 </Badge>
               </div>
             </div>
           </div>
           
-          <div className="mt-6">
-            <div className="flex justify-between text-sm text-gray-700 mb-2">
+          <div className="mt-4">
+            <div className="flex justify-between text-xs text-gray-700 mb-1">
               <span>Progress</span>
               <span>{Math.round(progress)}% Complete</span>
             </div>
-            <Progress value={progress} className="h-3 bg-white" />
+            <Progress value={progress} className="h-2 bg-white" />
           </div>
         </CardHeader>
       </Card>
@@ -160,28 +160,27 @@ export const ProcedureExecution: React.FC<ProcedureExecutionProps> = ({
 
       {/* Navigation */}
       <Card>
-        <CardContent className="p-6">
+        <CardContent className="p-4">
           <div className="flex justify-between items-center">
             <Button
               variant="outline"
               onClick={currentStep === 0 ? onCancel : goToPreviousStep}
-              size="lg"
             >
               <ArrowLeft className="h-4 w-4 mr-2" />
               {currentStep === 0 ? 'Cancel' : 'Previous'}
             </Button>
 
             <div className="text-center">
-              <p className="text-sm text-gray-600">
+              <p className="text-xs text-gray-600">
                 {fields.filter(f => f.is_required).length} required fields
               </p>
             </div>
 
-            <Button onClick={goToNextStep} size="lg" className="bg-blue-600 hover:bg-blue-700">
+            <Button onClick={goToNextStep} className="bg-blue-600 hover:bg-blue-700">
               {currentStep === totalSteps - 1 ? (
                 <>
                   <CheckCircle className="h-4 w-4 mr-2" />
-                  Complete Procedure
+                  Complete
                 </>
               ) : (
                 <>
@@ -197,25 +196,25 @@ export const ProcedureExecution: React.FC<ProcedureExecutionProps> = ({
       {/* Summary of answers */}
       {Object.keys(answers).length > 0 && (
         <Card>
-          <CardHeader>
-            <CardTitle className="text-lg flex items-center gap-2">
-              <Clock className="h-5 w-5" />
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm flex items-center gap-2">
+              <Clock className="h-4 w-4" />
               Current Answers
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <CardContent className="pt-0">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
               {Object.entries(answers).map(([fieldId, value]) => {
                 const fieldIndex = parseInt(fieldId.split('_')[1]);
                 const field = fields[fieldIndex];
                 if (!field || !value) return null;
 
                 return (
-                  <div key={fieldId} className="p-3 bg-gray-50 rounded-lg">
-                    <div className="text-sm font-medium text-gray-700 mb-1">
+                  <div key={fieldId} className="p-2 bg-gray-50 rounded text-sm">
+                    <div className="font-medium text-gray-700 mb-0.5">
                       {field.label}
                     </div>
-                    <div className="text-gray-900">
+                    <div className="text-gray-900 text-xs">
                       {Array.isArray(value) ? value.join(', ') : 
                        typeof value === 'object' ? value.name || JSON.stringify(value) :
                        value.toString()}
