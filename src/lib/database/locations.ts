@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/integrations/supabase/types";
 import type { LocationHierarchy, LocationStats, LocationBreadcrumb } from "@/types/location";
@@ -112,8 +111,8 @@ export const locationsApi = {
   },
 
   async getLocationBreadcrumbs(locationId: string): Promise<LocationBreadcrumb[]> {
-    // Simple breadcrumb implementation - get location and traverse up
-    const breadcrumbs: LocationBreadcrumb[] = [];
+    // Use explicit typing to avoid deep recursion
+    const breadcrumbs: any[] = [];
     let currentId: string | null = locationId;
     let level = 0;
     
@@ -126,17 +125,21 @@ export const locationsApi = {
       
       if (error || !data) break;
       
-      breadcrumbs.unshift({
+      // Create breadcrumb object explicitly
+      const crumb = {
         id: data.id,
         name: data.name,
         level: level
-      });
+      };
+      
+      // Add to beginning of array manually
+      breadcrumbs.splice(0, 0, crumb);
       
       currentId = data.parent_id;
       level++;
     }
     
-    return breadcrumbs;
+    return breadcrumbs as LocationBreadcrumb[];
   },
 
   async getLocationStats(locationId: string): Promise<LocationStats> {
