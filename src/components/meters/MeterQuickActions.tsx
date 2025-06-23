@@ -94,7 +94,7 @@ export const MeterQuickActions = ({ onCreateMeter }: MeterQuickActionsProps) => 
               </div>
             ))}
             
-            {warningMet Ders.slice(0, 2).map(meter => (
+            {warningMeters.slice(0, 2).map(meter => (
               <div key={meter.id} className="flex items-center justify-between p-3 bg-yellow-50 rounded-lg">
                 <div>
                   <p className="font-medium text-yellow-900">{meter.name}</p>
