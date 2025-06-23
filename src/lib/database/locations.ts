@@ -156,18 +156,18 @@ export const locationsApi = {
   },
 
   buildLocationTree(locations: LocationRow[]): LocationHierarchy[] {
-    // Use a simple approach to avoid TypeScript recursion issues
-    const locationMap: Record<string, any> = {};
+    // Create a simple map to avoid TypeScript recursion issues
+    const locationMap: { [key: string]: LocationHierarchy } = {};
     const rootLocations: LocationHierarchy[] = [];
 
-    // First pass: create all location objects
+    // First pass: create all location objects without children
     locations.forEach(location => {
       locationMap[location.id] = {
         ...location,
         children: [],
         level: 0,
         path: [location.name]
-      };
+      } as LocationHierarchy;
     });
 
     // Second pass: build parent-child relationships
@@ -178,6 +178,7 @@ export const locationsApi = {
         const parent = locationMap[location.parent_id];
         locationNode.level = parent.level + 1;
         locationNode.path = [...parent.path, location.name];
+        parent.children = parent.children || [];
         parent.children.push(locationNode);
       } else {
         rootLocations.push(locationNode);
