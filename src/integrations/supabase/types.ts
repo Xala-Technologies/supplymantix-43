@@ -725,30 +725,58 @@ export type Database = {
       }
       locations: {
         Row: {
+          address: string | null
+          coordinates: Json | null
           created_at: string
           description: string | null
           id: string
+          is_active: boolean | null
+          location_code: string | null
+          location_type: string | null
+          metadata: Json | null
           name: string
+          parent_id: string | null
           tenant_id: string
           updated_at: string
         }
         Insert: {
+          address?: string | null
+          coordinates?: Json | null
           created_at?: string
           description?: string | null
           id?: string
+          is_active?: boolean | null
+          location_code?: string | null
+          location_type?: string | null
+          metadata?: Json | null
           name: string
+          parent_id?: string | null
           tenant_id: string
           updated_at?: string
         }
         Update: {
+          address?: string | null
+          coordinates?: Json | null
           created_at?: string
           description?: string | null
           id?: string
+          is_active?: boolean | null
+          location_code?: string | null
+          location_type?: string | null
+          metadata?: Json | null
           name?: string
+          parent_id?: string | null
           tenant_id?: string
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "locations_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "locations"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "locations_tenant_id_fkey"
             columns: ["tenant_id"]

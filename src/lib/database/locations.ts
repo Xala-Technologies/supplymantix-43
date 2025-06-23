@@ -4,9 +4,12 @@ import type { Database } from "@/integrations/supabase/types";
 import type { LocationHierarchy, LocationStats, LocationBreadcrumb } from "@/types/location";
 
 type Tables = Database["public"]["Tables"];
+type LocationRow = Tables["locations"]["Row"];
+type LocationInsert = Tables["locations"]["Insert"];
+type LocationUpdate = Tables["locations"]["Update"];
 
 export const locationsApi = {
-  async getLocations() {
+  async getLocations(): Promise<LocationRow[]> {
     const { data, error } = await supabase
       .from("locations")
       .select("*")
@@ -14,7 +17,7 @@ export const locationsApi = {
       .order("name", { ascending: true });
     
     if (error) throw error;
-    return data;
+    return data || [];
   },
 
   async getLocationHierarchy(): Promise<LocationHierarchy[]> {
@@ -28,7 +31,7 @@ export const locationsApi = {
     return this.buildLocationTree(data || []);
   },
 
-  async getLocationChildren(parentId: string) {
+  async getLocationChildren(parentId: string): Promise<LocationRow[]> {
     const { data, error } = await supabase
       .from("locations")
       .select("*")
@@ -37,13 +40,13 @@ export const locationsApi = {
       .order("name", { ascending: true });
     
     if (error) throw error;
-    return data;
+    return data || [];
   },
 
   async getLocationBreadcrumbs(locationId: string): Promise<LocationBreadcrumb[]> {
     // Simple breadcrumb implementation - get location and traverse up
     const breadcrumbs: LocationBreadcrumb[] = [];
-    let currentId = locationId;
+    let currentId: string | null = locationId;
     let level = 0;
     
     while (currentId && level < 10) { // Prevent infinite loops
@@ -85,7 +88,7 @@ export const locationsApi = {
     };
   },
 
-  async searchLocations(query: string) {
+  async searchLocations(query: string): Promise<LocationRow[]> {
     const { data, error } = await supabase
       .from("locations")
       .select("*")
@@ -94,10 +97,10 @@ export const locationsApi = {
       .order("name", { ascending: true });
     
     if (error) throw error;
-    return data;
+    return data || [];
   },
 
-  async createLocation(location: any) {
+  async createLocation(location: LocationInsert): Promise<LocationRow> {
     const { data, error } = await supabase
       .from("locations")
       .insert(location)
@@ -108,7 +111,7 @@ export const locationsApi = {
     return data;
   },
 
-  async updateLocation(id: string, updates: any) {
+  async updateLocation(id: string, updates: LocationUpdate): Promise<LocationRow> {
     const { data, error } = await supabase
       .from("locations")
       .update(updates)
@@ -120,7 +123,7 @@ export const locationsApi = {
     return data;
   },
 
-  async deleteLocation(id: string) {
+  async deleteLocation(id: string): Promise<void> {
     // Soft delete
     const { error } = await supabase
       .from("locations")
@@ -130,7 +133,7 @@ export const locationsApi = {
     if (error) throw error;
   },
 
-  async moveLocation(locationId: string, newParentId: string | null) {
+  async moveLocation(locationId: string, newParentId: string | null): Promise<LocationRow> {
     // Validate that we're not creating a circular reference
     if (newParentId) {
       const breadcrumbs = await this.getLocationBreadcrumbs(newParentId);
@@ -152,29 +155,33 @@ export const locationsApi = {
     return data;
   },
 
-  buildLocationTree(locations: any[]): LocationHierarchy[] {
-    const locationMap = new Map();
+  buildLocationTree(locations: LocationRow[]): LocationHierarchy[] {
+    const locationMap = new Map<string, LocationHierarchy>();
     const rootLocations: LocationHierarchy[] = [];
 
     // Create a map for quick lookup and add hierarchy properties
     locations.forEach(location => {
       locationMap.set(location.id, { 
-        ...location, 
+        ...location,
         children: [],
         level: 0,
         path: [location.name]
-      });
+      } as LocationHierarchy);
     });
 
     // Build the tree structure
     locations.forEach(location => {
       const locationNode = locationMap.get(location.id);
+      if (!locationNode) return;
       
       if (location.parent_id && locationMap.has(location.parent_id)) {
         const parent = locationMap.get(location.parent_id);
-        locationNode.level = parent.level + 1;
-        locationNode.path = [...parent.path, location.name];
-        parent.children.push(locationNode);
+        if (parent) {
+          locationNode.level = parent.level + 1;
+          locationNode.path = [...parent.path, location.name];
+          parent.children = parent.children || [];
+          parent.children.push(locationNode);
+        }
       } else {
         rootLocations.push(locationNode);
       }
