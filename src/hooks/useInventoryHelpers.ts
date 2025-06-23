@@ -1,17 +1,40 @@
 
 import { supabase } from "@/integrations/supabase/client";
 
-// Get current user's tenant ID from the users table
-export const getCurrentTenantId = async () => {
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) throw new Error('User not authenticated');
+export const getCurrentTenantId = async (): Promise<string> => {
+  console.log('getCurrentTenantId: Getting current user and tenant...');
   
-  const { data: userData, error } = await supabase
+  const { data: { user }, error: authError } = await supabase.auth.getUser();
+  
+  if (authError) {
+    console.error('getCurrentTenantId: Auth error:', authError);
+    throw new Error('Authentication error: ' + authError.message);
+  }
+  
+  if (!user) {
+    console.error('getCurrentTenantId: No authenticated user found');
+    throw new Error('No authenticated user found');
+  }
+  
+  console.log('getCurrentTenantId: User found:', user.id);
+  
+  // Get tenant_id from users table
+  const { data: userData, error: userError } = await supabase
     .from('users')
     .select('tenant_id')
     .eq('id', user.id)
     .single();
-    
-  if (error) throw error;
+  
+  if (userError) {
+    console.error('getCurrentTenantId: Error fetching user data:', userError);
+    throw new Error('Error fetching user data: ' + userError.message);
+  }
+  
+  if (!userData?.tenant_id) {
+    console.error('getCurrentTenantId: No tenant_id found for user');
+    throw new Error('No tenant found for user');
+  }
+  
+  console.log('getCurrentTenantId: Tenant ID found:', userData.tenant_id);
   return userData.tenant_id;
 };

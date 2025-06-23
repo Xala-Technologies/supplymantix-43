@@ -39,21 +39,23 @@ export const InventoryForm = ({ item, onSuccess, trigger, mode = 'create' }: Inv
     handleSubmit,
     reset,
     formState: { errors },
+    watch,
   } = useForm<InventoryFormData>({
     defaultValues: {
-      name: item?.name || '',
-      description: item?.description || '',
-      sku: item?.sku || '',
-      location: item?.location || '',
-      quantity: item?.quantity || 0,
-      min_quantity: item?.min_quantity || 0,
-      unit_cost: item?.unit_cost || 0,
+      name: '',
+      description: '',
+      sku: '',
+      location: '',
+      quantity: 0,
+      min_quantity: 0,
+      unit_cost: 0,
     },
   });
 
   // Reset form when item changes (for edit mode)
   useEffect(() => {
     if (item && mode === 'edit') {
+      console.log('InventoryForm: Resetting form for edit mode with item:', item);
       reset({
         name: item.name || '',
         description: item.description || '',
@@ -63,12 +65,24 @@ export const InventoryForm = ({ item, onSuccess, trigger, mode = 'create' }: Inv
         min_quantity: item.min_quantity || 0,
         unit_cost: item.unit_cost || 0,
       });
+    } else if (mode === 'create') {
+      console.log('InventoryForm: Resetting form for create mode');
+      reset({
+        name: '',
+        description: '',
+        sku: '',
+        location: '',
+        quantity: 0,
+        min_quantity: 0,
+        unit_cost: 0,
+      });
     }
-  }, [item, mode, reset]);
+  }, [item, mode, reset, open]);
 
   const onSubmit = async (data: InventoryFormData) => {
     try {
       console.log('InventoryForm: Form submission started with data:', data);
+      console.log('InventoryForm: Mode:', mode, 'Item:', item);
       
       if (mode === 'edit' && item) {
         console.log('InventoryForm: Updating item:', item.id);
@@ -87,7 +101,7 @@ export const InventoryForm = ({ item, onSuccess, trigger, mode = 'create' }: Inv
         console.log('InventoryForm: Update successful');
       } else {
         console.log('InventoryForm: Creating new item');
-        await createMutation.mutateAsync({
+        const result = await createMutation.mutateAsync({
           name: data.name,
           description: data.description || '',
           sku: data.sku || '',
@@ -96,33 +110,59 @@ export const InventoryForm = ({ item, onSuccess, trigger, mode = 'create' }: Inv
           min_quantity: Number(data.min_quantity) || 0,
           unit_cost: Number(data.unit_cost) || 0,
         });
-        console.log('InventoryForm: Create successful');
+        console.log('InventoryForm: Create successful, result:', result);
       }
       
       // Close dialog and reset form
       setOpen(false);
-      if (mode === 'create') {
-        reset();
-      }
+      
+      // Always reset form after successful submission
+      reset({
+        name: '',
+        description: '',
+        sku: '',
+        location: '',
+        quantity: 0,
+        min_quantity: 0,
+        unit_cost: 0,
+      });
       
       // Call success callback
       if (onSuccess) {
-        onSuccess();
+        console.log('InventoryForm: Calling onSuccess callback');
+        await onSuccess();
       }
+      
+      console.log('InventoryForm: Form submission completed successfully');
       
     } catch (error) {
       console.error('InventoryForm: Error saving inventory item:', error);
+      // Don't close dialog on error so user can fix the issue
     }
   };
 
   const isSubmitting = createMutation.isPending || updateMutation.isPending;
 
   const handleOpenChange = (newOpen: boolean) => {
+    console.log('InventoryForm: Dialog open change:', newOpen);
     setOpen(newOpen);
     if (!newOpen && mode === 'create') {
-      reset();
+      // Reset form when closing dialog in create mode
+      reset({
+        name: '',
+        description: '',
+        sku: '',
+        location: '',
+        quantity: 0,
+        min_quantity: 0,
+        unit_cost: 0,
+      });
     }
   };
+
+  // Watch all form values for debugging
+  const watchedValues = watch();
+  console.log('InventoryForm: Current form values:', watchedValues);
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>

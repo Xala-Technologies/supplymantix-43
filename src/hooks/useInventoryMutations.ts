@@ -18,29 +18,39 @@ export const useCreateInventoryItem = () => {
       min_quantity?: number;
       unit_cost?: number;
     }) => {
-      console.log('useCreateInventoryItem: Creating inventory item:', item);
+      console.log('useCreateInventoryItem: Starting creation with data:', item);
       const tenantId = await getCurrentTenantId();
       console.log('useCreateInventoryItem: Using tenant ID:', tenantId);
+      
+      if (!tenantId) {
+        throw new Error('No tenant ID found. Please ensure you are logged in.');
+      }
       
       const result = await inventoryEnhancedApi.createInventoryItem({
         ...item,
         tenant_id: tenantId,
         min_quantity: item.min_quantity || 0,
-        unit_cost: item.unit_cost || 0
+        unit_cost: item.unit_cost || 0,
+        description: item.description || '',
+        sku: item.sku || '',
+        location: item.location || ''
       });
       
-      console.log('useCreateInventoryItem: Create result:', result);
+      console.log('useCreateInventoryItem: Create successful, result:', result);
       return result;
     },
     onSuccess: (data) => {
       console.log('useCreateInventoryItem: Item created successfully:', data);
       
-      // Invalidate and refetch queries
+      // Invalidate all related queries to force refresh
       queryClient.invalidateQueries({ queryKey: ["inventory-enhanced"] });
       queryClient.invalidateQueries({ queryKey: ["low-stock-alerts"] });
       
+      // Also refetch the queries immediately
+      queryClient.refetchQueries({ queryKey: ["inventory-enhanced"] });
+      
       // Show success message
-      toast.success("Inventory item created successfully");
+      toast.success(`Inventory item "${data.name}" created successfully`);
     },
     onError: (error) => {
       console.error("useCreateInventoryItem: Failed to create inventory item:", error);
