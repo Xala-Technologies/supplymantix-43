@@ -24,7 +24,7 @@ export const useCreateReorderPO = () => {
       
       // Calculate total amount
       const totalAmount = items.reduce((sum, item) => 
-        sum + (item.reorder_quantity * (item.unit_cost || 0)), 0
+        sum + (item.reorder_quantity * item.unit_cost), 0
       );
       
       // Create purchase order
@@ -36,7 +36,7 @@ export const useCreateReorderPO = () => {
           inventory_item_id: item.id,
           description: `${item.name} - Reorder (Current: ${item.quantity}, Min: ${item.min_quantity})`,
           quantity: item.reorder_quantity,
-          unit_price: item.unit_cost || 0
+          unit_price: item.unit_cost
         }))
       });
       
@@ -97,9 +97,13 @@ export const useAutoReorderCheck = () => {
         return { message: "No items need reordering" };
       }
       
-      // Calculate reorder quantities
+      // Calculate reorder quantities and ensure required properties
       const reorderItems = itemsToReorder.map(item => ({
-        ...item,
+        id: item.id,
+        name: item.name,
+        quantity: item.quantity,
+        min_quantity: item.min_quantity || 0,
+        unit_cost: item.unit_cost || 0,
         reorder_quantity: calculateReorderQty(item)
       }));
       

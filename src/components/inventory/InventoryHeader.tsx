@@ -15,6 +15,7 @@ interface InventoryHeaderProps {
   statusFilter?: string;
   locationFilter?: string;
   locations?: Array<{ id: string; name: string }>;
+  extraActions?: React.ReactNode;
 }
 
 export const InventoryHeader = ({
@@ -25,7 +26,8 @@ export const InventoryHeader = ({
   searchValue = "",
   statusFilter = "all",
   locationFilter = "all",
-  locations = []
+  locations = [],
+  extraActions
 }: InventoryHeaderProps) => {
   const exportMutation = useExportInventory();
 
@@ -62,6 +64,8 @@ export const InventoryHeader = ({
             <Download className="w-4 h-4" />
             Export
           </Button>
+          
+          {extraActions}
         </div>
       </div>
 
