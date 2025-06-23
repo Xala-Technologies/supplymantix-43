@@ -22,7 +22,7 @@ export const WorkOrdersPage = () => {
     handleFormSubmit,
     handleFormCancel,
     setViewModeToList
-  } = useWorkOrdersPage(workOrders);
+  } = useWorkOrdersPage(workOrders || []);
 
   if (isLoading) {
     return (

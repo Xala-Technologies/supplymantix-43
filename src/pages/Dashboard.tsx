@@ -1,11 +1,10 @@
 import { DashboardLayout } from "@/components/Layout/DashboardLayout";
-import { DashboardMetrics } from "@/components/dashboard/DashboardMetrics";
-import { WorkOrdersDashboard } from "@/components/dashboard/WorkOrdersDashboard";
+import { EnhancedDashboardMetrics } from "@/components/dashboard/EnhancedDashboardMetrics";
 import { useWorkOrdersIntegration } from "@/hooks/useWorkOrdersIntegration";
 import { WorkOrder } from "@/types/workOrder";
 import { transformWorkOrderData } from "@/services/workOrderService";
 import { useState } from "react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useNavigate } from "react-router-dom";
 
 // Sample data for demonstration
 const sampleWorkOrders: WorkOrder[] = [
@@ -122,49 +121,27 @@ const sampleWorkOrders: WorkOrder[] = [
 export default function Dashboard() {
   const { data: workOrders, isLoading } = useWorkOrdersIntegration();
   const [isCreateLoading, setIsCreateLoading] = useState(false);
+  const navigate = useNavigate();
 
   // Transform and use real data if available, otherwise use sample data
   const transformedWorkOrders: WorkOrder[] = workOrders?.length > 0 
     ? workOrders.map(transformWorkOrderData)
     : sampleWorkOrders;
 
-  const handleCreateWorkOrder = async (data: any) => {
-    setIsCreateLoading(true);
-    try {
-      // TODO: Implement actual work order creation
-      console.log('Creating work order:', data);
-      
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // For now, just add to sample data (in real app, this would trigger a refetch)
-      const newWorkOrder: WorkOrder = {
-        id: Date.now().toString(),
-        title: data.title,
-        description: data.description || '',
-        status: data.status || 'open',
-        priority: data.priority || 'medium',
-        category: data.category || 'maintenance',
-        assignedTo: data.assignedTo || [],
-        due_date: data.dueDate || new Date().toISOString(),
-        asset: data.asset || { id: 'temp', name: 'General Asset', status: 'active' },
-        location: data.location || '',
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-        tenant_id: 'sample-tenant',
-        tags: [],
-        time_spent: 0,
-        total_cost: 0,
-        parts_used: []
-      };
-      
-      console.log('Work order created successfully:', newWorkOrder);
-    } catch (error) {
-      console.error('Failed to create work order:', error);
-      throw error;
-    } finally {
-      setIsCreateLoading(false);
-    }
+  const handleCreateWorkOrder = async () => {
+    navigate('/dashboard/work-orders');
+  };
+
+  const handleScheduleProcedure = () => {
+    navigate('/dashboard/procedures');
+  };
+
+  const handleAddAsset = () => {
+    navigate('/dashboard/assets');
+  };
+
+  const handleInviteUser = () => {
+    navigate('/dashboard/organization');
   };
 
   if (isLoading) {
@@ -182,30 +159,15 @@ export default function Dashboard() {
 
   return (
     <DashboardLayout>
-      <div className="h-full flex flex-col">
-        <div className="mb-6">
-          <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-          <p className="text-gray-600">Welcome back! Here's your maintenance overview.</p>
+      <div className="h-full overflow-auto">
+        <div className="container mx-auto p-6">
+          <EnhancedDashboardMetrics
+            onCreateWorkOrder={handleCreateWorkOrder}
+            onScheduleProcedure={handleScheduleProcedure}
+            onAddAsset={handleAddAsset}
+            onInviteUser={handleInviteUser}
+          />
         </div>
-        
-        <Tabs defaultValue="overview" className="flex-1 flex flex-col">
-          <TabsList className="grid w-full grid-cols-2 lg:w-[400px]">
-            <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="work-orders">Work Orders</TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="overview" className="flex-1 mt-6">
-            <DashboardMetrics />
-          </TabsContent>
-          
-          <TabsContent value="work-orders" className="flex-1 mt-6">
-            <WorkOrdersDashboard
-              workOrders={transformedWorkOrders}
-              onCreateWorkOrder={handleCreateWorkOrder}
-              isCreateLoading={isCreateLoading}
-            />
-          </TabsContent>
-        </Tabs>
       </div>
     </DashboardLayout>
   );
