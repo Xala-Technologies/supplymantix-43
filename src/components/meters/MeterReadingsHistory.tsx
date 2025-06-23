@@ -132,12 +132,12 @@ export const MeterReadingsHistory = ({ meterId }: MeterReadingsHistoryProps) => 
                   </div>
                 </div>
                 <div className="text-right">
-                  {reading.users && (
+                  {reading.users && typeof reading.users === 'object' && 'email' in reading.users && (
                     <div className="flex items-center gap-1 text-sm text-muted-foreground mb-1">
                       <User className="h-3 w-3" />
-                      {reading.users.first_name || reading.users.last_name 
-                        ? `${reading.users.first_name || ''} ${reading.users.last_name || ''}`.trim()
-                        : reading.users.email
+                      {(reading.users as any).first_name && (reading.users as any).last_name 
+                        ? `${(reading.users as any).first_name} ${(reading.users as any).last_name}`.trim()
+                        : (reading.users as any).email || 'Unknown User'
                       }
                     </div>
                   )}

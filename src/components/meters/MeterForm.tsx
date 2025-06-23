@@ -34,7 +34,7 @@ export const MeterForm = ({ onClose }: MeterFormProps) => {
     e.preventDefault();
     
     try {
-      await createMeter.mutateAsync({
+      const meterData = {
         name: formData.name,
         type: formData.type,
         unit: formData.unit,
@@ -44,7 +44,9 @@ export const MeterForm = ({ onClose }: MeterFormProps) => {
         reading_frequency: formData.reading_frequency,
         target_min: formData.target_min ? Number(formData.target_min) : null,
         target_max: formData.target_max ? Number(formData.target_max) : null,
-      });
+      };
+      
+      await createMeter.mutateAsync(meterData);
       onClose();
     } catch (error) {
       console.error("Error creating meter:", error);
