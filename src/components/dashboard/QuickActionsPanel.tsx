@@ -49,17 +49,15 @@ export const QuickActionsPanel = ({
         <CardTitle className="text-lg font-semibold">Quick Actions</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="space-y-3">
+        <div className="grid grid-cols-2 gap-3">
           {actions.map((action) => (
             <Button
               key={action.label}
               onClick={action.onClick}
-              className={`w-full h-14 flex items-center justify-start gap-3 px-4 text-left ${action.className}`}
+              className={`h-16 flex flex-col items-center justify-center space-y-1 ${action.className}`}
             >
-              <div className="flex-shrink-0">
-                <action.icon className="h-5 w-5" />
-              </div>
-              <span className="text-sm font-medium">{action.label}</span>
+              <action.icon className="h-5 w-5" />
+              <span className="text-xs font-medium">{action.label}</span>
             </Button>
           ))}
         </div>
