@@ -200,7 +200,7 @@ export const MeterForm = ({ onClose }: MeterFormProps) => {
                       <SelectValue placeholder="Select an asset (optional)" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">No Asset</SelectItem>
+                      <SelectItem value="no-asset">No Asset</SelectItem>
                       {assets?.map((asset) => (
                         <SelectItem key={asset.id} value={asset.id}>
                           <div className="flex items-center gap-2">
