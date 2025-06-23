@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { DashboardLayout } from "@/components/Layout/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -20,7 +19,8 @@ import {
   Clock,
   CheckCircle,
   Globe,
-  Building
+  Building,
+  FileText
 } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { 
@@ -32,6 +32,13 @@ import {
 import { ProcedureFormBuilder } from "@/components/procedures/ProcedureFormBuilder";
 import { ProcedureExecution } from "@/components/procedures/ProcedureExecution";
 import { useCreateProcedure, useUpdateProcedure } from "@/hooks/useProceduresEnhanced";
+import { toast } from "sonner";
+
+interface ExecutionResult {
+  answers: any[];
+  score: number;
+  procedure: any;
+}
 
 const Procedures = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -40,7 +47,10 @@ const Procedures = () => {
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [showExecutionDialog, setShowExecutionDialog] = useState(false);
+  const [showResultsDialog, setShowResultsDialog] = useState(false);
   const [selectedProcedure, setSelectedProcedure] = useState<any>(null);
+  const [executionResult, setExecutionResult] = useState<ExecutionResult | null>(null);
+  const [currentExecutionId, setCurrentExecutionId] = useState<string | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
 
   const { data: proceduresData, isLoading } = useProceduresEnhanced({
@@ -116,23 +126,62 @@ const Procedures = () => {
     duplicateProcedure.mutate({ id });
   };
 
-  const handleExecuteProcedure = (procedure: any) => {
-    setSelectedProcedure(procedure);
-    setShowExecutionDialog(true);
+  const handleExecuteProcedure = async (procedure: any) => {
+    try {
+      setSelectedProcedure(procedure);
+      
+      // Start execution in database
+      const execution = await startExecution.mutateAsync({ 
+        procedureId: procedure.id 
+      });
+      
+      setCurrentExecutionId(execution.id);
+      setShowExecutionDialog(true);
+    } catch (error) {
+      console.error('Failed to start execution:', error);
+      toast.error('Failed to start procedure execution');
+    }
   };
 
-  const handleStartExecution = () => {
-    if (!selectedProcedure) return;
+  const handleExecutionComplete = (answers: any, score: number) => {
+    // Store the results
+    setExecutionResult({
+      answers,
+      score,
+      procedure: selectedProcedure
+    });
+    
+    // Close execution dialog and show results
+    setShowExecutionDialog(false);
+    setShowResultsDialog(true);
+    setCurrentExecutionId(null);
+    
+    toast.success(`Procedure completed with ${score}% score!`);
+  };
 
-    startExecution.mutate(
-      { procedureId: selectedProcedure.id },
-      {
-        onSuccess: (execution) => {
-          // You could navigate to execution page or show execution dialog
-          console.log('Execution started:', execution);
-        }
-      }
-    );
+  const handleExecutionCancel = () => {
+    setShowExecutionDialog(false);
+    setSelectedProcedure(null);
+    setCurrentExecutionId(null);
+  };
+
+  const formatAnswerValue = (answer: any): string => {
+    if (answer.value === null || answer.value === undefined || answer.value === '') {
+      return 'Not answered';
+    }
+    
+    switch (answer.fieldType) {
+      case 'checkbox':
+        return answer.value ? 'Yes' : 'No';
+      case 'multiselect':
+        return Array.isArray(answer.value) ? answer.value.join(', ') : answer.value;
+      case 'file':
+        return typeof answer.value === 'object' ? answer.value.name || 'File uploaded' : answer.value;
+      case 'date':
+        return new Date(answer.value).toLocaleDateString();
+      default:
+        return String(answer.value);
+    }
   };
 
   if (isLoading) {
@@ -309,9 +358,10 @@ const Procedures = () => {
                         size="sm" 
                         className="flex-1"
                         onClick={() => handleExecuteProcedure(procedure)}
+                        disabled={startExecution.isPending}
                       >
                         <Play className="h-4 w-4 mr-1" />
-                        Execute
+                        {startExecution.isPending ? 'Starting...' : 'Execute'}
                       </Button>
                       <Button 
                         variant="ghost" 
@@ -375,16 +425,74 @@ const Procedures = () => {
           {selectedProcedure && (
             <ProcedureExecution
               procedure={selectedProcedure}
-              onComplete={(answers, score) => {
-                console.log('Execution completed:', { answers, score });
-                setShowExecutionDialog(false);
-                setSelectedProcedure(null);
-              }}
-              onCancel={() => {
-                setShowExecutionDialog(false);
-                setSelectedProcedure(null);
-              }}
+              executionId={currentExecutionId || undefined}
+              onComplete={handleExecutionComplete}
+              onCancel={handleExecutionCancel}
             />
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Results Dialog */}
+      <Dialog open={showResultsDialog} onOpenChange={setShowResultsDialog}>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <CheckCircle className="h-5 w-5 text-green-600" />
+              Procedure Completed
+            </DialogTitle>
+          </DialogHeader>
+          {executionResult && (
+            <div className="space-y-4">
+              <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                <h3 className="font-semibold text-green-800 mb-2">{executionResult.procedure.title}</h3>
+                <div className="flex items-center gap-4 text-sm">
+                  <span className="text-green-700">
+                    Score: <strong>{executionResult.score}%</strong>
+                  </span>
+                  <span className="text-green-700">
+                    Fields Completed: <strong>{executionResult.answers.length}</strong>
+                  </span>
+                  <span className="text-green-700">
+                    Date: <strong>{new Date().toLocaleDateString()}</strong>
+                  </span>
+                </div>
+              </div>
+
+              {executionResult.answers.length > 0 && (
+                <div>
+                  <h4 className="font-medium text-gray-900 mb-3">Responses:</h4>
+                  <div className="space-y-2">
+                    {executionResult.answers.map((answer: any, index: number) => (
+                      <div key={index} className="border rounded-lg p-3">
+                        <div className="flex justify-between items-start">
+                          <div className="flex-1">
+                            <h5 className="font-medium text-sm text-gray-900">{answer.label}</h5>
+                            <p className="text-sm text-gray-600 mt-1">{formatAnswerValue(answer)}</p>
+                          </div>
+                          <Badge variant="outline" className="text-xs">
+                            {answer.fieldType}
+                          </Badge>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <div className="flex justify-end gap-2 pt-4 border-t">
+                <Button variant="outline" onClick={() => setShowResultsDialog(false)}>
+                  Close
+                </Button>
+                <Button onClick={() => {
+                  // Could implement export/print functionality here
+                  setShowResultsDialog(false);
+                }}>
+                  <FileText className="h-4 w-4 mr-2" />
+                  Export Results
+                </Button>
+              </div>
+            </div>
           )}
         </DialogContent>
       </Dialog>
