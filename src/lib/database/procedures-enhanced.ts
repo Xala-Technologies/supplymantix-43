@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/integrations/supabase/types";
 import { getCurrentTenantId } from "@/hooks/useInventoryHelpers";
@@ -58,6 +59,19 @@ const mapFieldFromDB = (dbField: any): ProcedureField => ({
   options: dbField.options || {},
   created_at: dbField.created_at,
   updated_at: dbField.updated_at
+});
+
+const mapExecutionFromDB = (dbExecution: any): ProcedureExecution => ({
+  id: dbExecution.id,
+  procedure_id: dbExecution.procedure_id,
+  work_order_id: dbExecution.work_order_id,
+  user_id: dbExecution.user_id,
+  tenant_id: dbExecution.tenant_id,
+  answers: dbExecution.answers,
+  score: dbExecution.score,
+  status: dbExecution.status as ProcedureExecution['status'],
+  started_at: dbExecution.started_at,
+  completed_at: dbExecution.completed_at
 });
 
 export const proceduresEnhancedApi = {
@@ -358,7 +372,7 @@ export const proceduresEnhancedApi = {
       throw error;
     }
 
-    return data;
+    return mapExecutionFromDB(data);
   },
 
   // Submit execution
@@ -382,7 +396,7 @@ export const proceduresEnhancedApi = {
       throw error;
     }
 
-    return data;
+    return mapExecutionFromDB(data);
   },
 
   // Get execution history
@@ -404,7 +418,7 @@ export const proceduresEnhancedApi = {
       throw error;
     }
 
-    return data || [];
+    return (data || []).map(mapExecutionFromDB);
   },
 
   // Templates

@@ -20,8 +20,8 @@ export const NewWorkOrderProcedureSection = ({
 }: NewWorkOrderProcedureSectionProps) => {
   const [showProcedureDialog, setShowProcedureDialog] = useState(false);
 
-  const handleProcedureSelect = (procedureId: string) => {
-    onProcedureAdd(procedureId);
+  const handleProcedureSelect = (procedure: any) => {
+    onProcedureAdd(procedure.id);
     setShowProcedureDialog(false);
   };
 
@@ -104,7 +104,7 @@ export const NewWorkOrderProcedureSection = ({
         <ProcedureSelectionDialog
           open={showProcedureDialog}
           onOpenChange={setShowProcedureDialog}
-          onProcedureSelect={handleProcedureSelect}
+          onSelect={handleProcedureSelect}
           selectedProcedures={selectedProcedures}
         />
       </CardContent>

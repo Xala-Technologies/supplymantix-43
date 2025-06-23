@@ -21,9 +21,9 @@ export const WorkOrderProcedureSection = ({
   // Get linked procedures for this work order
   const linkedProcedures = workOrderProcedureService.getLinkedProcedures(workOrderId);
   
-  const handleProcedureSelect = (procedureId: string) => {
+  const handleProcedureSelect = (procedure: any) => {
     // In a real app, this would make an API call to link the procedure
-    console.log('Linking procedure', procedureId, 'to work order', workOrderId);
+    console.log('Linking procedure', procedure.id, 'to work order', workOrderId);
     setShowProcedureDialog(false);
   };
 
@@ -150,7 +150,7 @@ export const WorkOrderProcedureSection = ({
         <ProcedureSelectionDialog
           open={showProcedureDialog}
           onOpenChange={setShowProcedureDialog}
-          onProcedureSelect={handleProcedureSelect}
+          onSelect={handleProcedureSelect}
           selectedProcedures={linkedProcedures.map(link => link.procedureId)}
         />
       </CardContent>

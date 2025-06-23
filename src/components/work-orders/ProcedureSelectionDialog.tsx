@@ -13,13 +13,15 @@ interface ProcedureSelectionDialogProps {
   onOpenChange: (open: boolean) => void;
   onSelect: (procedure: any) => void;
   onCreateNew?: () => void;
+  selectedProcedures?: string[];
 }
 
 export const ProcedureSelectionDialog: React.FC<ProcedureSelectionDialogProps> = ({
   open,
   onOpenChange,
   onSelect,
-  onCreateNew
+  onCreateNew,
+  selectedProcedures = []
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
   
@@ -79,7 +81,9 @@ export const ProcedureSelectionDialog: React.FC<ProcedureSelectionDialogProps> =
               {procedures.map((procedure) => (
                 <Card 
                   key={procedure.id}
-                  className="cursor-pointer hover:shadow-md transition-shadow"
+                  className={`cursor-pointer hover:shadow-md transition-shadow ${
+                    selectedProcedures.includes(procedure.id) ? 'ring-2 ring-blue-500' : ''
+                  }`}
                   onClick={() => handleSelect(procedure)}
                 >
                   <CardContent className="p-4">
