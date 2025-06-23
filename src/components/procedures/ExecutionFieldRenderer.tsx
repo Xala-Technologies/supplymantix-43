@@ -71,12 +71,12 @@ export const ExecutionFieldRenderer: React.FC<ExecutionFieldRendererProps> = ({
   if (field.field_type === 'section') {
     return (
       <Card className="bg-gradient-to-r from-gray-50 to-slate-50 border-2 border-dashed border-gray-300">
-        <CardContent className="p-6 text-center">
-          <div className="flex items-center justify-center gap-2 mb-2">
-            <Heading className="h-5 w-5 text-gray-600" />
-            <h3 className="text-xl font-semibold text-gray-900">{field.label}</h3>
+        <CardContent className="p-4 text-center">
+          <div className="flex items-center justify-center gap-2 mb-1">
+            <Heading className="h-4 w-4 text-gray-600" />
+            <h3 className="text-lg font-semibold text-gray-900">{field.label}</h3>
           </div>
-          <p className="text-sm text-gray-600">Section header - click Next to continue</p>
+          <p className="text-xs text-gray-600">Section header - click Next to continue</p>
         </CardContent>
       </Card>
     );
@@ -264,44 +264,44 @@ export const ExecutionFieldRenderer: React.FC<ExecutionFieldRendererProps> = ({
   };
 
   return (
-    <div className="w-full min-h-[200px]">
+    <div className="w-full">
       <Card className={`border-l-4 ${getFieldTypeColor(field.field_type)} shadow-sm`}>
-        <CardContent className="p-6">
-          <div className="space-y-4">
-            {/* Field Header */}
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-gray-100">
-                <FieldIcon className="h-4 w-4 text-gray-600" />
+        <CardContent className="p-4">
+          <div className="space-y-3">
+            {/* Compact Field Header */}
+            <div className="flex items-center gap-2">
+              <div className="p-1.5 rounded-md bg-gray-100">
+                <FieldIcon className="h-3 w-3 text-gray-600" />
               </div>
               <div className="flex-1">
                 <div className="flex items-center gap-2">
-                  <Label htmlFor={fieldId} className="text-base font-medium text-gray-900">
+                  <Label htmlFor={fieldId} className="text-sm font-medium text-gray-900">
                     {field.label}
                   </Label>
                   {field.is_required && (
-                    <Badge variant="destructive" className="text-xs">
+                    <Badge variant="destructive" className="text-xs px-1.5 py-0.5">
                       Required
                     </Badge>
                   )}
                 </div>
                 {field.field_type !== 'checkbox' && (
-                  <Badge variant="outline" className="text-xs mt-1">
+                  <Badge variant="outline" className="text-xs mt-0.5">
                     {field.field_type}
                   </Badge>
                 )}
               </div>
             </div>
 
-            {/* Field Input */}
-            <div className="bg-white rounded-lg border p-4 min-h-[60px]">
+            {/* Compact Field Input */}
+            <div className="bg-white rounded-md border p-3">
               {renderInput()}
             </div>
 
             {/* Error Message */}
             {error && (
-              <div className="flex items-center gap-2 text-red-600 text-sm bg-red-50 p-3 rounded-lg border border-red-200">
-                <AlertCircle className="h-4 w-4 flex-shrink-0" />
-                <span>{error}</span>
+              <div className="flex items-center gap-2 text-red-600 text-sm bg-red-50 p-2 rounded-md border border-red-200">
+                <AlertCircle className="h-3 w-3 flex-shrink-0" />
+                <span className="text-xs">{error}</span>
               </div>
             )}
           </div>
