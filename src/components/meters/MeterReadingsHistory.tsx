@@ -119,36 +119,43 @@ export const MeterReadingsHistory = ({ meterId }: MeterReadingsHistoryProps) => 
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
-            {readings.slice(0, 10).map((reading) => (
-              <div key={reading.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                <div className="flex items-center gap-3">
-                  <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
-                  <div>
-                    <p className="font-semibold text-lg">{Number(reading.value).toLocaleString()}</p>
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <Clock className="h-3 w-3" />
-                      {new Date(reading.recorded_at).toLocaleString()}
+            {readings.slice(0, 10).map((reading) => {
+              // Extract user info safely
+              const userInfo = reading.users && typeof reading.users === 'object' && reading.users !== null 
+                ? reading.users as any 
+                : null;
+              
+              return (
+                <div key={reading.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                  <div className="flex items-center gap-3">
+                    <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
+                    <div>
+                      <p className="font-semibold text-lg">{Number(reading.value).toLocaleString()}</p>
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <Clock className="h-3 w-3" />
+                        {new Date(reading.recorded_at).toLocaleString()}
+                      </div>
                     </div>
                   </div>
+                  <div className="text-right">
+                    {userInfo && 'email' in userInfo && (
+                      <div className="flex items-center gap-1 text-sm text-muted-foreground mb-1">
+                        <User className="h-3 w-3" />
+                        {userInfo.first_name && userInfo.last_name 
+                          ? `${userInfo.first_name} ${userInfo.last_name}`.trim()
+                          : userInfo.email || 'Unknown User'
+                        }
+                      </div>
+                    )}
+                    {reading.comment && (
+                      <p className="text-xs text-muted-foreground max-w-xs">
+                        {reading.comment}
+                      </p>
+                    )}
+                  </div>
                 </div>
-                <div className="text-right">
-                  {reading.users && typeof reading.users === 'object' && reading.users !== null && 'email' in reading.users && (
-                    <div className="flex items-center gap-1 text-sm text-muted-foreground mb-1">
-                      <User className="h-3 w-3" />
-                      {(reading.users as any).first_name && (reading.users as any).last_name 
-                        ? `${(reading.users as any).first_name} ${(reading.users as any).last_name}`.trim()
-                        : (reading.users as any).email || 'Unknown User'
-                      }
-                    </div>
-                  )}
-                  {reading.comment && (
-                    <p className="text-xs text-muted-foreground max-w-xs">
-                      {reading.comment}
-                    </p>
-                  )}
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </CardContent>
       </Card>
