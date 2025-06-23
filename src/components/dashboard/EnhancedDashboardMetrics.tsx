@@ -147,9 +147,9 @@ export const EnhancedDashboardMetrics = ({
   return (
     <div className="space-y-6">
       {/* Welcome Section */}
-      <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg p-6 text-white">
+      <div className="rounded-lg p-6">
         <h1 className="text-2xl font-bold mb-2">Welcome back!</h1>
-        <p className="text-blue-100">Here's what's happening with your maintenance operations today.</p>
+        <p className="text-gray-600">Here's what's happening with your maintenance operations today.</p>
       </div>
 
       {/* KPI Cards */}
