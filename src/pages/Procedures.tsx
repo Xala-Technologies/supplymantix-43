@@ -334,7 +334,7 @@ const Procedures = () => {
 
       {/* Create Dialog */}
       <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
-        <DialogContent className="max-w-6xl h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-5xl h-[85vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Create New Procedure</DialogTitle>
           </DialogHeader>
@@ -348,7 +348,7 @@ const Procedures = () => {
 
       {/* Edit Dialog */}
       <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
-        <DialogContent className="max-w-6xl h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-5xl h-[85vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Edit Procedure</DialogTitle>
           </DialogHeader>
@@ -368,7 +368,7 @@ const Procedures = () => {
 
       {/* Execution Dialog */}
       <Dialog open={showExecutionDialog} onOpenChange={setShowExecutionDialog}>
-        <DialogContent className="max-w-3xl h-[85vh] overflow-y-auto">
+        <DialogContent className="max-w-2xl h-[80vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Execute Procedure</DialogTitle>
           </DialogHeader>

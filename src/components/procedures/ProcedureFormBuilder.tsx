@@ -141,33 +141,33 @@ export const ProcedureFormBuilder: React.FC<ProcedureFormBuilderProps> = ({
   };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
-      <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Header Section */}
+    <div className="max-w-4xl mx-auto space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-4">
+        {/* Compact Header */}
         <div className="text-center space-y-1">
-          <div className="flex items-center justify-center gap-2 mb-1">
-            <Sparkles className="h-5 w-5 text-blue-600" />
-            <h2 className="text-xl font-bold text-gray-900">
+          <div className="flex items-center justify-center gap-2">
+            <Sparkles className="h-4 w-4 text-blue-600" />
+            <h2 className="text-lg font-bold text-gray-900">
               {initialData ? 'Edit Procedure' : 'Create New Procedure'}
             </h2>
           </div>
-          <p className="text-sm text-gray-600">
-            Build standardized procedures with custom fields and validation
+          <p className="text-xs text-gray-600">
+            Build standardized procedures with custom fields
           </p>
         </div>
 
         {/* Basic Information */}
         <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="flex items-center gap-2 text-base">
-              <Building className="h-4 w-4 text-blue-600" />
+          <CardHeader className="pb-2">
+            <CardTitle className="flex items-center gap-2 text-sm">
+              <Building className="h-3 w-3 text-blue-600" />
               Basic Information
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <CardContent className="space-y-3 pt-0">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
               <div className="space-y-1">
-                <Label htmlFor="title" className="text-sm font-medium">
+                <Label htmlFor="title" className="text-xs font-medium">
                   Procedure Title *
                 </Label>
                 <Input
@@ -176,19 +176,19 @@ export const ProcedureFormBuilder: React.FC<ProcedureFormBuilderProps> = ({
                   onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
                   placeholder="Enter procedure title"
                   required
-                  className="h-9"
+                  className="h-7 text-sm"
                 />
               </div>
 
               <div className="space-y-1">
-                <Label htmlFor="category" className="text-sm font-medium">
+                <Label htmlFor="category" className="text-xs font-medium">
                   Category
                 </Label>
                 <Select
                   value={formData.category}
                   onValueChange={(value) => setFormData(prev => ({ ...prev, category: value }))}
                 >
-                  <SelectTrigger className="h-9">
+                  <SelectTrigger className="h-7 text-sm">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -206,56 +206,56 @@ export const ProcedureFormBuilder: React.FC<ProcedureFormBuilderProps> = ({
             </div>
 
             <div className="space-y-1">
-              <Label htmlFor="description" className="text-sm font-medium">
+              <Label htmlFor="description" className="text-xs font-medium">
                 Description
               </Label>
               <Textarea
                 id="description"
                 value={formData.description}
                 onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                placeholder="Describe what this procedure covers and when to use it"
-                rows={3}
-                className="resize-none"
+                placeholder="Describe this procedure"
+                rows={2}
+                className="resize-none text-sm"
               />
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label className="text-sm font-medium">Tags</Label>
-                <div className="flex flex-wrap gap-1 min-h-[32px] p-2 border rounded bg-gray-50">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+              <div className="space-y-1">
+                <Label className="text-xs font-medium">Tags</Label>
+                <div className="flex flex-wrap gap-1 min-h-[24px] p-1 border rounded bg-gray-50">
                   {formData.tags.map(tag => (
                     <Badge 
                       key={tag} 
                       variant="secondary" 
-                      className="text-xs cursor-pointer hover:bg-red-100 hover:text-red-700" 
+                      className="text-xs px-1 py-0 cursor-pointer hover:bg-red-100 hover:text-red-700" 
                       onClick={() => removeTag(tag)}
                     >
                       {tag} ×
                     </Badge>
                   ))}
                   {formData.tags.length === 0 && (
-                    <span className="text-gray-500 text-xs">No tags added</span>
+                    <span className="text-gray-500 text-xs">No tags</span>
                   )}
                 </div>
-                <div className="flex gap-2">
+                <div className="flex gap-1">
                   <Input
                     value={newTag}
                     onChange={(e) => setNewTag(e.target.value)}
                     placeholder="Add tag"
                     onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addTag())}
-                    className="flex-1 h-8"
+                    className="flex-1 h-6 text-xs"
                   />
-                  <Button type="button" onClick={addTag} size="sm" variant="outline" className="h-8">
+                  <Button type="button" onClick={addTag} size="sm" variant="outline" className="h-6 px-2 text-xs">
                     Add
                   </Button>
                 </div>
               </div>
 
-              <div className="flex items-center justify-between p-3 bg-blue-50 rounded border border-blue-200">
+              <div className="flex items-center justify-between p-2 bg-blue-50 rounded border border-blue-200">
                 <div className="flex items-center gap-2">
-                  <Globe className="h-4 w-4 text-blue-600" />
+                  <Globe className="h-3 w-3 text-blue-600" />
                   <div>
-                    <Label htmlFor="is_global" className="text-sm font-medium">
+                    <Label htmlFor="is_global" className="text-xs font-medium">
                       Global Procedure
                     </Label>
                     <p className="text-xs text-gray-600">
@@ -275,33 +275,33 @@ export const ProcedureFormBuilder: React.FC<ProcedureFormBuilderProps> = ({
 
         {/* Fields Section */}
         <Card>
-          <CardHeader className="pb-3">
+          <CardHeader className="pb-2">
             <div className="flex items-center justify-between">
-              <CardTitle className="flex items-center gap-2 text-base">
-                <Sparkles className="h-4 w-4 text-green-600" />
+              <CardTitle className="flex items-center gap-2 text-sm">
+                <Sparkles className="h-3 w-3 text-green-600" />
                 Procedure Fields ({formData.fields.length})
               </CardTitle>
-              <Button type="button" onClick={addField} size="sm" className="h-8 bg-green-600 hover:bg-green-700">
+              <Button type="button" onClick={addField} size="sm" className="h-6 px-2 bg-green-600 hover:bg-green-700 text-xs">
                 <Plus className="h-3 w-3 mr-1" />
                 Add Field
               </Button>
             </div>
           </CardHeader>
-          <CardContent>
+          <CardContent className="pt-0">
             {formData.fields.length === 0 ? (
-              <div className="text-center py-8 bg-gray-50 rounded border-2 border-dashed border-gray-300">
-                <Sparkles className="h-8 w-8 text-gray-400 mx-auto mb-2" />
+              <div className="text-center py-6 bg-gray-50 rounded border-2 border-dashed border-gray-300">
+                <Sparkles className="h-6 w-6 text-gray-400 mx-auto mb-1" />
                 <h3 className="text-sm font-medium text-gray-900 mb-1">No fields added yet</h3>
-                <p className="text-xs text-gray-600 mb-3">
+                <p className="text-xs text-gray-600 mb-2">
                   Add fields to create a structured procedure
                 </p>
-                <Button type="button" onClick={addField} variant="outline" size="sm">
+                <Button type="button" onClick={addField} variant="outline" size="sm" className="h-7 text-xs">
                   <Plus className="h-3 w-3 mr-1" />
                   Add Your First Field
                 </Button>
               </div>
             ) : (
-              <div className="space-y-3">
+              <div className="space-y-2">
                 {formData.fields.map((field, index) => (
                   <FieldEditor
                     key={index}
@@ -319,16 +319,16 @@ export const ProcedureFormBuilder: React.FC<ProcedureFormBuilderProps> = ({
         </Card>
 
         {/* Actions */}
-        <div className="flex justify-end space-x-3 pt-4">
-          <Button type="button" variant="outline" onClick={onCancel}>
+        <div className="flex justify-end space-x-2 pt-2">
+          <Button type="button" variant="outline" onClick={onCancel} className="h-7 text-xs">
             Cancel
           </Button>
           <Button 
             type="submit" 
             disabled={isLoading || !formData.title}
-            className="bg-blue-600 hover:bg-blue-700"
+            className="bg-blue-600 hover:bg-blue-700 h-7 text-xs"
           >
-            <Save className="h-4 w-4 mr-2" />
+            <Save className="h-3 w-3 mr-1" />
             {isLoading ? 'Saving...' : 'Save Procedure'}
           </Button>
         </div>
