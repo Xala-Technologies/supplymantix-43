@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { DashboardLayout } from "@/components/Layout/DashboardLayout";
 import { LocationsHeader } from "@/components/locations/LocationsHeader";
@@ -7,6 +6,7 @@ import { LocationForm } from "@/components/locations/LocationForm";
 import { LocationDetailDialog } from "@/components/locations/LocationDetailDialog";
 import { LocationBreadcrumbs } from "@/components/locations/LocationBreadcrumbs";
 import { useLocationHierarchy, useDeleteLocation } from "@/hooks/useLocations";
+import { useGlobalAssetStats, useGlobalMeterStats } from "@/hooks/useGlobalStats";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertTriangle, Plus, Building2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -23,6 +23,8 @@ const Locations = () => {
   const [currentLocationId, setCurrentLocationId] = useState<string | null>(null);
 
   const { data: locationHierarchy, isLoading, error } = useLocationHierarchy();
+  const { data: assetStats, isLoading: assetStatsLoading } = useGlobalAssetStats();
+  const { data: meterStats, isLoading: meterStatsLoading } = useGlobalMeterStats();
   const deleteLocation = useDeleteLocation();
   const { toast } = useToast();
 
@@ -213,11 +215,15 @@ const Locations = () => {
                   </div>
                   <div className="flex justify-between">
                     <span className="text-blue-700">Active Assets:</span>
-                    <span className="font-medium">42</span>
+                    <span className="font-medium">
+                      {assetStatsLoading ? "..." : assetStats?.active || 0}
+                    </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-blue-700">Total Meters:</span>
-                    <span className="font-medium">15</span>
+                    <span className="font-medium">
+                      {meterStatsLoading ? "..." : meterStats?.total || 0}
+                    </span>
                   </div>
                 </div>
               </div>
