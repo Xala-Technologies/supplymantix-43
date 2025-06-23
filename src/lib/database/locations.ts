@@ -163,8 +163,8 @@ export const locationsApi = {
     const result: LocationHierarchy[] = [];
     const locationMap = new Map<string, LocationHierarchy>();
     
-    // First pass: create all location objects - avoid spread operator on complex types
-    locations.forEach((location: LocationRow) => {
+    // First pass: create all location objects with simple assignment
+    for (const location of locations) {
       const hierarchyNode: LocationHierarchy = {
         id: location.id,
         name: location.name,
@@ -184,19 +184,21 @@ export const locationsApi = {
         path: []
       };
       locationMap.set(location.id, hierarchyNode);
-    });
+    }
     
-    // Second pass: build hierarchy
-    locations.forEach((location: LocationRow) => {
+    // Second pass: build hierarchy with simple for-of loop
+    for (const location of locations) {
       const node = locationMap.get(location.id);
-      if (!node) return;
+      if (!node) continue;
       
       if (location.parent_id && locationMap.has(location.parent_id)) {
         const parent = locationMap.get(location.parent_id);
         if (parent) {
           node.level = parent.level + 1;
           node.path = [...parent.path, parent.name];
-          parent.children = parent.children || [];
+          if (!parent.children) {
+            parent.children = [];
+          }
           parent.children.push(node);
         }
       } else {
@@ -204,7 +206,7 @@ export const locationsApi = {
         node.path = [];
         result.push(node);
       }
-    });
+    }
     
     return result;
   },
