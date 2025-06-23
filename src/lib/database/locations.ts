@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/integrations/supabase/types";
 import type { LocationHierarchy, LocationStats, LocationBreadcrumb } from "@/types/location";
@@ -6,6 +7,26 @@ type Tables = Database["public"]["Tables"];
 type LocationRow = Tables["locations"]["Row"];
 type LocationInsert = Tables["locations"]["Insert"];
 type LocationUpdate = Tables["locations"]["Update"];
+
+// Simple interface to avoid deep type inference
+interface SimpleNode {
+  id: string;
+  name: string;
+  description: string | null;
+  tenant_id: string;
+  parent_id: string | null;
+  location_code: string | null;
+  location_type: string;
+  address: string | null;
+  coordinates: any | null;
+  is_active: boolean;
+  metadata: any;
+  created_at: string;
+  updated_at: string;
+  children: SimpleNode[];
+  level: number;
+  path: string[];
+}
 
 export const locationsApi = {
   async getLocations(): Promise<LocationRow[]> {
@@ -28,34 +49,52 @@ export const locationsApi = {
     
     if (error) throw error;
     
-    // Directly return simple transformation to avoid type recursion
+    // Use simple object creation to avoid deep type inference
     if (!data || data.length === 0) return [];
     
     const result: any[] = [];
-    const nodeMap = new Map();
+    const nodeMap = new Map<string, any>();
     
-    // First pass - create all nodes
-    data.forEach(location => {
-      nodeMap.set(location.id, {
-        ...location,
+    // First pass - create all nodes with explicit simple structure
+    for (const location of data) {
+      const node = {
+        id: location.id,
+        name: location.name,
+        description: location.description,
+        tenant_id: location.tenant_id,
+        parent_id: location.parent_id,
+        location_code: location.location_code,
+        location_type: location.location_type,
+        address: location.address,
+        coordinates: location.coordinates,
+        is_active: location.is_active,
+        metadata: location.metadata,
+        created_at: location.created_at,
+        updated_at: location.updated_at,
         children: [],
         level: 0,
         path: []
-      });
-    });
+      };
+      nodeMap.set(location.id, node);
+    }
     
     // Second pass - build hierarchy
-    data.forEach(location => {
+    for (const location of data) {
       const node = nodeMap.get(location.id);
       if (location.parent_id && nodeMap.has(location.parent_id)) {
         const parent = nodeMap.get(location.parent_id);
         node.level = parent.level + 1;
-        node.path = [...parent.path, parent.name];
+        const newPath = [];
+        for (const pathItem of parent.path) {
+          newPath.push(pathItem);
+        }
+        newPath.push(parent.name);
+        node.path = newPath;
         parent.children.push(node);
       } else {
         result.push(node);
       }
-    });
+    }
     
     return result as LocationHierarchy[];
   },
@@ -193,8 +232,7 @@ export const locationsApi = {
     const nodesMap = new Map<string, SimpleNode>();
     
     // Create all nodes first with explicit simple structure
-    for (let i = 0; i < locations.length; i++) {
-      const loc = locations[i];
+    for (const loc of locations) {
       const simpleNode: SimpleNode = {
         id: loc.id,
         name: loc.name,
@@ -219,8 +257,7 @@ export const locationsApi = {
     // Build hierarchy with simple operations
     const rootNodes: SimpleNode[] = [];
     
-    for (let i = 0; i < locations.length; i++) {
-      const loc = locations[i];
+    for (const loc of locations) {
       const node = nodesMap.get(loc.id);
       if (!node) continue;
       
@@ -230,8 +267,8 @@ export const locationsApi = {
           node.level = parent.level + 1;
           // Simple path building
           const newPath: string[] = [];
-          for (let j = 0; j < parent.path.length; j++) {
-            newPath.push(parent.path[j]);
+          for (const pathItem of parent.path) {
+            newPath.push(pathItem);
           }
           newPath.push(parent.name);
           node.path = newPath;
@@ -245,6 +282,6 @@ export const locationsApi = {
     }
     
     // Convert to LocationHierarchy[] with explicit cast
-    return rootNodes as unknown as LocationHierarchy[];
+    return rootNodes as LocationHierarchy[];
   },
 };
