@@ -56,189 +56,6 @@ const getFieldTypeColor = (fieldType: string) => {
   return colors[fieldType] || 'border-l-gray-400';
 };
 
-const renderFieldInput = (field: ProcedureField, value: any, onChange: (value: any) => void, fieldId: string) => {
-  console.log(`Rendering field ${field.field_type} with value:`, value);
-  
-  switch (field.field_type) {
-    case 'text':
-      return (
-        <Input
-          id={fieldId}
-          value={value || ''}
-          onChange={(e) => {
-            console.log(`Text field ${fieldId} changed to:`, e.target.value);
-            onChange(e.target.value);
-          }}
-          placeholder={`Enter ${field.label.toLowerCase()}`}
-          className="text-sm w-full"
-        />
-      );
-
-    case 'number':
-      return (
-        <Input
-          id={fieldId}
-          type="number"
-          value={value || ''}
-          onChange={(e) => {
-            const numValue = e.target.value;
-            console.log(`Number field ${fieldId} changed to:`, numValue);
-            onChange(numValue);
-          }}
-          placeholder={`Enter ${field.label.toLowerCase()}`}
-          className="text-sm w-full"
-          step="any"
-        />
-      );
-
-    case 'date':
-      return (
-        <Input
-          id={fieldId}
-          type="date"
-          value={value || ''}
-          onChange={(e) => {
-            console.log(`Date field ${fieldId} changed to:`, e.target.value);
-            onChange(e.target.value);
-          }}
-          className="text-sm w-full"
-        />
-      );
-
-    case 'checkbox':
-      return (
-        <div className="flex items-center space-x-3 p-3">
-          <Checkbox
-            id={fieldId}
-            checked={Boolean(value)}
-            onCheckedChange={(checked) => {
-              console.log(`Checkbox field ${fieldId} changed to:`, checked);
-              onChange(checked === true);
-            }}
-            className="h-5 w-5"
-          />
-          <Label htmlFor={fieldId} className="cursor-pointer text-sm font-medium">
-            {field.label}
-          </Label>
-        </div>
-      );
-
-    case 'select':
-      const choices = field.options?.choices || [];
-      return (
-        <Select 
-          value={value || ''} 
-          onValueChange={(selectedValue) => {
-            console.log(`Select field ${fieldId} changed to:`, selectedValue);
-            onChange(selectedValue);
-          }}
-        >
-          <SelectTrigger className="text-sm w-full">
-            <SelectValue placeholder={`Select ${field.label.toLowerCase()}`} />
-          </SelectTrigger>
-          <SelectContent>
-            {choices.length === 0 ? (
-              <SelectItem value="" disabled>No options available</SelectItem>
-            ) : (
-              choices.map((choice: string, index: number) => (
-                <SelectItem key={`${choice}-${index}`} value={choice} className="text-sm">
-                  {choice}
-                </SelectItem>
-              ))
-            )}
-          </SelectContent>
-        </Select>
-      );
-
-    case 'multiselect':
-      const multiselectChoices = field.options?.choices || [];
-      const selectedValues = Array.isArray(value) ? value : [];
-      
-      return (
-        <div className="space-y-2 max-h-48 overflow-y-auto">
-          {multiselectChoices.length === 0 ? (
-            <div className="text-sm text-gray-500 p-3">No options available</div>
-          ) : (
-            multiselectChoices.map((choice: string, index: number) => (
-              <div key={`${choice}-${index}`} className="flex items-center space-x-3 p-2 hover:bg-gray-50 rounded">
-                <Checkbox
-                  id={`${fieldId}_${choice}_${index}`}
-                  checked={selectedValues.includes(choice)}
-                  onCheckedChange={(checked) => {
-                    const currentValues = Array.isArray(value) ? [...value] : [];
-                    let newValues;
-                    if (checked) {
-                      newValues = [...currentValues, choice];
-                    } else {
-                      newValues = currentValues.filter((v: string) => v !== choice);
-                    }
-                    console.log(`Multiselect field ${fieldId} changed to:`, newValues);
-                    onChange(newValues);
-                  }}
-                  className="h-4 w-4"
-                />
-                <Label htmlFor={`${fieldId}_${choice}_${index}`} className="cursor-pointer text-sm">
-                  {choice}
-                </Label>
-              </div>
-            ))
-          )}
-        </div>
-      );
-
-    case 'file':
-      return (
-        <div className="space-y-3">
-          <Input
-            id={fieldId}
-            type="file"
-            onChange={(e) => {
-              const file = e.target.files?.[0];
-              if (file) {
-                const fileData = {
-                  name: file.name,
-                  size: file.size,
-                  type: file.type,
-                  lastModified: file.lastModified
-                };
-                console.log(`File field ${fieldId} changed to:`, fileData);
-                onChange(fileData);
-              } else {
-                onChange(null);
-              }
-            }}
-            className="text-sm w-full"
-            accept="*/*"
-          />
-          {value && typeof value === 'object' && value.name && (
-            <div className="p-3 bg-gray-50 rounded border">
-              <p className="font-medium text-sm text-gray-900">{value.name}</p>
-              <p className="text-gray-600 text-xs">
-                {value.size ? `${(value.size / 1024).toFixed(1)} KB` : 'Unknown size'} 
-                {value.type && ` • ${value.type}`}
-              </p>
-            </div>
-          )}
-        </div>
-      );
-
-    default:
-      return (
-        <Textarea
-          id={fieldId}
-          value={value || ''}
-          onChange={(e) => {
-            console.log(`Textarea field ${fieldId} changed to:`, e.target.value);
-            onChange(e.target.value);
-          }}
-          placeholder={`Enter ${field.label.toLowerCase()}`}
-          rows={3}
-          className="resize-none text-sm w-full"
-        />
-      );
-  }
-};
-
 export const ExecutionFieldRenderer: React.FC<ExecutionFieldRendererProps> = ({
   field,
   value,
@@ -248,6 +65,9 @@ export const ExecutionFieldRenderer: React.FC<ExecutionFieldRendererProps> = ({
 }) => {
   const FieldIcon = getFieldIcon(field.field_type);
 
+  console.log(`Rendering field ${field.field_type} with value:`, value);
+
+  // Section fields are displayed differently
   if (field.field_type === 'section') {
     return (
       <Card className="bg-gradient-to-r from-gray-50 to-slate-50 border-2 border-dashed border-gray-300">
@@ -262,43 +82,231 @@ export const ExecutionFieldRenderer: React.FC<ExecutionFieldRendererProps> = ({
     );
   }
 
+  const renderInput = () => {
+    switch (field.field_type) {
+      case 'text':
+        return (
+          <Input
+            id={fieldId}
+            value={value || ''}
+            onChange={(e) => {
+              console.log(`Text field ${fieldId} changed to:`, e.target.value);
+              onChange(e.target.value);
+            }}
+            placeholder={`Enter ${field.label.toLowerCase()}`}
+            className="text-sm w-full"
+          />
+        );
+
+      case 'number':
+        return (
+          <Input
+            id={fieldId}
+            type="number"
+            value={value || ''}
+            onChange={(e) => {
+              const numValue = e.target.value;
+              console.log(`Number field ${fieldId} changed to:`, numValue);
+              onChange(numValue);
+            }}
+            placeholder={`Enter ${field.label.toLowerCase()}`}
+            className="text-sm w-full"
+            step="any"
+          />
+        );
+
+      case 'date':
+        return (
+          <Input
+            id={fieldId}
+            type="date"
+            value={value || ''}
+            onChange={(e) => {
+              console.log(`Date field ${fieldId} changed to:`, e.target.value);
+              onChange(e.target.value);
+            }}
+            className="text-sm w-full"
+          />
+        );
+
+      case 'checkbox':
+        return (
+          <div className="flex items-center space-x-3 p-3">
+            <Checkbox
+              id={fieldId}
+              checked={Boolean(value)}
+              onCheckedChange={(checked) => {
+                console.log(`Checkbox field ${fieldId} changed to:`, checked);
+                onChange(checked === true);
+              }}
+              className="h-5 w-5"
+            />
+            <Label htmlFor={fieldId} className="cursor-pointer text-sm font-medium">
+              {field.label}
+            </Label>
+          </div>
+        );
+
+      case 'select':
+        const choices = field.options?.choices || [];
+        return (
+          <Select 
+            value={value || ''} 
+            onValueChange={(selectedValue) => {
+              console.log(`Select field ${fieldId} changed to:`, selectedValue);
+              onChange(selectedValue);
+            }}
+          >
+            <SelectTrigger className="text-sm w-full">
+              <SelectValue placeholder={`Select ${field.label.toLowerCase()}`} />
+            </SelectTrigger>
+            <SelectContent className="bg-white border shadow-lg z-50">
+              {choices.length === 0 ? (
+                <SelectItem value="" disabled>No options available</SelectItem>
+              ) : (
+                choices.map((choice: string, index: number) => (
+                  <SelectItem key={`${choice}-${index}`} value={choice} className="text-sm">
+                    {choice}
+                  </SelectItem>
+                ))
+              )}
+            </SelectContent>
+          </Select>
+        );
+
+      case 'multiselect':
+        const multiselectChoices = field.options?.choices || [];
+        const selectedValues = Array.isArray(value) ? value : [];
+        
+        return (
+          <div className="space-y-2 max-h-48 overflow-y-auto border rounded-lg p-2 bg-white">
+            {multiselectChoices.length === 0 ? (
+              <div className="text-sm text-gray-500 p-3">No options available</div>
+            ) : (
+              multiselectChoices.map((choice: string, index: number) => (
+                <div key={`${choice}-${index}`} className="flex items-center space-x-3 p-2 hover:bg-gray-50 rounded">
+                  <Checkbox
+                    id={`${fieldId}_${choice}_${index}`}
+                    checked={selectedValues.includes(choice)}
+                    onCheckedChange={(checked) => {
+                      const currentValues = Array.isArray(value) ? [...value] : [];
+                      let newValues;
+                      if (checked) {
+                        newValues = [...currentValues, choice];
+                      } else {
+                        newValues = currentValues.filter((v: string) => v !== choice);
+                      }
+                      console.log(`Multiselect field ${fieldId} changed to:`, newValues);
+                      onChange(newValues);
+                    }}
+                    className="h-4 w-4"
+                  />
+                  <Label htmlFor={`${fieldId}_${choice}_${index}`} className="cursor-pointer text-sm">
+                    {choice}
+                  </Label>
+                </div>
+              ))
+            )}
+          </div>
+        );
+
+      case 'file':
+        return (
+          <div className="space-y-3">
+            <Input
+              id={fieldId}
+              type="file"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) {
+                  const fileData = {
+                    name: file.name,
+                    size: file.size,
+                    type: file.type,
+                    lastModified: file.lastModified
+                  };
+                  console.log(`File field ${fieldId} changed to:`, fileData);
+                  onChange(fileData);
+                } else {
+                  onChange(null);
+                }
+              }}
+              className="text-sm w-full"
+              accept="*/*"
+            />
+            {value && typeof value === 'object' && value.name && (
+              <div className="p-3 bg-gray-50 rounded border">
+                <p className="font-medium text-sm text-gray-900">{value.name}</p>
+                <p className="text-gray-600 text-xs">
+                  {value.size ? `${(value.size / 1024).toFixed(1)} KB` : 'Unknown size'} 
+                  {value.type && ` • ${value.type}`}
+                </p>
+              </div>
+            )}
+          </div>
+        );
+
+      default:
+        return (
+          <Textarea
+            id={fieldId}
+            value={value || ''}
+            onChange={(e) => {
+              console.log(`Textarea field ${fieldId} changed to:`, e.target.value);
+              onChange(e.target.value);
+            }}
+            placeholder={`Enter ${field.label.toLowerCase()}`}
+            rows={3}
+            className="resize-none text-sm w-full"
+          />
+        );
+    }
+  };
+
   return (
-    <Card className={`border-l-4 ${getFieldTypeColor(field.field_type)} shadow-sm`}>
-      <CardContent className="p-4">
-        <div className="space-y-4">
-          {/* Field Header */}
-          <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-gray-100">
-              <FieldIcon className="h-4 w-4 text-gray-600" />
-            </div>
-            <div className="flex-1">
-              <div className="flex items-center gap-2">
-                <Label htmlFor={fieldId} className="text-base font-medium text-gray-900">
-                  {field.label}
-                </Label>
-                {field.is_required && (
-                  <Badge variant="destructive" className="text-xs">
-                    Required
+    <div className="w-full min-h-[200px]">
+      <Card className={`border-l-4 ${getFieldTypeColor(field.field_type)} shadow-sm`}>
+        <CardContent className="p-6">
+          <div className="space-y-4">
+            {/* Field Header */}
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-gray-100">
+                <FieldIcon className="h-4 w-4 text-gray-600" />
+              </div>
+              <div className="flex-1">
+                <div className="flex items-center gap-2">
+                  <Label htmlFor={fieldId} className="text-base font-medium text-gray-900">
+                    {field.label}
+                  </Label>
+                  {field.is_required && (
+                    <Badge variant="destructive" className="text-xs">
+                      Required
+                    </Badge>
+                  )}
+                </div>
+                {field.field_type !== 'checkbox' && (
+                  <Badge variant="outline" className="text-xs mt-1">
+                    {field.field_type}
                   </Badge>
                 )}
               </div>
             </div>
-          </div>
 
-          {/* Field Input */}
-          <div className="bg-white rounded-lg border p-4">
-            {renderFieldInput(field, value, onChange, fieldId)}
-          </div>
-
-          {/* Error Message */}
-          {error && (
-            <div className="flex items-center gap-2 text-red-600 text-sm bg-red-50 p-3 rounded-lg border border-red-200">
-              <AlertCircle className="h-4 w-4 flex-shrink-0" />
-              <span>{error}</span>
+            {/* Field Input */}
+            <div className="bg-white rounded-lg border p-4 min-h-[60px]">
+              {renderInput()}
             </div>
-          )}
-        </div>
-      </CardContent>
-    </Card>
+
+            {/* Error Message */}
+            {error && (
+              <div className="flex items-center gap-2 text-red-600 text-sm bg-red-50 p-3 rounded-lg border border-red-200">
+                <AlertCircle className="h-4 w-4 flex-shrink-0" />
+                <span>{error}</span>
+              </div>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+    </div>
   );
 };
