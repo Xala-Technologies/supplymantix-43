@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { DashboardLayout } from "@/components/Layout/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -20,7 +21,9 @@ import {
   CheckCircle,
   Globe,
   Building,
-  FileText
+  FileText,
+  AlertCircle,
+  Loader2
 } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { 
@@ -52,6 +55,7 @@ const Procedures = () => {
   const [executionResult, setExecutionResult] = useState<ExecutionResult | null>(null);
   const [currentExecutionId, setCurrentExecutionId] = useState<string | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
+  const [executingProcedures, setExecutingProcedures] = useState<Set<string>>(new Set());
 
   const { data: proceduresData, isLoading } = useProceduresEnhanced({
     search: searchTerm || undefined,
@@ -126,8 +130,26 @@ const Procedures = () => {
     duplicateProcedure.mutate({ id });
   };
 
+  const canExecuteProcedure = (procedure: any): { canExecute: boolean; reason?: string } => {
+    if (!procedure.fields || procedure.fields.length === 0) {
+      return { canExecute: false, reason: "No fields configured" };
+    }
+    if (executingProcedures.has(procedure.id)) {
+      return { canExecute: false, reason: "Currently executing" };
+    }
+    return { canExecute: true };
+  };
+
   const handleExecuteProcedure = async (procedure: any) => {
+    const { canExecute, reason } = canExecuteProcedure(procedure);
+    
+    if (!canExecute) {
+      toast.error(reason || "Cannot execute procedure");
+      return;
+    }
+
     try {
+      setExecutingProcedures(prev => new Set(prev).add(procedure.id));
       setSelectedProcedure(procedure);
       
       // Start execution in database
@@ -140,6 +162,12 @@ const Procedures = () => {
     } catch (error) {
       console.error('Failed to start execution:', error);
       toast.error('Failed to start procedure execution');
+    } finally {
+      setExecutingProcedures(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(procedure.id);
+        return newSet;
+      });
     }
   };
 
@@ -182,6 +210,66 @@ const Procedures = () => {
       default:
         return String(answer.value);
     }
+  };
+
+  const renderExecuteButton = (procedure: any, variant: 'primary' | 'secondary' = 'primary') => {
+    const { canExecute, reason } = canExecuteProcedure(procedure);
+    const isExecuting = executingProcedures.has(procedure.id);
+    
+    if (variant === 'primary') {
+      return (
+        <Button 
+          variant="outline" 
+          size="sm" 
+          className={`flex-1 transition-all duration-200 ${
+            canExecute 
+              ? 'hover:bg-blue-50 hover:border-blue-300 hover:text-blue-700' 
+              : 'opacity-50 cursor-not-allowed'
+          }`}
+          onClick={() => handleExecuteProcedure(procedure)}
+          disabled={!canExecute || isExecuting}
+          title={!canExecute ? reason : 'Execute this procedure'}
+        >
+          {isExecuting ? (
+            <>
+              <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+              Starting...
+            </>
+          ) : !canExecute ? (
+            <>
+              <AlertCircle className="h-4 w-4 mr-1" />
+              {reason === "No fields configured" ? "No Fields" : "Cannot Execute"}
+            </>
+          ) : (
+            <>
+              <Play className="h-4 w-4 mr-1" />
+              Execute
+            </>
+          )}
+        </Button>
+      );
+    }
+
+    // Secondary button for dropdown menu
+    return (
+      <DropdownMenuItem 
+        onClick={() => handleExecuteProcedure(procedure)}
+        disabled={!canExecute || isExecuting}
+        className={`${!canExecute ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+      >
+        {isExecuting ? (
+          <>
+            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+            Starting...
+          </>
+        ) : (
+          <>
+            <Play className="h-4 w-4 mr-2" />
+            Execute
+          </>
+        )}
+      </DropdownMenuItem>
+    );
   };
 
   if (isLoading) {
@@ -307,10 +395,7 @@ const Procedures = () => {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => handleExecuteProcedure(procedure)}>
-                            <Play className="h-4 w-4 mr-2" />
-                            Execute
-                          </DropdownMenuItem>
+                          {renderExecuteButton(procedure, 'secondary')}
                           <DropdownMenuItem onClick={() => {
                             setSelectedProcedure(procedure);
                             setShowEditDialog(true);
@@ -347,22 +432,13 @@ const Procedures = () => {
                       </div>
                     </div>
 
-                    <div className="flex items-center justify-between text-sm text-gray-500">
+                    <div className="flex items-center justify-between text-sm text-gray-500 mb-4">
                       <span>{procedure.fields?.length || 0} fields</span>
                       <span>{procedure.executions_count || 0} executions</span>
                     </div>
 
-                    <div className="flex space-x-2 mt-4">
-                      <Button 
-                        variant="outline" 
-                        size="sm" 
-                        className="flex-1"
-                        onClick={() => handleExecuteProcedure(procedure)}
-                        disabled={startExecution.isPending}
-                      >
-                        <Play className="h-4 w-4 mr-1" />
-                        {startExecution.isPending ? 'Starting...' : 'Execute'}
-                      </Button>
+                    <div className="flex space-x-2">
+                      {renderExecuteButton(procedure, 'primary')}
                       <Button 
                         variant="ghost" 
                         size="sm"
