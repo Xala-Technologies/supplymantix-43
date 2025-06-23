@@ -175,24 +175,26 @@ export const MetersList = ({
             )}
 
             <CardHeader className={`pb-4 ${onMeterSelect ? 'pl-12' : ''}`}>
-              <div className="flex items-start justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center shadow-sm">
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex items-center gap-3 min-w-0 flex-1">
+                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center shadow-sm flex-shrink-0">
                     <BarChart3 className="h-6 w-6 text-white" />
                   </div>
-                  <div>
-                    <h3 className="font-semibold text-slate-900 group-hover:text-blue-600 transition-colors">
+                  <div className="min-w-0 flex-1">
+                    <h3 className="font-semibold text-slate-900 group-hover:text-blue-600 transition-colors text-base leading-tight truncate">
                       {meter.name}
                     </h3>
-                    <p className="text-sm text-slate-500 capitalize">
+                    <p className="text-sm text-slate-500 capitalize truncate">
                       {meter.type} meter
                     </p>
                   </div>
                 </div>
-                <Badge variant="outline" className={getStatusColor(meter.status)}>
-                  {getStatusIcon(meter.status)}
-                  <span className="ml-1 capitalize">{meter.status}</span>
-                </Badge>
+                <div className="flex-shrink-0">
+                  <Badge variant="outline" className={getStatusColor(meter.status)}>
+                    {getStatusIcon(meter.status)}
+                    <span className="ml-1 capitalize">{meter.status}</span>
+                  </Badge>
+                </div>
               </div>
             </CardHeader>
             
@@ -238,13 +240,13 @@ export const MetersList = ({
               <div className="space-y-2">
                 {meter.asset_name && (
                   <div className="flex items-center gap-2 text-sm text-slate-600">
-                    <Factory className="h-4 w-4 text-slate-400" />
+                    <Factory className="h-4 w-4 text-slate-400 flex-shrink-0" />
                     <span className="truncate">{meter.asset_name}</span>
                   </div>
                 )}
                 {meter.location && (
                   <div className="flex items-center gap-2 text-sm text-slate-600">
-                    <MapPin className="h-4 w-4 text-slate-400" />
+                    <MapPin className="h-4 w-4 text-slate-400 flex-shrink-0" />
                     <span className="truncate">{meter.location}</span>
                   </div>
                 )}
