@@ -1,8 +1,10 @@
+
 import React, { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useMeterDetail } from "@/hooks/useMetersEnhanced";
 import { MeterReadingForm } from "./MeterReadingForm";
 import { MeterTriggersManager } from "./MeterTriggersManager";
@@ -16,8 +18,8 @@ import {
   MapPin, 
   Factory,
   TrendingUp,
-  Zap,
-  Settings
+  Settings,
+  Plus
 } from "lucide-react";
 
 interface MeterDetailDialogProps {
@@ -32,9 +34,9 @@ export const MeterDetailDialog = ({ meter, onClose }: MeterDetailDialogProps) =>
   if (isLoading) {
     return (
       <Dialog open onOpenChange={() => onClose()}>
-        <DialogContent className="max-w-6xl max-h-[90vh]">
-          <div className="flex items-center justify-center py-8">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600"></div>
+        <DialogContent className="max-w-5xl max-h-[90vh]">
+          <div className="flex items-center justify-center py-12">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
           </div>
         </DialogContent>
       </Dialog>
@@ -54,24 +56,24 @@ export const MeterDetailDialog = ({ meter, onClose }: MeterDetailDialogProps) =>
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'active': return 'bg-green-100 text-green-800 border-green-200';
-      case 'warning': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-      case 'critical': return 'bg-red-100 text-red-800 border-red-200';
-      default: return 'bg-gray-100 text-gray-800 border-gray-200';
+      case 'active': return 'bg-green-50 text-green-700 border-green-200';
+      case 'warning': return 'bg-yellow-50 text-yellow-700 border-yellow-200';
+      case 'critical': return 'bg-red-50 text-red-700 border-red-200';
+      default: return 'bg-gray-50 text-gray-700 border-gray-200';
     }
   };
 
   return (
     <Dialog open onOpenChange={() => onClose()}>
-      <DialogContent className="max-w-6xl max-h-[90vh] overflow-hidden">
+      <DialogContent className="max-w-5xl max-h-[90vh] overflow-hidden">
         <DialogHeader className="flex flex-row items-center justify-between border-b pb-4">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center">
-              <BarChart3 className="h-5 w-5 text-white" />
+            <div className="w-10 h-10 rounded bg-blue-100 flex items-center justify-center">
+              <BarChart3 className="h-5 w-5 text-blue-600" />
             </div>
             <div>
               <DialogTitle className="text-xl font-semibold">{meterDetail.name}</DialogTitle>
-              <div className="flex items-center gap-4 text-sm text-muted-foreground mt-1">
+              <div className="flex items-center gap-4 text-sm text-gray-600 mt-1">
                 {meterDetail.assets && (
                   <div className="flex items-center gap-1">
                     <Factory className="h-3 w-3" />
@@ -88,9 +90,9 @@ export const MeterDetailDialog = ({ meter, onClose }: MeterDetailDialogProps) =>
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <Badge className={getStatusColor(meterDetail.status)}>
+            <Badge variant="outline" className={getStatusColor(meterDetail.status)}>
               {getStatusIcon(meterDetail.status)}
-              {meterDetail.status}
+              <span className="ml-1 capitalize">{meterDetail.status}</span>
             </Badge>
             <Button variant="ghost" size="sm" onClick={onClose}>
               <X className="h-4 w-4" />
@@ -98,89 +100,75 @@ export const MeterDetailDialog = ({ meter, onClose }: MeterDetailDialogProps) =>
           </div>
         </DialogHeader>
 
-        {/* Meter Overview Cards */}
+        {/* Overview Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 py-4">
-          <div className="bg-gradient-to-br from-emerald-50 to-teal-50 p-4 rounded-xl border border-emerald-100">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-emerald-600 font-medium">Current Value</p>
-                <p className="text-2xl font-bold text-emerald-700">
-                  {Number(meterDetail.current_value).toLocaleString()}
-                </p>
-                <p className="text-xs text-emerald-600 uppercase tracking-wide">
-                  {meterDetail.unit}
-                </p>
+          <Card>
+            <CardContent className="p-4 text-center">
+              <div className="text-2xl font-bold text-blue-600">
+                {Number(meterDetail.current_value).toLocaleString()}
               </div>
-              <TrendingUp className="h-8 w-8 text-emerald-500" />
-            </div>
-          </div>
+              <div className="text-sm text-gray-600 font-medium">
+                {meterDetail.unit}
+              </div>
+              <div className="text-xs text-gray-500 mt-1">Current Value</div>
+            </CardContent>
+          </Card>
 
-          <div className="bg-gradient-to-br from-blue-50 to-indigo-50 p-4 rounded-xl border border-blue-100">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-blue-600 font-medium">Type</p>
-                <p className="text-xl font-semibold text-blue-700 capitalize">
-                  {meterDetail.type}
-                </p>
-                <p className="text-xs text-blue-600 uppercase tracking-wide">
-                  {meterDetail.reading_frequency?.replace('_', ' ')}
-                </p>
+          <Card>
+            <CardContent className="p-4 text-center">
+              <div className="text-lg font-semibold text-gray-900 capitalize">
+                {meterDetail.type}
               </div>
-              <Zap className="h-8 w-8 text-blue-500" />
-            </div>
-          </div>
+              <div className="text-sm text-gray-600">
+                {meterDetail.reading_frequency?.replace('_', ' ') || 'As needed'}
+              </div>
+              <div className="text-xs text-gray-500 mt-1">Type & Frequency</div>
+            </CardContent>
+          </Card>
 
-          <div className="bg-gradient-to-br from-purple-50 to-violet-50 p-4 rounded-xl border border-purple-100">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-purple-600 font-medium">Triggers</p>
-                <p className="text-xl font-semibold text-purple-700">
-                  {meterDetail.meter_triggers?.length || 0}
-                </p>
-                <p className="text-xs text-purple-600 uppercase tracking-wide">
-                  Active Rules
-                </p>
+          <Card>
+            <CardContent className="p-4 text-center">
+              <div className="text-lg font-semibold text-gray-900">
+                {meterDetail.meter_triggers?.length || 0}
               </div>
-              <Settings className="h-8 w-8 text-purple-500" />
-            </div>
-          </div>
+              <div className="text-sm text-gray-600">Active Rules</div>
+              <div className="text-xs text-gray-500 mt-1">Triggers</div>
+            </CardContent>
+          </Card>
 
-          <div className="bg-gradient-to-br from-orange-50 to-red-50 p-4 rounded-xl border border-orange-100">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-orange-600 font-medium">Last Reading</p>
-                <p className="text-sm font-semibold text-orange-700">
-                  {meterDetail.last_reading_at 
-                    ? new Date(meterDetail.last_reading_at).toLocaleDateString()
-                    : 'Never'
-                  }
-                </p>
-                <p className="text-xs text-orange-600 uppercase tracking-wide">
-                  Updated
-                </p>
+          <Card>
+            <CardContent className="p-4 text-center">
+              <div className="text-sm font-semibold text-gray-900">
+                {meterDetail.last_reading_at 
+                  ? new Date(meterDetail.last_reading_at).toLocaleDateString()
+                  : 'Never'
+                }
               </div>
-              <Clock className="h-8 w-8 text-orange-500" />
-            </div>
-          </div>
+              <div className="text-sm text-gray-600">Last Updated</div>
+              <div className="text-xs text-gray-500 mt-1">Reading Date</div>
+            </CardContent>
+          </Card>
         </div>
 
-        {/* Target Range Display */}
+        {/* Target Range */}
         {(meterDetail.target_min || meterDetail.target_max) && (
-          <div className="bg-gray-50 p-4 rounded-lg">
-            <p className="text-sm font-medium text-gray-700 mb-2">Target Range</p>
-            <div className="flex items-center gap-2 text-sm text-gray-600">
-              <span>Min: {meterDetail.target_min || 'N/A'} {meterDetail.unit}</span>
-              <span>•</span>
-              <span>Max: {meterDetail.target_max || 'N/A'} {meterDetail.unit}</span>
-            </div>
-          </div>
+          <Card>
+            <CardContent className="p-4">
+              <div className="text-sm font-medium text-gray-700 mb-2">Target Range</div>
+              <div className="flex items-center gap-2 text-sm text-gray-600">
+                <span>Min: {meterDetail.target_min || 'N/A'} {meterDetail.unit}</span>
+                <span>•</span>
+                <span>Max: {meterDetail.target_max || 'N/A'} {meterDetail.unit}</span>
+              </div>
+            </CardContent>
+          </Card>
         )}
 
         <Tabs defaultValue="readings" className="flex-1 overflow-hidden">
           <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="readings">Readings & History</TabsTrigger>
-            <TabsTrigger value="triggers">Triggers & Alerts</TabsTrigger>
-            <TabsTrigger value="overview">Overview & Stats</TabsTrigger>
+            <TabsTrigger value="readings">Readings</TabsTrigger>
+            <TabsTrigger value="triggers">Triggers</TabsTrigger>
+            <TabsTrigger value="details">Details</TabsTrigger>
           </TabsList>
 
           <TabsContent value="readings" className="flex-1 overflow-hidden">
@@ -189,9 +177,10 @@ export const MeterDetailDialog = ({ meter, onClose }: MeterDetailDialogProps) =>
                 <h3 className="text-lg font-semibold">Reading History</h3>
                 <Button 
                   onClick={() => setShowReadingForm(true)}
-                  className="bg-emerald-600 hover:bg-emerald-700"
+                  className="bg-blue-600 hover:bg-blue-700"
                 >
-                  Record New Reading
+                  <Plus className="h-4 w-4 mr-2" />
+                  Record Reading
                 </Button>
               </div>
               <MeterReadingsHistory meterId={meter.id} />
@@ -202,65 +191,71 @@ export const MeterDetailDialog = ({ meter, onClose }: MeterDetailDialogProps) =>
             <MeterTriggersManager meterId={meter.id} />
           </TabsContent>
 
-          <TabsContent value="overview" className="flex-1 overflow-hidden">
-            <div className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-4">
-                  <h3 className="text-lg font-semibold">Meter Information</h3>
-                  <div className="space-y-3">
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Name:</span>
-                      <span className="font-medium">{meterDetail.name}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Type:</span>
-                      <span className="font-medium capitalize">{meterDetail.type}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Unit:</span>
-                      <span className="font-medium">{meterDetail.unit}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Reading Frequency:</span>
-                      <span className="font-medium capitalize">
-                        {meterDetail.reading_frequency?.replace('_', ' ') || 'As needed'}
-                      </span>
-                    </div>
+          <TabsContent value="details" className="flex-1 overflow-hidden space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-base">Meter Information</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Name:</span>
+                    <span className="font-medium">{meterDetail.name}</span>
                   </div>
-                </div>
-
-                <div className="space-y-4">
-                  <h3 className="text-lg font-semibold">Statistics</h3>
-                  <div className="space-y-3">
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Total Readings:</span>
-                      <span className="font-medium">
-                        {Array.isArray(meterDetail.meter_readings) ? meterDetail.meter_readings.length : 0}
-                      </span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Active Triggers:</span>
-                      <span className="font-medium">
-                        {meterDetail.meter_triggers?.filter(t => t.is_active).length || 0}
-                      </span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Status:</span>
-                      <Badge className={getStatusColor(meterDetail.status)}>
-                        {meterDetail.status}
-                      </Badge>
-                    </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Type:</span>
+                    <span className="font-medium capitalize">{meterDetail.type}</span>
                   </div>
-                </div>
-              </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Unit:</span>
+                    <span className="font-medium">{meterDetail.unit}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Frequency:</span>
+                    <span className="font-medium capitalize">
+                      {meterDetail.reading_frequency?.replace('_', ' ') || 'As needed'}
+                    </span>
+                  </div>
+                </CardContent>
+              </Card>
 
-              {meterDetail.description && (
-                <div className="space-y-2">
-                  <h3 className="text-lg font-semibold">Description</h3>
-                  <p className="text-muted-foreground">{meterDetail.description}</p>
-                </div>
-              )}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-base">Statistics</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Total Readings:</span>
+                    <span className="font-medium">
+                      {Array.isArray(meterDetail.meter_readings) ? meterDetail.meter_readings.length : 0}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Active Triggers:</span>
+                    <span className="font-medium">
+                      {meterDetail.meter_triggers?.filter(t => t.is_active).length || 0}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Status:</span>
+                    <Badge variant="outline" className={getStatusColor(meterDetail.status)}>
+                      {meterDetail.status}
+                    </Badge>
+                  </div>
+                </CardContent>
+              </Card>
             </div>
+
+            {meterDetail.description && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-base">Description</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-gray-600">{meterDetail.description}</p>
+                </CardContent>
+              </Card>
+            )}
           </TabsContent>
         </Tabs>
 

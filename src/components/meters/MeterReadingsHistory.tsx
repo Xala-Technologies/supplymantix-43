@@ -1,9 +1,10 @@
+
 import React from "react";
 import { useMeterReadings } from "@/hooks/useMetersEnhanced";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { TrendingUp, TrendingDown, Clock, User } from "lucide-react";
+import { TrendingUp, TrendingDown, Clock, User, BarChart3 } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 interface MeterReadingsHistoryProps {
@@ -29,10 +30,12 @@ export const MeterReadingsHistory = ({ meterId }: MeterReadingsHistoryProps) => 
   if (!readings || readings.length === 0) {
     return (
       <Card>
-        <CardContent className="flex flex-col items-center justify-center py-8">
-          <TrendingUp className="h-12 w-12 text-gray-400 mb-4" />
-          <h3 className="text-lg font-medium text-gray-900 mb-2">No Readings Yet</h3>
-          <p className="text-gray-500 text-center">
+        <CardContent className="flex flex-col items-center justify-center py-12">
+          <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+            <BarChart3 className="h-8 w-8 text-gray-600" />
+          </div>
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">No Readings Yet</h3>
+          <p className="text-gray-600 text-center">
             Record your first reading to start tracking this meter's performance.
           </p>
         </CardContent>
@@ -65,9 +68,11 @@ export const MeterReadingsHistory = ({ meterId }: MeterReadingsHistoryProps) => 
       {/* Chart */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <TrendingUp className="h-5 w-5" />
-            Reading Trend
+          <div className="flex items-center justify-between">
+            <CardTitle className="flex items-center gap-2">
+              <TrendingUp className="h-5 w-5" />
+              Reading Trend
+            </CardTitle>
             {trend && (
               <Badge variant={trend === 'up' ? 'default' : trend === 'down' ? 'destructive' : 'secondary'}>
                 {trend === 'up' && <TrendingUp className="h-3 w-3 mr-1" />}
@@ -75,7 +80,7 @@ export const MeterReadingsHistory = ({ meterId }: MeterReadingsHistoryProps) => 
                 {trend === 'up' ? 'Increasing' : trend === 'down' ? 'Decreasing' : 'Stable'}
               </Badge>
             )}
-          </CardTitle>
+          </div>
         </CardHeader>
         <CardContent>
           <div className="h-64">
@@ -97,9 +102,9 @@ export const MeterReadingsHistory = ({ meterId }: MeterReadingsHistoryProps) => 
                 <Line 
                   type="monotone" 
                   dataKey="value" 
-                  stroke="#10b981" 
+                  stroke="#2563eb" 
                   strokeWidth={2}
-                  dot={{ fill: '#10b981', strokeWidth: 2, r: 4 }}
+                  dot={{ fill: '#2563eb', strokeWidth: 2, r: 4 }}
                   activeDot={{ r: 6 }}
                 />
               </LineChart>
@@ -127,10 +132,10 @@ export const MeterReadingsHistory = ({ meterId }: MeterReadingsHistoryProps) => 
               return (
                 <div key={reading.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                   <div className="flex items-center gap-3">
-                    <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
+                    <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
                     <div>
                       <p className="font-semibold text-lg">{Number(reading.value).toLocaleString()}</p>
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <div className="flex items-center gap-2 text-sm text-gray-600">
                         <Clock className="h-3 w-3" />
                         {new Date(reading.recorded_at).toLocaleString()}
                       </div>
@@ -138,7 +143,7 @@ export const MeterReadingsHistory = ({ meterId }: MeterReadingsHistoryProps) => 
                   </div>
                   <div className="text-right">
                     {userInfo && (
-                      <div className="flex items-center gap-1 text-sm text-muted-foreground mb-1">
+                      <div className="flex items-center gap-1 text-sm text-gray-600 mb-1">
                         <User className="h-3 w-3" />
                         {userInfo.first_name && userInfo.last_name 
                           ? `${userInfo.first_name} ${userInfo.last_name}`.trim()
@@ -147,7 +152,7 @@ export const MeterReadingsHistory = ({ meterId }: MeterReadingsHistoryProps) => 
                       </div>
                     )}
                     {reading.comment && (
-                      <p className="text-xs text-muted-foreground max-w-xs">
+                      <p className="text-xs text-gray-500 max-w-xs">
                         {reading.comment}
                       </p>
                     )}

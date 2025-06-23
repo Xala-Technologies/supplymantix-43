@@ -18,8 +18,6 @@ const Meters = () => {
 
   const { data: meters, isLoading, error } = useMeters();
 
-  console.log("Meters page data:", { meters, isLoading, error });
-
   const filteredMeters = meters?.filter(meter => {
     const matchesSearch = meter.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          meter.location?.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -31,8 +29,8 @@ const Meters = () => {
 
   return (
     <DashboardLayout>
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
-        <div className="space-y-8 p-8">
+      <div className="min-h-screen bg-gray-50">
+        <div className="max-w-7xl mx-auto p-6 space-y-6">
           <MetersHeader
             onCreateMeter={() => setIsFormOpen(true)}
             searchQuery={searchQuery}
@@ -44,29 +42,22 @@ const Meters = () => {
           />
 
           {error && (
-            <Alert variant="destructive" className="border-red-200 bg-red-50">
+            <Alert variant="destructive">
               <AlertTriangle className="h-4 w-4" />
-              <AlertDescription className="text-red-800">
-                <strong>Error loading meters:</strong> {error instanceof Error ? error.message : "An unknown error occurred"}
-                <div className="mt-2 text-sm text-red-600">
-                  Please try refreshing the page or contact support if the issue persists.
-                </div>
+              <AlertDescription>
+                Error loading meters: {error instanceof Error ? error.message : "Unknown error"}
               </AlertDescription>
             </Alert>
           )}
 
-          <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-white/20 shadow-xl p-6">
-            <MetersList
-              meters={filteredMeters}
-              isLoading={isLoading}
-              onMeterClick={setSelectedMeter}
-            />
-          </div>
+          <MetersList
+            meters={filteredMeters}
+            isLoading={isLoading}
+            onMeterClick={setSelectedMeter}
+          />
 
           {isFormOpen && (
-            <MeterForm
-              onClose={() => setIsFormOpen(false)}
-            />
+            <MeterForm onClose={() => setIsFormOpen(false)} />
           )}
 
           {selectedMeter && (

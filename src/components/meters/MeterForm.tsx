@@ -6,11 +6,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useCreateMeter } from "@/hooks/useMetersEnhanced";
 import { useAssets } from "@/hooks/useAssets";
-import { X, BarChart3, Zap, Settings, Factory, MapPin, Target, Info } from "lucide-react";
+import { X, Settings, Zap, Factory } from "lucide-react";
 
 interface MeterFormProps {
   onClose: () => void;
@@ -63,11 +63,10 @@ export const MeterForm = ({ onClose }: MeterFormProps) => {
         unit: formData.unit.trim(),
         description: formData.description.trim() || null,
         location: formData.location.trim() || null,
-        asset_id: formData.asset_id === "no-asset" ? null : formData.asset_id || null,
+        asset_id: formData.asset_id === "no-asset" || !formData.asset_id ? null : formData.asset_id,
         reading_frequency: formData.reading_frequency,
         target_min: formData.target_min ? Number(formData.target_min) : null,
         target_max: formData.target_max ? Number(formData.target_max) : null,
-        tenant_id: undefined, // This will be handled by the API
       } as any;
       
       await createMeter.mutateAsync(meterData);
@@ -79,39 +78,32 @@ export const MeterForm = ({ onClose }: MeterFormProps) => {
 
   const commonUnits = [
     "°C", "°F", "PSI", "bar", "kPa", "Hz", "RPM", "V", "A", "kW", "kWh", 
-    "L/min", "m³/h", "hours", "minutes", "seconds", "%", "ppm", "pH"
+    "L/min", "m³/h", "hours", "minutes", "%", "ppm"
   ];
 
   return (
     <Dialog open onOpenChange={() => onClose()}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-gradient-to-br from-white to-blue-50/30">
-        <DialogHeader className="flex flex-row items-center justify-between border-b pb-6">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center">
-              <BarChart3 className="h-6 w-6 text-white" />
-            </div>
-            <div>
-              <DialogTitle className="text-2xl font-bold">Create New Meter</DialogTitle>
-              <p className="text-gray-600 mt-1">Set up a new meter to track asset performance</p>
-            </div>
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader className="flex flex-row items-center justify-between">
+          <div>
+            <DialogTitle className="text-xl font-semibold">Create New Meter</DialogTitle>
+            <p className="text-gray-600 text-sm mt-1">Set up a new meter to track performance</p>
           </div>
-          <Button variant="ghost" size="sm" onClick={onClose} className="rounded-full">
+          <Button variant="ghost" size="sm" onClick={onClose}>
             <X className="h-4 w-4" />
           </Button>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-8 py-6">
+        <form onSubmit={handleSubmit} className="space-y-6">
           {/* Basic Information */}
-          <Card className="border-0 shadow-lg">
-            <CardContent className="p-6">
-              <div className="flex items-center gap-2 mb-4">
-                <Info className="h-5 w-5 text-blue-600" />
-                <h3 className="text-lg font-semibold">Basic Information</h3>
-              </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base">Basic Information</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="name" className="text-sm font-medium">
+                  <Label htmlFor="name">
                     Meter Name <span className="text-red-500">*</span>
                   </Label>
                   <Input
@@ -119,31 +111,29 @@ export const MeterForm = ({ onClose }: MeterFormProps) => {
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                     placeholder="e.g., Compressor Runtime Monitor"
-                    className={errors.name ? "border-red-300 focus:border-red-500" : ""}
+                    className={errors.name ? "border-red-300" : ""}
                   />
                   {errors.name && <p className="text-sm text-red-600">{errors.name}</p>}
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="unit" className="text-sm font-medium">
-                    Unit of Measurement <span className="text-red-500">*</span>
+                  <Label htmlFor="unit">
+                    Unit <span className="text-red-500">*</span>
                   </Label>
-                  <div className="relative">
-                    <Input
-                      id="unit"
-                      value={formData.unit}
-                      onChange={(e) => setFormData({ ...formData, unit: e.target.value })}
-                      placeholder="e.g., hours, °C, PSI"
-                      className={errors.unit ? "border-red-300 focus:border-red-500" : ""}
-                    />
-                    {errors.unit && <p className="text-sm text-red-600">{errors.unit}</p>}
-                  </div>
-                  <div className="flex flex-wrap gap-1 mt-2">
+                  <Input
+                    id="unit"
+                    value={formData.unit}
+                    onChange={(e) => setFormData({ ...formData, unit: e.target.value })}
+                    placeholder="e.g., hours, °C, PSI"
+                    className={errors.unit ? "border-red-300" : ""}
+                  />
+                  {errors.unit && <p className="text-sm text-red-600">{errors.unit}</p>}
+                  <div className="flex flex-wrap gap-1">
                     {commonUnits.map((unit) => (
                       <Badge 
                         key={unit}
                         variant="outline" 
-                        className="cursor-pointer hover:bg-emerald-50 hover:border-emerald-300 text-xs"
+                        className="cursor-pointer hover:bg-blue-50 text-xs"
                         onClick={() => setFormData({ ...formData, unit })}
                       >
                         {unit}
@@ -152,22 +142,12 @@ export const MeterForm = ({ onClose }: MeterFormProps) => {
                   </div>
                 </div>
               </div>
-            </CardContent>
-          </Card>
 
-          {/* Configuration */}
-          <Card className="border-0 shadow-lg">
-            <CardContent className="p-6">
-              <div className="flex items-center gap-2 mb-4">
-                <Settings className="h-5 w-5 text-purple-600" />
-                <h3 className="text-lg font-semibold">Configuration</h3>
-              </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="type" className="text-sm font-medium">Meter Type</Label>
+                  <Label>Meter Type</Label>
                   <Select value={formData.type} onValueChange={(value) => setFormData({ ...formData, type: value })}>
-                    <SelectTrigger className="h-12">
+                    <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -188,18 +168,17 @@ export const MeterForm = ({ onClose }: MeterFormProps) => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="reading_frequency" className="text-sm font-medium">Reading Frequency</Label>
+                  <Label>Reading Frequency</Label>
                   <Select value={formData.reading_frequency} onValueChange={(value) => setFormData({ ...formData, reading_frequency: value })}>
-                    <SelectTrigger className="h-12">
+                    <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="none">As Needed</SelectItem>
-                      <SelectItem value="hour">Every Hour</SelectItem>
+                      <SelectItem value="hour">Hourly</SelectItem>
                       <SelectItem value="day">Daily</SelectItem>
                       <SelectItem value="week">Weekly</SelectItem>
                       <SelectItem value="month">Monthly</SelectItem>
-                      <SelectItem value="year">Yearly</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -208,27 +187,20 @@ export const MeterForm = ({ onClose }: MeterFormProps) => {
           </Card>
 
           {/* Location & Asset */}
-          <Card className="border-0 shadow-lg">
-            <CardContent className="p-6">
-              <div className="flex items-center gap-2 mb-4">
-                <MapPin className="h-5 w-5 text-green-600" />
-                <h3 className="text-lg font-semibold">Location & Asset</h3>
-              </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base">Location & Asset</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="asset" className="text-sm font-medium">Associated Asset</Label>
+                  <Label>Associated Asset</Label>
                   <Select value={formData.asset_id} onValueChange={(value) => setFormData({ ...formData, asset_id: value })}>
-                    <SelectTrigger className="h-12">
+                    <SelectTrigger>
                       <SelectValue placeholder="Select an asset (optional)" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="no-asset">
-                        <div className="flex items-center gap-2">
-                          <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
-                          No Asset
-                        </div>
-                      </SelectItem>
+                      <SelectItem value="">No Asset</SelectItem>
                       {assets?.map((asset) => (
                         <SelectItem key={asset.id} value={asset.id}>
                           <div className="flex items-center gap-2">
@@ -242,13 +214,11 @@ export const MeterForm = ({ onClose }: MeterFormProps) => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="location" className="text-sm font-medium">Location</Label>
+                  <Label>Location</Label>
                   <Input
-                    id="location"
                     value={formData.location}
                     onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                    placeholder="e.g., Production Floor A, Building 2"
-                    className="h-12"
+                    placeholder="e.g., Production Floor A"
                   />
                 </div>
               </div>
@@ -256,37 +226,32 @@ export const MeterForm = ({ onClose }: MeterFormProps) => {
           </Card>
 
           {/* Target Range */}
-          <Card className="border-0 shadow-lg">
-            <CardContent className="p-6">
-              <div className="flex items-center gap-2 mb-4">
-                <Target className="h-5 w-5 text-orange-600" />
-                <h3 className="text-lg font-semibold">Target Range (Optional)</h3>
-              </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base">Target Range (Optional)</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="target_min" className="text-sm font-medium">Minimum Target Value</Label>
+                  <Label>Minimum Target</Label>
                   <Input
-                    id="target_min"
                     type="number"
                     step="0.01"
                     value={formData.target_min}
                     onChange={(e) => setFormData({ ...formData, target_min: e.target.value })}
                     placeholder="0"
-                    className="h-12"
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="target_max" className="text-sm font-medium">Maximum Target Value</Label>
+                  <Label>Maximum Target</Label>
                   <Input
-                    id="target_max"
                     type="number"
                     step="0.01"
                     value={formData.target_max}
                     onChange={(e) => setFormData({ ...formData, target_max: e.target.value })}
                     placeholder="100"
-                    className={errors.target_max ? "border-red-300 focus:border-red-500 h-12" : "h-12"}
+                    className={errors.target_max ? "border-red-300" : ""}
                   />
                   {errors.target_max && <p className="text-sm text-red-600">{errors.target_max}</p>}
                 </div>
@@ -295,32 +260,25 @@ export const MeterForm = ({ onClose }: MeterFormProps) => {
           </Card>
 
           {/* Description */}
-          <Card className="border-0 shadow-lg">
-            <CardContent className="p-6">
-              <div className="space-y-2">
-                <Label htmlFor="description" className="text-sm font-medium">Description</Label>
-                <Textarea
-                  id="description"
-                  value={formData.description}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  placeholder="Additional details about this meter, its purpose, and monitoring requirements..."
-                  rows={4}
-                  className="resize-none"
-                />
-              </div>
-            </CardContent>
-          </Card>
+          <div className="space-y-2">
+            <Label>Description</Label>
+            <Textarea
+              value={formData.description}
+              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              placeholder="Additional details about this meter..."
+              rows={3}
+            />
+          </div>
 
           {/* Actions */}
-          <div className="flex justify-end space-x-4 pt-6 border-t">
-            <Button type="button" variant="outline" onClick={onClose} size="lg">
+          <div className="flex justify-end gap-3 pt-4 border-t">
+            <Button type="button" variant="outline" onClick={onClose}>
               Cancel
             </Button>
             <Button 
               type="submit" 
               disabled={createMeter.isPending}
-              className="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 min-w-[120px]"
-              size="lg"
+              className="bg-blue-600 hover:bg-blue-700"
             >
               {createMeter.isPending ? "Creating..." : "Create Meter"}
             </Button>
