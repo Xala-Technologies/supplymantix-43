@@ -8,6 +8,7 @@ import { WorkOrdersTopHeader } from "@/components/work-orders/WorkOrdersTopHeade
 import { useState, useEffect, useMemo } from "react";
 import { ChevronLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import { WorkOrder, WorkOrderFilters } from "@/types/workOrder";
 import { transformWorkOrderData } from "@/services/workOrderService";
 
@@ -168,7 +169,7 @@ export default function WorkOrders() {
 
   return (
     <DashboardLayout>
-      <div className="h-full flex flex-col w-full">
+      <div className="h-full flex flex-col w-full bg-gray-50/30">
         {/* Top Header */}
         <WorkOrdersTopHeader
           workOrdersCount={filteredWorkOrders.length}
@@ -178,135 +179,137 @@ export default function WorkOrders() {
           onCreateWorkOrder={handleCreateWorkOrder}
         />
 
-        {/* Main Content */}
-        <div className="flex-1 flex w-full gap-1 p-4">
-          {/* Desktop Layout with 70/30 split */}
-          <div className="hidden lg:flex h-full w-full gap-4">
-            {/* Left Panel - 30% */}
-            <div className="w-[30%] bg-white border border-gray-200 rounded-xl shadow-sm flex flex-col overflow-hidden">
-              <EnhancedWorkOrdersList 
-                workOrders={filteredWorkOrders}
-                selectedWorkOrderId={selectedWorkOrder}
-                onSelectWorkOrder={handleSelectWorkOrder}
-              />
-            </div>
-            
-            {/* Main Content Area - 70% */}
-            <div className="w-[70%] flex flex-col bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
-              {viewMode === 'detail' && selectedWorkOrderData && (
-                <EnhancedWorkOrderDetail 
-                  workOrder={selectedWorkOrderData}
-                  onEdit={handleEditWorkOrder}
-                />
-              )}
-              
-              {viewMode === 'form' && (
-                <div className="h-full overflow-auto">
-                  <div className="p-6">
-                    <div className="mb-6">
-                      <Button 
-                        variant="ghost" 
-                        onClick={handleFormCancel}
-                        className="mb-4"
-                      >
-                        <ChevronLeft className="w-4 h-4 mr-2" />
-                        Back
-                      </Button>
-                    </div>
-                    <EnhancedWorkOrderForm
-                      workOrder={editingWorkOrder || undefined}
-                      onSubmit={handleFormSubmit}
-                      onCancel={handleFormCancel}
-                    />
-                  </div>
-                </div>
-              )}
-              
-              {/* Only show empty state if no work orders exist */}
-              {viewMode === 'list' && filteredWorkOrders.length === 0 && (
-                <div className="flex-1 flex items-center justify-center">
-                  <div className="text-center space-y-4">
-                    <div className="w-16 h-16 bg-gradient-to-br from-blue-50 to-indigo-100 rounded-2xl flex items-center justify-center mx-auto">
-                      <span className="text-2xl">📋</span>
-                    </div>
-                    <div className="space-y-2">
-                      <h3 className="text-lg font-semibold text-gray-900">No work orders found</h3>
-                      <p className="text-sm text-gray-500">Create your first work order to get started</p>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-          
-          {/* Mobile Layout */}
-          <div className="lg:hidden h-full w-full">
-            {viewMode === 'list' && (
-              <div className="h-full bg-white rounded-xl border border-gray-200 shadow-sm">
+        {/* Main Content - Single Card */}
+        <div className="flex-1 p-6">
+          <Card className="h-full flex overflow-hidden">
+            {/* Desktop Layout with 70/30 split */}
+            <div className="hidden lg:flex h-full w-full">
+              {/* Left Panel - 30% */}
+              <div className="w-[30%] border-r border-gray-200">
                 <EnhancedWorkOrdersList 
                   workOrders={filteredWorkOrders}
                   selectedWorkOrderId={selectedWorkOrder}
                   onSelectWorkOrder={handleSelectWorkOrder}
                 />
               </div>
-            )}
-            
-            {viewMode === 'detail' && selectedWorkOrderData && (
-              <div className="h-full bg-white rounded-xl border border-gray-200 shadow-sm flex flex-col">
-                <div className="p-3 border-b border-gray-100 flex items-center gap-3">
-                  <Button 
-                    variant="ghost" 
-                    size="sm"
-                    onClick={() => setViewMode('list')}
-                    className="p-1.5 h-auto"
-                  >
-                    <ChevronLeft className="w-4 h-4" />
-                  </Button>
-                  <div className="flex-1 min-w-0">
-                    <h2 className="font-semibold text-gray-900 truncate text-sm">
-                      {selectedWorkOrderData.title}
-                    </h2>
-                    <p className="text-xs text-gray-500">#{selectedWorkOrder}</p>
-                  </div>
-                </div>
-                
-                <div className="flex-1 overflow-auto">
+              
+              {/* Main Content Area - 70% */}
+              <div className="w-[70%] flex flex-col overflow-hidden">
+                {viewMode === 'detail' && selectedWorkOrderData && (
                   <EnhancedWorkOrderDetail 
                     workOrder={selectedWorkOrderData}
                     onEdit={handleEditWorkOrder}
                   />
-                </div>
-              </div>
-            )}
-            
-            {viewMode === 'form' && (
-              <div className="h-full bg-white rounded-xl border border-gray-200 shadow-sm flex flex-col">
-                <div className="p-3 border-b border-gray-100 flex items-center gap-3">
-                  <Button 
-                    variant="ghost" 
-                    size="sm"
-                    onClick={handleFormCancel}
-                    className="p-1.5 h-auto"
-                  >
-                    <ChevronLeft className="w-4 h-4" />
-                  </Button>
-                  <h2 className="font-semibold text-gray-900 text-sm">
-                    {editingWorkOrder ? 'Edit Work Order' : 'Create Work Order'}
-                  </h2>
-                </div>
+                )}
                 
-                <div className="flex-1 overflow-auto">
-                  <div className="p-4">
-                    <EnhancedWorkOrderForm
-                      workOrder={editingWorkOrder || undefined}
-                      onSubmit={handleFormSubmit}
-                      onCancel={handleFormCancel}
+                {viewMode === 'form' && (
+                  <div className="h-full overflow-auto">
+                    <div className="p-6">
+                      <div className="mb-6">
+                        <Button 
+                          variant="ghost" 
+                          onClick={handleFormCancel}
+                          className="mb-4"
+                        >
+                          <ChevronLeft className="w-4 h-4 mr-2" />
+                          Back
+                        </Button>
+                      </div>
+                      <EnhancedWorkOrderForm
+                        workOrder={editingWorkOrder || undefined}
+                        onSubmit={handleFormSubmit}
+                        onCancel={handleFormCancel}
+                      />
+                    </div>
+                  </div>
+                )}
+                
+                {/* Only show empty state if no work orders exist */}
+                {viewMode === 'list' && filteredWorkOrders.length === 0 && (
+                  <div className="flex-1 flex items-center justify-center">
+                    <div className="text-center space-y-4">
+                      <div className="w-16 h-16 bg-gradient-to-br from-blue-50 to-indigo-100 rounded-2xl flex items-center justify-center mx-auto">
+                        <span className="text-2xl">📋</span>
+                      </div>
+                      <div className="space-y-2">
+                        <h3 className="text-lg font-semibold text-gray-900">No work orders found</h3>
+                        <p className="text-sm text-gray-500">Create your first work order to get started</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+            
+            {/* Mobile Layout */}
+            <div className="lg:hidden h-full w-full">
+              {viewMode === 'list' && (
+                <div className="h-full">
+                  <EnhancedWorkOrdersList 
+                    workOrders={filteredWorkOrders}
+                    selectedWorkOrderId={selectedWorkOrder}
+                    onSelectWorkOrder={handleSelectWorkOrder}
+                  />
+                </div>
+              )}
+              
+              {viewMode === 'detail' && selectedWorkOrderData && (
+                <div className="h-full flex flex-col">
+                  <div className="p-3 border-b border-gray-100 flex items-center gap-3">
+                    <Button 
+                      variant="ghost" 
+                      size="sm"
+                      onClick={() => setViewMode('list')}
+                      className="p-1.5 h-auto"
+                    >
+                      <ChevronLeft className="w-4 h-4" />
+                    </Button>
+                    <div className="flex-1 min-w-0">
+                      <h2 className="font-semibold text-gray-900 truncate text-sm">
+                        {selectedWorkOrderData.title}
+                      </h2>
+                      <p className="text-xs text-gray-500">#{selectedWorkOrder}</p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex-1 overflow-auto">
+                    <EnhancedWorkOrderDetail 
+                      workOrder={selectedWorkOrderData}
+                      onEdit={handleEditWorkOrder}
                     />
                   </div>
                 </div>
-              </div>
-            )}
-          </div>
+              )}
+              
+              {viewMode === 'form' && (
+                <div className="h-full flex flex-col">
+                  <div className="p-3 border-b border-gray-100 flex items-center gap-3">
+                    <Button 
+                      variant="ghost" 
+                      size="sm"
+                      onClick={handleFormCancel}
+                      className="p-1.5 h-auto"
+                    >
+                      <ChevronLeft className="w-4 h-4" />
+                    </Button>
+                    <h2 className="font-semibold text-gray-900 text-sm">
+                      {editingWorkOrder ? 'Edit Work Order' : 'Create Work Order'}
+                    </h2>
+                  </div>
+                  
+                  <div className="flex-1 overflow-auto">
+                    <div className="p-4">
+                      <EnhancedWorkOrderForm
+                        workOrder={editingWorkOrder || undefined}
+                        onSubmit={handleFormSubmit}
+                        onCancel={handleFormCancel}
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          </Card>
         </div>
       </div>
     </DashboardLayout>
