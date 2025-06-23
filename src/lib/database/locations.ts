@@ -19,7 +19,10 @@ export const locationsApi = {
 
   async getLocationHierarchy(): Promise<LocationHierarchy[]> {
     const { data, error } = await supabase
-      .rpc('get_location_hierarchy');
+      .from("locations")
+      .select("*")
+      .eq("is_active", true)
+      .order("name", { ascending: true });
     
     if (error) throw error;
     return this.buildLocationTree(data || []);
@@ -38,25 +41,47 @@ export const locationsApi = {
   },
 
   async getLocationBreadcrumbs(locationId: string): Promise<LocationBreadcrumb[]> {
-    const { data, error } = await supabase
-      .rpc('get_location_breadcrumbs', { location_id: locationId });
+    // Simple breadcrumb implementation - get location and traverse up
+    const breadcrumbs: LocationBreadcrumb[] = [];
+    let currentId = locationId;
+    let level = 0;
     
-    if (error) throw error;
-    return data || [];
+    while (currentId && level < 10) { // Prevent infinite loops
+      const { data, error } = await supabase
+        .from("locations")
+        .select("id, name, parent_id")
+        .eq("id", currentId)
+        .single();
+      
+      if (error || !data) break;
+      
+      breadcrumbs.unshift({
+        id: data.id,
+        name: data.name,
+        level: level
+      });
+      
+      currentId = data.parent_id;
+      level++;
+    }
+    
+    return breadcrumbs;
   },
 
   async getLocationStats(locationId: string): Promise<LocationStats> {
-    const { data, error } = await supabase
-      .rpc('get_location_stats', { location_id: locationId });
+    // Get stats by counting related records
+    const [assetsResult, metersResult, workOrdersResult, childrenResult] = await Promise.all([
+      supabase.from("assets").select("id", { count: 'exact' }).eq("location_id", locationId),
+      supabase.from("meters").select("id", { count: 'exact' }).eq("location_id", locationId),
+      supabase.from("work_orders").select("id", { count: 'exact' }).eq("location_id", locationId),
+      supabase.from("locations").select("id", { count: 'exact' }).eq("parent_id", locationId).eq("is_active", true)
+    ]);
     
-    if (error) throw error;
-    
-    const stats = data?.[0];
     return {
-      asset_count: Number(stats?.asset_count || 0),
-      meter_count: Number(stats?.meter_count || 0),
-      work_order_count: Number(stats?.work_order_count || 0),
-      child_location_count: Number(stats?.child_location_count || 0),
+      asset_count: assetsResult.count || 0,
+      meter_count: metersResult.count || 0,
+      work_order_count: workOrdersResult.count || 0,
+      child_location_count: childrenResult.count || 0,
     };
   },
 
@@ -72,7 +97,7 @@ export const locationsApi = {
     return data;
   },
 
-  async createLocation(location: Tables["locations"]["Insert"]) {
+  async createLocation(location: any) {
     const { data, error } = await supabase
       .from("locations")
       .insert(location)
@@ -83,7 +108,7 @@ export const locationsApi = {
     return data;
   },
 
-  async updateLocation(id: string, updates: Tables["locations"]["Update"]) {
+  async updateLocation(id: string, updates: any) {
     const { data, error } = await supabase
       .from("locations")
       .update(updates)
@@ -131,9 +156,14 @@ export const locationsApi = {
     const locationMap = new Map();
     const rootLocations: LocationHierarchy[] = [];
 
-    // Create a map for quick lookup
+    // Create a map for quick lookup and add hierarchy properties
     locations.forEach(location => {
-      locationMap.set(location.id, { ...location, children: [] });
+      locationMap.set(location.id, { 
+        ...location, 
+        children: [],
+        level: 0,
+        path: [location.name]
+      });
     });
 
     // Build the tree structure
@@ -142,6 +172,8 @@ export const locationsApi = {
       
       if (location.parent_id && locationMap.has(location.parent_id)) {
         const parent = locationMap.get(location.parent_id);
+        locationNode.level = parent.level + 1;
+        locationNode.path = [...parent.path, location.name];
         parent.children.push(locationNode);
       } else {
         rootLocations.push(locationNode);

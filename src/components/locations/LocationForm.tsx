@@ -15,14 +15,15 @@ import { LOCATION_TYPES } from "@/types/location";
 
 interface LocationFormProps {
   location?: Location;
+  parentLocation?: Location | null;
   onClose: () => void;
 }
 
-export const LocationForm = ({ location, onClose }: LocationFormProps) => {
+export const LocationForm = ({ location, parentLocation, onClose }: LocationFormProps) => {
   const [formData, setFormData] = useState({
     name: location?.name || "",
     description: location?.description || "",
-    parent_id: location?.parent_id || null,
+    parent_id: location?.parent_id || parentLocation?.id || null,
     location_code: location?.location_code || "",
     location_type: location?.location_type || "general",
     address: location?.address || "",
@@ -65,10 +66,7 @@ export const LocationForm = ({ location, onClose }: LocationFormProps) => {
       if (location) {
         await updateLocation.mutateAsync({
           id: location.id,
-          updates: {
-            ...formData,
-            parent_id: formData.parent_id || null,
-          }
+          updates: formData
         });
         toast({
           title: "Success",
@@ -108,7 +106,6 @@ export const LocationForm = ({ location, onClose }: LocationFormProps) => {
         const locationData = {
           ...formData,
           tenant_id: tenantId,
-          parent_id: formData.parent_id || null,
           is_active: true,
           metadata: {},
         };
@@ -245,7 +242,7 @@ export const LocationForm = ({ location, onClose }: LocationFormProps) => {
 };
 
 // Helper function to check if a location is a descendant of another
-function isDescendant(locationId: string, ancestorId: string | undefined, locations: Location[]): boolean {
+function isDescendant(locationId: string, ancestorId: string | undefined, locations: any[]): boolean {
   if (!ancestorId) return false;
   
   const location = locations.find(loc => loc.id === locationId);

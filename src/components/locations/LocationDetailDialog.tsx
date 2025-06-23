@@ -19,9 +19,10 @@ import type { Location } from "@/types/location";
 interface LocationDetailDialogProps {
   location: Location;
   onClose: () => void;
+  onEdit?: () => void;
 }
 
-export const LocationDetailDialog = ({ location, onClose }: LocationDetailDialogProps) => {
+export const LocationDetailDialog = ({ location, onClose, onEdit }: LocationDetailDialogProps) => {
   return (
     <Dialog open onOpenChange={onClose}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
@@ -39,10 +40,12 @@ export const LocationDetailDialog = ({ location, onClose }: LocationDetailDialog
               Active
             </Badge>
             <div className="flex gap-2">
-              <Button variant="outline" size="sm">
-                <Edit className="h-4 w-4 mr-2" />
-                Edit
-              </Button>
+              {onEdit && (
+                <Button variant="outline" size="sm" onClick={onEdit}>
+                  <Edit className="h-4 w-4 mr-2" />
+                  Edit
+                </Button>
+              )}
               <Button variant="outline" size="sm">
                 <Trash2 className="h-4 w-4 mr-2" />
                 Delete
