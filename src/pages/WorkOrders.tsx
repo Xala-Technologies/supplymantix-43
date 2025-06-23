@@ -4,7 +4,7 @@ import { useWorkOrdersIntegration } from "@/hooks/useWorkOrdersIntegration";
 import { EnhancedWorkOrdersList } from "@/components/work-orders/EnhancedWorkOrdersList";
 import { EnhancedWorkOrderDetail } from "@/components/work-orders/EnhancedWorkOrderDetail";
 import { EnhancedWorkOrderForm } from "@/components/work-orders/EnhancedWorkOrderForm";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ChevronLeft, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { WorkOrder } from "@/types/workOrder";
@@ -84,14 +84,22 @@ type ViewMode = 'list' | 'detail' | 'form';
 
 export default function WorkOrders() {
   const { data: workOrders, isLoading } = useWorkOrdersIntegration();
-  const [selectedWorkOrder, setSelectedWorkOrder] = useState<string | null>('5969');
-  const [viewMode, setViewMode] = useState<ViewMode>('list');
+  const [selectedWorkOrder, setSelectedWorkOrder] = useState<string | null>(null);
+  const [viewMode, setViewMode] = useState<ViewMode>('detail');
   const [editingWorkOrder, setEditingWorkOrder] = useState<WorkOrder | null>(null);
 
   // Transform and use real data if available, otherwise use sample data
   const transformedWorkOrders: WorkOrder[] = workOrders?.length > 0 
     ? workOrders.map(transformWorkOrderData)
     : sampleWorkOrders;
+
+  // Auto-select first work order when data loads
+  useEffect(() => {
+    if (transformedWorkOrders.length > 0 && !selectedWorkOrder) {
+      setSelectedWorkOrder(transformedWorkOrders[0].id);
+      setViewMode('detail');
+    }
+  }, [transformedWorkOrders, selectedWorkOrder]);
 
   const selectedWorkOrderData = transformedWorkOrders.find(wo => wo.id === selectedWorkOrder);
 
@@ -182,15 +190,16 @@ export default function WorkOrders() {
               </div>
             )}
             
-            {viewMode === 'list' && (
+            {/* Only show empty state if no work orders exist */}
+            {viewMode === 'list' && transformedWorkOrders.length === 0 && (
               <div className="flex-1 flex items-center justify-center">
                 <div className="text-center space-y-4">
                   <div className="w-16 h-16 bg-gradient-to-br from-blue-50 to-indigo-100 rounded-2xl flex items-center justify-center mx-auto">
                     <span className="text-2xl">📋</span>
                   </div>
                   <div className="space-y-2">
-                    <h3 className="text-lg font-semibold text-gray-900">Select a work order</h3>
-                    <p className="text-sm text-gray-500">Choose a work order from the list to view details</p>
+                    <h3 className="text-lg font-semibold text-gray-900">No work orders found</h3>
+                    <p className="text-sm text-gray-500">Create your first work order to get started</p>
                   </div>
                   <Button onClick={handleCreateWorkOrder} className="mt-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700">
                     <Plus className="w-4 h-4 mr-2" />
