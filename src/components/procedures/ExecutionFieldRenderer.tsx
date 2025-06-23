@@ -56,6 +56,189 @@ const getFieldTypeColor = (fieldType: string) => {
   return colors[fieldType] || 'border-l-gray-400';
 };
 
+const renderFieldInput = (field: ProcedureField, value: any, onChange: (value: any) => void, fieldId: string) => {
+  console.log(`Rendering field ${field.field_type} with value:`, value);
+  
+  switch (field.field_type) {
+    case 'text':
+      return (
+        <Input
+          id={fieldId}
+          value={value || ''}
+          onChange={(e) => {
+            console.log(`Text field ${fieldId} changed to:`, e.target.value);
+            onChange(e.target.value);
+          }}
+          placeholder={`Enter ${field.label.toLowerCase()}`}
+          className="text-sm w-full"
+        />
+      );
+
+    case 'number':
+      return (
+        <Input
+          id={fieldId}
+          type="number"
+          value={value || ''}
+          onChange={(e) => {
+            const numValue = e.target.value;
+            console.log(`Number field ${fieldId} changed to:`, numValue);
+            onChange(numValue);
+          }}
+          placeholder={`Enter ${field.label.toLowerCase()}`}
+          className="text-sm w-full"
+          step="any"
+        />
+      );
+
+    case 'date':
+      return (
+        <Input
+          id={fieldId}
+          type="date"
+          value={value || ''}
+          onChange={(e) => {
+            console.log(`Date field ${fieldId} changed to:`, e.target.value);
+            onChange(e.target.value);
+          }}
+          className="text-sm w-full"
+        />
+      );
+
+    case 'checkbox':
+      return (
+        <div className="flex items-center space-x-3 p-3">
+          <Checkbox
+            id={fieldId}
+            checked={Boolean(value)}
+            onCheckedChange={(checked) => {
+              console.log(`Checkbox field ${fieldId} changed to:`, checked);
+              onChange(checked === true);
+            }}
+            className="h-5 w-5"
+          />
+          <Label htmlFor={fieldId} className="cursor-pointer text-sm font-medium">
+            {field.label}
+          </Label>
+        </div>
+      );
+
+    case 'select':
+      const choices = field.options?.choices || [];
+      return (
+        <Select 
+          value={value || ''} 
+          onValueChange={(selectedValue) => {
+            console.log(`Select field ${fieldId} changed to:`, selectedValue);
+            onChange(selectedValue);
+          }}
+        >
+          <SelectTrigger className="text-sm w-full">
+            <SelectValue placeholder={`Select ${field.label.toLowerCase()}`} />
+          </SelectTrigger>
+          <SelectContent>
+            {choices.length === 0 ? (
+              <SelectItem value="" disabled>No options available</SelectItem>
+            ) : (
+              choices.map((choice: string, index: number) => (
+                <SelectItem key={`${choice}-${index}`} value={choice} className="text-sm">
+                  {choice}
+                </SelectItem>
+              ))
+            )}
+          </SelectContent>
+        </Select>
+      );
+
+    case 'multiselect':
+      const multiselectChoices = field.options?.choices || [];
+      const selectedValues = Array.isArray(value) ? value : [];
+      
+      return (
+        <div className="space-y-2 max-h-48 overflow-y-auto">
+          {multiselectChoices.length === 0 ? (
+            <div className="text-sm text-gray-500 p-3">No options available</div>
+          ) : (
+            multiselectChoices.map((choice: string, index: number) => (
+              <div key={`${choice}-${index}`} className="flex items-center space-x-3 p-2 hover:bg-gray-50 rounded">
+                <Checkbox
+                  id={`${fieldId}_${choice}_${index}`}
+                  checked={selectedValues.includes(choice)}
+                  onCheckedChange={(checked) => {
+                    const currentValues = Array.isArray(value) ? [...value] : [];
+                    let newValues;
+                    if (checked) {
+                      newValues = [...currentValues, choice];
+                    } else {
+                      newValues = currentValues.filter((v: string) => v !== choice);
+                    }
+                    console.log(`Multiselect field ${fieldId} changed to:`, newValues);
+                    onChange(newValues);
+                  }}
+                  className="h-4 w-4"
+                />
+                <Label htmlFor={`${fieldId}_${choice}_${index}`} className="cursor-pointer text-sm">
+                  {choice}
+                </Label>
+              </div>
+            ))
+          )}
+        </div>
+      );
+
+    case 'file':
+      return (
+        <div className="space-y-3">
+          <Input
+            id={fieldId}
+            type="file"
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              if (file) {
+                const fileData = {
+                  name: file.name,
+                  size: file.size,
+                  type: file.type,
+                  lastModified: file.lastModified
+                };
+                console.log(`File field ${fieldId} changed to:`, fileData);
+                onChange(fileData);
+              } else {
+                onChange(null);
+              }
+            }}
+            className="text-sm w-full"
+            accept="*/*"
+          />
+          {value && typeof value === 'object' && value.name && (
+            <div className="p-3 bg-gray-50 rounded border">
+              <p className="font-medium text-sm text-gray-900">{value.name}</p>
+              <p className="text-gray-600 text-xs">
+                {value.size ? `${(value.size / 1024).toFixed(1)} KB` : 'Unknown size'} 
+                {value.type && ` • ${value.type}`}
+              </p>
+            </div>
+          )}
+        </div>
+      );
+
+    default:
+      return (
+        <Textarea
+          id={fieldId}
+          value={value || ''}
+          onChange={(e) => {
+            console.log(`Textarea field ${fieldId} changed to:`, e.target.value);
+            onChange(e.target.value);
+          }}
+          placeholder={`Enter ${field.label.toLowerCase()}`}
+          rows={3}
+          className="resize-none text-sm w-full"
+        />
+      );
+  }
+};
+
 export const ExecutionFieldRenderer: React.FC<ExecutionFieldRendererProps> = ({
   field,
   value,
@@ -103,7 +286,7 @@ export const ExecutionFieldRenderer: React.FC<ExecutionFieldRendererProps> = ({
           </div>
 
           {/* Field Input */}
-          <div className="bg-white rounded-lg border p-3">
+          <div className="bg-white rounded-lg border p-4">
             {renderFieldInput(field, value, onChange, fieldId)}
           </div>
 
@@ -118,139 +301,4 @@ export const ExecutionFieldRenderer: React.FC<ExecutionFieldRendererProps> = ({
       </CardContent>
     </Card>
   );
-};
-
-const renderFieldInput = (field: ProcedureField, value: any, onChange: (value: any) => void, fieldId: string) => {
-  switch (field.field_type) {
-    case 'text':
-      return (
-        <Input
-          id={fieldId}
-          value={value || ''}
-          onChange={(e) => onChange(e.target.value)}
-          placeholder={`Enter ${field.label.toLowerCase()}`}
-          className="text-sm"
-        />
-      );
-
-    case 'number':
-      return (
-        <Input
-          id={fieldId}
-          type="number"
-          value={value || ''}
-          onChange={(e) => onChange(e.target.value)}
-          placeholder={`Enter ${field.label.toLowerCase()}`}
-          className="text-sm"
-        />
-      );
-
-    case 'date':
-      return (
-        <Input
-          id={fieldId}
-          type="date"
-          value={value || ''}
-          onChange={(e) => onChange(e.target.value)}
-          className="text-sm"
-        />
-      );
-
-    case 'checkbox':
-      return (
-        <div className="flex items-center space-x-3 p-2">
-          <Checkbox
-            id={fieldId}
-            checked={value === true}
-            onCheckedChange={(checked) => onChange(checked)}
-            className="h-5 w-5"
-          />
-          <Label htmlFor={fieldId} className="cursor-pointer text-sm font-medium">
-            {field.label}
-          </Label>
-        </div>
-      );
-
-    case 'select':
-      return (
-        <Select value={value || ''} onValueChange={onChange}>
-          <SelectTrigger className="text-sm">
-            <SelectValue placeholder={`Select ${field.label.toLowerCase()}`} />
-          </SelectTrigger>
-          <SelectContent>
-            {field.options?.choices?.map((choice: string) => (
-              <SelectItem key={choice} value={choice} className="text-sm">
-                {choice}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      );
-
-    case 'multiselect':
-      return (
-        <div className="space-y-2">
-          {field.options?.choices?.map((choice: string) => (
-            <div key={choice} className="flex items-center space-x-3 p-2 hover:bg-gray-50 rounded">
-              <Checkbox
-                id={`${fieldId}_${choice}`}
-                checked={(value || []).includes(choice)}
-                onCheckedChange={(checked) => {
-                  const currentValues = value || [];
-                  const newValues = checked
-                    ? [...currentValues, choice]
-                    : currentValues.filter((v: string) => v !== choice);
-                  onChange(newValues);
-                }}
-                className="h-4 w-4"
-              />
-              <Label htmlFor={`${fieldId}_${choice}`} className="cursor-pointer text-sm">
-                {choice}
-              </Label>
-            </div>
-          ))}
-        </div>
-      );
-
-    case 'file':
-      return (
-        <div className="space-y-3">
-          <Input
-            id={fieldId}
-            type="file"
-            onChange={(e) => {
-              const file = e.target.files?.[0];
-              if (file) {
-                onChange({
-                  name: file.name,
-                  size: file.size,
-                  type: file.type
-                });
-              }
-            }}
-            className="text-sm"
-          />
-          {value && (
-            <div className="p-3 bg-gray-50 rounded border">
-              <p className="font-medium text-sm">{value.name}</p>
-              <p className="text-gray-600 text-xs">
-                {(value.size / 1024).toFixed(1)} KB • {value.type}
-              </p>
-            </div>
-          )}
-        </div>
-      );
-
-    default:
-      return (
-        <Textarea
-          id={fieldId}
-          value={value || ''}
-          onChange={(e) => onChange(e.target.value)}
-          placeholder={`Enter ${field.label.toLowerCase()}`}
-          rows={3}
-          className="resize-none text-sm"
-        />
-      );
-  }
 };
