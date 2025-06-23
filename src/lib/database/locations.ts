@@ -160,35 +160,49 @@ export const locationsApi = {
       return [];
     }
 
-    // Use a simple object structure to avoid TypeScript recursion issues
-    const nodeMap: { [key: string]: any } = {};
-    const result: any[] = [];
+    // Create a flat map of nodes first
+    const nodes: Record<string, any> = {};
+    const rootNodes: any[] = [];
     
-    // Create all nodes first
-    locations.forEach(location => {
-      nodeMap[location.id] = {
-        ...location,
+    // Initialize all nodes
+    for (const location of locations) {
+      const node = {
+        id: location.id,
+        name: location.name,
+        description: location.description,
+        tenant_id: location.tenant_id,
+        parent_id: location.parent_id,
+        location_code: location.location_code,
+        location_type: location.location_type,
+        address: location.address,
+        coordinates: location.coordinates,
+        is_active: location.is_active,
+        metadata: location.metadata,
+        created_at: location.created_at,
+        updated_at: location.updated_at,
         children: [],
         level: 0,
         path: []
       };
-    });
+      nodes[location.id] = node;
+    }
     
-    // Build hierarchy
-    locations.forEach(location => {
-      const node = nodeMap[location.id];
+    // Build the hierarchy
+    for (const location of locations) {
+      const node = nodes[location.id];
       
-      if (location.parent_id && nodeMap[location.parent_id]) {
-        const parent = nodeMap[location.parent_id];
+      if (location.parent_id && nodes[location.parent_id]) {
+        const parent = nodes[location.parent_id];
         node.level = parent.level + 1;
-        node.path = [...parent.path, parent.name];
+        const parentPath = parent.path || [];
+        node.path = parentPath.concat(parent.name);
         parent.children.push(node);
       } else {
-        result.push(node);
+        node.path = [];
+        rootNodes.push(node);
       }
-    });
+    }
     
-    // Return with proper typing
-    return result as LocationHierarchy[];
+    return rootNodes;
   },
 };
