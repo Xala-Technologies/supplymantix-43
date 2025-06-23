@@ -53,10 +53,10 @@ export const InventoryForm = ({ item, onSuccess, trigger, mode = 'create' }: Inv
 
   const onSubmit = async (data: InventoryFormData) => {
     try {
-      console.log('Form submission started with data:', data);
+      console.log('InventoryForm: Form submission started with data:', data);
       
       if (mode === 'edit' && item) {
-        console.log('Updating item:', item.id);
+        console.log('InventoryForm: Updating item:', item.id);
         await updateMutation.mutateAsync({
           id: item.id,
           updates: {
@@ -69,10 +69,11 @@ export const InventoryForm = ({ item, onSuccess, trigger, mode = 'create' }: Inv
             unit_cost: data.unit_cost,
           }
         });
-        console.log('Update successful');
+        console.log('InventoryForm: Update successful');
+        toast.success('Item updated successfully');
       } else {
-        console.log('Creating new item');
-        await createMutation.mutateAsync({
+        console.log('InventoryForm: Creating new item');
+        const result = await createMutation.mutateAsync({
           name: data.name,
           description: data.description,
           sku: data.sku,
@@ -81,15 +82,21 @@ export const InventoryForm = ({ item, onSuccess, trigger, mode = 'create' }: Inv
           min_quantity: data.min_quantity || 0,
           unit_cost: data.unit_cost || 0,
         });
-        console.log('Create successful');
+        console.log('InventoryForm: Create successful, result:', result);
+        toast.success('Item created successfully');
       }
       
       setOpen(false);
       reset();
-      onSuccess?.();
-      toast.success(mode === 'edit' ? 'Item updated successfully' : 'Item created successfully');
+      
+      // Give a small delay before calling onSuccess to ensure mutations are complete
+      setTimeout(() => {
+        console.log('InventoryForm: Calling onSuccess callback');
+        onSuccess?.();
+      }, 100);
+      
     } catch (error) {
-      console.error('Error saving inventory item:', error);
+      console.error('InventoryForm: Error saving inventory item:', error);
       toast.error('Failed to save inventory item: ' + (error as Error).message);
     }
   };

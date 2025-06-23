@@ -18,27 +18,39 @@ export const useCreateInventoryItem = () => {
       min_quantity?: number;
       unit_cost?: number;
     }) => {
-      console.log('Creating inventory item:', item);
+      console.log('useCreateInventoryItem: Creating inventory item:', item);
       const tenantId = await getCurrentTenantId();
+      console.log('useCreateInventoryItem: Using tenant ID:', tenantId);
+      
       const result = await inventoryEnhancedApi.createInventoryItem({
         ...item,
         tenant_id: tenantId,
         min_quantity: item.min_quantity || 0,
         unit_cost: item.unit_cost || 0
       });
-      console.log('Create result:', result);
+      
+      console.log('useCreateInventoryItem: Create result:', result);
       return result;
     },
-    onSuccess: () => {
-      console.log('Item created successfully, invalidating queries...');
+    onSuccess: (data) => {
+      console.log('useCreateInventoryItem: Item created successfully:', data);
+      console.log('useCreateInventoryItem: Invalidating and refetching queries...');
+      
+      // Invalidate all inventory-related queries
       queryClient.invalidateQueries({ queryKey: ["inventory-enhanced"] });
       queryClient.invalidateQueries({ queryKey: ["low-stock-alerts"] });
-      // Force a refetch of the main inventory query
-      queryClient.refetchQueries({ queryKey: ["inventory-enhanced"] });
+      
+      // Force immediate refetch to ensure UI updates
+      queryClient.refetchQueries({ 
+        queryKey: ["inventory-enhanced"],
+        type: 'active'
+      });
+      
+      console.log('useCreateInventoryItem: Queries invalidated and refetched');
       toast.success("Inventory item created successfully");
     },
     onError: (error) => {
-      console.error("Failed to create inventory item:", error);
+      console.error("useCreateInventoryItem: Failed to create inventory item:", error);
       toast.error("Failed to create inventory item: " + (error as Error).message);
     },
   });
@@ -61,18 +73,26 @@ export const useUpdateInventoryItem = () => {
         unit_cost?: number;
       }
     }) => {
-      console.log('Updating inventory item:', id, updates);
+      console.log('useUpdateInventoryItem: Updating inventory item:', id, updates);
       const result = await inventoryEnhancedApi.updateInventoryItem(id, updates);
-      console.log('Update result:', result);
+      console.log('useUpdateInventoryItem: Update result:', result);
       return result;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      console.log('useUpdateInventoryItem: Item updated successfully:', data);
       queryClient.invalidateQueries({ queryKey: ["inventory-enhanced"] });
       queryClient.invalidateQueries({ queryKey: ["low-stock-alerts"] });
+      
+      // Force immediate refetch
+      queryClient.refetchQueries({ 
+        queryKey: ["inventory-enhanced"],
+        type: 'active'
+      });
+      
       toast.success("Inventory item updated successfully");
     },
     onError: (error) => {
-      console.error("Failed to update inventory item:", error);
+      console.error("useUpdateInventoryItem: Failed to update inventory item:", error);
       toast.error("Failed to update inventory item: " + (error as Error).message);
     },
   });
@@ -84,17 +104,25 @@ export const useDeleteInventoryItem = () => {
   
   return useMutation({
     mutationFn: async (id: string) => {
-      console.log('Deleting inventory item:', id);
+      console.log('useDeleteInventoryItem: Deleting inventory item:', id);
       await inventoryEnhancedApi.deleteInventoryItem(id);
-      console.log('Delete completed for:', id);
+      console.log('useDeleteInventoryItem: Delete completed for:', id);
     },
     onSuccess: () => {
+      console.log('useDeleteInventoryItem: Item deleted successfully');
       queryClient.invalidateQueries({ queryKey: ["inventory-enhanced"] });
       queryClient.invalidateQueries({ queryKey: ["low-stock-alerts"] });
+      
+      // Force immediate refetch
+      queryClient.refetchQueries({ 
+        queryKey: ["inventory-enhanced"],
+        type: 'active'
+      });
+      
       toast.success("Inventory item deleted successfully");
     },
     onError: (error) => {
-      console.error("Failed to delete inventory item:", error);
+      console.error("useDeleteInventoryItem: Failed to delete inventory item:", error);
       toast.error("Failed to delete inventory item: " + (error as Error).message);
     },
   });
