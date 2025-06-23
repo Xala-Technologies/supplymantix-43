@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Progress } from "@/components/ui/progress";
 import { 
   BarChart3, 
   Activity, 
@@ -12,7 +13,9 @@ import {
   MapPin, 
   Factory,
   Zap,
-  Settings
+  Settings,
+  Eye,
+  Plus
 } from "lucide-react";
 
 interface Meter {
@@ -28,6 +31,8 @@ interface Meter {
   target_range?: { min: number; max: number };
   description?: string;
   reading_frequency?: string;
+  target_min?: number;
+  target_max?: number;
 }
 
 interface MetersListProps {
@@ -39,16 +44,24 @@ interface MetersListProps {
 export const MetersList = ({ meters, isLoading, onMeterClick }: MetersListProps) => {
   if (isLoading) {
     return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {[...Array(6)].map((_, i) => (
-          <Card key={i}>
-            <CardHeader>
-              <Skeleton className="h-6 w-3/4" />
-              <Skeleton className="h-4 w-1/2" />
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        {[...Array(8)].map((_, i) => (
+          <Card key={i} className="animate-pulse border-0 shadow-lg">
+            <CardHeader className="pb-4">
+              <div className="flex items-center gap-3">
+                <Skeleton className="h-10 w-10 rounded-xl" />
+                <div className="space-y-2">
+                  <Skeleton className="h-5 w-24" />
+                  <Skeleton className="h-3 w-16" />
+                </div>
+              </div>
             </CardHeader>
             <CardContent>
-              <Skeleton className="h-20 w-full mb-4" />
-              <Skeleton className="h-8 w-full" />
+              <Skeleton className="h-20 w-full mb-4 rounded-xl" />
+              <div className="space-y-2">
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-3 w-3/4" />
+              </div>
             </CardContent>
           </Card>
         ))}
@@ -58,15 +71,17 @@ export const MetersList = ({ meters, isLoading, onMeterClick }: MetersListProps)
 
   if (!meters || meters.length === 0) {
     return (
-      <Card className="col-span-full">
-        <CardContent className="flex flex-col items-center justify-center py-12">
-          <BarChart3 className="h-16 w-16 text-gray-400 mb-4" />
-          <h3 className="text-xl font-semibold text-gray-900 mb-2">No Meters Found</h3>
-          <p className="text-gray-500 text-center mb-6 max-w-md">
-            Get started by creating your first meter to track asset performance and maintenance metrics.
+      <Card className="border-0 shadow-2xl bg-gradient-to-br from-slate-50 to-blue-50">
+        <CardContent className="flex flex-col items-center justify-center py-16">
+          <div className="w-24 h-24 rounded-2xl bg-gradient-to-br from-emerald-100 to-teal-100 flex items-center justify-center mb-6">
+            <BarChart3 className="h-12 w-12 text-emerald-600" />
+          </div>
+          <h3 className="text-2xl font-bold text-gray-900 mb-3">No Meters Found</h3>
+          <p className="text-gray-600 text-center mb-8 max-w-md">
+            Get started by creating your first meter to track asset performance and maintenance metrics in real-time.
           </p>
-          <Button className="bg-emerald-600 hover:bg-emerald-700">
-            <BarChart3 className="h-4 w-4 mr-2" />
+          <Button className="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 gap-2 shadow-lg">
+            <Plus className="h-4 w-4" />
             Create Your First Meter
           </Button>
         </CardContent>
@@ -96,101 +111,136 @@ export const MetersList = ({ meters, isLoading, onMeterClick }: MetersListProps)
     return type === 'automated' ? <Zap className="h-3 w-3" /> : <Settings className="h-3 w-3" />;
   };
 
+  const calculateProgress = (meter: Meter) => {
+    if (!meter.target_min || !meter.target_max) return null;
+    const range = meter.target_max - meter.target_min;
+    const progress = ((meter.current_value - meter.target_min) / range) * 100;
+    return Math.max(0, Math.min(100, progress));
+  };
+
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      {meters.map((meter) => (
-        <Card 
-          key={meter.id} 
-          className="hover:shadow-xl transition-all duration-300 border-l-4 border-l-emerald-500 group cursor-pointer hover:border-l-emerald-600"
-          onClick={() => onMeterClick(meter)}
-        >
-          <CardHeader className="pb-3">
-            <div className="flex items-start justify-between">
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-lg bg-emerald-100 flex items-center justify-center group-hover:bg-emerald-200 transition-colors">
-                  {getStatusIcon(meter.status)}
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+      {meters.map((meter) => {
+        const progress = calculateProgress(meter);
+        return (
+          <Card 
+            key={meter.id} 
+            className="group hover:shadow-2xl transition-all duration-300 border-0 shadow-lg cursor-pointer hover:scale-105 bg-white/90 backdrop-blur-sm overflow-hidden"
+            onClick={() => onMeterClick(meter)}
+          >
+            {/* Status Indicator Bar */}
+            <div className={`h-1 w-full ${
+              meter.status === 'active' ? 'bg-gradient-to-r from-green-400 to-emerald-500' :
+              meter.status === 'warning' ? 'bg-gradient-to-r from-yellow-400 to-orange-500' :
+              meter.status === 'critical' ? 'bg-gradient-to-r from-red-400 to-red-600' :
+              'bg-gradient-to-r from-gray-400 to-gray-500'
+            }`} />
+
+            <CardHeader className="pb-4">
+              <div className="flex items-start justify-between">
+                <div className="flex items-center gap-3">
+                  <div className={`w-12 h-12 rounded-xl flex items-center justify-center transition-colors ${
+                    meter.status === 'active' ? 'bg-green-100 group-hover:bg-green-200' :
+                    meter.status === 'warning' ? 'bg-yellow-100 group-hover:bg-yellow-200' :
+                    meter.status === 'critical' ? 'bg-red-100 group-hover:bg-red-200' :
+                    'bg-gray-100 group-hover:bg-gray-200'
+                  }`}>
+                    {getStatusIcon(meter.status)}
+                  </div>
+                  <div>
+                    <CardTitle className="text-lg group-hover:text-emerald-700 transition-colors leading-tight">
+                      {meter.name}
+                    </CardTitle>
+                    <div className="flex items-center gap-2 mt-1">
+                      {getTypeIcon(meter.type)}
+                      <span className="text-xs text-gray-500 capitalize">{meter.type}</span>
+                    </div>
+                  </div>
                 </div>
-                <div>
-                  <CardTitle className="text-lg group-hover:text-emerald-700 transition-colors">
-                    {meter.name}
-                  </CardTitle>
-                  <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                    {getTypeIcon(meter.type)}
-                    <span className="capitalize">{meter.type}</span>
+                <Badge className={`${getStatusColor(meter.status)} text-xs font-medium`}>
+                  {meter.status}
+                </Badge>
+              </div>
+              
+              {/* Asset and Location Info */}
+              <div className="space-y-2 mt-3">
+                {meter.asset_name && (
+                  <div className="flex items-center gap-2 text-sm text-gray-600">
+                    <Factory className="h-3 w-3" />
+                    <span className="truncate">{meter.asset_name}</span>
+                  </div>
+                )}
+                {meter.location && (
+                  <div className="flex items-center gap-2 text-sm text-gray-600">
+                    <MapPin className="h-3 w-3" />
+                    <span className="truncate">{meter.location}</span>
+                  </div>
+                )}
+              </div>
+            </CardHeader>
+            
+            <CardContent className="space-y-4">
+              {/* Current Value Display */}
+              <div className="relative overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-br from-emerald-50/50 via-teal-50/50 to-blue-50/50 rounded-2xl"></div>
+                <div className="relative text-center py-6 px-4">
+                  <div className="text-3xl font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent mb-1">
+                    {meter.current_value.toLocaleString()}
+                  </div>
+                  <div className="text-sm font-semibold text-emerald-600 uppercase tracking-wider">
+                    {meter.unit}
                   </div>
                 </div>
               </div>
-              <Badge className={`${getStatusColor(meter.status)} text-xs`}>
-                {meter.status}
-              </Badge>
-            </div>
-            
-            <div className="text-sm text-muted-foreground space-y-1">
-              {meter.asset_name && (
-                <div className="flex items-center gap-1">
-                  <Factory className="h-3 w-3" />
-                  <span>{meter.asset_name}</span>
+
+              {/* Progress Bar for Target Range */}
+              {progress !== null && (
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between text-xs text-gray-600">
+                    <span>Target Progress</span>
+                    <span>{Math.round(progress)}%</span>
+                  </div>
+                  <Progress 
+                    value={progress} 
+                    className="h-2"
+                  />
+                  <div className="flex items-center justify-between text-xs text-gray-500">
+                    <span>{meter.target_min?.toLocaleString()}</span>
+                    <span>{meter.target_max?.toLocaleString()}</span>
+                  </div>
                 </div>
               )}
-              {meter.location && (
-                <div className="flex items-center gap-1">
-                  <MapPin className="h-3 w-3" />
-                  <span>{meter.location}</span>
-                </div>
+
+              {/* Description */}
+              {meter.description && (
+                <p className="text-sm text-gray-600 line-clamp-2 leading-relaxed">
+                  {meter.description}
+                </p>
               )}
-            </div>
-          </CardHeader>
-          
-          <CardContent className="space-y-4">
-            {/* Current Value Display */}
-            <div className="text-center py-6 bg-gradient-to-br from-emerald-50 to-teal-50 rounded-xl">
-              <div className="text-3xl font-bold text-emerald-700 mb-1">
-                {meter.current_value.toLocaleString()}
-              </div>
-              <div className="text-sm font-medium text-emerald-600 uppercase tracking-wider">
-                {meter.unit}
-              </div>
-            </div>
 
-            {/* Target Range */}
-            {meter.target_range && (
-              <div className="bg-gray-50 p-3 rounded-lg">
-                <div className="text-xs font-medium text-gray-600 mb-1">Target Range</div>
-                <div className="text-sm text-gray-700">
-                  {meter.target_range.min.toLocaleString()} - {meter.target_range.max.toLocaleString()} {meter.unit}
+              {/* Footer */}
+              <div className="flex items-center justify-between pt-3 border-t border-gray-100">
+                <div className="flex items-center gap-2 text-xs text-gray-500">
+                  <Clock className="h-3 w-3" />
+                  <span>{new Date(meter.last_reading).toLocaleDateString()}</span>
                 </div>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 gap-2 transition-all duration-200"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onMeterClick(meter);
+                  }}
+                >
+                  <Eye className="h-3 w-3" />
+                  View
+                </Button>
               </div>
-            )}
-
-            {/* Description */}
-            {meter.description && (
-              <div className="text-sm text-muted-foreground line-clamp-2">
-                {meter.description}
-              </div>
-            )}
-
-            {/* Footer */}
-            <div className="flex items-center justify-between pt-3 border-t border-gray-100">
-              <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                <Clock className="h-3 w-3" />
-                {new Date(meter.last_reading).toLocaleDateString()}
-              </div>
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                className="text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 gap-1"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onMeterClick(meter);
-                }}
-              >
-                <TrendingUp className="h-3 w-3" />
-                View Details
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      ))}
+            </CardContent>
+          </Card>
+        );
+      })}
     </div>
   );
 };

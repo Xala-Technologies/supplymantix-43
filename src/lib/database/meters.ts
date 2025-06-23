@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/integrations/supabase/types";
 
@@ -12,13 +11,7 @@ export const metersApi = {
         .from("meters")
         .select(`
           *,
-          assets(id, name, location),
-          meter_readings(
-            id,
-            value,
-            recorded_at,
-            users(email, first_name, last_name)
-          )
+          assets(id, name, location)
         `)
         .order("created_at", { ascending: false });
       
@@ -27,8 +20,8 @@ export const metersApi = {
         throw error;
       }
       
-      console.log("API: Got meters successfully:", data?.length);
-      return data;
+      console.log("API: Got meters successfully:", data?.length || 0);
+      return data || [];
     } catch (error) {
       console.error("Error in getMeters:", error);
       throw error;
@@ -43,13 +36,6 @@ export const metersApi = {
         .select(`
           *,
           assets(id, name, location, asset_tag),
-          meter_readings(
-            id,
-            value,
-            comment,
-            recorded_at,
-            users(email, first_name, last_name)
-          ),
           meter_triggers(*)
         `)
         .eq("id", id)
@@ -154,8 +140,7 @@ export const metersApi = {
       const { data, error } = await supabase
         .from("meter_readings")
         .select(`
-          *,
-          users(email, first_name, last_name)
+          *
         `)
         .eq("meter_id", meterId)
         .order("recorded_at", { ascending: false });
@@ -165,8 +150,8 @@ export const metersApi = {
         throw error;
       }
       
-      console.log("API: Got meter readings successfully:", data?.length);
-      return data;
+      console.log("API: Got meter readings successfully:", data?.length || 0);
+      return data || [];
     } catch (error) {
       console.error("Error in getMeterReadings:", error);
       throw error;

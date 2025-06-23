@@ -31,7 +31,13 @@ export const useMeters = () => {
         const meters = await databaseApi.getMeters();
         console.log("Raw meters data:", meters);
         
-        return meters?.map(meter => ({
+        // Return empty array if no data
+        if (!meters || meters.length === 0) {
+          console.log("No meters found, returning empty array");
+          return [];
+        }
+        
+        return meters.map(meter => ({
           id: meter.id,
           name: meter.name,
           type: meter.type,
@@ -51,11 +57,14 @@ export const useMeters = () => {
           target_min: meter.target_min ? Number(meter.target_min) : undefined,
           target_max: meter.target_max ? Number(meter.target_max) : undefined,
           last_reading_at: meter.last_reading_at,
-        })) || [];
+        }));
       } catch (error) {
         console.error("Error fetching meters:", error);
+        // Return empty array instead of throwing to prevent UI crashes
         return [];
       }
     },
+    retry: 3,
+    retryDelay: 1000,
   });
 };
