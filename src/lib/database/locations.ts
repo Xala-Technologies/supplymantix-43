@@ -156,12 +156,15 @@ export const locationsApi = {
   },
 
   buildLocationTree(locations: LocationRow[]): LocationHierarchy[] {
-    // Avoid recursive type issues by using any for intermediate processing
-    const locationMap: { [key: string]: any } = {};
-    const rootLocations: LocationHierarchy[] = [];
+    if (!locations || locations.length === 0) {
+      return [];
+    }
 
-    // First pass: create base objects
-    locations.forEach(location => {
+    // Create a map for quick lookup - use Record to avoid type inference issues
+    const locationMap: Record<string, any> = {};
+    
+    // First pass: create all nodes
+    for (const location of locations) {
       locationMap[location.id] = {
         id: location.id,
         name: location.name,
@@ -180,22 +183,27 @@ export const locationsApi = {
         level: 0,
         path: [location.name]
       };
-    });
+    }
 
-    // Second pass: build relationships
-    locations.forEach(location => {
-      const locationNode = locationMap[location.id];
+    // Second pass: build relationships and determine root nodes
+    const rootNodes: any[] = [];
+    
+    for (const location of locations) {
+      const node = locationMap[location.id];
       
       if (location.parent_id && locationMap[location.parent_id]) {
+        // Has parent - add to parent's children
         const parent = locationMap[location.parent_id];
-        locationNode.level = parent.level + 1;
-        locationNode.path = [...parent.path, location.name];
-        parent.children.push(locationNode);
+        node.level = parent.level + 1;
+        node.path = [...parent.path, location.name];
+        parent.children.push(node);
       } else {
-        rootLocations.push(locationNode);
+        // No parent - it's a root node
+        rootNodes.push(node);
       }
-    });
+    }
 
-    return rootLocations;
+    // Cast to proper type and return
+    return rootNodes as LocationHierarchy[];
   },
 };
