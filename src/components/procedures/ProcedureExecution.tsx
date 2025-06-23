@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -7,6 +6,7 @@ import { Progress } from "@/components/ui/progress";
 import { CheckCircle, AlertCircle, Clock, ArrowLeft, ArrowRight, Play, X, FileText } from "lucide-react";
 import { ProcedureField, ProcedureWithFields } from "@/lib/database/procedures-enhanced";
 import { ExecutionFieldRenderer } from "./ExecutionFieldRenderer";
+import { ExecutionTimeline } from "./ExecutionTimeline";
 import { useSubmitExecution } from "@/hooks/useProceduresEnhanced";
 import { toast } from "sonner";
 
@@ -36,12 +36,30 @@ export const ProcedureExecution: React.FC<ProcedureExecutionProps> = ({
   const [answers, setAnswers] = useState<Record<string, any>>({});
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [showSummary, setShowSummary] = useState(false);
+  const [executionStartTime] = useState(new Date());
   
   const submitExecution = useSubmitExecution();
   const fields = procedure.fields || [];
   const totalSteps = fields.length;
   const progress = totalSteps > 0 ? (currentStep + 1) / totalSteps * 100 : 100;
   const currentField = fields[currentStep];
+
+  // Estimate duration based on field count and complexity
+  const estimateDuration = (): number => {
+    const baseTimePerField = 2; // 2 minutes per field base
+    const complexityMultiplier = fields.reduce((acc, field) => {
+      switch (field.field_type) {
+        case 'file':
+        case 'multiselect':
+          return acc + 1.5;
+        case 'section':
+          return acc + 0.5;
+        default:
+          return acc + 1;
+      }
+    }, 0);
+    return Math.ceil(baseTimePerField * complexityMultiplier);
+  };
 
   const validateField = (field: ProcedureField, value: any): string | null => {
     if (field.is_required && (!value || (Array.isArray(value) && value.length === 0) || value === '')) {
@@ -85,7 +103,6 @@ export const ProcedureExecution: React.FC<ProcedureExecutionProps> = ({
     if (currentStep < totalSteps - 1) {
       setCurrentStep(currentStep + 1);
     } else {
-      // Show summary before final completion
       setShowSummary(true);
     }
   };
@@ -152,7 +169,6 @@ export const ProcedureExecution: React.FC<ProcedureExecutionProps> = ({
     
     try {
       if (executionId) {
-        // Submit to database if we have an execution ID
         await submitExecution.mutateAsync({
           executionId,
           answers: formattedAnswers,
@@ -161,7 +177,6 @@ export const ProcedureExecution: React.FC<ProcedureExecutionProps> = ({
         toast.success('Procedure completed successfully!');
       }
       
-      // Call the completion callback
       onComplete(formattedAnswers, score);
     } catch (error) {
       console.error('Error completing execution:', error);
@@ -188,6 +203,17 @@ export const ProcedureExecution: React.FC<ProcedureExecutionProps> = ({
     
     return (
       <div className="flex flex-col h-full">
+        {/* Timeline */}
+        <div className="flex-shrink-0 p-4 border-b">
+          <ExecutionTimeline
+            startTime={executionStartTime}
+            estimatedDurationMinutes={estimateDuration()}
+            currentStep={totalSteps}
+            totalSteps={totalSteps}
+            isCompleted={true}
+          />
+        </div>
+
         {/* Header */}
         <div className="flex-shrink-0 border-b bg-gradient-to-r from-green-50 to-emerald-50 p-4">
           <div className="flex items-center gap-2 mb-2">
@@ -261,6 +287,17 @@ export const ProcedureExecution: React.FC<ProcedureExecutionProps> = ({
 
   return (
     <div className="flex flex-col h-full">
+      {/* Timeline */}
+      <div className="flex-shrink-0 p-4 border-b">
+        <ExecutionTimeline
+          startTime={executionStartTime}
+          estimatedDurationMinutes={estimateDuration()}
+          currentStep={currentStep}
+          totalSteps={totalSteps}
+          isCompleted={false}
+        />
+      </div>
+
       {/* Header */}
       <div className="flex-shrink-0 border-b bg-gradient-to-r from-blue-50 to-indigo-50 p-3">
         <div className="flex justify-between items-start mb-3">
