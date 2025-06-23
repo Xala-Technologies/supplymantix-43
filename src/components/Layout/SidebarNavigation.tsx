@@ -23,10 +23,10 @@ export function SidebarNavigation() {
   return (
     <SidebarContent className="p-0 bg-white overflow-hidden">
       {Object.entries(groupedItems).map(([group, items]) => (
-        <SidebarGroup key={group} className="px-4 py-2 mb-2">
+        <SidebarGroup key={group} className="px-4 py-1 mb-1">
           <SidebarGroupLabel 
             className={`
-              text-gray-500 uppercase text-xs font-bold tracking-widest px-0 py-3 mb-2
+              text-gray-500 uppercase text-xs font-bold tracking-widest px-0 py-2 mb-1
               transition-all duration-300 ease-in-out
               ${isCollapsed ? 'opacity-0 scale-75' : 'opacity-100 scale-100'}
             `}
@@ -34,7 +34,7 @@ export function SidebarNavigation() {
             {!isCollapsed && t(group as keyof typeof t)}
           </SidebarGroupLabel>
           <SidebarGroupContent className="p-0">
-            <SidebarMenu className="space-y-2 mb-6">
+            <SidebarMenu className="space-y-1 mb-3">
               {items.map((item) => {
                 const isActive = location.pathname === item.url;
                 const Icon = item.icon;
@@ -44,22 +44,22 @@ export function SidebarNavigation() {
                     <SidebarMenuButton 
                       asChild
                       className={`
-                        relative group h-11 px-3 rounded-xl transition-all duration-300 ease-in-out m-0
+                        relative group h-9 px-3 rounded-xl transition-all duration-300 ease-in-out m-0
                         overflow-hidden
                         ${isActive 
                           ? 'bg-gradient-to-r from-blue-500 via-purple-600 to-indigo-600 text-white shadow-lg shadow-blue-500/25 scale-105' 
                           : 'text-gray-700 hover:text-gray-900 hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-50 hover:shadow-md hover:scale-105'
                         }
-                        ${isCollapsed ? 'w-11 justify-center' : 'w-full'}
+                        ${isCollapsed ? 'w-9 justify-center' : 'w-full'}
                       `}
                     >
                       <Link to={item.url} className={`
                         flex items-center w-full transition-all duration-300 ease-in-out
-                        ${isCollapsed ? 'justify-center' : 'space-x-4'}
+                        ${isCollapsed ? 'justify-center' : 'space-x-3'}
                       `}>
                         {/* Enhanced Icon Container */}
                         <div className={`
-                          w-6 h-6 rounded-lg flex items-center justify-center transition-all duration-300 ease-in-out
+                          w-5 h-5 rounded-lg flex items-center justify-center transition-all duration-300 ease-in-out
                           ${isActive 
                             ? 'bg-white/20 text-white shadow-sm' 
                             : 'bg-transparent text-gray-600 group-hover:text-blue-600 group-hover:bg-white/50'
@@ -84,7 +84,7 @@ export function SidebarNavigation() {
                         {/* Enhanced Active Indicator */}
                         {isActive && (
                           <div className={`
-                            absolute right-3 w-2 h-2 rounded-full bg-white shadow-sm
+                            absolute right-2 w-1.5 h-1.5 rounded-full bg-white shadow-sm
                             transition-all duration-300 ease-in-out
                             ${isCollapsed ? 'opacity-0 scale-0' : 'opacity-100 scale-100'}
                           `}></div>
