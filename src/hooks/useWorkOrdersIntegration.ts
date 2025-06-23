@@ -1,12 +1,13 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { databaseApi } from "@/lib/database";
 import { toast } from "sonner";
+import { WorkOrder } from "@/types/workOrder";
 
 // Enhanced work orders hook with asset and inventory integration
 export const useWorkOrdersIntegration = () => {
   return useQuery({
     queryKey: ["work-orders-integration"],
-    queryFn: async () => {
+    queryFn: async (): Promise<WorkOrder[]> => {
       try {
         const [workOrders, assets, inventory] = await Promise.all([
           databaseApi.getWorkOrders(),
@@ -14,15 +15,34 @@ export const useWorkOrdersIntegration = () => {
           databaseApi.getInventoryItems()
         ]);
         
-        // Merge data for rich display
+        // Transform and merge data to match WorkOrder interface
         return workOrders.map(wo => ({
-          ...wo,
-          asset: assets.find(a => a.id === wo.asset_id),
-          partsUsed: wo.parts_used ? JSON.parse(wo.parts_used as string) : [],
-          totalCost: wo.total_cost || 0,
-          timeSpent: wo.time_spent || 0,
+          id: wo.id,
+          title: wo.title || 'Untitled Work Order',
+          description: wo.description || '',
+          status: wo.status || 'open',
           priority: wo.priority || 'medium',
-          category: wo.category || 'maintenance'
+          assignedTo: wo.assigned_to ? [wo.assigned_to] : [], // Convert single assigned_to to array
+          asset: assets.find(a => a.id === wo.asset_id) || {
+            id: wo.asset_id || '',
+            name: 'Unknown Asset',
+            status: 'active'
+          },
+          location: wo.location_id || '',
+          category: wo.category || 'maintenance',
+          dueDate: wo.due_date || '',
+          due_date: wo.due_date || '',
+          createdAt: wo.created_at,
+          created_at: wo.created_at,
+          updated_at: wo.updated_at,
+          tenant_id: wo.tenant_id,
+          tags: wo.tags || [],
+          partsUsed: wo.parts_used ? JSON.parse(wo.parts_used as string) : [],
+          parts_used: wo.parts_used ? JSON.parse(wo.parts_used as string) : [],
+          totalCost: wo.total_cost || 0,
+          total_cost: wo.total_cost || 0,
+          timeSpent: wo.time_spent || 0,
+          time_spent: wo.time_spent || 0
         }));
       } catch (error) {
         console.error('Error fetching work orders:', error);
