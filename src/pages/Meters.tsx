@@ -9,6 +9,7 @@ import { MeterBulkActions } from "@/components/meters/MeterBulkActions";
 import { MeterExportDialog } from "@/components/meters/MeterExportDialog";
 import { MeterImportDialog } from "@/components/meters/MeterImportDialog";
 import { MeterAnalytics } from "@/components/meters/MeterAnalytics";
+import { MeterQuickActions } from "@/components/meters/MeterQuickActions";
 import { useMeters } from "@/hooks/useMeters";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -100,9 +101,10 @@ const Meters = () => {
           )}
 
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-            <TabsList className="grid w-full grid-cols-2 max-w-md">
+            <TabsList className="grid w-full grid-cols-3 max-w-md">
               <TabsTrigger value="meters">Meters</TabsTrigger>
               <TabsTrigger value="analytics">Analytics</TabsTrigger>
+              <TabsTrigger value="overview">Overview</TabsTrigger>
             </TabsList>
 
             <TabsContent value="meters" className="space-y-6">
@@ -117,6 +119,10 @@ const Meters = () => {
 
             <TabsContent value="analytics">
               <MeterAnalytics />
+            </TabsContent>
+
+            <TabsContent value="overview">
+              <MeterQuickActions onCreateMeter={() => setIsFormOpen(true)} />
             </TabsContent>
           </Tabs>
 
