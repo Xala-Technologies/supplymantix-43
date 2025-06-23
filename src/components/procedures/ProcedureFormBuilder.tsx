@@ -58,15 +58,14 @@ export const ProcedureFormBuilder: React.FC<ProcedureFormBuilderProps> = ({
       label: 'New Field',
       field_type: 'text',
       is_required: false,
-      order_index: fields.length,
       options: null
     };
     setFields([...fields, newField]);
   };
 
-  const updateField = (index: number, updatedField: ProcedureField) => {
+  const updateField = (index: number, updatedField: Partial<ProcedureField>) => {
     const newFields = [...fields];
-    newFields[index] = updatedField;
+    newFields[index] = { ...newFields[index], ...updatedField };
     setFields(newFields);
   };
 
@@ -85,11 +84,6 @@ export const ProcedureFormBuilder: React.FC<ProcedureFormBuilderProps> = ({
     const newFields = [...fields];
     const targetIndex = direction === 'up' ? index - 1 : index + 1;
     [newFields[index], newFields[targetIndex]] = [newFields[targetIndex], newFields[index]];
-    
-    // Update order_index
-    newFields.forEach((field, i) => {
-      field.order_index = i;
-    });
     
     setFields(newFields);
   };
@@ -111,15 +105,15 @@ export const ProcedureFormBuilder: React.FC<ProcedureFormBuilderProps> = ({
   return (
     <div className="h-full flex flex-col bg-gray-50">
       {/* Compact Header */}
-      <div className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white p-3 flex items-center justify-between">
+      <div className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white p-2 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <FileText className="h-4 w-4" />
-          <h2 className="text-lg font-semibold">
+          <h2 className="text-sm font-semibold">
             {initialData ? 'Edit Procedure' : 'Create Procedure'}
           </h2>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="ghost" size="sm" onClick={onCancel} className="text-white hover:bg-white/20 h-7">
+          <Button variant="ghost" size="sm" onClick={onCancel} className="text-white hover:bg-white/20 h-6 px-2">
             <X className="h-3 w-3" />
           </Button>
         </div>
@@ -129,50 +123,50 @@ export const ProcedureFormBuilder: React.FC<ProcedureFormBuilderProps> = ({
       <div className="flex-1 overflow-hidden flex">
         {/* Left Panel - Form Details */}
         <div className="w-1/3 border-r bg-white overflow-y-auto">
-          <div className="p-3 space-y-3">
+          <div className="p-2 space-y-2">
             <div className="flex items-center gap-2 mb-2">
               <Settings className="h-4 w-4 text-gray-600" />
-              <h3 className="font-medium text-gray-900">Basic Information</h3>
+              <h3 className="font-medium text-gray-900 text-sm">Basic Information</h3>
             </div>
             
-            <div className="space-y-2">
+            <div className="space-y-1">
               <Label htmlFor="title" className="text-xs font-medium">Title *</Label>
               <Input
                 id="title"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="Enter procedure title"
-                className="h-8 text-sm"
+                className="h-7 text-xs"
               />
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-1">
               <Label htmlFor="description" className="text-xs font-medium">Description</Label>
               <Textarea
                 id="description"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder="Enter procedure description"
-                rows={3}
-                className="text-sm resize-none"
+                rows={2}
+                className="text-xs resize-none"
               />
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-1">
               <Label htmlFor="category" className="text-xs font-medium">Category</Label>
               <Select value={category} onValueChange={setCategory}>
-                <SelectTrigger className="h-8 text-sm">
+                <SelectTrigger className="h-7 text-xs">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent className="bg-white">
                   {categories.map(cat => (
-                    <SelectItem key={cat} value={cat} className="text-sm">{cat}</SelectItem>
+                    <SelectItem key={cat} value={cat} className="text-xs">{cat}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
 
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between py-1">
               <Label htmlFor="global" className="text-xs font-medium">Global Procedure</Label>
               <Switch
                 id="global"
@@ -181,24 +175,24 @@ export const ProcedureFormBuilder: React.FC<ProcedureFormBuilderProps> = ({
               />
             </div>
 
-            <Separator className="my-3" />
+            <Separator className="my-2" />
 
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Eye className="h-4 w-4 text-gray-600" />
-                <h3 className="font-medium text-gray-900">Fields ({fields.length})</h3>
+                <h3 className="font-medium text-gray-900 text-sm">Fields ({fields.length})</h3>
               </div>
-              <Button onClick={addField} size="sm" className="h-7 px-2 text-xs bg-blue-600 hover:bg-blue-700">
+              <Button onClick={addField} size="sm" className="h-6 px-2 text-xs bg-blue-600 hover:bg-blue-700">
                 <Plus className="h-3 w-3 mr-1" />
-                Add Field
+                Add
               </Button>
             </div>
 
             {fields.length === 0 && (
-              <div className="text-center py-4 text-gray-500">
-                <FileText className="h-8 w-8 mx-auto mb-2 opacity-50" />
+              <div className="text-center py-3 text-gray-500">
+                <FileText className="h-6 w-6 mx-auto mb-1 opacity-50" />
                 <p className="text-xs">No fields added yet</p>
-                <p className="text-xs text-gray-400">Click "Add Field" to get started</p>
+                <p className="text-xs text-gray-400">Click "Add" to get started</p>
               </div>
             )}
           </div>
@@ -206,87 +200,46 @@ export const ProcedureFormBuilder: React.FC<ProcedureFormBuilderProps> = ({
 
         {/* Right Panel - Field Editor */}
         <div className="flex-1 overflow-y-auto">
-          <div className="p-3 space-y-2">
+          <div className="p-2 space-y-1">
             {fields.map((field, index) => (
-              <Card key={field.id || index} className="border shadow-sm">
-                <CardHeader className="p-3 bg-gray-50 border-b">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <GripVertical className="h-4 w-4 text-gray-400 cursor-move" />
-                      <Badge variant="outline" className="text-xs px-1 py-0">
-                        {field.field_type}
-                      </Badge>
-                      <span className="text-sm font-medium">{field.label}</span>
-                      {field.is_required && (
-                        <Badge variant="destructive" className="text-xs px-1 py-0">Required</Badge>
-                      )}
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => moveField(index, 'up')}
-                        disabled={index === 0}
-                        className="h-6 w-6 p-0"
-                      >
-                        ↑
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => moveField(index, 'down')}
-                        disabled={index === fields.length - 1}
-                        className="h-6 w-6 p-0"
-                      >
-                        ↓
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => removeField(index)}
-                        className="h-6 w-6 p-0 text-red-600 hover:bg-red-50"
-                      >
-                        <Trash2 className="h-3 w-3" />
-                      </Button>
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent className="p-3">
-                  <FieldEditor
-                    field={field}
-                    onChange={(updatedField) => updateField(index, updatedField)}
-                  />
-                </CardContent>
-              </Card>
+              <FieldEditor
+                key={field.id || index}
+                field={field}
+                index={index}
+                totalFields={fields.length}
+                onUpdate={(updatedField) => updateField(index, updatedField)}
+                onDelete={() => removeField(index)}
+                onMove={(direction) => moveField(index, direction)}
+              />
             ))}
           </div>
         </div>
       </div>
 
       {/* Compact Footer */}
-      <div className="border-t bg-white p-3 flex justify-between items-center">
+      <div className="border-t bg-white p-2 flex justify-between items-center">
         <div className="text-xs text-gray-600">
           {fields.length} field{fields.length !== 1 ? 's' : ''} configured
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" onClick={onCancel} size="sm" className="h-7 text-xs">
+          <Button variant="outline" onClick={onCancel} size="sm" className="h-6 text-xs px-2">
             Cancel
           </Button>
           <Button 
             onClick={handleSave} 
             disabled={!title.trim() || isLoading}
             size="sm"
-            className="h-7 text-xs bg-blue-600 hover:bg-blue-700"
+            className="h-6 text-xs px-2 bg-blue-600 hover:bg-blue-700"
           >
             {isLoading ? (
               <>
-                <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white mr-1"></div>
+                <div className="animate-spin rounded-full h-2 w-2 border-b-2 border-white mr-1"></div>
                 Saving...
               </>
             ) : (
               <>
                 <Save className="h-3 w-3 mr-1" />
-                Save Procedure
+                Save
               </>
             )}
           </Button>
