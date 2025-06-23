@@ -7,7 +7,11 @@ import { InventoryStatusBadge } from "./InventoryStatusBadge";
 import { StockMovementModal } from "./StockMovementModal";
 import { InventoryForm } from "./InventoryForm";
 import { InventoryHeader } from "./InventoryHeader";
+import { ReorderDialog } from "./ReorderDialog";
+import { BulkInventoryImport } from "./BulkInventoryImport";
+import { InventoryAnalytics } from "./InventoryAnalytics";
 import { useInventoryEnhanced, useLowStockAlerts, useDeleteInventoryItem } from "@/hooks/useInventoryEnhanced";
+import { useAutoReorderCheck } from "@/hooks/useInventoryReorder";
 import { useLocations } from "@/hooks/useLocations";
 import { 
   AlertTriangle, 
@@ -15,9 +19,12 @@ import {
   DollarSign,
   Edit,
   Trash2,
-  RefreshCw
+  RefreshCw,
+  BarChart3,
+  ShoppingCart
 } from "lucide-react";
 import type { InventoryItemWithStats } from "@/lib/database/inventory-enhanced";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export const InventoryDashboard = () => {
   const [search, setSearch] = useState("");
@@ -26,6 +33,7 @@ export const InventoryDashboard = () => {
   const [sortBy, setSortBy] = useState<string>("name");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
   const [currentPage, setCurrentPage] = useState(1);
+  const [activeTab, setActiveTab] = useState("inventory");
   const itemsPerPage = 20;
 
   console.log('InventoryDashboard: Current filters:', { search, statusFilter, locationFilter, sortBy, sortOrder });
@@ -43,6 +51,7 @@ export const InventoryDashboard = () => {
   const { data: lowStockAlerts } = useLowStockAlerts();
   const { data: locations } = useLocations();
   const deleteItemMutation = useDeleteInventoryItem();
+  const autoReorderCheck = useAutoReorderCheck();
 
   console.log('InventoryDashboard: Inventory data received:', inventoryData);
   console.log('InventoryDashboard: Is loading:', isLoading);
@@ -58,6 +67,12 @@ export const InventoryDashboard = () => {
   const handleRefresh = () => {
     console.log('Manual refresh triggered');
     refetch();
+  };
+
+  const handleAutoReorder = () => {
+    if (inventoryData?.items) {
+      autoReorderCheck.mutate(inventoryData.items);
+    }
   };
 
   // Calculate dashboard metrics
@@ -183,6 +198,29 @@ export const InventoryDashboard = () => {
         statusFilter={statusFilter}
         locationFilter={locationFilter}
         locations={locations}
+        extraActions={
+          <div className="flex items-center gap-2">
+            <BulkInventoryImport onSuccess={refetch} />
+            <ReorderDialog 
+              items={inventoryData?.items || []}
+              trigger={
+                <Button variant="outline" className="flex items-center gap-2">
+                  <ShoppingCart className="w-4 h-4" />
+                  Auto Reorder ({lowStockItems})
+                </Button>
+              }
+            />
+            <Button 
+              onClick={handleAutoReorder}
+              disabled={autoReorderCheck.isPending}
+              variant="outline"
+              className="flex items-center gap-2"
+            >
+              <Package className="w-4 h-4" />
+              {autoReorderCheck.isPending ? 'Checking...' : 'Smart Reorder'}
+            </Button>
+          </div>
+        }
       />
 
       {/* Dashboard Metrics */}
@@ -270,70 +308,107 @@ export const InventoryDashboard = () => {
       {/* Low Stock Alerts */}
       {lowStockItems > 0 && (
         <div className="bg-red-50 border border-red-200 rounded-lg p-4 mx-6">
-          <div className="flex items-center gap-2 text-red-800 mb-2">
-            <AlertTriangle className="w-5 h-5" />
-            <span className="font-medium">Low Stock Alert</span>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2 text-red-800">
+              <AlertTriangle className="w-5 h-5" />
+              <span className="font-medium">Low Stock Alert</span>
+            </div>
+            <ReorderDialog 
+              items={inventoryData?.items || []}
+              trigger={
+                <Button variant="outline" size="sm" className="text-red-700 border-red-300 hover:bg-red-100">
+                  Create Reorder PO
+                </Button>
+              }
+            />
           </div>
-          <p className="text-red-700 text-sm">
+          <p className="text-red-700 text-sm mt-1">
             You have {lowStockItems} item(s) that are running low on stock and may need reordering.
           </p>
         </div>
       )}
 
-      {/* Empty State */}
-      {!isLoading && !error && totalItems === 0 && (
-        <div className="text-center py-12 mx-6">
-          <Package className="w-16 h-16 mx-auto text-gray-400 mb-4" />
-          <h3 className="text-lg font-medium text-gray-900 mb-2">No inventory items found</h3>
-          <p className="text-gray-600 mb-4">
-            Get started by adding your first inventory item.
-          </p>
-          <InventoryForm 
-            onSuccess={() => {
-              console.log('New item created, refreshing data...');
-              refetch();
-            }}
-            trigger={
-              <Button>
-                <Package className="w-4 h-4 mr-2" />
-                Add Your First Item
-              </Button>
-            }
-          />
-        </div>
-      )}
+      {/* Main Content Tabs */}
+      <div className="mx-6">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
+          <TabsList>
+            <TabsTrigger value="inventory" className="flex items-center gap-2">
+              <Package className="w-4 h-4" />
+              Inventory
+            </TabsTrigger>
+            <TabsTrigger value="analytics" className="flex items-center gap-2">
+              <BarChart3 className="w-4 h-4" />
+              Analytics
+            </TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="inventory">
+            {/* Empty State */}
+            {!isLoading && !error && totalItems === 0 && (
+              <div className="text-center py-12">
+                <Package className="w-16 h-16 mx-auto text-gray-400 mb-4" />
+                <h3 className="text-lg font-medium text-gray-900 mb-2">No inventory items found</h3>
+                <p className="text-gray-600 mb-4">
+                  Get started by adding your first inventory item or importing from CSV.
+                </p>
+                <div className="flex items-center justify-center gap-3">
+                  <InventoryForm 
+                    onSuccess={() => {
+                      console.log('New item created, refreshing data...');
+                      refetch();
+                    }}
+                    trigger={
+                      <Button>
+                        <Package className="w-4 h-4 mr-2" />
+                        Add Your First Item
+                      </Button>
+                    }
+                  />
+                  <BulkInventoryImport onSuccess={refetch} />
+                </div>
+              </div>
+            )}
 
-      {/* Inventory Items */}
-      {!isLoading && !error && totalItems > 0 && (
-        <Card className="mx-6">
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <CardTitle className="flex items-center gap-2">
-                <Package className="w-5 h-5" />
-                Inventory Items
-              </CardTitle>
-              <Button onClick={handleRefresh} variant="outline" size="sm">
-                <RefreshCw className="w-4 h-4 mr-2" />
-                Refresh
-              </Button>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <DataTable
-              columns={columns}
-              data={inventoryData?.items || []}
-              loading={isLoading}
-              pagination={{
-                currentPage,
-                totalPages: Math.ceil(totalItems / itemsPerPage),
-                onPageChange: setCurrentPage,
-                itemsPerPage,
-                totalItems
-              }}
-            />
-          </CardContent>
-        </Card>
-      )}
+            {/* Inventory Items */}
+            {!isLoading && !error && totalItems > 0 && (
+              <Card>
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="flex items-center gap-2">
+                      <Package className="w-5 h-5" />
+                      Inventory Items
+                    </CardTitle>
+                    <Button onClick={handleRefresh} variant="outline" size="sm">
+                      <RefreshCw className="w-4 h-4 mr-2" />
+                      Refresh
+                    </Button>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <DataTable
+                    columns={columns}
+                    data={inventoryData?.items || []}
+                    loading={isLoading}
+                    pagination={{
+                      currentPage,
+                      totalPages: Math.ceil(totalItems / itemsPerPage),
+                      onPageChange: setCurrentPage,
+                      itemsPerPage,
+                      totalItems
+                    }}
+                  />
+                </CardContent>
+              </Card>
+            )}
+          </TabsContent>
+          
+          <TabsContent value="analytics">
+            {inventoryData?.items && (
+              <InventoryAnalytics items={inventoryData.items} />
+            )}
+          </TabsContent>
+        </Tabs>
+      </div>
     </div>
   );
 };
