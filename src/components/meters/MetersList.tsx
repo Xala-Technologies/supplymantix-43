@@ -1,4 +1,3 @@
-
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -132,7 +131,8 @@ export const MetersList = ({
   const handleMeterClick = (meter: Meter, event: React.MouseEvent) => {
     event.preventDefault();
     event.stopPropagation();
-    console.log('Meter clicked:', meter);
+    console.log('MetersList: Meter clicked:', meter);
+    console.log('MetersList: Calling onMeterClick with meter:', meter.id, meter.name);
     onMeterClick(meter);
   };
 
@@ -152,9 +152,15 @@ export const MetersList = ({
         return (
           <Card 
             key={meter.id} 
-            className={`group hover:shadow-lg transition-all duration-200 border-slate-200 hover:border-slate-300 bg-white relative ${
+            className={`group hover:shadow-lg transition-all duration-200 border-slate-200 hover:border-slate-300 bg-white relative cursor-pointer ${
               isSelected ? 'ring-2 ring-blue-500 border-blue-300' : ''
             }`}
+            onClick={(e) => {
+              // Allow clicking on the card itself to open details
+              if (!e.defaultPrevented) {
+                handleMeterClick(meter, e);
+              }
+            }}
           >
             {/* Selection Checkbox */}
             {onMeterSelect && (
@@ -163,6 +169,7 @@ export const MetersList = ({
                   checked={isSelected}
                   onCheckedChange={(checked) => handleSelectChange(meter.id, checked as boolean)}
                   className="bg-white"
+                  onClick={(e) => e.stopPropagation()}
                 />
               </div>
             )}
@@ -253,7 +260,10 @@ export const MetersList = ({
                   variant="ghost" 
                   size="sm" 
                   className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 font-medium"
-                  onClick={(e) => handleMeterClick(meter, e)}
+                  onClick={(e) => {
+                    console.log('View Details button clicked for meter:', meter.id);
+                    handleMeterClick(meter, e);
+                  }}
                 >
                   <Eye className="h-4 w-4 mr-1" />
                   View Details

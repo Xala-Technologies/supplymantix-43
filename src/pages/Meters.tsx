@@ -38,12 +38,13 @@ const Meters = () => {
   }) || [];
 
   const handleMeterClick = (meter: any) => {
-    console.log('Opening meter detail dialog for:', meter);
+    console.log('Meters page: Opening meter detail dialog for:', meter);
+    console.log('Meters page: Setting selectedMeter to:', meter.id, meter.name);
     setSelectedMeter(meter);
   };
 
   const handleCloseDialog = () => {
-    console.log('Closing meter detail dialog');
+    console.log('Meters page: Closing meter detail dialog');
     setSelectedMeter(null);
   };
 
