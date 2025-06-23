@@ -156,20 +156,22 @@ export const locationsApi = {
   },
 
   buildLocationTree(locations: LocationRow[]): LocationHierarchy[] {
-    const locationMap = new Map<string, LocationHierarchy>();
+    // Create a simple map to avoid complex recursive types
+    const locationMap = new Map<string, any>();
     const rootLocations: LocationHierarchy[] = [];
 
-    // Create a map for quick lookup and add hierarchy properties
+    // First pass: create location nodes with basic hierarchy properties
     locations.forEach(location => {
-      locationMap.set(location.id, { 
+      const locationNode = {
         ...location,
         children: [],
         level: 0,
         path: [location.name]
-      } as LocationHierarchy);
+      };
+      locationMap.set(location.id, locationNode);
     });
 
-    // Build the tree structure
+    // Second pass: build the tree structure
     locations.forEach(location => {
       const locationNode = locationMap.get(location.id);
       if (!locationNode) return;
@@ -179,7 +181,6 @@ export const locationsApi = {
         if (parent) {
           locationNode.level = parent.level + 1;
           locationNode.path = [...parent.path, location.name];
-          parent.children = parent.children || [];
           parent.children.push(locationNode);
         }
       } else {
