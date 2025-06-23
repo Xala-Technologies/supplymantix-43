@@ -5,11 +5,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { useCreateLocation, useUpdateLocation } from "@/hooks/useLocations";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useCreateLocation, useUpdateLocation, useLocations } from "@/hooks/useLocations";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Building2 } from "lucide-react";
+import { Loader2, Building2, MapPin } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import type { Location } from "@/types/location";
+import { LOCATION_TYPES } from "@/types/location";
 
 interface LocationFormProps {
   location?: Location;
@@ -20,14 +22,25 @@ export const LocationForm = ({ location, onClose }: LocationFormProps) => {
   const [formData, setFormData] = useState({
     name: location?.name || "",
     description: location?.description || "",
+    parent_id: location?.parent_id || null,
+    location_code: location?.location_code || "",
+    location_type: location?.location_type || "general",
+    address: location?.address || "",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const { data: locations } = useLocations();
   const createLocation = useCreateLocation();
   const updateLocation = useUpdateLocation();
   const { toast } = useToast();
 
-  const handleInputChange = (field: string, value: string) => {
+  // Filter out current location and its descendants from parent options
+  const availableParents = locations?.filter(loc => 
+    loc.id !== location?.id && 
+    !isDescendant(loc.id, location?.id, locations)
+  ) || [];
+
+  const handleInputChange = (field: string, value: string | null) => {
     setFormData(prev => ({
       ...prev,
       [field]: value
@@ -52,7 +65,10 @@ export const LocationForm = ({ location, onClose }: LocationFormProps) => {
       if (location) {
         await updateLocation.mutateAsync({
           id: location.id,
-          updates: formData
+          updates: {
+            ...formData,
+            parent_id: formData.parent_id || null,
+          }
         });
         toast({
           title: "Success",
@@ -72,7 +88,6 @@ export const LocationForm = ({ location, onClose }: LocationFormProps) => {
         }
 
         // Get tenant_id from user metadata or from an organization lookup
-        // For now, we'll derive it from the existing data in the system
         const { data: existingData } = await supabase
           .from('assets')
           .select('tenant_id')
@@ -92,7 +107,10 @@ export const LocationForm = ({ location, onClose }: LocationFormProps) => {
 
         const locationData = {
           ...formData,
-          tenant_id: tenantId
+          tenant_id: tenantId,
+          parent_id: formData.parent_id || null,
+          is_active: true,
+          metadata: {},
         };
         
         await createLocation.mutateAsync(locationData);
@@ -116,7 +134,7 @@ export const LocationForm = ({ location, onClose }: LocationFormProps) => {
 
   return (
     <Dialog open onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Building2 className="h-5 w-5" />
@@ -134,6 +152,68 @@ export const LocationForm = ({ location, onClose }: LocationFormProps) => {
                 onChange={(e) => handleInputChange("name", e.target.value)}
                 placeholder="Enter location name"
                 required
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="location_code">Location Code</Label>
+              <Input
+                id="location_code"
+                value={formData.location_code}
+                onChange={(e) => handleInputChange("location_code", e.target.value)}
+                placeholder="e.g., BLD-001, WH-A"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="location_type">Location Type</Label>
+              <Select value={formData.location_type} onValueChange={(value) => handleInputChange("location_type", value)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select location type" />
+                </SelectTrigger>
+                <SelectContent>
+                  {LOCATION_TYPES.map((type) => (
+                    <SelectItem key={type.value} value={type.value}>
+                      <div className="flex items-center gap-2">
+                        <span>{type.icon}</span>
+                        {type.label}
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="parent_id">Parent Location</Label>
+              <Select value={formData.parent_id || "none"} onValueChange={(value) => handleInputChange("parent_id", value === "none" ? null : value)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select parent location" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">No Parent (Root Level)</SelectItem>
+                  {availableParents.map((parent) => (
+                    <SelectItem key={parent.id} value={parent.id}>
+                      {parent.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="address">Address</Label>
+            <div className="relative">
+              <MapPin className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+              <Input
+                id="address"
+                value={formData.address}
+                onChange={(e) => handleInputChange("address", e.target.value)}
+                placeholder="Enter physical address"
+                className="pl-10"
               />
             </div>
           </div>
@@ -163,3 +243,15 @@ export const LocationForm = ({ location, onClose }: LocationFormProps) => {
     </Dialog>
   );
 };
+
+// Helper function to check if a location is a descendant of another
+function isDescendant(locationId: string, ancestorId: string | undefined, locations: Location[]): boolean {
+  if (!ancestorId) return false;
+  
+  const location = locations.find(loc => loc.id === locationId);
+  if (!location || !location.parent_id) return false;
+  
+  if (location.parent_id === ancestorId) return true;
+  
+  return isDescendant(location.parent_id, ancestorId, locations);
+}
