@@ -22,14 +22,16 @@ import {
   Building,
   FileText,
   AlertCircle,
-  Loader2
+  Loader2,
+  Download
 } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { 
   useProceduresEnhanced, 
   useDeleteProcedure, 
   useDuplicateProcedure,
-  useStartExecution 
+  useStartExecution,
+  useProcedureTemplates
 } from "@/hooks/useProceduresEnhanced";
 import { ProcedureFormBuilder } from "@/components/procedures/ProcedureFormBuilder";
 import { ProcedureExecution } from "@/components/procedures/ProcedureExecution";
@@ -50,6 +52,7 @@ const Procedures = () => {
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [showExecutionDialog, setShowExecutionDialog] = useState(false);
   const [showResultsDialog, setShowResultsDialog] = useState(false);
+  const [showTemplatesDialog, setShowTemplatesDialog] = useState(false);
   const [selectedProcedure, setSelectedProcedure] = useState<any>(null);
   const [executionResult, setExecutionResult] = useState<ExecutionResult | null>(null);
   const [currentExecutionId, setCurrentExecutionId] = useState<string | null>(null);
@@ -61,6 +64,8 @@ const Procedures = () => {
     category: selectedCategory !== "all" ? selectedCategory : undefined,
     is_global: showGlobalOnly || undefined
   });
+
+  const { data: templates, isLoading: templatesLoading } = useProcedureTemplates();
 
   const createProcedure = useCreateProcedure();
   const updateProcedure = useUpdateProcedure();
@@ -93,6 +98,24 @@ const Procedures = () => {
       "Other": "bg-gray-100 text-gray-700"
     };
     return colors[category] || "bg-gray-100 text-gray-700";
+  };
+
+  const handleCreateFromTemplate = (template: any) => {
+    const templateData = template.template_data;
+    
+    createProcedure.mutate({
+      title: `${templateData.title} (From Template)`,
+      description: templateData.description,
+      category: templateData.category,
+      tags: templateData.tags || [],
+      is_global: false,
+      fields: templateData.fields || []
+    }, {
+      onSuccess: () => {
+        setShowTemplatesDialog(false);
+        toast.success(`Procedure created from template: ${template.name}`);
+      }
+    });
   };
 
   const handleCreateProcedure = (data: any) => {
@@ -294,7 +317,12 @@ const Procedures = () => {
             <p className="text-gray-600">Manage standardized procedures and checklists</p>
           </div>
           <div className="flex space-x-2">
-            <Button variant="outline">
+            <Button 
+              variant="outline" 
+              onClick={() => setShowTemplatesDialog(true)}
+              disabled={templatesLoading}
+            >
+              <Download className="h-4 w-4 mr-2" />
               Import Templates
             </Button>
             <Button onClick={() => setShowCreateDialog(true)} className="bg-blue-600 hover:bg-blue-700">
@@ -456,6 +484,80 @@ const Procedures = () => {
           )}
         </div>
       </div>
+
+      {/* Templates Dialog */}
+      <Dialog open={showTemplatesDialog} onOpenChange={setShowTemplatesDialog}>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Import from Templates</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            {templatesLoading ? (
+              <div className="text-center py-8">
+                <Loader2 className="h-8 w-8 animate-spin mx-auto mb-2" />
+                <p className="text-gray-600">Loading templates...</p>
+              </div>
+            ) : !templates || templates.length === 0 ? (
+              <div className="text-center py-8">
+                <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                <h3 className="text-lg font-medium text-gray-900 mb-2">No templates available</h3>
+                <p className="text-gray-600">Create procedures first to save them as templates</p>
+              </div>
+            ) : (
+              <div className="grid gap-3">
+                {templates.map((template) => (
+                  <Card key={template.id} className="hover:shadow-md transition-shadow cursor-pointer">
+                    <CardContent className="p-4">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <h4 className="font-semibold text-gray-900 mb-1">{template.name}</h4>
+                          <p className="text-sm text-gray-600 mb-2">{template.description}</p>
+                          <div className="flex items-center gap-2">
+                            {template.tags && template.tags.length > 0 && (
+                              <div className="flex gap-1">
+                                {template.tags.slice(0, 3).map((tag, index) => (
+                                  <Badge key={index} variant="secondary" className="text-xs">
+                                    {tag}
+                                  </Badge>
+                                ))}
+                                {template.tags.length > 3 && (
+                                  <Badge variant="secondary" className="text-xs">
+                                    +{template.tags.length - 3}
+                                  </Badge>
+                                )}
+                              </div>
+                            )}
+                            {template.is_public && (
+                              <Badge variant="outline" className="text-xs">
+                                <Globe className="h-3 w-3 mr-1" />
+                                Public
+                              </Badge>
+                            )}
+                          </div>
+                        </div>
+                        <Button 
+                          size="sm"
+                          onClick={() => handleCreateFromTemplate(template)}
+                          disabled={createProcedure.isPending}
+                        >
+                          {createProcedure.isPending ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <>
+                              <Download className="h-4 w-4 mr-1" />
+                              Import
+                            </>
+                          )}
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Create Dialog */}
       <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
