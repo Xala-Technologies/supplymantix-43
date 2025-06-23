@@ -44,25 +44,25 @@ export function SidebarNavigation() {
                     <SidebarMenuButton 
                       asChild
                       className={`
-                        relative group h-9 px-3 rounded-xl transition-all duration-300 ease-in-out m-0
+                        relative group h-9 px-3 rounded-xl transition-all duration-200 ease-in-out m-0
                         overflow-hidden
                         ${isActive 
-                          ? 'bg-gradient-to-r from-blue-500 via-purple-600 to-indigo-600 text-white shadow-lg shadow-blue-500/25 scale-105' 
-                          : 'text-gray-700 hover:text-gray-900 hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-50 hover:shadow-md hover:scale-105'
+                          ? 'bg-gradient-to-r from-blue-500 via-purple-600 to-indigo-600 text-white shadow-lg shadow-blue-500/25' 
+                          : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900 active:bg-gray-100'
                         }
                         ${isCollapsed ? 'w-9 justify-center' : 'w-full'}
                       `}
                     >
                       <Link to={item.url} className={`
-                        flex items-center w-full transition-all duration-300 ease-in-out
+                        flex items-center w-full transition-all duration-200 ease-in-out
                         ${isCollapsed ? 'justify-center' : 'space-x-3'}
                       `}>
                         {/* Enhanced Icon Container */}
                         <div className={`
-                          w-5 h-5 rounded-lg flex items-center justify-center transition-all duration-300 ease-in-out
+                          w-5 h-5 rounded-lg flex items-center justify-center transition-all duration-200 ease-in-out
                           ${isActive 
                             ? 'bg-white/20 text-white shadow-sm' 
-                            : 'bg-transparent text-gray-600 group-hover:text-blue-600 group-hover:bg-white/50'
+                            : 'bg-transparent text-gray-600 group-hover:text-blue-600'
                           }
                         `}>
                           <Icon className="w-4 h-4" />
@@ -71,7 +71,7 @@ export function SidebarNavigation() {
                         {/* Enhanced Text with Animation */}
                         <span 
                           className={`
-                            font-medium text-sm tracking-wide transition-all duration-300 ease-in-out
+                            font-medium text-sm tracking-wide transition-all duration-200 ease-in-out
                             ${isCollapsed 
                               ? 'opacity-0 scale-75 w-0 overflow-hidden' 
                               : 'opacity-100 scale-100 flex-1'
@@ -85,17 +85,10 @@ export function SidebarNavigation() {
                         {isActive && (
                           <div className={`
                             absolute right-2 w-1.5 h-1.5 rounded-full bg-white shadow-sm
-                            transition-all duration-300 ease-in-out
+                            transition-all duration-200 ease-in-out
                             ${isCollapsed ? 'opacity-0 scale-0' : 'opacity-100 scale-100'}
                           `}></div>
                         )}
-                        
-                        {/* Hover Effect Overlay */}
-                        <div className={`
-                          absolute inset-0 bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-xl
-                          opacity-0 group-hover:opacity-100 transition-opacity duration-300 ease-in-out
-                          ${isActive ? 'hidden' : ''}
-                        `}></div>
                       </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
