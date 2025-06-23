@@ -37,6 +37,10 @@ export const ProcedureExecution: React.FC<ProcedureExecutionProps> = ({
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [showSummary, setShowSummary] = useState(false);
   const [executionStartTime] = useState(new Date());
+  // Add scheduled date - could come from work order or procedure settings
+  const [scheduledDate] = useState<Date | undefined>(
+    workOrderId ? new Date(Date.now() + 24 * 60 * 60 * 1000) : undefined // Example: scheduled for tomorrow
+  );
   
   const submitExecution = useSubmitExecution();
   const fields = procedure.fields || [];
@@ -207,10 +211,14 @@ export const ProcedureExecution: React.FC<ProcedureExecutionProps> = ({
         <div className="flex-shrink-0 p-4 border-b">
           <ExecutionTimeline
             startTime={executionStartTime}
+            scheduledDate={scheduledDate}
             estimatedDurationMinutes={estimateDuration()}
             currentStep={totalSteps}
             totalSteps={totalSteps}
             isCompleted={true}
+            executorName="Current User" // This could come from auth context
+            location={procedure.category} // Use category as location for now
+            priority="medium" // This could come from work order or procedure settings
           />
         </div>
 
@@ -291,10 +299,14 @@ export const ProcedureExecution: React.FC<ProcedureExecutionProps> = ({
       <div className="flex-shrink-0 p-4 border-b">
         <ExecutionTimeline
           startTime={executionStartTime}
+          scheduledDate={scheduledDate}
           estimatedDurationMinutes={estimateDuration()}
           currentStep={currentStep}
           totalSteps={totalSteps}
           isCompleted={false}
+          executorName="Current User" // This could come from auth context
+          location={procedure.category} // Use category as location for now
+          priority="medium" // This could come from work order or procedure settings
         />
       </div>
 
