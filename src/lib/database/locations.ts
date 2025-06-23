@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/integrations/supabase/types";
 import type { LocationHierarchy, LocationStats, LocationBreadcrumb } from "@/types/location";
@@ -7,26 +6,6 @@ type Tables = Database["public"]["Tables"];
 type LocationRow = Tables["locations"]["Row"];
 type LocationInsert = Tables["locations"]["Insert"];
 type LocationUpdate = Tables["locations"]["Update"];
-
-// Simple interface to avoid deep type inference
-interface SimpleNode {
-  id: string;
-  name: string;
-  description: string | null;
-  tenant_id: string;
-  parent_id: string | null;
-  location_code: string | null;
-  location_type: string;
-  address: string | null;
-  coordinates: any | null;
-  is_active: boolean;
-  metadata: any;
-  created_at: string;
-  updated_at: string;
-  children: SimpleNode[];
-  level: number;
-  path: string[];
-}
 
 export const locationsApi = {
   async getLocations(): Promise<LocationRow[]> {
@@ -48,7 +27,37 @@ export const locationsApi = {
       .order("name", { ascending: true });
     
     if (error) throw error;
-    return this.buildLocationTree(data || []);
+    
+    // Directly return simple transformation to avoid type recursion
+    if (!data || data.length === 0) return [];
+    
+    const result: any[] = [];
+    const nodeMap = new Map();
+    
+    // First pass - create all nodes
+    data.forEach(location => {
+      nodeMap.set(location.id, {
+        ...location,
+        children: [],
+        level: 0,
+        path: []
+      });
+    });
+    
+    // Second pass - build hierarchy
+    data.forEach(location => {
+      const node = nodeMap.get(location.id);
+      if (location.parent_id && nodeMap.has(location.parent_id)) {
+        const parent = nodeMap.get(location.parent_id);
+        node.level = parent.level + 1;
+        node.path = [...parent.path, parent.name];
+        parent.children.push(node);
+      } else {
+        result.push(node);
+      }
+    });
+    
+    return result as LocationHierarchy[];
   },
 
   async getLocationChildren(parentId: string): Promise<LocationRow[]> {
