@@ -31,7 +31,7 @@ export const locationsApi = {
     
     if (!data || data.length === 0) return [];
     
-    return this.buildLocationTree(data);
+    return locationsApi.buildLocationTree(data);
   },
 
   async getLocationChildren(parentId: string): Promise<LocationRow[]> {
@@ -75,7 +75,7 @@ export const locationsApi = {
   },
 
   async getLocationStats(locationId: string): Promise<LocationStats> {
-    // Use raw fetch approach to completely avoid TypeScript type inference issues
+    // Use simple Supabase queries without complex counting to avoid type issues
     const stats: LocationStats = {
       asset_count: 0,
       meter_count: 0,
@@ -83,83 +83,42 @@ export const locationsApi = {
       child_location_count: 0,
     };
 
-    // Use Promise.all with simple individual queries
-    const promises = [
-      // Assets
-      (async () => {
-        try {
-          const response = await fetch(`${supabase.supabaseUrl}/rest/v1/assets?location_id=eq.${locationId}&select=id`, {
-            headers: {
-              'apikey': supabase.supabaseKey,
-              'Authorization': `Bearer ${supabase.supabaseKey}`,
-              'Content-Type': 'application/json'
-            }
-          });
-          const data = await response.json();
-          return Array.isArray(data) ? data.length : 0;
-        } catch {
-          return 0;
-        }
-      })(),
+    try {
+      // Get asset count
+      const { data: assets } = await supabase
+        .from("assets")
+        .select("id")
+        .eq("location_id", locationId);
       
-      // Meters
-      (async () => {
-        try {
-          const response = await fetch(`${supabase.supabaseUrl}/rest/v1/meters?location_id=eq.${locationId}&select=id`, {
-            headers: {
-              'apikey': supabase.supabaseKey,
-              'Authorization': `Bearer ${supabase.supabaseKey}`,
-              'Content-Type': 'application/json'
-            }
-          });
-          const data = await response.json();
-          return Array.isArray(data) ? data.length : 0;
-        } catch {
-          return 0;
-        }
-      })(),
-      
-      // Work Orders
-      (async () => {
-        try {
-          const response = await fetch(`${supabase.supabaseUrl}/rest/v1/work_orders?location_id=eq.${locationId}&select=id`, {
-            headers: {
-              'apikey': supabase.supabaseKey,
-              'Authorization': `Bearer ${supabase.supabaseKey}`,
-              'Content-Type': 'application/json'
-            }
-          });
-          const data = await response.json();
-          return Array.isArray(data) ? data.length : 0;
-        } catch {
-          return 0;
-        }
-      })(),
-      
-      // Children
-      (async () => {
-        try {
-          const response = await fetch(`${supabase.supabaseUrl}/rest/v1/locations?parent_id=eq.${locationId}&is_active=eq.true&select=id`, {
-            headers: {
-              'apikey': supabase.supabaseKey,
-              'Authorization': `Bearer ${supabase.supabaseKey}`,
-              'Content-Type': 'application/json'
-            }
-          });
-          const data = await response.json();
-          return Array.isArray(data) ? data.length : 0;
-        } catch {
-          return 0;
-        }
-      })()
-    ];
+      stats.asset_count = assets ? assets.length : 0;
 
-    const [assetCount, meterCount, workOrderCount, childrenCount] = await Promise.all(promises);
-    
-    stats.asset_count = assetCount;
-    stats.meter_count = meterCount;
-    stats.work_order_count = workOrderCount;
-    stats.child_location_count = childrenCount;
+      // Get meter count  
+      const { data: meters } = await supabase
+        .from("meters")
+        .select("id")
+        .eq("location_id", locationId);
+      
+      stats.meter_count = meters ? meters.length : 0;
+
+      // Get work order count
+      const { data: workOrders } = await supabase
+        .from("work_orders")
+        .select("id")
+        .eq("location_id", locationId);
+      
+      stats.work_order_count = workOrders ? workOrders.length : 0;
+
+      // Get children count
+      const { data: children } = await supabase
+        .from("locations")
+        .select("id")
+        .eq("parent_id", locationId)
+        .eq("is_active", true);
+      
+      stats.child_location_count = children ? children.length : 0;
+    } catch (error) {
+      console.error("Error getting location stats:", error);
+    }
     
     return stats;
   },
@@ -210,7 +169,7 @@ export const locationsApi = {
 
   async moveLocation(locationId: string, newParentId: string | null): Promise<LocationRow> {
     if (newParentId) {
-      const breadcrumbs = await this.getLocationBreadcrumbs(newParentId);
+      const breadcrumbs = await locationsApi.getLocationBreadcrumbs(newParentId);
       const wouldCreateCycle = breadcrumbs.some(b => b.id === locationId);
       
       if (wouldCreateCycle) {
