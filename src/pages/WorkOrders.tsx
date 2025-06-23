@@ -158,8 +158,8 @@ export default function WorkOrders() {
       <DashboardLayout>
         <div className="flex items-center justify-center h-[60vh]">
           <div className="text-center space-y-3">
-            <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto"></div>
-            <p className="text-muted-foreground text-sm">Loading work orders...</p>
+            <div className="w-8 h-8 border-2 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto"></div>
+            <p className="text-gray-600 text-sm">Loading work orders...</p>
           </div>
         </div>
       </DashboardLayout>
@@ -168,21 +168,19 @@ export default function WorkOrders() {
 
   return (
     <DashboardLayout>
-      <div className="h-full flex flex-col bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/40">
-        {/* Enhanced Header */}
-        <div className="bg-white/80 backdrop-blur-sm border-b border-slate-200/60 px-6 py-4">
-          <div className="flex items-center justify-between mb-4">
+      <div className="h-full flex flex-col bg-gray-50">
+        {/* Clean Header */}
+        <div className="bg-white border-b border-gray-200 px-6 py-4">
+          <div className="flex items-center justify-between mb-6">
             <div>
-              <h1 className="text-2xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">
-                Work Orders
-              </h1>
-              <p className="text-slate-600 text-sm mt-1">
-                Manage and track maintenance operations across your facility
+              <h1 className="text-2xl font-semibold text-gray-900">Work Orders</h1>
+              <p className="text-gray-600 text-sm mt-1">
+                Manage and track maintenance operations
               </p>
             </div>
             
             <div className="flex items-center gap-3">
-              <div className="flex items-center gap-1 bg-slate-100 rounded-lg p-1">
+              <div className="flex items-center gap-1 bg-gray-100 rounded-lg p-1">
                 <Button
                   variant={layoutMode === 'split' ? 'default' : 'ghost'}
                   size="sm"
@@ -201,33 +199,32 @@ export default function WorkOrders() {
                 </Button>
               </div>
               
-              <Button onClick={handleCreateWorkOrder} className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-lg">
+              <Button onClick={handleCreateWorkOrder} className="bg-blue-600 hover:bg-blue-700">
                 <Plus className="w-4 h-4 mr-2" />
                 New Work Order
               </Button>
             </div>
           </div>
 
-          {/* Global Search and Quick Filters */}
+          {/* Simple Search and Filters */}
           <div className="flex items-center gap-4">
             <div className="relative flex-1 max-w-md">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
               <Input
                 placeholder="Search work orders..."
                 value={globalSearch}
                 onChange={(e) => setGlobalSearch(e.target.value)}
-                className="pl-10 bg-white/70 border-slate-200 focus:bg-white"
+                className="pl-10 border-gray-300 focus:border-blue-500 focus:ring-blue-500"
               />
             </div>
             
             <div className="flex items-center gap-2">
-              <span className="text-sm text-slate-600">Quick filter:</span>
               {['all', 'open', 'in_progress', 'high', 'urgent'].map((filter) => (
                 <Badge
                   key={filter}
                   variant={quickFilter === filter ? 'default' : 'outline'}
                   className={cn(
-                    "cursor-pointer transition-all hover:scale-105",
+                    "cursor-pointer transition-colors",
                     quickFilter === filter && "bg-blue-600 hover:bg-blue-700"
                   )}
                   onClick={() => setQuickFilter(filter)}
@@ -240,16 +237,16 @@ export default function WorkOrders() {
         </div>
 
         {/* Stats Overview */}
-        <div className="px-6 py-4">
+        <div className="px-6 py-4 bg-white border-b border-gray-200">
           <WorkOrdersStatsOverview workOrders={filteredWorkOrders} />
         </div>
 
         {/* Main Content Area */}
-        <div className="flex-1 px-6 pb-6 overflow-hidden">
+        <div className="flex-1 px-6 py-6 overflow-hidden">
           {layoutMode === 'split' && (
             <div className="h-full flex gap-6">
-              {/* Enhanced Left Panel - Work Orders List */}
-              <div className="w-[380px] bg-white/70 backdrop-blur-sm border border-slate-200/60 rounded-2xl shadow-xl overflow-hidden">
+              {/* Left Panel - Work Orders List */}
+              <div className="w-[380px] bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
                 <EnhancedWorkOrdersList 
                   workOrders={filteredWorkOrders}
                   selectedWorkOrderId={selectedWorkOrder}
@@ -258,8 +255,8 @@ export default function WorkOrders() {
                 />
               </div>
               
-              {/* Enhanced Right Panel - Detail/Form */}
-              <div className="flex-1 bg-white/70 backdrop-blur-sm border border-slate-200/60 rounded-2xl shadow-xl overflow-hidden">
+              {/* Right Panel - Detail/Form */}
+              <div className="flex-1 bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
                 {viewMode === 'detail' && selectedWorkOrderData && (
                   <EnhancedWorkOrderDetail 
                     workOrder={selectedWorkOrderData}
@@ -274,7 +271,7 @@ export default function WorkOrders() {
                         <Button 
                           variant="ghost" 
                           onClick={handleFormCancel}
-                          className="mb-4 hover:bg-slate-100"
+                          className="mb-4"
                         >
                           <ChevronLeft className="w-4 h-4 mr-2" />
                           Back
@@ -289,17 +286,17 @@ export default function WorkOrders() {
                   </div>
                 )}
                 
-                {/* Enhanced Empty State */}
+                {/* Empty State */}
                 {!selectedWorkOrderData && viewMode !== 'form' && filteredWorkOrders.length === 0 && (
                   <div className="flex-1 flex items-center justify-center p-8">
-                    <div className="text-center space-y-6 max-w-md">
-                      <div className="w-24 h-24 bg-gradient-to-br from-blue-100 to-indigo-200 rounded-3xl flex items-center justify-center mx-auto">
-                        <span className="text-4xl">🔧</span>
+                    <div className="text-center space-y-4 max-w-sm">
+                      <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto">
+                        <span className="text-2xl">🔧</span>
                       </div>
-                      <div className="space-y-3">
-                        <h3 className="text-xl font-semibold text-slate-800">No Work Orders Found</h3>
-                        <p className="text-slate-600 leading-relaxed">
-                          No work orders match your current search and filter criteria. Try adjusting your filters or create a new work order.
+                      <div className="space-y-2">
+                        <h3 className="text-lg font-medium text-gray-900">No Work Orders Found</h3>
+                        <p className="text-gray-600 text-sm">
+                          No work orders match your current search criteria.
                         </p>
                       </div>
                       <WorkOrdersQuickActions onCreateWorkOrder={handleCreateWorkOrder} />
@@ -311,22 +308,22 @@ export default function WorkOrders() {
           )}
 
           {layoutMode === 'grid' && (
-            <div className="h-full bg-white/70 backdrop-blur-sm border border-slate-200/60 rounded-2xl shadow-xl p-6 overflow-auto">
+            <div className="h-full bg-white border border-gray-200 rounded-lg shadow-sm p-6 overflow-auto">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                 {filteredWorkOrders.map((workOrder) => (
                   <div
                     key={workOrder.id}
                     className={cn(
-                      "p-4 rounded-xl border-2 cursor-pointer transition-all duration-200 hover:shadow-lg hover:scale-[1.02]",
+                      "p-4 rounded-lg border cursor-pointer transition-all duration-200 hover:shadow-md",
                       selectedWorkOrder === workOrder.id 
-                        ? "bg-blue-50 border-blue-200 shadow-md" 
-                        : "bg-white border-slate-200 hover:border-slate-300"
+                        ? "bg-blue-50 border-blue-200 shadow-sm" 
+                        : "bg-white border-gray-200 hover:border-gray-300"
                     )}
                     onClick={() => handleSelectWorkOrder(workOrder.id)}
                   >
                     <div className="space-y-3">
                       <div className="flex items-start justify-between">
-                        <h4 className="font-semibold text-slate-800 line-clamp-2 text-sm">
+                        <h4 className="font-medium text-gray-900 line-clamp-2 text-sm">
                           {workOrder.title}
                         </h4>
                         <Badge className={cn(
@@ -339,10 +336,10 @@ export default function WorkOrders() {
                         </Badge>
                       </div>
                       
-                      <div className="space-y-2 text-xs text-slate-600">
+                      <div className="space-y-2 text-xs text-gray-600">
                         <div>#{workOrder.id.slice(-4)} • {getAssetName(workOrder.asset)}</div>
                         <div className="flex items-center justify-between">
-                          <span>{workOrder.status.replace('_', ' ')}</span>
+                          <span className="capitalize">{workOrder.status.replace('_', ' ')}</span>
                           <span>{workOrder.assignedTo.length} assigned</span>
                         </div>
                       </div>
