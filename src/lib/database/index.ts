@@ -1,4 +1,3 @@
-
 import { inventoryApi } from "./inventory";
 import { workOrdersApi } from "./work-orders";
 import { workOrdersEnhancedApi } from "./work-orders-enhanced";
@@ -16,6 +15,7 @@ import { locationsApi } from "./locations";
 import { billingApi } from "./billing";
 import { integrationsApi } from "./integrations";
 import { inventoryEnhancedApi } from "./inventory-enhanced";
+import { metersApi } from "./meters";
 
 export const databaseApi = {
   ...workOrdersApi,
@@ -35,4 +35,5 @@ export const databaseApi = {
   ...locationsApi,
   ...billingApi,
   ...integrationsApi,
+  ...metersApi,
 };

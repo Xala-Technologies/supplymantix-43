@@ -9,28 +9,33 @@ import { useMeters } from "@/hooks/useMeters";
 
 const Meters = () => {
   const [isFormOpen, setIsFormOpen] = useState(false);
-  const [selectedMeter, setSelectedMeter] = useState(null);
+  const [selectedMeter, setSelectedMeter] = useState<any>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [typeFilter, setTypeFilter] = useState("all");
+  const [statusFilter, setStatusFilter] = useState("all");
 
   const { data: meters, isLoading } = useMeters();
 
   const filteredMeters = meters?.filter(meter => {
     const matchesSearch = meter.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         meter.location?.toLowerCase().includes(searchQuery.toLowerCase());
+                         meter.location?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                         meter.asset_name?.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesType = typeFilter === "all" || meter.type === typeFilter;
-    return matchesSearch && matchesType;
+    const matchesStatus = statusFilter === "all" || meter.status === statusFilter;
+    return matchesSearch && matchesType && matchesStatus;
   }) || [];
 
   return (
     <DashboardLayout>
-      <div className="space-y-6">
+      <div className="space-y-6 p-6">
         <MetersHeader
           onCreateMeter={() => setIsFormOpen(true)}
           searchQuery={searchQuery}
           onSearchChange={setSearchQuery}
           typeFilter={typeFilter}
           onTypeFilterChange={setTypeFilter}
+          statusFilter={statusFilter}
+          onStatusFilterChange={setStatusFilter}
         />
 
         <MetersList

@@ -758,6 +758,169 @@ export type Database = {
           },
         ]
       }
+      meter_readings: {
+        Row: {
+          comment: string | null
+          created_at: string
+          id: string
+          meter_id: string
+          recorded_at: string
+          recorded_by: string | null
+          value: number
+        }
+        Insert: {
+          comment?: string | null
+          created_at?: string
+          id?: string
+          meter_id: string
+          recorded_at?: string
+          recorded_by?: string | null
+          value: number
+        }
+        Update: {
+          comment?: string | null
+          created_at?: string
+          id?: string
+          meter_id?: string
+          recorded_at?: string
+          recorded_by?: string | null
+          value?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "meter_readings_meter_id_fkey"
+            columns: ["meter_id"]
+            isOneToOne: false
+            referencedRelation: "meters"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      meter_triggers: {
+        Row: {
+          action: string
+          created_at: string
+          id: string
+          is_active: boolean
+          last_fired_at: string | null
+          meter_id: string
+          name: string
+          throttle_hours: number | null
+          trigger_condition: string
+          trigger_value: number
+          updated_at: string
+        }
+        Insert: {
+          action?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          last_fired_at?: string | null
+          meter_id: string
+          name: string
+          throttle_hours?: number | null
+          trigger_condition: string
+          trigger_value: number
+          updated_at?: string
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          last_fired_at?: string | null
+          meter_id?: string
+          name?: string
+          throttle_hours?: number | null
+          trigger_condition?: string
+          trigger_value?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "meter_triggers_meter_id_fkey"
+            columns: ["meter_id"]
+            isOneToOne: false
+            referencedRelation: "meters"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      meters: {
+        Row: {
+          asset_id: string | null
+          created_at: string
+          created_by: string | null
+          current_value: number | null
+          description: string | null
+          id: string
+          last_reading_at: string | null
+          location: string | null
+          name: string
+          reading_frequency: string | null
+          status: string
+          target_max: number | null
+          target_min: number | null
+          tenant_id: string
+          type: string
+          unit: string
+          updated_at: string
+        }
+        Insert: {
+          asset_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          current_value?: number | null
+          description?: string | null
+          id?: string
+          last_reading_at?: string | null
+          location?: string | null
+          name: string
+          reading_frequency?: string | null
+          status?: string
+          target_max?: number | null
+          target_min?: number | null
+          tenant_id: string
+          type?: string
+          unit: string
+          updated_at?: string
+        }
+        Update: {
+          asset_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          current_value?: number | null
+          description?: string | null
+          id?: string
+          last_reading_at?: string | null
+          location?: string | null
+          name?: string
+          reading_frequency?: string | null
+          status?: string
+          target_max?: number | null
+          target_min?: number | null
+          tenant_id?: string
+          type?: string
+          unit?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "meters_asset_id_fkey"
+            columns: ["asset_id"]
+            isOneToOne: false
+            referencedRelation: "assets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "meters_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notification_preferences: {
         Row: {
           category: string
