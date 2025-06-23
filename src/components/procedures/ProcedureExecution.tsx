@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -37,9 +38,8 @@ export const ProcedureExecution: React.FC<ProcedureExecutionProps> = ({
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [showSummary, setShowSummary] = useState(false);
   const [executionStartTime] = useState(new Date());
-  // Add scheduled date - could come from work order or procedure settings
   const [scheduledDate] = useState<Date | undefined>(
-    workOrderId ? new Date(Date.now() + 24 * 60 * 60 * 1000) : undefined // Example: scheduled for tomorrow
+    workOrderId ? new Date(Date.now() + 24 * 60 * 60 * 1000) : undefined
   );
   
   const submitExecution = useSubmitExecution();
@@ -48,9 +48,8 @@ export const ProcedureExecution: React.FC<ProcedureExecutionProps> = ({
   const progress = totalSteps > 0 ? (currentStep + 1) / totalSteps * 100 : 100;
   const currentField = fields[currentStep];
 
-  // Estimate duration based on field count and complexity
   const estimateDuration = (): number => {
-    const baseTimePerField = 2; // 2 minutes per field base
+    const baseTimePerField = 2;
     const complexityMultiplier = fields.reduce((acc, field) => {
       switch (field.field_type) {
         case 'file':
@@ -216,9 +215,9 @@ export const ProcedureExecution: React.FC<ProcedureExecutionProps> = ({
             currentStep={totalSteps}
             totalSteps={totalSteps}
             isCompleted={true}
-            executorName="Current User" // This could come from auth context
-            location={procedure.category} // Use category as location for now
-            priority="medium" // This could come from work order or procedure settings
+            executorName="Current User"
+            location={procedure.category}
+            priority="medium"
           />
         </div>
 
@@ -304,9 +303,9 @@ export const ProcedureExecution: React.FC<ProcedureExecutionProps> = ({
           currentStep={currentStep}
           totalSteps={totalSteps}
           isCompleted={false}
-          executorName="Current User" // This could come from auth context
-          location={procedure.category} // Use category as location for now
-          priority="medium" // This could come from work order or procedure settings
+          executorName="Current User"
+          location={procedure.category}
+          priority="medium"
         />
       </div>
 
@@ -359,14 +358,10 @@ export const ProcedureExecution: React.FC<ProcedureExecutionProps> = ({
       {/* Navigation */}
       <div className="flex-shrink-0 border-t bg-gray-50 p-3">
         <div className="flex justify-between items-center">
-          <Button variant="outline" onClick={currentStep === 0 ? onCancel : goToPreviousStep} size="sm">
+          <Button variant="outline" onClick={currentStep === 0 ? on Cancel : goToPreviousStep} size="sm">
             <ArrowLeft className="h-4 w-4 mr-1" />
             {currentStep === 0 ? 'Cancel' : 'Previous'}
           </Button>
-
-          <div className="text-center">
-            
-          </div>
 
           <Button onClick={goToNextStep} className="bg-blue-600 hover:bg-blue-700" size="sm">
             {currentStep === totalSteps - 1 ? (
