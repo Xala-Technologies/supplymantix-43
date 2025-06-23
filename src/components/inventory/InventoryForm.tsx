@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -8,7 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Plus, Edit } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { useCreateInventoryItem, useUpdateInventoryItem } from "@/hooks/useInventoryEnhanced";
+import { useCreateInventoryItem, useUpdateInventoryItem } from "@/hooks/useInventoryMutations";
 import type { InventoryItemWithStats } from "@/lib/database/inventory-enhanced";
 
 interface InventoryFormData {
@@ -69,11 +69,10 @@ export const InventoryForm = ({ item, onSuccess, trigger, mode = 'create' }: Inv
   const onSubmit = async (data: InventoryFormData) => {
     try {
       console.log('InventoryForm: Form submission started with data:', data);
-      console.log('InventoryForm: Mode:', mode, 'Item ID:', item?.id);
       
       if (mode === 'edit' && item) {
         console.log('InventoryForm: Updating item:', item.id);
-        const result = await updateMutation.mutateAsync({
+        await updateMutation.mutateAsync({
           id: item.id,
           updates: {
             name: data.name,
@@ -85,11 +84,10 @@ export const InventoryForm = ({ item, onSuccess, trigger, mode = 'create' }: Inv
             unit_cost: Number(data.unit_cost) || 0,
           }
         });
-        console.log('InventoryForm: Update successful:', result);
-        toast.success('Item updated successfully');
+        console.log('InventoryForm: Update successful');
       } else {
         console.log('InventoryForm: Creating new item');
-        const result = await createMutation.mutateAsync({
+        await createMutation.mutateAsync({
           name: data.name,
           description: data.description || '',
           sku: data.sku || '',
@@ -98,26 +96,22 @@ export const InventoryForm = ({ item, onSuccess, trigger, mode = 'create' }: Inv
           min_quantity: Number(data.min_quantity) || 0,
           unit_cost: Number(data.unit_cost) || 0,
         });
-        console.log('InventoryForm: Create successful, result:', result);
-        toast.success('Item created successfully');
+        console.log('InventoryForm: Create successful');
       }
       
+      // Close dialog and reset form
       setOpen(false);
-      
-      // Reset form only for create mode
       if (mode === 'create') {
         reset();
       }
       
-      // Call success callback after a short delay to ensure mutation is complete
-      setTimeout(() => {
-        console.log('InventoryForm: Calling onSuccess callback');
-        onSuccess?.();
-      }, 100);
+      // Call success callback
+      if (onSuccess) {
+        onSuccess();
+      }
       
     } catch (error) {
       console.error('InventoryForm: Error saving inventory item:', error);
-      toast.error('Failed to save inventory item: ' + (error as Error).message);
     }
   };
 
@@ -126,7 +120,6 @@ export const InventoryForm = ({ item, onSuccess, trigger, mode = 'create' }: Inv
   const handleOpenChange = (newOpen: boolean) => {
     setOpen(newOpen);
     if (!newOpen && mode === 'create') {
-      // Reset form when closing create dialog
       reset();
     }
   };
@@ -146,6 +139,12 @@ export const InventoryForm = ({ item, onSuccess, trigger, mode = 'create' }: Inv
           <DialogTitle>
             {mode === 'edit' ? 'Edit Inventory Item' : 'Add New Inventory Item'}
           </DialogTitle>
+          <DialogDescription>
+            {mode === 'edit' 
+              ? 'Update the details of your inventory item.' 
+              : 'Enter the details for your new inventory item.'
+            }
+          </DialogDescription>
         </DialogHeader>
         
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">

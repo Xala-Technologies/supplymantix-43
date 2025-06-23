@@ -34,24 +34,12 @@ export const useCreateInventoryItem = () => {
     },
     onSuccess: (data) => {
       console.log('useCreateInventoryItem: Item created successfully:', data);
-      console.log('useCreateInventoryItem: Invalidating and refetching queries...');
       
-      // Invalidate all inventory-related queries
+      // Invalidate and refetch queries
       queryClient.invalidateQueries({ queryKey: ["inventory-enhanced"] });
       queryClient.invalidateQueries({ queryKey: ["low-stock-alerts"] });
       
-      // Force immediate refetch to ensure UI updates
-      queryClient.refetchQueries({ 
-        queryKey: ["inventory-enhanced"],
-        type: 'active'
-      });
-      
-      queryClient.refetchQueries({ 
-        queryKey: ["low-stock-alerts"],
-        type: 'active'
-      });
-      
-      console.log('useCreateInventoryItem: Queries invalidated and refetched');
+      // Show success message
       toast.success("Inventory item created successfully");
     },
     onError: (error) => {
@@ -86,20 +74,9 @@ export const useUpdateInventoryItem = () => {
     onSuccess: (data) => {
       console.log('useUpdateInventoryItem: Item updated successfully:', data);
       
-      // Invalidate all inventory-related queries
+      // Invalidate and refetch queries
       queryClient.invalidateQueries({ queryKey: ["inventory-enhanced"] });
       queryClient.invalidateQueries({ queryKey: ["low-stock-alerts"] });
-      
-      // Force immediate refetch
-      queryClient.refetchQueries({ 
-        queryKey: ["inventory-enhanced"],
-        type: 'active'
-      });
-      
-      queryClient.refetchQueries({ 
-        queryKey: ["low-stock-alerts"],
-        type: 'active'
-      });
       
       toast.success("Inventory item updated successfully");
     },
@@ -123,20 +100,9 @@ export const useDeleteInventoryItem = () => {
     onSuccess: () => {
       console.log('useDeleteInventoryItem: Item deleted successfully');
       
-      // Invalidate all inventory-related queries
+      // Invalidate and refetch queries
       queryClient.invalidateQueries({ queryKey: ["inventory-enhanced"] });
       queryClient.invalidateQueries({ queryKey: ["low-stock-alerts"] });
-      
-      // Force immediate refetch
-      queryClient.refetchQueries({ 
-        queryKey: ["inventory-enhanced"],
-        type: 'active'
-      });
-      
-      queryClient.refetchQueries({ 
-        queryKey: ["low-stock-alerts"],
-        type: 'active'
-      });
       
       toast.success("Inventory item deleted successfully");
     },
