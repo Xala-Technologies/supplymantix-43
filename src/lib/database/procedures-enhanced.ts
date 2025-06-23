@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/integrations/supabase/types";
 import { getCurrentTenantId } from "@/hooks/useInventoryHelpers";
@@ -16,6 +15,8 @@ export interface ProcedureField {
   is_required: boolean;
   field_order: number;
   options?: any;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface ProcedureExecution {
@@ -47,6 +48,18 @@ export interface ProcedureWithFields extends Procedure {
   executions_count?: number;
 }
 
+const mapFieldFromDB = (dbField: any): ProcedureField => ({
+  id: dbField.id,
+  procedure_id: dbField.procedure_id,
+  label: dbField.label,
+  field_type: dbField.field_type as ProcedureField['field_type'],
+  is_required: dbField.is_required || false,
+  field_order: dbField.field_order || 0,
+  options: dbField.options || {},
+  created_at: dbField.created_at,
+  updated_at: dbField.updated_at
+});
+
 export const proceduresEnhancedApi = {
   // Get all procedures with optional filters
   async getProcedures(params: {
@@ -61,10 +74,7 @@ export const proceduresEnhancedApi = {
     
     let query = supabase
       .from("procedures")
-      .select(`
-        *,
-        procedure_fields!inner(count)
-      `, { count: 'exact' });
+      .select("*", { count: 'exact' });
 
     const tenantId = await getCurrentTenantId();
     query = query.eq("tenant_id", tenantId);
@@ -118,7 +128,7 @@ export const proceduresEnhancedApi = {
 
         return {
           ...procedure,
-          fields: fields || [],
+          fields: (fields || []).map(mapFieldFromDB),
           executions_count: executionsCount || 0
         };
       })
@@ -158,7 +168,7 @@ export const proceduresEnhancedApi = {
 
     return {
       ...procedure,
-      fields: fields || [],
+      fields: (fields || []).map(mapFieldFromDB),
       executions_count: executionsCount || 0
     };
   },
@@ -215,7 +225,7 @@ export const proceduresEnhancedApi = {
         throw fieldsError;
       }
 
-      return { ...createdProcedure, fields: fields || [] };
+      return { ...createdProcedure, fields: (fields || []).map(mapFieldFromDB) };
     }
 
     return { ...createdProcedure, fields: [] };
@@ -280,7 +290,7 @@ export const proceduresEnhancedApi = {
           throw fieldsError;
         }
 
-        return { ...updatedProcedure, fields: fields || [] };
+        return { ...updatedProcedure, fields: (fields || []).map(mapFieldFromDB) };
       }
     }
 
@@ -291,7 +301,7 @@ export const proceduresEnhancedApi = {
       .eq("procedure_id", id)
       .order("field_order");
 
-    return { ...updatedProcedure, fields: fields || [] };
+    return { ...updatedProcedure, fields: (fields || []).map(mapFieldFromDB) };
   },
 
   // Delete procedure
