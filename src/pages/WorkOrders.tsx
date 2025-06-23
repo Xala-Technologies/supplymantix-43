@@ -13,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { WorkOrder } from "@/types/workOrder";
 import { transformWorkOrderData } from "@/services/workOrderService";
+import { getAssetName } from "@/utils/assetUtils";
 import { cn } from "@/lib/utils";
 
 // Sample data for demonstration
@@ -289,16 +290,16 @@ export default function WorkOrders() {
                 )}
                 
                 {/* Enhanced Empty State */}
-                {!selectedWorkOrderData && viewMode !== 'form' && (
+                {!selectedWorkOrderData && viewMode !== 'form' && filteredWorkOrders.length === 0 && (
                   <div className="flex-1 flex items-center justify-center p-8">
                     <div className="text-center space-y-6 max-w-md">
                       <div className="w-24 h-24 bg-gradient-to-br from-blue-100 to-indigo-200 rounded-3xl flex items-center justify-center mx-auto">
                         <span className="text-4xl">🔧</span>
                       </div>
                       <div className="space-y-3">
-                        <h3 className="text-xl font-semibold text-slate-800">Select a Work Order</h3>
+                        <h3 className="text-xl font-semibold text-slate-800">No Work Orders Found</h3>
                         <p className="text-slate-600 leading-relaxed">
-                          Choose a work order from the list to view detailed information, track progress, and manage tasks.
+                          No work orders match your current search and filter criteria. Try adjusting your filters or create a new work order.
                         </p>
                       </div>
                       <WorkOrdersQuickActions onCreateWorkOrder={handleCreateWorkOrder} />
@@ -339,7 +340,7 @@ export default function WorkOrders() {
                       </div>
                       
                       <div className="space-y-2 text-xs text-slate-600">
-                        <div>#{workOrder.id.slice(-4)} • {workOrder.asset?.name}</div>
+                        <div>#{workOrder.id.slice(-4)} • {getAssetName(workOrder.asset)}</div>
                         <div className="flex items-center justify-between">
                           <span>{workOrder.status.replace('_', ' ')}</span>
                           <span>{workOrder.assignedTo.length} assigned</span>
