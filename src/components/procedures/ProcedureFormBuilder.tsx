@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -77,11 +76,12 @@ export const ProcedureFormBuilder: React.FC<ProcedureFormBuilderProps> = ({
 
   const addField = () => {
     const newField: ProcedureField = {
+      id: crypto.randomUUID(),
       label: 'New Field',
       field_type: 'text',
       is_required: false,
       field_order: formData.fields.length,
-      options: {}
+      options: null
     };
     setFormData(prev => ({
       ...prev,
@@ -99,7 +99,10 @@ export const ProcedureFormBuilder: React.FC<ProcedureFormBuilderProps> = ({
   const removeField = (index: number) => {
     setFormData(prev => ({
       ...prev,
-      fields: prev.fields.filter((_, i) => i !== index)
+      fields: prev.fields.filter((_, i) => i !== index).map((field, i) => ({
+        ...field,
+        field_order: i
+      }))
     }));
   };
 
@@ -304,7 +307,7 @@ export const ProcedureFormBuilder: React.FC<ProcedureFormBuilderProps> = ({
               <div className="space-y-2">
                 {formData.fields.map((field, index) => (
                   <FieldEditor
-                    key={index}
+                    key={field.id || index}
                     field={field}
                     index={index}
                     totalFields={formData.fields.length}
