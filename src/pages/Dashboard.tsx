@@ -144,6 +144,8 @@ export default function Dashboard() {
     navigate('/dashboard/organization');
   };
 
+  console.log('Dashboard rendering, isLoading:', isLoading, 'workOrders:', workOrders);
+
   if (isLoading) {
     return (
       <DashboardLayout>
