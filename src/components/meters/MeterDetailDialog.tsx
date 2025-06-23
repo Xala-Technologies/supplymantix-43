@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -9,62 +8,58 @@ import { useMeterDetail } from "@/hooks/useMetersEnhanced";
 import { MeterReadingForm } from "./MeterReadingForm";
 import { MeterTriggersManager } from "./MeterTriggersManager";
 import { MeterReadingsHistory } from "./MeterReadingsHistory";
-import { 
-  X, 
-  Activity, 
-  AlertTriangle, 
-  BarChart3, 
-  Clock, 
-  MapPin, 
-  Factory,
-  TrendingUp,
-  Settings,
-  Plus
-} from "lucide-react";
-
+import { X, Activity, AlertTriangle, BarChart3, Clock, MapPin, Factory, TrendingUp, Settings, Plus } from "lucide-react";
 interface MeterDetailDialogProps {
-  meter: { id: string; name: string };
+  meter: {
+    id: string;
+    name: string;
+  };
   onClose: () => void;
 }
-
-export const MeterDetailDialog = ({ meter, onClose }: MeterDetailDialogProps) => {
+export const MeterDetailDialog = ({
+  meter,
+  onClose
+}: MeterDetailDialogProps) => {
   const [showReadingForm, setShowReadingForm] = useState(false);
-  const { data: meterDetail, isLoading } = useMeterDetail(meter.id);
-
+  const {
+    data: meterDetail,
+    isLoading
+  } = useMeterDetail(meter.id);
   if (isLoading) {
-    return (
-      <Dialog open onOpenChange={() => onClose()}>
+    return <Dialog open onOpenChange={() => onClose()}>
         <DialogContent className="max-w-5xl max-h-[90vh]">
           <div className="flex items-center justify-center py-12">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
           </div>
         </DialogContent>
-      </Dialog>
-    );
+      </Dialog>;
   }
-
   if (!meterDetail) return null;
-
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case 'active': return <Activity className="h-4 w-4 text-green-500" />;
-      case 'warning': return <AlertTriangle className="h-4 w-4 text-yellow-500" />;
-      case 'critical': return <AlertTriangle className="h-4 w-4 text-red-500" />;
-      default: return <BarChart3 className="h-4 w-4 text-gray-400" />;
+      case 'active':
+        return <Activity className="h-4 w-4 text-green-500" />;
+      case 'warning':
+        return <AlertTriangle className="h-4 w-4 text-yellow-500" />;
+      case 'critical':
+        return <AlertTriangle className="h-4 w-4 text-red-500" />;
+      default:
+        return <BarChart3 className="h-4 w-4 text-gray-400" />;
     }
   };
-
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'active': return 'bg-green-50 text-green-700 border-green-200';
-      case 'warning': return 'bg-yellow-50 text-yellow-700 border-yellow-200';
-      case 'critical': return 'bg-red-50 text-red-700 border-red-200';
-      default: return 'bg-gray-50 text-gray-700 border-gray-200';
+      case 'active':
+        return 'bg-green-50 text-green-700 border-green-200';
+      case 'warning':
+        return 'bg-yellow-50 text-yellow-700 border-yellow-200';
+      case 'critical':
+        return 'bg-red-50 text-red-700 border-red-200';
+      default:
+        return 'bg-gray-50 text-gray-700 border-gray-200';
     }
   };
-
-  return (
-    <Dialog open onOpenChange={() => onClose()}>
+  return <Dialog open onOpenChange={() => onClose()}>
       <DialogContent className="max-w-5xl max-h-[90vh] overflow-hidden">
         <DialogHeader className="flex flex-row items-center justify-between border-b pb-4">
           <div className="flex items-center gap-3">
@@ -74,18 +69,14 @@ export const MeterDetailDialog = ({ meter, onClose }: MeterDetailDialogProps) =>
             <div>
               <DialogTitle className="text-xl font-semibold">{meterDetail.name}</DialogTitle>
               <div className="flex items-center gap-4 text-sm text-gray-600 mt-1">
-                {meterDetail.assets && (
-                  <div className="flex items-center gap-1">
+                {meterDetail.assets && <div className="flex items-center gap-1">
                     <Factory className="h-3 w-3" />
                     {meterDetail.assets.name}
-                  </div>
-                )}
-                {meterDetail.location && (
-                  <div className="flex items-center gap-1">
+                  </div>}
+                {meterDetail.location && <div className="flex items-center gap-1">
                     <MapPin className="h-3 w-3" />
                     {meterDetail.location}
-                  </div>
-                )}
+                  </div>}
               </div>
             </div>
           </div>
@@ -94,9 +85,7 @@ export const MeterDetailDialog = ({ meter, onClose }: MeterDetailDialogProps) =>
               {getStatusIcon(meterDetail.status)}
               <span className="ml-1 capitalize">{meterDetail.status}</span>
             </Badge>
-            <Button variant="ghost" size="sm" onClick={onClose}>
-              <X className="h-4 w-4" />
-            </Button>
+            
           </div>
         </DialogHeader>
 
@@ -139,10 +128,7 @@ export const MeterDetailDialog = ({ meter, onClose }: MeterDetailDialogProps) =>
           <Card>
             <CardContent className="p-4 text-center">
               <div className="text-sm font-semibold text-gray-900">
-                {meterDetail.last_reading_at 
-                  ? new Date(meterDetail.last_reading_at).toLocaleDateString()
-                  : 'Never'
-                }
+                {meterDetail.last_reading_at ? new Date(meterDetail.last_reading_at).toLocaleDateString() : 'Never'}
               </div>
               <div className="text-sm text-gray-600">Last Updated</div>
               <div className="text-xs text-gray-500 mt-1">Reading Date</div>
@@ -151,8 +137,7 @@ export const MeterDetailDialog = ({ meter, onClose }: MeterDetailDialogProps) =>
         </div>
 
         {/* Target Range */}
-        {(meterDetail.target_min || meterDetail.target_max) && (
-          <Card>
+        {(meterDetail.target_min || meterDetail.target_max) && <Card>
             <CardContent className="p-4">
               <div className="text-sm font-medium text-gray-700 mb-2">Target Range</div>
               <div className="flex items-center gap-2 text-sm text-gray-600">
@@ -161,8 +146,7 @@ export const MeterDetailDialog = ({ meter, onClose }: MeterDetailDialogProps) =>
                 <span>Max: {meterDetail.target_max || 'N/A'} {meterDetail.unit}</span>
               </div>
             </CardContent>
-          </Card>
-        )}
+          </Card>}
 
         <Tabs defaultValue="readings" className="flex-1 overflow-hidden">
           <TabsList className="grid w-full grid-cols-3">
@@ -175,10 +159,7 @@ export const MeterDetailDialog = ({ meter, onClose }: MeterDetailDialogProps) =>
             <div className="space-y-4">
               <div className="flex justify-between items-center">
                 <h3 className="text-lg font-semibold">Reading History</h3>
-                <Button 
-                  onClick={() => setShowReadingForm(true)}
-                  className="bg-blue-600 hover:bg-blue-700"
-                >
+                <Button onClick={() => setShowReadingForm(true)} className="bg-blue-600 hover:bg-blue-700">
                   <Plus className="h-4 w-4 mr-2" />
                   Record Reading
                 </Button>
@@ -246,28 +227,18 @@ export const MeterDetailDialog = ({ meter, onClose }: MeterDetailDialogProps) =>
               </Card>
             </div>
 
-            {meterDetail.description && (
-              <Card>
+            {meterDetail.description && <Card>
                 <CardHeader>
                   <CardTitle className="text-base">Description</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <p className="text-gray-600">{meterDetail.description}</p>
                 </CardContent>
-              </Card>
-            )}
+              </Card>}
           </TabsContent>
         </Tabs>
 
-        {showReadingForm && (
-          <MeterReadingForm
-            meterId={meter.id}
-            meterName={meter.name}
-            unit={meterDetail.unit}
-            onClose={() => setShowReadingForm(false)}
-          />
-        )}
+        {showReadingForm && <MeterReadingForm meterId={meter.id} meterName={meter.name} unit={meterDetail.unit} onClose={() => setShowReadingForm(false)} />}
       </DialogContent>
-    </Dialog>
-  );
+    </Dialog>;
 };
