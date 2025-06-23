@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -40,11 +39,12 @@ export const MeterForm = ({ onClose }: MeterFormProps) => {
         unit: formData.unit,
         description: formData.description || null,
         location: formData.location || null,
-        asset_id: formData.asset_id || null,
+        asset_id: formData.asset_id === "no-asset" ? null : formData.asset_id || null,
         reading_frequency: formData.reading_frequency,
         target_min: formData.target_min ? Number(formData.target_min) : null,
         target_max: formData.target_max ? Number(formData.target_max) : null,
-      } as any; // Type assertion to bypass the tenant_id requirement since it's handled by the API
+        tenant_id: undefined, // This will be handled by the API
+      } as any;
       
       await createMeter.mutateAsync(meterData);
       onClose();
@@ -127,7 +127,7 @@ export const MeterForm = ({ onClose }: MeterFormProps) => {
                 <SelectValue placeholder="Select an asset (optional)" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">No Asset</SelectItem>
+                <SelectItem value="no-asset">No Asset</SelectItem>
                 {assets?.map((asset) => (
                   <SelectItem key={asset.id} value={asset.id}>
                     {asset.name} {asset.location && `(${asset.location})`}
