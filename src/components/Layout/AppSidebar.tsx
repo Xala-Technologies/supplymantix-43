@@ -4,6 +4,7 @@ import { AppSidebarHeader } from "./SidebarHeader";
 import { SidebarNavigation } from "./SidebarNavigation";
 import { AppSidebarFooter } from "./SidebarFooter";
 import { useSidebar } from "@/components/ui/sidebar";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 export function AppSidebar() {
   const { state } = useSidebar();
@@ -22,9 +23,11 @@ export function AppSidebar() {
         <AppSidebarHeader />
       </SidebarHeader>
       
-      <SidebarContent className="flex-1 overflow-y-auto">
-        <SidebarNavigation />
-      </SidebarContent>
+      <ScrollArea className="flex-1">
+        <SidebarContent className="flex-1 p-0">
+          <SidebarNavigation />
+        </SidebarContent>
+      </ScrollArea>
       
       <SidebarFooter className={`
         transition-all duration-300 ease-in-out border-t border-gray-100
