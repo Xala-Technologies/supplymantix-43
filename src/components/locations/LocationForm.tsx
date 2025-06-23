@@ -5,10 +5,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useCreateLocation, useUpdateLocation, useLocations } from "@/hooks/useLocations";
+import { useCreateLocation, useUpdateLocation } from "@/hooks/useLocations";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, MapPin, Building2 } from "lucide-react";
+import { Loader2, Building2 } from "lucide-react";
 import type { Location } from "@/types/location";
 
 interface LocationFormProps {
@@ -23,7 +22,6 @@ export const LocationForm = ({ location, onClose }: LocationFormProps) => {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const { data: locations } = useLocations();
   const createLocation = useCreateLocation();
   const updateLocation = useUpdateLocation();
   const { toast } = useToast();
@@ -60,7 +58,14 @@ export const LocationForm = ({ location, onClose }: LocationFormProps) => {
           description: "Location updated successfully",
         });
       } else {
-        await createLocation.mutateAsync(formData);
+        // Add tenant_id for new locations - using a placeholder for now
+        // In a real app, this would come from the current user's context
+        const locationData = {
+          ...formData,
+          tenant_id: "00000000-0000-0000-0000-000000000000" // Placeholder tenant ID
+        };
+        
+        await createLocation.mutateAsync(locationData);
         toast({
           title: "Success",
           description: "Location created successfully",
