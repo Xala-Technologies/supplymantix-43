@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/integrations/supabase/types";
 import type { LocationHierarchy, LocationStats, LocationBreadcrumb } from "@/types/location";
@@ -143,11 +144,11 @@ export const locationsApi = {
   },
 
   async getLocationStats(locationId: string): Promise<LocationStats> {
-    // Simplify by using individual queries instead of Promise.all to avoid deep type inference
-    const assetsResult = await supabase.from("assets").select("id", { count: 'exact' }).eq("location_id", locationId);
-    const metersResult = await supabase.from("meters").select("id", { count: 'exact' }).eq("location_id", locationId);
-    const workOrdersResult = await supabase.from("work_orders").select("id", { count: 'exact' }).eq("location_id", locationId);
-    const childrenResult = await supabase.from("locations").select("id", { count: 'exact' }).eq("parent_id", locationId).eq("is_active", true);
+    // Use explicit any typing to avoid deep type inference
+    const assetsResult: any = await supabase.from("assets").select("id", { count: 'exact' }).eq("location_id", locationId);
+    const metersResult: any = await supabase.from("meters").select("id", { count: 'exact' }).eq("location_id", locationId);
+    const workOrdersResult: any = await supabase.from("work_orders").select("id", { count: 'exact' }).eq("location_id", locationId);
+    const childrenResult: any = await supabase.from("locations").select("id", { count: 'exact' }).eq("parent_id", locationId).eq("is_active", true);
     
     // Explicit return object
     const stats: LocationStats = {
