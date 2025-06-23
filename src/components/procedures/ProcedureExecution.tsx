@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -48,7 +47,7 @@ export const ProcedureExecution: React.FC<ProcedureExecutionProps> = ({
   const progress = totalSteps > 0 ? (currentStep + 1) / totalSteps * 100 : 100;
   const currentField = fields[currentStep];
 
-  const estimateDuration = (): number => {
+  function estimateDuration(): number {
     const baseTimePerField = 2;
     const complexityMultiplier = fields.reduce((acc, field) => {
       switch (field.field_type) {
@@ -62,9 +61,9 @@ export const ProcedureExecution: React.FC<ProcedureExecutionProps> = ({
       }
     }, 0);
     return Math.ceil(baseTimePerField * complexityMultiplier);
-  };
+  }
 
-  const validateField = (field: ProcedureField, value: any): string | null => {
+  function validateField(field: ProcedureField, value: any): string | null {
     if (field.is_required && (!value || (Array.isArray(value) && value.length === 0) || value === '')) {
       return `${field.label} is required`;
     }
@@ -75,9 +74,9 @@ export const ProcedureExecution: React.FC<ProcedureExecutionProps> = ({
       return `${field.label} must be a valid date`;
     }
     return null;
-  };
+  }
 
-  const handleAnswerChange = (fieldId: string, value: any) => {
+  function handleAnswerChange(fieldId: string, value: any) {
     setAnswers(prev => ({
       ...prev,
       [fieldId]: value
@@ -86,9 +85,9 @@ export const ProcedureExecution: React.FC<ProcedureExecutionProps> = ({
       ...prev,
       [fieldId]: ''
     }));
-  };
+  }
 
-  const goToNextStep = () => {
+  function goToNextStep() {
     if (!currentField) return;
     
     const fieldId = currentField.id || `field_${currentStep}`;
@@ -108,9 +107,9 @@ export const ProcedureExecution: React.FC<ProcedureExecutionProps> = ({
     } else {
       setShowSummary(true);
     }
-  };
+  }
 
-  const goToPreviousStep = () => {
+  function goToPreviousStep() {
     if (showSummary) {
       setShowSummary(false);
       return;
@@ -118,9 +117,9 @@ export const ProcedureExecution: React.FC<ProcedureExecutionProps> = ({
     if (currentStep > 0) {
       setCurrentStep(currentStep - 1);
     }
-  };
+  }
 
-  const calculateScore = (): number => {
+  function calculateScore(): number {
     const requiredFields = fields.filter(f => f.is_required);
     if (requiredFields.length === 0) return 100;
 
@@ -132,9 +131,9 @@ export const ProcedureExecution: React.FC<ProcedureExecutionProps> = ({
     }).length;
 
     return Math.round(completedRequired / requiredFields.length * 100);
-  };
+  }
 
-  const getFormattedAnswers = (): FieldAnswer[] => {
+  function getFormattedAnswers(): FieldAnswer[] {
     return fields.map((field, index) => {
       const fieldId = field.id || `field_${index}`;
       const value = answers[fieldId];
@@ -145,9 +144,9 @@ export const ProcedureExecution: React.FC<ProcedureExecutionProps> = ({
         fieldType: field.field_type
       };
     }).filter(answer => answer.value !== undefined && answer.value !== null && answer.value !== '');
-  };
+  }
 
-  const formatAnswerValue = (answer: FieldAnswer): string => {
+  function formatAnswerValue(answer: FieldAnswer): string {
     if (answer.value === null || answer.value === undefined || answer.value === '') {
       return 'Not answered';
     }
@@ -164,9 +163,9 @@ export const ProcedureExecution: React.FC<ProcedureExecutionProps> = ({
       default:
         return String(answer.value);
     }
-  };
+  }
 
-  const completeExecution = async () => {
+  async function completeExecution() {
     const score = calculateScore();
     const formattedAnswers = getFormattedAnswers();
     
@@ -185,7 +184,7 @@ export const ProcedureExecution: React.FC<ProcedureExecutionProps> = ({
       console.error('Error completing execution:', error);
       toast.error('Failed to complete procedure. Please try again.');
     }
-  };
+  }
 
   if (totalSteps === 0) {
     return (
@@ -358,7 +357,7 @@ export const ProcedureExecution: React.FC<ProcedureExecutionProps> = ({
       {/* Navigation */}
       <div className="flex-shrink-0 border-t bg-gray-50 p-3">
         <div className="flex justify-between items-center">
-          <Button variant="outline" onClick={currentStep === 0 ? on Cancel : goToPreviousStep} size="sm">
+          <Button variant="outline" onClick={currentStep === 0 ? onCancel : goToPreviousStep} size="sm">
             <ArrowLeft className="h-4 w-4 mr-1" />
             {currentStep === 0 ? 'Cancel' : 'Previous'}
           </Button>
