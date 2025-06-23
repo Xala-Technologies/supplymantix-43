@@ -160,12 +160,24 @@ export const locationsApi = {
       return [];
     }
 
-    // Create a map for quick lookup - use Record to avoid type inference issues
-    const locationMap: Record<string, any> = {};
+    // Create map of all locations first
+    const locationMap = new Map<string, LocationRow>();
+    locations.forEach(loc => locationMap.set(loc.id, loc));
     
-    // First pass: create all nodes
-    for (const location of locations) {
-      locationMap[location.id] = {
+    const rootNodes: LocationHierarchy[] = [];
+    
+    // Build hierarchy by processing each location
+    const processLocation = (location: LocationRow, level: number = 0, parentPath: string[] = []): LocationHierarchy => {
+      const children: LocationHierarchy[] = [];
+      const currentPath = [...parentPath, location.name];
+      
+      // Find and process children
+      const childLocations = locations.filter(loc => loc.parent_id === location.id);
+      for (const child of childLocations) {
+        children.push(processLocation(child, level + 1, currentPath));
+      }
+      
+      return {
         id: location.id,
         name: location.name,
         description: location.description,
@@ -179,31 +191,18 @@ export const locationsApi = {
         metadata: location.metadata,
         created_at: location.created_at,
         updated_at: location.updated_at,
-        children: [],
-        level: 0,
-        path: [location.name]
+        children,
+        level,
+        path: currentPath
       };
-    }
-
-    // Second pass: build relationships and determine root nodes
-    const rootNodes: any[] = [];
+    };
     
-    for (const location of locations) {
-      const node = locationMap[location.id];
-      
-      if (location.parent_id && locationMap[location.parent_id]) {
-        // Has parent - add to parent's children
-        const parent = locationMap[location.parent_id];
-        node.level = parent.level + 1;
-        node.path = [...parent.path, location.name];
-        parent.children.push(node);
-      } else {
-        // No parent - it's a root node
-        rootNodes.push(node);
-      }
+    // Find root locations (no parent) and process them
+    const rootLocations = locations.filter(loc => !loc.parent_id);
+    for (const rootLocation of rootLocations) {
+      rootNodes.push(processLocation(rootLocation));
     }
-
-    // Cast to proper type and return
-    return rootNodes as LocationHierarchy[];
+    
+    return rootNodes;
   },
 };
