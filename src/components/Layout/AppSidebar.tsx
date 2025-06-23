@@ -16,14 +16,9 @@ export function AppSidebar() {
       transition-all duration-300 ease-in-out
       ${isCollapsed ? 'w-16' : 'w-72'}
     `}>
-      <SidebarHeader className={`
-        transition-all duration-300 ease-in-out
-        ${isCollapsed ? 'px-2' : 'px-4'}
-      `}>
-        <AppSidebarHeader />
-      </SidebarHeader>
+      <AppSidebarHeader />
       
-      <ScrollArea className="flex-1">
+      <ScrollArea className="flex-1 mt-16">
         <SidebarContent className="flex-1 p-0">
           <SidebarNavigation />
         </SidebarContent>
