@@ -1,3 +1,4 @@
+
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { inventoryEnhancedApi, type InventoryItemWithStats } from "@/lib/database/inventory-enhanced";
 import { toast } from "sonner";
@@ -34,6 +35,7 @@ export const useInventoryEnhanced = (params?: {
       console.log('useInventoryEnhanced query executing with params:', params);
       const result = await inventoryEnhancedApi.searchInventory(params || {});
       console.log('useInventoryEnhanced query result:', result);
+      console.log('Number of items returned:', result.items?.length || 0);
       return result;
     },
     retry: 2,
@@ -76,8 +78,11 @@ export const useCreateInventoryItem = () => {
       return result;
     },
     onSuccess: () => {
+      console.log('Item created successfully, invalidating queries...');
       queryClient.invalidateQueries({ queryKey: ["inventory-enhanced"] });
       queryClient.invalidateQueries({ queryKey: ["low-stock-alerts"] });
+      // Force a refetch of the main inventory query
+      queryClient.refetchQueries({ queryKey: ["inventory-enhanced"] });
       toast.success("Inventory item created successfully");
     },
     onError: (error) => {
