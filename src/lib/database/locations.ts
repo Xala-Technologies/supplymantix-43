@@ -75,7 +75,7 @@ export const locationsApi = {
   },
 
   async getLocationStats(locationId: string): Promise<LocationStats> {
-    // Use a completely different approach with raw queries to avoid type inference issues
+    // Use raw fetch approach to completely avoid TypeScript type inference issues
     const stats: LocationStats = {
       asset_count: 0,
       meter_count: 0,
@@ -83,50 +83,83 @@ export const locationsApi = {
       child_location_count: 0,
     };
 
-    // Get asset count with manual count
-    const assetsQuery = supabase
-      .from("assets")
-      .select("id")
-      .eq("location_id", locationId);
-    
-    const assetsResult = await assetsQuery;
-    if (assetsResult.data) {
-      stats.asset_count = assetsResult.data.length;
-    }
+    // Use Promise.all with simple individual queries
+    const promises = [
+      // Assets
+      (async () => {
+        try {
+          const response = await fetch(`${supabase.supabaseUrl}/rest/v1/assets?location_id=eq.${locationId}&select=id`, {
+            headers: {
+              'apikey': supabase.supabaseKey,
+              'Authorization': `Bearer ${supabase.supabaseKey}`,
+              'Content-Type': 'application/json'
+            }
+          });
+          const data = await response.json();
+          return Array.isArray(data) ? data.length : 0;
+        } catch {
+          return 0;
+        }
+      })(),
+      
+      // Meters
+      (async () => {
+        try {
+          const response = await fetch(`${supabase.supabaseUrl}/rest/v1/meters?location_id=eq.${locationId}&select=id`, {
+            headers: {
+              'apikey': supabase.supabaseKey,
+              'Authorization': `Bearer ${supabase.supabaseKey}`,
+              'Content-Type': 'application/json'
+            }
+          });
+          const data = await response.json();
+          return Array.isArray(data) ? data.length : 0;
+        } catch {
+          return 0;
+        }
+      })(),
+      
+      // Work Orders
+      (async () => {
+        try {
+          const response = await fetch(`${supabase.supabaseUrl}/rest/v1/work_orders?location_id=eq.${locationId}&select=id`, {
+            headers: {
+              'apikey': supabase.supabaseKey,
+              'Authorization': `Bearer ${supabase.supabaseKey}`,
+              'Content-Type': 'application/json'
+            }
+          });
+          const data = await response.json();
+          return Array.isArray(data) ? data.length : 0;
+        } catch {
+          return 0;
+        }
+      })(),
+      
+      // Children
+      (async () => {
+        try {
+          const response = await fetch(`${supabase.supabaseUrl}/rest/v1/locations?parent_id=eq.${locationId}&is_active=eq.true&select=id`, {
+            headers: {
+              'apikey': supabase.supabaseKey,
+              'Authorization': `Bearer ${supabase.supabaseKey}`,
+              'Content-Type': 'application/json'
+            }
+          });
+          const data = await response.json();
+          return Array.isArray(data) ? data.length : 0;
+        } catch {
+          return 0;
+        }
+      })()
+    ];
 
-    // Get meter count with manual count
-    const metersQuery = supabase
-      .from("meters")
-      .select("id")
-      .eq("location_id", locationId);
+    const [assetCount, meterCount, workOrderCount, childrenCount] = await Promise.all(promises);
     
-    const metersResult = await metersQuery;
-    if (metersResult.data) {
-      stats.meter_count = metersResult.data.length;
-    }
-
-    // Get work order count with manual count
-    const workOrdersQuery = supabase
-      .from("work_orders")
-      .select("id")
-      .eq("location_id", locationId);
-    
-    const workOrdersResult = await workOrdersQuery;
-    if (workOrdersResult.data) {
-      stats.work_order_count = workOrdersResult.data.length;
-    }
-
-    // Get children count with manual count
-    const childrenQuery = supabase
-      .from("locations")
-      .select("id")
-      .eq("parent_id", locationId)
-      .eq("is_active", true);
-    
-    const childrenResult = await childrenQuery;
-    if (childrenResult.data) {
-      stats.child_location_count = childrenResult.data.length;
-    }
+    stats.asset_count = assetCount;
+    stats.meter_count = meterCount;
+    stats.work_order_count = workOrderCount;
+    stats.child_location_count = childrenCount;
     
     return stats;
   },
