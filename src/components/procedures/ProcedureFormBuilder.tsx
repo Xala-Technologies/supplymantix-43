@@ -145,55 +145,49 @@ export const ProcedureFormBuilder: React.FC<ProcedureFormBuilderProps> = ({
   };
 
   return (
-    <div className="w-full h-full">
-      <form onSubmit={handleSubmit} className="space-y-6 h-full">
+    <div className="w-full h-full flex flex-col">
+      <form onSubmit={handleSubmit} className="flex flex-col h-full">
         {/* Compact Header */}
-        <div className="text-center space-y-2 px-6 py-4 border-b bg-gray-50">
+        <div className="text-center py-2 border-b bg-gray-50 flex-shrink-0">
           <div className="flex items-center justify-center gap-2">
-            <Sparkles className="h-5 w-5 text-blue-600" />
-            <h2 className="text-xl font-bold text-gray-900">
+            <Sparkles className="h-4 w-4 text-blue-600" />
+            <h2 className="text-lg font-bold text-gray-900">
               {initialData ? 'Edit Procedure' : 'Create New Procedure'}
             </h2>
           </div>
-          <p className="text-sm text-gray-600">
-            Build standardized procedures with custom fields
-          </p>
         </div>
 
-        <div className="px-6 space-y-6 flex-1 overflow-y-auto">
-          {/* Basic Information */}
-          <Card className="border-0 shadow-none">
-            <CardHeader className="px-0 pb-4">
-              <CardTitle className="flex items-center gap-2 text-lg">
-                <Building className="h-4 w-4 text-blue-600" />
-                Basic Information
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="px-0 space-y-4">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        {/* Two Column Layout */}
+        <div className="flex-1 overflow-hidden flex">
+          {/* Left Column - Basic Info */}
+          <div className="w-1/2 border-r overflow-y-auto">
+            <div className="p-3 space-y-3">
+              {/* Basic Information */}
+              <div className="space-y-3">
+                <div className="flex items-center gap-2 text-sm font-semibold text-blue-600">
+                  <Building className="h-3 w-3" />
+                  Basic Information
+                </div>
+                
                 <div className="space-y-2">
-                  <Label htmlFor="title" className="text-sm font-medium">
-                    Procedure Title *
-                  </Label>
+                  <Label htmlFor="title" className="text-xs font-medium">Procedure Title *</Label>
                   <Input
                     id="title"
                     value={formData.title}
                     onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
                     placeholder="Enter procedure title"
                     required
-                    className="h-10"
+                    className="h-8 text-sm"
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="category" className="text-sm font-medium">
-                    Category
-                  </Label>
+                  <Label htmlFor="category" className="text-xs font-medium">Category</Label>
                   <Select
                     value={formData.category}
                     onValueChange={(value) => setFormData(prev => ({ ...prev, category: value }))}
                   >
-                    <SelectTrigger className="h-10">
+                    <SelectTrigger className="h-8 text-sm">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -208,64 +202,56 @@ export const ProcedureFormBuilder: React.FC<ProcedureFormBuilderProps> = ({
                     </SelectContent>
                   </Select>
                 </div>
-              </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="description" className="text-sm font-medium">
-                  Description
-                </Label>
-                <Textarea
-                  id="description"
-                  value={formData.description}
-                  onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                  placeholder="Describe this procedure"
-                  rows={3}
-                  className="resize-none"
-                />
-              </div>
-
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label className="text-sm font-medium">Tags</Label>
-                  <div className="flex flex-wrap gap-2 min-h-[32px] p-3 border rounded-lg bg-gray-50">
+                  <Label htmlFor="description" className="text-xs font-medium">Description</Label>
+                  <Textarea
+                    id="description"
+                    value={formData.description}
+                    onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+                    placeholder="Describe this procedure"
+                    rows={2}
+                    className="resize-none text-sm"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="text-xs font-medium">Tags</Label>
+                  <div className="flex flex-wrap gap-1 min-h-[24px] p-2 border rounded text-xs bg-gray-50">
                     {formData.tags.map(tag => (
                       <Badge 
                         key={tag} 
                         variant="secondary" 
-                        className="text-sm px-2 py-1 cursor-pointer hover:bg-red-100 hover:text-red-700" 
+                        className="text-xs px-1 py-0 cursor-pointer hover:bg-red-100 hover:text-red-700" 
                         onClick={() => removeTag(tag)}
                       >
                         {tag} ×
                       </Badge>
                     ))}
                     {formData.tags.length === 0 && (
-                      <span className="text-gray-500 text-sm">No tags</span>
+                      <span className="text-gray-500 text-xs">No tags</span>
                     )}
                   </div>
-                  <div className="flex gap-2">
+                  <div className="flex gap-1">
                     <Input
                       value={newTag}
                       onChange={(e) => setNewTag(e.target.value)}
                       placeholder="Add tag"
                       onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addTag())}
-                      className="flex-1 h-9"
+                      className="flex-1 h-7 text-xs"
                     />
-                    <Button type="button" onClick={addTag} size="sm" variant="outline" className="h-9 px-3">
+                    <Button type="button" onClick={addTag} size="sm" variant="outline" className="h-7 px-2 text-xs">
                       Add
                     </Button>
                   </div>
                 </div>
 
-                <div className="flex items-center justify-between p-4 bg-blue-50 rounded-lg border border-blue-200">
-                  <div className="flex items-center gap-3">
-                    <Globe className="h-4 w-4 text-blue-600" />
+                <div className="flex items-center justify-between p-2 bg-blue-50 rounded border border-blue-200">
+                  <div className="flex items-center gap-2">
+                    <Globe className="h-3 w-3 text-blue-600" />
                     <div>
-                      <Label htmlFor="is_global" className="text-sm font-medium">
-                        Global Procedure
-                      </Label>
-                      <p className="text-xs text-gray-600">
-                        Available to all users
-                      </p>
+                      <Label htmlFor="is_global" className="text-xs font-medium">Global Procedure</Label>
+                      <p className="text-xs text-gray-600">Available to all users</p>
                     </div>
                   </div>
                   <Switch
@@ -275,38 +261,37 @@ export const ProcedureFormBuilder: React.FC<ProcedureFormBuilderProps> = ({
                   />
                 </div>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
 
-          {/* Fields Section */}
-          <Card className="border-0 shadow-none">
-            <CardHeader className="px-0 pb-4">
+          {/* Right Column - Fields */}
+          <div className="w-1/2 flex flex-col">
+            <div className="p-3 border-b bg-gray-50 flex-shrink-0">
               <div className="flex items-center justify-between">
-                <CardTitle className="flex items-center gap-2 text-lg">
-                  <Sparkles className="h-4 w-4 text-green-600" />
+                <div className="flex items-center gap-2 text-sm font-semibold text-green-600">
+                  <Sparkles className="h-3 w-3" />
                   Procedure Fields ({formData.fields.length})
-                </CardTitle>
-                <Button type="button" onClick={addField} size="sm" className="h-9 px-3 bg-green-600 hover:bg-green-700">
-                  <Plus className="h-4 w-4 mr-2" />
+                </div>
+                <Button type="button" onClick={addField} size="sm" className="h-7 px-2 text-xs bg-green-600 hover:bg-green-700">
+                  <Plus className="h-3 w-3 mr-1" />
                   Add Field
                 </Button>
               </div>
-            </CardHeader>
-            <CardContent className="px-0">
+            </div>
+            
+            <div className="flex-1 overflow-y-auto p-3">
               {formData.fields.length === 0 ? (
-                <div className="text-center py-12 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
-                  <Sparkles className="h-8 w-8 text-gray-400 mx-auto mb-3" />
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">No fields added yet</h3>
-                  <p className="text-sm text-gray-600 mb-4">
-                    Add fields to create a structured procedure
-                  </p>
-                  <Button type="button" onClick={addField} variant="outline" size="sm" className="h-9">
-                    <Plus className="h-4 w-4 mr-2" />
+                <div className="text-center py-8 bg-gray-50 rounded border-2 border-dashed border-gray-300">
+                  <Sparkles className="h-6 w-6 text-gray-400 mx-auto mb-2" />
+                  <h3 className="text-sm font-medium text-gray-900 mb-1">No fields added yet</h3>
+                  <p className="text-xs text-gray-600 mb-3">Add fields to create a structured procedure</p>
+                  <Button type="button" onClick={addField} variant="outline" size="sm" className="h-7 text-xs">
+                    <Plus className="h-3 w-3 mr-1" />
                     Add Your First Field
                   </Button>
                 </div>
               ) : (
-                <div className="space-y-3">
+                <div className="space-y-2">
                   {formData.fields.map((field, index) => (
                     <FieldEditor
                       key={field.id || index}
@@ -320,21 +305,21 @@ export const ProcedureFormBuilder: React.FC<ProcedureFormBuilderProps> = ({
                   ))}
                 </div>
               )}
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         </div>
 
         {/* Fixed Actions Footer */}
-        <div className="flex justify-end space-x-3 px-6 py-4 bg-gray-50 border-t">
-          <Button type="button" variant="outline" onClick={onCancel} className="h-10">
+        <div className="flex justify-end space-x-2 p-3 bg-gray-50 border-t flex-shrink-0">
+          <Button type="button" variant="outline" onClick={onCancel} className="h-8 text-sm">
             Cancel
           </Button>
           <Button 
             type="submit" 
             disabled={isLoading || !formData.title}
-            className="bg-blue-600 hover:bg-blue-700 h-10"
+            className="bg-blue-600 hover:bg-blue-700 h-8 text-sm"
           >
-            <Save className="h-4 w-4 mr-2" />
+            <Save className="h-3 w-3 mr-1" />
             {isLoading ? 'Saving...' : 'Save Procedure'}
           </Button>
         </div>
