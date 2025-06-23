@@ -75,59 +75,60 @@ export const locationsApi = {
   },
 
   async getLocationStats(locationId: string): Promise<LocationStats> {
-    // Simplified approach - execute queries individually with explicit typing
-    let assetCount = 0;
-    let meterCount = 0;
-    let workOrderCount = 0;
-    let childrenCount = 0;
+    // Use a completely different approach with raw queries to avoid type inference issues
+    const stats: LocationStats = {
+      asset_count: 0,
+      meter_count: 0,
+      work_order_count: 0,
+      child_location_count: 0,
+    };
 
-    try {
-      const assetsResponse = await supabase
-        .from("assets")
-        .select("id", { count: 'exact' })
-        .eq("location_id", locationId);
-      assetCount = assetsResponse.count || 0;
-    } catch (error) {
-      console.error('Error fetching asset count:', error);
+    // Get asset count with manual count
+    const assetsQuery = supabase
+      .from("assets")
+      .select("id")
+      .eq("location_id", locationId);
+    
+    const assetsResult = await assetsQuery;
+    if (assetsResult.data) {
+      stats.asset_count = assetsResult.data.length;
     }
 
-    try {
-      const metersResponse = await supabase
-        .from("meters")
-        .select("id", { count: 'exact' })
-        .eq("location_id", locationId);
-      meterCount = metersResponse.count || 0;
-    } catch (error) {
-      console.error('Error fetching meter count:', error);
+    // Get meter count with manual count
+    const metersQuery = supabase
+      .from("meters")
+      .select("id")
+      .eq("location_id", locationId);
+    
+    const metersResult = await metersQuery;
+    if (metersResult.data) {
+      stats.meter_count = metersResult.data.length;
     }
 
-    try {
-      const workOrdersResponse = await supabase
-        .from("work_orders")
-        .select("id", { count: 'exact' })
-        .eq("location_id", locationId);
-      workOrderCount = workOrdersResponse.count || 0;
-    } catch (error) {
-      console.error('Error fetching work order count:', error);
+    // Get work order count with manual count
+    const workOrdersQuery = supabase
+      .from("work_orders")
+      .select("id")
+      .eq("location_id", locationId);
+    
+    const workOrdersResult = await workOrdersQuery;
+    if (workOrdersResult.data) {
+      stats.work_order_count = workOrdersResult.data.length;
     }
 
-    try {
-      const childrenResponse = await supabase
-        .from("locations")
-        .select("id", { count: 'exact' })
-        .eq("parent_id", locationId)
-        .eq("is_active", true);
-      childrenCount = childrenResponse.count || 0;
-    } catch (error) {
-      console.error('Error fetching children count:', error);
+    // Get children count with manual count
+    const childrenQuery = supabase
+      .from("locations")
+      .select("id")
+      .eq("parent_id", locationId)
+      .eq("is_active", true);
+    
+    const childrenResult = await childrenQuery;
+    if (childrenResult.data) {
+      stats.child_location_count = childrenResult.data.length;
     }
     
-    return {
-      asset_count: assetCount,
-      meter_count: meterCount,
-      work_order_count: workOrderCount,
-      child_location_count: childrenCount,
-    };
+    return stats;
   },
 
   async searchLocations(query: string): Promise<LocationRow[]> {
