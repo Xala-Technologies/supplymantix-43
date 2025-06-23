@@ -116,7 +116,7 @@ export const inventoryEnhancedApi = {
       }
     }
 
-    console.log('Processed and filtered search results:', filteredItems);
+    console.log('Final filtered search results:', filteredItems);
 
     return {
       items: filteredItems,

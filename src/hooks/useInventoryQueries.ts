@@ -17,18 +17,19 @@ export const useInventoryEnhanced = (params?: {
     queryFn: async () => {
       console.log('useInventoryEnhanced query executing with params:', params);
       
-      // If no search params are provided, get all items
-      const result = params && Object.keys(params).length > 0 
-        ? await inventoryEnhancedApi.searchInventory(params)
-        : await inventoryEnhancedApi.searchInventory({});
-        
-      console.log('useInventoryEnhanced query result:', result);
-      console.log('Number of items returned:', result.items?.length || 0);
-      return result;
+      try {
+        // Always use searchInventory which handles all cases properly
+        const result = await inventoryEnhancedApi.searchInventory(params || {});
+        console.log('useInventoryEnhanced query success:', result);
+        return result;
+      } catch (error) {
+        console.error('useInventoryEnhanced query error:', error);
+        throw error;
+      }
     },
-    retry: 2,
-    staleTime: 1000 * 60 * 2, // 2 minutes
-    refetchOnWindowFocus: true,
+    retry: 1,
+    staleTime: 1000 * 30, // 30 seconds
+    refetchOnWindowFocus: false,
     refetchOnMount: true,
   });
 };
@@ -37,7 +38,18 @@ export const useInventoryEnhanced = (params?: {
 export const useLowStockAlerts = () => {
   return useQuery({
     queryKey: ["low-stock-alerts"],
-    queryFn: inventoryEnhancedApi.getLowStockAlerts,
-    staleTime: 1000 * 60 * 5, // 5 minutes
+    queryFn: async () => {
+      console.log('Fetching low stock alerts...');
+      try {
+        const result = await inventoryEnhancedApi.getLowStockAlerts();
+        console.log('Low stock alerts result:', result);
+        return result;
+      } catch (error) {
+        console.error('Low stock alerts error:', error);
+        throw error;
+      }
+    },
+    staleTime: 1000 * 60 * 2, // 2 minutes
+    retry: 1,
   });
 };

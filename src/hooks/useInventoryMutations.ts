@@ -42,12 +42,13 @@ export const useCreateInventoryItem = () => {
     onSuccess: (data) => {
       console.log('useCreateInventoryItem: Item created successfully:', data);
       
-      // Invalidate all related queries to force refresh
+      // Force invalidate and refetch all inventory-related queries
       queryClient.invalidateQueries({ queryKey: ["inventory-enhanced"] });
       queryClient.invalidateQueries({ queryKey: ["low-stock-alerts"] });
       
-      // Also refetch the queries immediately
+      // Also force refetch
       queryClient.refetchQueries({ queryKey: ["inventory-enhanced"] });
+      queryClient.refetchQueries({ queryKey: ["low-stock-alerts"] });
       
       // Show success message
       toast.success(`Inventory item "${data.name}" created successfully`);
@@ -84,9 +85,11 @@ export const useUpdateInventoryItem = () => {
     onSuccess: (data) => {
       console.log('useUpdateInventoryItem: Item updated successfully:', data);
       
-      // Invalidate and refetch queries
+      // Force invalidate and refetch queries
       queryClient.invalidateQueries({ queryKey: ["inventory-enhanced"] });
       queryClient.invalidateQueries({ queryKey: ["low-stock-alerts"] });
+      queryClient.refetchQueries({ queryKey: ["inventory-enhanced"] });
+      queryClient.refetchQueries({ queryKey: ["low-stock-alerts"] });
       
       toast.success("Inventory item updated successfully");
     },
@@ -110,9 +113,11 @@ export const useDeleteInventoryItem = () => {
     onSuccess: () => {
       console.log('useDeleteInventoryItem: Item deleted successfully');
       
-      // Invalidate and refetch queries
+      // Force invalidate and refetch queries
       queryClient.invalidateQueries({ queryKey: ["inventory-enhanced"] });
       queryClient.invalidateQueries({ queryKey: ["low-stock-alerts"] });
+      queryClient.refetchQueries({ queryKey: ["inventory-enhanced"] });
+      queryClient.refetchQueries({ queryKey: ["low-stock-alerts"] });
       
       toast.success("Inventory item deleted successfully");
     },
