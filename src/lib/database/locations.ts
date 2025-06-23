@@ -74,7 +74,6 @@ export const locationsApi = {
   },
 
   async getLocationStats(locationId: string): Promise<LocationStats> {
-    // Use a completely type-safe approach that avoids Supabase's complex type inference
     const stats: LocationStats = {
       asset_count: 0,
       meter_count: 0,
@@ -83,10 +82,10 @@ export const locationsApi = {
     };
 
     try {
-      // Use Promise.all with explicit any types to bypass TypeScript inference
+      // Use Promise.all with proper field names
       const [assetsResult, metersResult, workOrdersResult, childrenResult] = await Promise.all([
-        (supabase as any).from("assets").select("id", { count: 'exact', head: true }).eq("location_id", locationId),
-        (supabase as any).from("meters").select("id", { count: 'exact', head: true }).eq("location_id", locationId),
+        (supabase as any).from("assets").select("id", { count: 'exact', head: true }).eq("location", locationId),
+        (supabase as any).from("meters").select("id", { count: 'exact', head: true }).eq("location", locationId),
         (supabase as any).from("work_orders").select("id", { count: 'exact', head: true }).eq("location_id", locationId),
         (supabase as any).from("locations").select("id", { count: 'exact', head: true }).eq("parent_id", locationId).eq("is_active", true)
       ]);

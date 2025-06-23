@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/integrations/supabase/types";
 
@@ -98,11 +97,11 @@ export const assetsApi = {
     }
   },
 
-  async getAssetsByLocation(location: string) {
+  async getAssetsByLocation(locationId: string) {
     const { data, error } = await supabase
       .from("assets")
       .select("*")
-      .eq("location", location)
+      .eq("location", locationId) // Note: using location field as string for now
       .order("name", { ascending: true });
     
     if (error) {
