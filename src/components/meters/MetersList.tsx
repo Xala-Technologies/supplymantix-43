@@ -1,4 +1,3 @@
-
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -84,10 +83,10 @@ export const MetersList = ({ meters, isLoading, onMeterClick }: MetersListProps)
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'active': return 'bg-green-50 text-green-700 border-green-200';
-      case 'warning': return 'bg-yellow-50 text-yellow-700 border-yellow-200';
+      case 'active': return 'bg-emerald-50 text-emerald-700 border-emerald-200';
+      case 'warning': return 'bg-amber-50 text-amber-700 border-amber-200';
       case 'critical': return 'bg-red-50 text-red-700 border-red-200';
-      default: return 'bg-gray-50 text-gray-700 border-gray-200';
+      default: return 'bg-slate-50 text-slate-700 border-slate-200';
     }
   };
 
@@ -107,6 +106,13 @@ export const MetersList = ({ meters, isLoading, onMeterClick }: MetersListProps)
     return Math.max(0, Math.min(100, progress));
   };
 
+  const handleMeterClick = (meter: Meter, event: React.MouseEvent) => {
+    event.preventDefault();
+    event.stopPropagation();
+    console.log('Meter clicked:', meter);
+    onMeterClick(meter);
+  };
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       {meters.map((meter) => {
@@ -114,20 +120,19 @@ export const MetersList = ({ meters, isLoading, onMeterClick }: MetersListProps)
         return (
           <Card 
             key={meter.id} 
-            className="hover:shadow-md transition-shadow cursor-pointer group"
-            onClick={() => onMeterClick(meter)}
+            className="group hover:shadow-lg transition-all duration-200 border-slate-200 hover:border-slate-300 bg-white"
           >
-            <CardHeader className="pb-3">
+            <CardHeader className="pb-4">
               <div className="flex items-start justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 bg-blue-100 rounded flex items-center justify-center">
-                    <BarChart3 className="h-4 w-4 text-blue-600" />
+                  <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center shadow-sm">
+                    <BarChart3 className="h-5 w-5 text-white" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-gray-900 group-hover:text-blue-600 transition-colors">
+                    <h3 className="font-semibold text-slate-900 group-hover:text-blue-600 transition-colors">
                       {meter.name}
                     </h3>
-                    <p className="text-sm text-gray-500 capitalize">
+                    <p className="text-sm text-slate-500 capitalize">
                       {meter.type} meter
                     </p>
                   </div>
@@ -141,11 +146,11 @@ export const MetersList = ({ meters, isLoading, onMeterClick }: MetersListProps)
             
             <CardContent className="space-y-4">
               {/* Current Value */}
-              <div className="text-center p-4 bg-gray-50 rounded-lg">
-                <div className="text-2xl font-bold text-gray-900">
+              <div className="text-center p-4 bg-slate-50 rounded-xl border">
+                <div className="text-3xl font-bold text-slate-900">
                   {meter.current_value.toLocaleString()}
                 </div>
-                <div className="text-sm font-medium text-gray-600 uppercase">
+                <div className="text-sm font-medium text-slate-600 uppercase tracking-wide">
                   {meter.unit}
                 </div>
               </div>
@@ -153,12 +158,12 @@ export const MetersList = ({ meters, isLoading, onMeterClick }: MetersListProps)
               {/* Progress Bar */}
               {progress !== null && (
                 <div className="space-y-2">
-                  <div className="flex justify-between text-xs text-gray-600">
+                  <div className="flex justify-between text-xs text-slate-600">
                     <span>Target Progress</span>
                     <span>{Math.round(progress)}%</span>
                   </div>
                   <Progress value={progress} className="h-2" />
-                  <div className="flex justify-between text-xs text-gray-500">
+                  <div className="flex justify-between text-xs text-slate-500">
                     <span>{meter.target_min?.toLocaleString()}</span>
                     <span>{meter.target_max?.toLocaleString()}</span>
                   </div>
@@ -166,37 +171,34 @@ export const MetersList = ({ meters, isLoading, onMeterClick }: MetersListProps)
               )}
 
               {/* Asset & Location */}
-              <div className="space-y-1">
+              <div className="space-y-2">
                 {meter.asset_name && (
-                  <div className="flex items-center gap-2 text-sm text-gray-600">
-                    <Factory className="h-3 w-3" />
+                  <div className="flex items-center gap-2 text-sm text-slate-600">
+                    <Factory className="h-4 w-4 text-slate-400" />
                     <span className="truncate">{meter.asset_name}</span>
                   </div>
                 )}
                 {meter.location && (
-                  <div className="flex items-center gap-2 text-sm text-gray-600">
-                    <MapPin className="h-3 w-3" />
+                  <div className="flex items-center gap-2 text-sm text-slate-600">
+                    <MapPin className="h-4 w-4 text-slate-400" />
                     <span className="truncate">{meter.location}</span>
                   </div>
                 )}
               </div>
 
               {/* Footer */}
-              <div className="flex items-center justify-between pt-3 border-t">
-                <div className="flex items-center gap-1 text-xs text-gray-500">
+              <div className="flex items-center justify-between pt-4 border-t border-slate-100">
+                <div className="flex items-center gap-2 text-xs text-slate-500">
                   <Clock className="h-3 w-3" />
                   <span>{new Date(meter.last_reading).toLocaleDateString()}</span>
                 </div>
                 <Button 
                   variant="ghost" 
                   size="sm" 
-                  className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onMeterClick(meter);
-                  }}
+                  className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 font-medium"
+                  onClick={(e) => handleMeterClick(meter, e)}
                 >
-                  <Eye className="h-3 w-3 mr-1" />
+                  <Eye className="h-4 w-4 mr-1" />
                   View
                 </Button>
               </div>

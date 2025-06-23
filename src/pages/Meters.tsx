@@ -27,10 +27,20 @@ const Meters = () => {
     return matchesSearch && matchesType && matchesStatus;
   }) || [];
 
+  const handleMeterClick = (meter: any) => {
+    console.log('Opening meter detail dialog for:', meter);
+    setSelectedMeter(meter);
+  };
+
+  const handleCloseDialog = () => {
+    console.log('Closing meter detail dialog');
+    setSelectedMeter(null);
+  };
+
   return (
     <DashboardLayout>
-      <div className="min-h-screen bg-gray-50">
-        <div className="max-w-7xl mx-auto p-6 space-y-6">
+      <div className="min-h-screen bg-slate-50">
+        <div className="max-w-7xl mx-auto p-6 space-y-8">
           <MetersHeader
             onCreateMeter={() => setIsFormOpen(true)}
             searchQuery={searchQuery}
@@ -53,7 +63,7 @@ const Meters = () => {
           <MetersList
             meters={filteredMeters}
             isLoading={isLoading}
-            onMeterClick={setSelectedMeter}
+            onMeterClick={handleMeterClick}
           />
 
           {isFormOpen && (
@@ -63,7 +73,7 @@ const Meters = () => {
           {selectedMeter && (
             <MeterDetailDialog
               meter={selectedMeter}
-              onClose={() => setSelectedMeter(null)}
+              onClose={handleCloseDialog}
             />
           )}
         </div>
