@@ -24,8 +24,12 @@ export function AppSidebar() {
       `}>
         <AppSidebarHeader />
       </SidebarHeader>
-      <ScrollArea ref={scrollAreaRef} className="flex-1">
-        <SidebarContent className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-200 scrollbar-track-transparent">
+      <ScrollArea 
+        ref={scrollAreaRef} 
+        className="flex-1"
+        style={{ scrollBehavior: 'auto' }}
+      >
+        <SidebarContent className="flex-1 overflow-visible">
           <SidebarNavigation />
         </SidebarContent>
       </ScrollArea>
