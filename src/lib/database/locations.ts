@@ -160,49 +160,35 @@ export const locationsApi = {
       return [];
     }
 
-    // Create map of all locations first
-    const locationMap = new Map<string, LocationRow>();
-    locations.forEach(loc => locationMap.set(loc.id, loc));
+    const result: LocationHierarchy[] = [];
+    const locationMap = new Map();
     
-    const rootNodes: LocationHierarchy[] = [];
+    // First pass: create all location objects
+    locations.forEach(location => {
+      locationMap.set(location.id, {
+        ...location,
+        children: [],
+        level: 0,
+        path: []
+      });
+    });
     
-    // Build hierarchy by processing each location
-    const processLocation = (location: LocationRow, level: number = 0, parentPath: string[] = []): LocationHierarchy => {
-      const children: LocationHierarchy[] = [];
-      const currentPath = [...parentPath, location.name];
+    // Second pass: build hierarchy
+    locations.forEach(location => {
+      const node = locationMap.get(location.id);
       
-      // Find and process children
-      const childLocations = locations.filter(loc => loc.parent_id === location.id);
-      for (const child of childLocations) {
-        children.push(processLocation(child, level + 1, currentPath));
+      if (location.parent_id && locationMap.has(location.parent_id)) {
+        const parent = locationMap.get(location.parent_id);
+        node.level = parent.level + 1;
+        node.path = [...parent.path, parent.name];
+        parent.children.push(node);
+      } else {
+        // Root node
+        node.path = [];
+        result.push(node);
       }
-      
-      return {
-        id: location.id,
-        name: location.name,
-        description: location.description,
-        tenant_id: location.tenant_id,
-        parent_id: location.parent_id,
-        location_code: location.location_code,
-        location_type: location.location_type,
-        address: location.address,
-        coordinates: location.coordinates,
-        is_active: location.is_active,
-        metadata: location.metadata,
-        created_at: location.created_at,
-        updated_at: location.updated_at,
-        children,
-        level,
-        path: currentPath
-      };
-    };
+    });
     
-    // Find root locations (no parent) and process them
-    const rootLocations = locations.filter(loc => !loc.parent_id);
-    for (const rootLocation of rootLocations) {
-      rootNodes.push(processLocation(rootLocation));
-    }
-    
-    return rootNodes;
+    return result;
   },
 };
