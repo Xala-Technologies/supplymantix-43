@@ -1,12 +1,23 @@
 
 import React from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { MapPin, Building2 } from "lucide-react";
+import { Separator } from "@/components/ui/separator";
+import { 
+  Building2, 
+  MapPin, 
+  Calendar, 
+  Edit, 
+  Trash2,
+  FileText,
+  Users,
+  Settings
+} from "lucide-react";
+import type { Location } from "@/types/location";
 
 interface LocationDetailDialogProps {
-  location: any;
+  location: Location;
   onClose: () => void;
 }
 
@@ -15,63 +26,109 @@ export const LocationDetailDialog = ({ location, onClose }: LocationDetailDialog
     <Dialog open onOpenChange={onClose}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-3">
-            <Building2 className="h-6 w-6 text-blue-600" />
+          <DialogTitle className="flex items-center gap-2">
+            <Building2 className="h-5 w-5" />
             {location.name}
-            <Badge variant="secondary">Location</Badge>
           </DialogTitle>
         </DialogHeader>
 
-        <Tabs defaultValue="overview" className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="assets">Assets</TabsTrigger>
-            <TabsTrigger value="activity">Activity</TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="overview" className="space-y-4">
-            <div className="grid grid-cols-3 gap-4">
-              <div className="text-center p-4 bg-gray-50 rounded-lg">
-                <div className="text-2xl font-bold text-blue-600">{location.assets_count || 0}</div>
-                <div className="text-sm text-muted-foreground">Total Assets</div>
-              </div>
-              <div className="text-center p-4 bg-gray-50 rounded-lg">
-                <div className="text-2xl font-bold text-green-600">5</div>
-                <div className="text-sm text-muted-foreground">Active Work Orders</div>
-              </div>
-              <div className="text-center p-4 bg-gray-50 rounded-lg">
-                <div className="text-2xl font-bold text-purple-600">12</div>
-                <div className="text-sm text-muted-foreground">Team Members</div>
-              </div>
+        <div className="space-y-6">
+          {/* Status and Actions */}
+          <div className="flex items-center justify-between">
+            <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+              Active
+            </Badge>
+            <div className="flex gap-2">
+              <Button variant="outline" size="sm">
+                <Edit className="h-4 w-4 mr-2" />
+                Edit
+              </Button>
+              <Button variant="outline" size="sm">
+                <Trash2 className="h-4 w-4 mr-2" />
+                Delete
+              </Button>
             </div>
+          </div>
 
-            <div>
-              <h3 className="font-medium mb-3">Location Details</h3>
-              <div className="space-y-2 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Description:</span>
-                  <span>{location.description || "No description"}</span>
+          <Separator />
+
+          {/* Basic Information */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-4">
+              <div>
+                <label className="text-sm font-medium text-gray-500">Location Name</label>
+                <p className="text-base text-gray-900 mt-1">{location.name}</p>
+              </div>
+              
+              {location.description && (
+                <div>
+                  <label className="text-sm font-medium text-gray-500">Description</label>
+                  <p className="text-base text-gray-900 mt-1">{location.description}</p>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Created:</span>
-                  <span>{new Date(location.created_at).toLocaleDateString()}</span>
+              )}
+
+              <div>
+                <label className="text-sm font-medium text-gray-500">Created Date</label>
+                <p className="text-base text-gray-900 mt-1 flex items-center gap-2">
+                  <Calendar className="h-4 w-4" />
+                  {new Date(location.created_at).toLocaleDateString()}
+                </p>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <div className="p-4 bg-gray-50 rounded-lg">
+                <h4 className="font-medium text-gray-900 mb-3 flex items-center gap-2">
+                  <Settings className="h-4 w-4" />
+                  Quick Stats
+                </h4>
+                <div className="space-y-2 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Assets:</span>
+                    <span className="font-medium">0</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Work Orders:</span>
+                    <span className="font-medium">0</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Meters:</span>
+                    <span className="font-medium">0</span>
+                  </div>
                 </div>
               </div>
             </div>
-          </TabsContent>
+          </div>
 
-          <TabsContent value="assets">
-            <div className="text-center py-8 text-muted-foreground">
-              Assets information will be displayed here
-            </div>
-          </TabsContent>
+          <Separator />
 
-          <TabsContent value="activity">
-            <div className="text-center py-8 text-muted-foreground">
-              Recent activity will be displayed here
+          {/* Related Information Tabs */}
+          <div className="space-y-4">
+            <div className="border-b border-gray-200">
+              <nav className="flex space-x-8">
+                <button className="border-b-2 border-blue-500 text-blue-600 pb-2 text-sm font-medium">
+                  Assets
+                </button>
+                <button className="text-gray-500 hover:text-gray-700 pb-2 text-sm font-medium">
+                  Work Orders
+                </button>
+                <button className="text-gray-500 hover:text-gray-700 pb-2 text-sm font-medium">
+                  Meters
+                </button>
+              </nav>
             </div>
-          </TabsContent>
-        </Tabs>
+
+            <div className="p-6 border border-gray-200 rounded-lg bg-gray-50">
+              <div className="text-center">
+                <FileText className="h-8 w-8 text-gray-400 mx-auto mb-2" />
+                <p className="text-gray-500">No assets found for this location</p>
+                <Button variant="link" className="mt-2">
+                  Add Asset to Location
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
       </DialogContent>
     </Dialog>
   );

@@ -1,12 +1,13 @@
 
+import React from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Plus, Search, MapPin, Building } from "lucide-react";
+import { Plus, Search, MapPin, Filter } from "lucide-react";
 
 interface LocationsHeaderProps {
   onCreateLocation: () => void;
   searchQuery: string;
-  onSearchChange: (value: string) => void;
+  onSearchChange: (query: string) => void;
 }
 
 export const LocationsHeader = ({
@@ -15,33 +16,28 @@ export const LocationsHeader = ({
   onSearchChange,
 }: LocationsHeaderProps) => {
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
+    <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
+      <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
-              <MapPin className="h-5 w-5 text-white" />
-            </div>
-            Locations & Facilities
+          <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+            <MapPin className="h-6 w-6 text-blue-600" />
+            Locations
           </h1>
-          <p className="text-muted-foreground">
-            Organize and manage your facility locations
+          <p className="text-gray-600 mt-1">
+            Manage your facility locations and organizational structure
           </p>
         </div>
+        
         <div className="flex items-center gap-3">
-          <Button variant="outline" className="gap-2">
-            <Building className="h-4 w-4" />
-            Floor Plans
-          </Button>
-          <Button onClick={onCreateLocation} className="bg-blue-600 hover:bg-blue-700 gap-2">
-            <Plus className="h-4 w-4" />
+          <Button onClick={onCreateLocation} className="bg-blue-600 hover:bg-blue-700">
+            <Plus className="h-4 w-4 mr-2" />
             Add Location
           </Button>
         </div>
       </div>
 
-      <div className="flex items-center space-x-4">
-        <div className="relative flex-1 max-w-sm">
+      <div className="mt-6 flex flex-col sm:flex-row gap-4">
+        <div className="relative flex-1 max-w-md">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
           <Input
             placeholder="Search locations..."
@@ -49,6 +45,13 @@ export const LocationsHeader = ({
             onChange={(e) => onSearchChange(e.target.value)}
             className="pl-10"
           />
+        </div>
+        
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm">
+            <Filter className="h-4 w-4 mr-2" />
+            Filter
+          </Button>
         </div>
       </div>
     </div>
