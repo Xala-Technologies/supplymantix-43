@@ -368,7 +368,7 @@ const Procedures = () => {
 
       {/* Execution Dialog */}
       <Dialog open={showExecutionDialog} onOpenChange={setShowExecutionDialog}>
-        <DialogContent className="max-w-4xl h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-3xl h-[85vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Execute Procedure</DialogTitle>
           </DialogHeader>
