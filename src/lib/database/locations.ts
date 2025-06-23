@@ -161,11 +161,12 @@ export const locationsApi = {
     }
 
     const result: LocationHierarchy[] = [];
-    const locationMap = new Map<string, LocationHierarchy>();
+    const locationMap = new Map<string, any>();
     
     // First pass: create all location objects with simple assignment
-    for (const location of locations) {
-      const hierarchyNode: LocationHierarchy = {
+    for (let i = 0; i < locations.length; i++) {
+      const location = locations[i] as LocationRow;
+      const hierarchyNode = {
         id: location.id,
         name: location.name,
         description: location.description,
@@ -179,31 +180,32 @@ export const locationsApi = {
         metadata: location.metadata,
         created_at: location.created_at,
         updated_at: location.updated_at,
-        children: [],
+        children: [] as LocationHierarchy[],
         level: 0,
-        path: []
-      };
+        path: [] as string[]
+      } as LocationHierarchy;
       locationMap.set(location.id, hierarchyNode);
     }
     
-    // Second pass: build hierarchy with simple for-of loop
-    for (const location of locations) {
-      const node = locationMap.get(location.id);
+    // Second pass: build hierarchy with simple for loop
+    for (let i = 0; i < locations.length; i++) {
+      const location = locations[i] as LocationRow;
+      const node = locationMap.get(location.id) as LocationHierarchy;
       if (!node) continue;
       
       if (location.parent_id && locationMap.has(location.parent_id)) {
-        const parent = locationMap.get(location.parent_id);
+        const parent = locationMap.get(location.parent_id) as LocationHierarchy;
         if (parent) {
           node.level = parent.level + 1;
           node.path = [...parent.path, parent.name];
           if (!parent.children) {
-            parent.children = [];
+            parent.children = [] as LocationHierarchy[];
           }
           parent.children.push(node);
         }
       } else {
         // Root node
-        node.path = [];
+        node.path = [] as string[];
         result.push(node);
       }
     }
