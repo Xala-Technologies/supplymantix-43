@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -235,7 +234,9 @@ export const MeterDetailDialog = ({ meter, onClose }: MeterDetailDialogProps) =>
                   <div className="space-y-3">
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Total Readings:</span>
-                      <span className="font-medium">{meterDetail.meter_readings?.length || 0}</span>
+                      <span className="font-medium">
+                        {Array.isArray(meterDetail.meter_readings) ? meterDetail.meter_readings.length : 0}
+                      </span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Active Triggers:</span>

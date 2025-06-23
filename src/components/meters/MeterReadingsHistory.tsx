@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useMeterReadings } from "@/hooks/useMetersEnhanced";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -120,7 +119,7 @@ export const MeterReadingsHistory = ({ meterId }: MeterReadingsHistoryProps) => 
         <CardContent>
           <div className="space-y-3">
             {readings.slice(0, 10).map((reading) => {
-              // Extract user info safely
+              // Extract user info safely - handle both direct users object and nested relationship
               const userInfo = reading.users && typeof reading.users === 'object' && reading.users !== null 
                 ? reading.users as any 
                 : null;
@@ -138,7 +137,7 @@ export const MeterReadingsHistory = ({ meterId }: MeterReadingsHistoryProps) => 
                     </div>
                   </div>
                   <div className="text-right">
-                    {userInfo && 'email' in userInfo && (
+                    {userInfo && (
                       <div className="flex items-center gap-1 text-sm text-muted-foreground mb-1">
                         <User className="h-3 w-3" />
                         {userInfo.first_name && userInfo.last_name 

@@ -36,7 +36,11 @@ export const metersApi = {
         .select(`
           *,
           assets(id, name, location, asset_tag),
-          meter_triggers(*)
+          meter_triggers(*),
+          meter_readings(
+            *,
+            users(id, email, first_name, last_name)
+          )
         `)
         .eq("id", id)
         .single();
@@ -140,7 +144,8 @@ export const metersApi = {
       const { data, error } = await supabase
         .from("meter_readings")
         .select(`
-          *
+          *,
+          users(id, email, first_name, last_name)
         `)
         .eq("meter_id", meterId)
         .order("recorded_at", { ascending: false });
