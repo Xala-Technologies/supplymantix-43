@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -88,51 +87,51 @@ export const ExecutionTimeline: React.FC<ExecutionTimelineProps> = ({
     {
       id: '1',
       name: 'Safety Check & Equipment Verification',
-      status: currentStep > 0 ? 'completed' : 'active',
+      status: (currentStep > 0 ? 'completed' : 'active') as 'pending' | 'active' | 'completed' | 'skipped' | 'failed',
       startTime: currentStep > 0 ? startTime : new Date(),
       endTime: currentStep > 0 ? addMinutes(startTime, 3) : undefined,
       estimatedDuration: 180,
-      difficulty: 'easy',
+      difficulty: 'easy' as 'easy' | 'medium' | 'hard',
       criticalPath: true
     },
     {
       id: '2', 
       name: 'Component Calibration',
-      status: currentStep > 1 ? 'completed' : currentStep === 1 ? 'active' : 'pending',
+      status: (currentStep > 1 ? 'completed' : currentStep === 1 ? 'active' : 'pending') as 'pending' | 'active' | 'completed' | 'skipped' | 'failed',
       startTime: currentStep > 1 ? addMinutes(startTime, 3) : currentStep === 1 ? new Date() : undefined,
       endTime: currentStep > 1 ? addMinutes(startTime, 8) : undefined,
       estimatedDuration: 300,
-      difficulty: 'medium',
+      difficulty: 'medium' as 'easy' | 'medium' | 'hard',
       criticalPath: true
     },
     {
       id: '3',
       name: 'Performance Testing',
-      status: currentStep > 2 ? 'completed' : currentStep === 2 ? 'active' : 'pending',
+      status: (currentStep > 2 ? 'completed' : currentStep === 2 ? 'active' : 'pending') as 'pending' | 'active' | 'completed' | 'skipped' | 'failed',
       startTime: currentStep > 2 ? addMinutes(startTime, 8) : currentStep === 2 ? new Date() : undefined,
       endTime: currentStep > 2 ? addMinutes(startTime, 15) : undefined,
       estimatedDuration: 420,
-      difficulty: 'hard',
+      difficulty: 'hard' as 'easy' | 'medium' | 'hard',
       criticalPath: true
     },
     {
       id: '4',
       name: 'Quality Verification',
-      status: currentStep > 3 ? 'completed' : currentStep === 3 ? 'active' : 'pending',
+      status: (currentStep > 3 ? 'completed' : currentStep === 3 ? 'active' : 'pending') as 'pending' | 'active' | 'completed' | 'skipped' | 'failed',
       startTime: currentStep > 3 ? addMinutes(startTime, 15) : currentStep === 3 ? new Date() : undefined,
       endTime: currentStep > 3 ? addMinutes(startTime, 20) : undefined,
       estimatedDuration: 300,
-      difficulty: 'medium',
+      difficulty: 'medium' as 'easy' | 'medium' | 'hard',
       criticalPath: false
     },
     {
       id: '5',
       name: 'Documentation & Sign-off',
-      status: currentStep > 4 ? 'completed' : currentStep === 4 ? 'active' : 'pending',
+      status: (currentStep > 4 ? 'completed' : currentStep === 4 ? 'active' : 'pending') as 'pending' | 'active' | 'completed' | 'skipped' | 'failed',
       startTime: currentStep > 4 ? addMinutes(startTime, 20) : currentStep === 4 ? new Date() : undefined,
       endTime: currentStep > 4 ? addMinutes(startTime, 25) : undefined,
       estimatedDuration: 300,
-      difficulty: 'easy',
+      difficulty: 'easy' as 'easy' | 'medium' | 'hard',
       criticalPath: false
     }
   ].slice(0, totalSteps);
@@ -497,12 +496,14 @@ export const ExecutionTimeline: React.FC<ExecutionTimelineProps> = ({
         </CardContent>
       </Card>
 
-      <style jsx>{`
-        @keyframes slideRight {
-          0% { transform: translateX(-100%) skewX(-12deg); }
-          100% { transform: translateX(200%) skewX(-12deg); }
-        }
-      `}</style>
+      <style>
+        {`
+          @keyframes slideRight {
+            0% { transform: translateX(-100%) skewX(-12deg); }
+            100% { transform: translateX(200%) skewX(-12deg); }
+          }
+        `}
+      </style>
     </div>
   );
 };
