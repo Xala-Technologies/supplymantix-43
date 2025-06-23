@@ -368,8 +368,8 @@ const Procedures = () => {
 
       {/* Execution Dialog */}
       <Dialog open={showExecutionDialog} onOpenChange={setShowExecutionDialog}>
-        <DialogContent className="max-w-2xl h-[80vh] overflow-y-auto">
-          <DialogHeader>
+        <DialogContent className="max-w-3xl h-[90vh] p-0 overflow-hidden">
+          <DialogHeader className="px-4 py-3 border-b">
             <DialogTitle>Execute Procedure</DialogTitle>
           </DialogHeader>
           {selectedProcedure && (

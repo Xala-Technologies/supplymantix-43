@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { CheckCircle, AlertCircle, Clock, ArrowLeft, ArrowRight, Play } from "lucide-react";
+import { CheckCircle, AlertCircle, Clock, ArrowLeft, ArrowRight, Play, X } from "lucide-react";
 import { ProcedureField, ProcedureWithFields } from "@/lib/database/procedures-enhanced";
 import { ExecutionFieldRenderer } from "./ExecutionFieldRenderer";
 
@@ -99,133 +99,122 @@ export const ProcedureExecution: React.FC<ProcedureExecutionProps> = ({
 
   if (totalSteps === 0) {
     return (
-      <Card className="max-w-md mx-auto">
-        <CardContent className="text-center py-6">
-          <AlertCircle className="h-8 w-8 text-yellow-500 mx-auto mb-2" />
-          <h3 className="font-semibold mb-1">No Fields Configured</h3>
-          <p className="text-sm text-gray-600 mb-3">This procedure has no fields to execute.</p>
-          <Button onClick={onCancel} variant="outline" size="sm">
-            Go Back
-          </Button>
-        </CardContent>
-      </Card>
+      <div className="flex flex-col items-center justify-center py-8">
+        <AlertCircle className="h-12 w-12 text-yellow-500 mb-3" />
+        <h3 className="text-lg font-semibold mb-2">No Fields Configured</h3>
+        <p className="text-sm text-gray-600 mb-4 text-center">This procedure has no fields to execute.</p>
+        <Button onClick={onCancel} variant="outline">
+          Go Back
+        </Button>
+      </div>
     );
   }
 
   return (
-    <div className="max-w-2xl mx-auto space-y-3">
-      {/* Compact Header */}
-      <Card className="bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200">
-        <CardHeader className="pb-2">
-          <div className="flex justify-between items-start">
-            <div className="space-y-1">
-              <div className="flex items-center gap-2">
-                <Play className="h-4 w-4 text-blue-600" />
-                <CardTitle className="text-base">{procedure.title}</CardTitle>
-              </div>
-              {procedure.description && (
-                <p className="text-xs text-gray-700">{procedure.description}</p>
-              )}
-              <div className="flex items-center gap-2 pt-0.5">
-                <Badge variant="outline" className="border-blue-300 text-blue-700 text-xs px-1.5 py-0">
-                  {procedure.category}
-                </Badge>
-                <Badge variant="secondary" className="text-xs px-1.5 py-0">
-                  Step {currentStep + 1} of {totalSteps}
-                </Badge>
-              </div>
+    <div className="flex flex-col h-full">
+      {/* Header */}
+      <div className="flex-shrink-0 border-b bg-gradient-to-r from-blue-50 to-indigo-50 p-3">
+        <div className="flex justify-between items-start mb-3">
+          <div className="flex-1">
+            <div className="flex items-center gap-2 mb-1">
+              <Play className="h-4 w-4 text-blue-600" />
+              <h2 className="text-lg font-semibold text-gray-900">{procedure.title}</h2>
+            </div>
+            {procedure.description && (
+              <p className="text-sm text-gray-600 mb-2">{procedure.description}</p>
+            )}
+            <div className="flex items-center gap-2">
+              <Badge variant="outline" className="border-blue-300 text-blue-700 text-xs">
+                {procedure.category}
+              </Badge>
+              <Badge variant="secondary" className="text-xs">
+                Step {currentStep + 1} of {totalSteps}
+              </Badge>
             </div>
           </div>
           
-          <div className="mt-3">
-            <div className="flex justify-between text-xs text-gray-700 mb-1">
-              <span>Progress</span>
-              <span>{Math.round(progress)}% Complete</span>
-            </div>
-            <Progress value={progress} className="h-1.5 bg-white" />
+          <Button variant="ghost" size="sm" onClick={onCancel} className="text-gray-500 hover:text-gray-700">
+            <X className="h-4 w-4" />
+          </Button>
+        </div>
+        
+        <div>
+          <div className="flex justify-between text-xs text-gray-600 mb-1">
+            <span>Progress</span>
+            <span>{Math.round(progress)}% Complete</span>
           </div>
-        </CardHeader>
-      </Card>
+          <Progress value={progress} className="h-2" />
+        </div>
+      </div>
 
       {/* Current Field */}
-      {currentField && (
-        <ExecutionFieldRenderer
-          field={currentField}
-          value={answers[`field_${currentStep}`] || ''}
-          onChange={(value) => handleAnswerChange(`field_${currentStep}`, value)}
-          error={errors[`field_${currentStep}`]}
-          fieldId={`field_${currentStep}`}
-        />
-      )}
+      <div className="flex-1 overflow-y-auto p-4">
+        {currentField && (
+          <ExecutionFieldRenderer
+            field={currentField}
+            value={answers[`field_${currentStep}`] || ''}
+            onChange={(value) => handleAnswerChange(`field_${currentStep}`, value)}
+            error={errors[`field_${currentStep}`]}
+            fieldId={`field_${currentStep}`}
+          />
+        )}
+      </div>
 
-      {/* Compact Navigation */}
-      <Card>
-        <CardContent className="p-3">
-          <div className="flex justify-between items-center">
-            <Button
-              variant="outline"
-              onClick={currentStep === 0 ? onCancel : goToPreviousStep}
-              size="sm"
-            >
-              <ArrowLeft className="h-3 w-3 mr-1" />
-              {currentStep === 0 ? 'Cancel' : 'Previous'}
-            </Button>
+      {/* Navigation */}
+      <div className="flex-shrink-0 border-t bg-gray-50 p-3">
+        <div className="flex justify-between items-center">
+          <Button
+            variant="outline"
+            onClick={currentStep === 0 ? onCancel : goToPreviousStep}
+            size="sm"
+          >
+            <ArrowLeft className="h-4 w-4 mr-1" />
+            {currentStep === 0 ? 'Cancel' : 'Previous'}
+          </Button>
 
-            <div className="text-center">
-              <p className="text-xs text-gray-600">
-                {fields.filter(f => f.is_required).length} required fields
-              </p>
-            </div>
-
-            <Button onClick={goToNextStep} className="bg-blue-600 hover:bg-blue-700" size="sm">
-              {currentStep === totalSteps - 1 ? (
-                <>
-                  <CheckCircle className="h-3 w-3 mr-1" />
-                  Complete
-                </>
-              ) : (
-                <>
-                  Next
-                  <ArrowRight className="h-3 w-3 ml-1" />
-                </>
-              )}
-            </Button>
+          <div className="text-center">
+            <p className="text-xs text-gray-600">
+              {fields.filter(f => f.is_required).length} required fields
+            </p>
           </div>
-        </CardContent>
-      </Card>
 
-      {/* Compact Summary */}
+          <Button onClick={goToNextStep} className="bg-blue-600 hover:bg-blue-700" size="sm">
+            {currentStep === totalSteps - 1 ? (
+              <>
+                <CheckCircle className="h-4 w-4 mr-1" />
+                Complete
+              </>
+            ) : (
+              <>
+                Next
+                <ArrowRight className="h-4 w-4 ml-1" />
+              </>
+            )}
+          </Button>
+        </div>
+      </div>
+
+      {/* Progress Summary */}
       {Object.keys(answers).length > 0 && (
-        <Card>
-          <CardHeader className="pb-1">
-            <CardTitle className="text-sm flex items-center gap-2">
-              <Clock className="h-3 w-3" />
-              Current Answers
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="pt-0">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-1.5">
-              {Object.entries(answers).map(([fieldId, value]) => {
-                const fieldIndex = parseInt(fieldId.split('_')[1]);
-                const field = fields[fieldIndex];
-                if (!field || !value) return null;
-
-                return (
-                  <div key={fieldId} className="p-1.5 bg-gray-50 rounded text-xs">
-                    <div className="font-medium text-gray-700 mb-0.5">
-                      {field.label}
-                    </div>
-                    <div className="text-gray-900">
-                      {Array.isArray(value) ? value.join(', ') : 
-                       typeof value === 'object' ? value.name || JSON.stringify(value) :
-                       value.toString()}
-                    </div>
-                  </div>
-                );
-              })}
+        <div className="flex-shrink-0 border-t bg-gray-50 p-2">
+          <div className="text-center">
+            <p className="text-xs text-gray-600 mb-1">
+              <Clock className="h-3 w-3 inline mr-1" />
+              {Object.keys(answers).length} of {totalSteps} fields completed
+            </p>
+            <div className="flex justify-center space-x-1">
+              {fields.map((_, index) => (
+                <div
+                  key={index}
+                  className={`w-2 h-2 rounded-full ${
+                    answers[`field_${index}`] ? 'bg-green-500' : 
+                    index === currentStep ? 'bg-blue-500' : 'bg-gray-300'
+                  }`}
+                />
+              ))}
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       )}
     </div>
   );
