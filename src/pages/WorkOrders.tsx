@@ -4,17 +4,11 @@ import { useWorkOrdersIntegration } from "@/hooks/useWorkOrdersIntegration";
 import { EnhancedWorkOrdersList } from "@/components/work-orders/EnhancedWorkOrdersList";
 import { EnhancedWorkOrderDetail } from "@/components/work-orders/EnhancedWorkOrderDetail";
 import { EnhancedWorkOrderForm } from "@/components/work-orders/EnhancedWorkOrderForm";
-import { WorkOrdersStatsOverview } from "@/components/work-orders/WorkOrdersStatsOverview";
-import { WorkOrdersQuickActions } from "@/components/work-orders/WorkOrdersQuickActions";
 import { useState, useEffect } from "react";
-import { ChevronLeft, Plus, LayoutGrid, List, Filter, Search } from "lucide-react";
+import { ChevronLeft, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
 import { WorkOrder } from "@/types/workOrder";
 import { transformWorkOrderData } from "@/services/workOrderService";
-import { getAssetName } from "@/utils/assetUtils";
-import { cn } from "@/lib/utils";
 
 // Sample data for demonstration
 const sampleWorkOrders: WorkOrder[] = [
@@ -87,16 +81,12 @@ const sampleWorkOrders: WorkOrder[] = [
 ];
 
 type ViewMode = 'list' | 'detail' | 'form';
-type LayoutMode = 'split' | 'grid' | 'full';
 
 export default function WorkOrders() {
   const { data: workOrders, isLoading } = useWorkOrdersIntegration();
   const [selectedWorkOrder, setSelectedWorkOrder] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<ViewMode>('detail');
-  const [layoutMode, setLayoutMode] = useState<LayoutMode>('split');
   const [editingWorkOrder, setEditingWorkOrder] = useState<WorkOrder | null>(null);
-  const [globalSearch, setGlobalSearch] = useState('');
-  const [quickFilter, setQuickFilter] = useState<string>('all');
 
   // Transform and use real data if available, otherwise use sample data
   const transformedWorkOrders: WorkOrder[] = workOrders?.length > 0 
@@ -132,6 +122,7 @@ export default function WorkOrders() {
 
   const handleFormSubmit = (data: any) => {
     console.log('Form submitted:', data);
+    // Handle create/update logic here
     setViewMode(selectedWorkOrder ? 'detail' : 'list');
   };
 
@@ -140,26 +131,13 @@ export default function WorkOrders() {
     setEditingWorkOrder(null);
   };
 
-  // Filter work orders based on search and quick filter
-  const filteredWorkOrders = transformedWorkOrders.filter(wo => {
-    const matchesSearch = globalSearch === '' || 
-      wo.title.toLowerCase().includes(globalSearch.toLowerCase()) ||
-      wo.description.toLowerCase().includes(globalSearch.toLowerCase());
-    
-    const matchesQuickFilter = quickFilter === 'all' || 
-      wo.status === quickFilter ||
-      wo.priority === quickFilter;
-    
-    return matchesSearch && matchesQuickFilter;
-  });
-
   if (isLoading) {
     return (
       <DashboardLayout>
         <div className="flex items-center justify-center h-[60vh]">
           <div className="text-center space-y-3">
-            <div className="w-8 h-8 border-2 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto"></div>
-            <p className="text-gray-600 text-sm">Loading work orders...</p>
+            <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto"></div>
+            <p className="text-muted-foreground text-sm">Loading work orders...</p>
           </div>
         </div>
       </DashboardLayout>
@@ -168,184 +146,140 @@ export default function WorkOrders() {
 
   return (
     <DashboardLayout>
-      <div className="h-full flex flex-col bg-gray-50">
-        {/* Clean Header */}
-        <div className="bg-white border-b border-gray-200 px-6 py-4">
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <h1 className="text-2xl font-semibold text-gray-900">Work Orders</h1>
-              <p className="text-gray-600 text-sm mt-1">
-                Manage and track maintenance operations
-              </p>
-            </div>
-            
-            <div className="flex items-center gap-3">
-              <div className="flex items-center gap-1 bg-gray-100 rounded-lg p-1">
-                <Button
-                  variant={layoutMode === 'split' ? 'default' : 'ghost'}
-                  size="sm"
-                  onClick={() => setLayoutMode('split')}
-                  className="h-8 px-3"
-                >
-                  <List className="w-4 h-4" />
-                </Button>
-                <Button
-                  variant={layoutMode === 'grid' ? 'default' : 'ghost'}
-                  size="sm"
-                  onClick={() => setLayoutMode('grid')}
-                  className="h-8 px-3"
-                >
-                  <LayoutGrid className="w-4 h-4" />
-                </Button>
-              </div>
-              
-              <Button onClick={handleCreateWorkOrder} className="bg-blue-600 hover:bg-blue-700">
-                <Plus className="w-4 h-4 mr-2" />
-                New Work Order
-              </Button>
-            </div>
+      <div className="h-full flex w-full">
+        {/* Desktop Layout with 70/30 split */}
+        <div className="hidden lg:flex h-full w-full gap-1">
+          {/* Left Panel - 30% */}
+          <div className="w-[30%] bg-white border border-gray-200 rounded-xl shadow-sm flex flex-col overflow-hidden">
+            <EnhancedWorkOrdersList 
+              workOrders={transformedWorkOrders}
+              selectedWorkOrderId={selectedWorkOrder}
+              onSelectWorkOrder={handleSelectWorkOrder}
+              onCreateWorkOrder={handleCreateWorkOrder}
+            />
           </div>
-
-          {/* Simple Search and Filters */}
-          <div className="flex items-center gap-4">
-            <div className="relative flex-1 max-w-md">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-              <Input
-                placeholder="Search work orders..."
-                value={globalSearch}
-                onChange={(e) => setGlobalSearch(e.target.value)}
-                className="pl-10 border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+          
+          {/* Main Content Area - 70% */}
+          <div className="w-[70%] flex flex-col bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+            {viewMode === 'detail' && selectedWorkOrderData && (
+              <EnhancedWorkOrderDetail 
+                workOrder={selectedWorkOrderData}
+                onEdit={handleEditWorkOrder}
+              />
+            )}
+            
+            {viewMode === 'form' && (
+              <div className="h-full overflow-auto">
+                <div className="p-6">
+                  <div className="mb-6">
+                    <Button 
+                      variant="ghost" 
+                      onClick={handleFormCancel}
+                      className="mb-4"
+                    >
+                      <ChevronLeft className="w-4 h-4 mr-2" />
+                      Back
+                    </Button>
+                  </div>
+                  <EnhancedWorkOrderForm
+                    workOrder={editingWorkOrder || undefined}
+                    onSubmit={handleFormSubmit}
+                    onCancel={handleFormCancel}
+                  />
+                </div>
+              </div>
+            )}
+            
+            {/* Only show empty state if no work orders exist */}
+            {viewMode === 'list' && transformedWorkOrders.length === 0 && (
+              <div className="flex-1 flex items-center justify-center">
+                <div className="text-center space-y-4">
+                  <div className="w-16 h-16 bg-gradient-to-br from-blue-50 to-indigo-100 rounded-2xl flex items-center justify-center mx-auto">
+                    <span className="text-2xl">📋</span>
+                  </div>
+                  <div className="space-y-2">
+                    <h3 className="text-lg font-semibold text-gray-900">No work orders found</h3>
+                    <p className="text-sm text-gray-500">Create your first work order to get started</p>
+                  </div>
+                  <Button onClick={handleCreateWorkOrder} className="mt-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700">
+                    <Plus className="w-4 h-4 mr-2" />
+                    Create New Work Order
+                  </Button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+        
+        {/* Mobile Layout */}
+        <div className="lg:hidden h-full w-full">
+          {viewMode === 'list' && (
+            <div className="h-full bg-white rounded-xl border border-gray-200 shadow-sm">
+              <div className="p-4 border-b border-gray-100">
+                <h1 className="text-xl font-semibold text-gray-900">Work Orders</h1>
+                <p className="text-gray-600 text-sm mt-0.5">Manage and track maintenance work orders</p>
+              </div>
+              <EnhancedWorkOrdersList 
+                workOrders={transformedWorkOrders}
+                selectedWorkOrderId={selectedWorkOrder}
+                onSelectWorkOrder={handleSelectWorkOrder}
+                onCreateWorkOrder={handleCreateWorkOrder}
               />
             </div>
-            
-            <div className="flex items-center gap-2">
-              {['all', 'open', 'in_progress', 'high', 'urgent'].map((filter) => (
-                <Badge
-                  key={filter}
-                  variant={quickFilter === filter ? 'default' : 'outline'}
-                  className={cn(
-                    "cursor-pointer transition-colors",
-                    quickFilter === filter && "bg-blue-600 hover:bg-blue-700"
-                  )}
-                  onClick={() => setQuickFilter(filter)}
+          )}
+          
+          {viewMode === 'detail' && selectedWorkOrderData && (
+            <div className="h-full bg-white rounded-xl border border-gray-200 shadow-sm flex flex-col">
+              <div className="p-3 border-b border-gray-100 flex items-center gap-3">
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  onClick={() => setViewMode('list')}
+                  className="p-1.5 h-auto"
                 >
-                  {filter.replace('_', ' ')}
-                </Badge>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* Stats Overview */}
-        <div className="px-6 py-4 bg-white border-b border-gray-200">
-          <WorkOrdersStatsOverview workOrders={filteredWorkOrders} />
-        </div>
-
-        {/* Main Content Area */}
-        <div className="flex-1 px-6 py-6 overflow-hidden">
-          {layoutMode === 'split' && (
-            <div className="h-full flex gap-6">
-              {/* Left Panel - Work Orders List */}
-              <div className="w-[380px] bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
-                <EnhancedWorkOrdersList 
-                  workOrders={filteredWorkOrders}
-                  selectedWorkOrderId={selectedWorkOrder}
-                  onSelectWorkOrder={handleSelectWorkOrder}
-                  onCreateWorkOrder={handleCreateWorkOrder}
-                />
+                  <ChevronLeft className="w-4 h-4" />
+                </Button>
+                <div className="flex-1 min-w-0">
+                  <h2 className="font-semibold text-gray-900 truncate text-sm">
+                    {selectedWorkOrderData.title}
+                  </h2>
+                  <p className="text-xs text-gray-500">#{selectedWorkOrder}</p>
+                </div>
               </div>
               
-              {/* Right Panel - Detail/Form */}
-              <div className="flex-1 bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
-                {viewMode === 'detail' && selectedWorkOrderData && (
-                  <EnhancedWorkOrderDetail 
-                    workOrder={selectedWorkOrderData}
-                    onEdit={handleEditWorkOrder}
-                  />
-                )}
-                
-                {viewMode === 'form' && (
-                  <div className="h-full overflow-auto">
-                    <div className="p-6">
-                      <div className="mb-6">
-                        <Button 
-                          variant="ghost" 
-                          onClick={handleFormCancel}
-                          className="mb-4"
-                        >
-                          <ChevronLeft className="w-4 h-4 mr-2" />
-                          Back
-                        </Button>
-                      </div>
-                      <EnhancedWorkOrderForm
-                        workOrder={editingWorkOrder || undefined}
-                        onSubmit={handleFormSubmit}
-                        onCancel={handleFormCancel}
-                      />
-                    </div>
-                  </div>
-                )}
-                
-                {/* Empty State */}
-                {!selectedWorkOrderData && viewMode !== 'form' && filteredWorkOrders.length === 0 && (
-                  <div className="flex-1 flex items-center justify-center p-8">
-                    <div className="text-center space-y-4 max-w-sm">
-                      <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto">
-                        <span className="text-2xl">🔧</span>
-                      </div>
-                      <div className="space-y-2">
-                        <h3 className="text-lg font-medium text-gray-900">No Work Orders Found</h3>
-                        <p className="text-gray-600 text-sm">
-                          No work orders match your current search criteria.
-                        </p>
-                      </div>
-                      <WorkOrdersQuickActions onCreateWorkOrder={handleCreateWorkOrder} />
-                    </div>
-                  </div>
-                )}
+              <div className="flex-1 overflow-auto">
+                <EnhancedWorkOrderDetail 
+                  workOrder={selectedWorkOrderData}
+                  onEdit={handleEditWorkOrder}
+                />
               </div>
             </div>
           )}
-
-          {layoutMode === 'grid' && (
-            <div className="h-full bg-white border border-gray-200 rounded-lg shadow-sm p-6 overflow-auto">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                {filteredWorkOrders.map((workOrder) => (
-                  <div
-                    key={workOrder.id}
-                    className={cn(
-                      "p-4 rounded-lg border cursor-pointer transition-all duration-200 hover:shadow-md",
-                      selectedWorkOrder === workOrder.id 
-                        ? "bg-blue-50 border-blue-200 shadow-sm" 
-                        : "bg-white border-gray-200 hover:border-gray-300"
-                    )}
-                    onClick={() => handleSelectWorkOrder(workOrder.id)}
-                  >
-                    <div className="space-y-3">
-                      <div className="flex items-start justify-between">
-                        <h4 className="font-medium text-gray-900 line-clamp-2 text-sm">
-                          {workOrder.title}
-                        </h4>
-                        <Badge className={cn(
-                          "text-xs ml-2 flex-shrink-0",
-                          workOrder.priority === 'high' ? 'bg-red-100 text-red-700' :
-                          workOrder.priority === 'medium' ? 'bg-yellow-100 text-yellow-700' :
-                          'bg-green-100 text-green-700'
-                        )}>
-                          {workOrder.priority}
-                        </Badge>
-                      </div>
-                      
-                      <div className="space-y-2 text-xs text-gray-600">
-                        <div>#{workOrder.id.slice(-4)} • {getAssetName(workOrder.asset)}</div>
-                        <div className="flex items-center justify-between">
-                          <span className="capitalize">{workOrder.status.replace('_', ' ')}</span>
-                          <span>{workOrder.assignedTo.length} assigned</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                ))}
+          
+          {viewMode === 'form' && (
+            <div className="h-full bg-white rounded-xl border border-gray-200 shadow-sm flex flex-col">
+              <div className="p-3 border-b border-gray-100 flex items-center gap-3">
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  onClick={handleFormCancel}
+                  className="p-1.5 h-auto"
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                </Button>
+                <h2 className="font-semibold text-gray-900 text-sm">
+                  {editingWorkOrder ? 'Edit Work Order' : 'Create Work Order'}
+                </h2>
+              </div>
+              
+              <div className="flex-1 overflow-auto">
+                <div className="p-4">
+                  <EnhancedWorkOrderForm
+                    workOrder={editingWorkOrder || undefined}
+                    onSubmit={handleFormSubmit}
+                    onCancel={handleFormCancel}
+                  />
+                </div>
               </div>
             </div>
           )}
