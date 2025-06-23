@@ -1,10 +1,22 @@
-
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { inventoryEnhancedApi, type InventoryItemWithStats } from "@/lib/database/inventory-enhanced";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
-// Get current user's tenant ID (simplified for now)
-const getCurrentTenantId = () => 'default-tenant-id';
+// Get current user's tenant ID from the users table
+const getCurrentTenantId = async () => {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error('User not authenticated');
+  
+  const { data: userData, error } = await supabase
+    .from('users')
+    .select('tenant_id')
+    .eq('id', user.id)
+    .single();
+    
+  if (error) throw error;
+  return userData.tenant_id;
+};
 
 // Enhanced inventory items query
 export const useInventoryEnhanced = (params?: {
@@ -53,9 +65,10 @@ export const useCreateInventoryItem = () => {
       unit_cost?: number;
     }) => {
       console.log('Creating inventory item:', item);
+      const tenantId = await getCurrentTenantId();
       const result = await inventoryEnhancedApi.createInventoryItem({
         ...item,
-        tenant_id: getCurrentTenantId(),
+        tenant_id: tenantId,
         min_quantity: item.min_quantity || 0,
         unit_cost: item.unit_cost || 0
       });
