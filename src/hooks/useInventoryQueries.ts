@@ -16,13 +16,20 @@ export const useInventoryEnhanced = (params?: {
     queryKey: ["inventory-enhanced", params],
     queryFn: async () => {
       console.log('useInventoryEnhanced query executing with params:', params);
-      const result = await inventoryEnhancedApi.searchInventory(params || {});
+      
+      // If no search params are provided, get all items
+      const result = params && Object.keys(params).length > 0 
+        ? await inventoryEnhancedApi.searchInventory(params)
+        : await inventoryEnhancedApi.searchInventory({});
+        
       console.log('useInventoryEnhanced query result:', result);
       console.log('Number of items returned:', result.items?.length || 0);
       return result;
     },
     retry: 2,
     staleTime: 1000 * 60 * 2, // 2 minutes
+    refetchOnWindowFocus: true,
+    refetchOnMount: true,
   });
 };
 

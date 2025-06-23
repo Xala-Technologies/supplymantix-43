@@ -57,37 +57,47 @@ export const inventoryEnhancedApi = {
       .from("inventory_items")
       .select("*", { count: 'exact' });
 
+    console.log('Base query created');
+
     // Apply search filter
     if (params.search) {
+      console.log('Applying search filter:', params.search);
       query = query.or(`name.ilike.%${params.search}%,sku.ilike.%${params.search}%,description.ilike.%${params.search}%`);
     }
 
     // Apply location filter
-    if (params.location) {
+    if (params.location && params.location !== 'all') {
+      console.log('Applying location filter:', params.location);
       query = query.eq("location", params.location);
     }
 
     // Apply status filter
-    if (params.status === 'out_of_stock') {
-      query = query.eq("quantity", 0);
-    } else if (params.status === 'low_stock') {
-      query = query.not("quantity", "gt", "min_quantity");
-    } else if (params.status === 'in_stock') {
-      query = query.gt("quantity", 0);
+    if (params.status) {
+      console.log('Applying status filter:', params.status);
+      if (params.status === 'out_of_stock') {
+        query = query.eq("quantity", 0);
+      } else if (params.status === 'low_stock') {
+        query = query.not("quantity", "gt", "min_quantity");
+      } else if (params.status === 'in_stock') {
+        query = query.gt("quantity", 0);
+      }
     }
 
     // Apply sorting
     const sortBy = params.sortBy || 'name';
     const sortOrder = params.sortOrder || 'asc';
+    console.log('Applying sort:', sortBy, sortOrder);
     query = query.order(sortBy, { ascending: sortOrder === 'asc' });
 
     // Apply pagination
     if (params.limit) {
       const start = params.offset || 0;
       const end = start + params.limit - 1;
+      console.log('Applying pagination:', start, 'to', end);
       query = query.range(start, end);
     }
 
+    console.log('Executing query...');
     const { data, error, count } = await query;
     
     if (error) {
@@ -95,12 +105,16 @@ export const inventoryEnhancedApi = {
       throw error;
     }
     
+    console.log('Search query results - data:', data, 'count:', count);
+    
     const items = (data || []).map(item => ({
       ...item,
       is_low_stock: (item.quantity || 0) <= (item.min_quantity || 0),
       needs_reorder: (item.quantity || 0) <= (item.min_quantity || 0) * 1.5,
       total_value: (item.quantity || 0) * (item.unit_cost || 0),
     }));
+
+    console.log('Processed search results:', items);
 
     return {
       items,
