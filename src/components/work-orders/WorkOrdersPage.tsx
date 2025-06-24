@@ -5,7 +5,7 @@ import { WorkOrdersContent } from "./WorkOrdersContent";
 import { useWorkOrdersPage } from "@/hooks/useWorkOrdersPage";
 
 export const WorkOrdersPage = () => {
-  const { data: workOrders, isLoading, refetch } = useWorkOrdersIntegration();
+  const { data: workOrders, isLoading, refetch, error } = useWorkOrdersIntegration();
   
   const {
     selectedWorkOrder,
@@ -26,10 +26,19 @@ export const WorkOrdersPage = () => {
 
   // Enhanced form submit handler that refreshes data
   const handleFormSubmitWithRefresh = async (data: any) => {
+    console.log('Submitting work order with refresh...');
     await handleFormSubmit(data);
-    // Refetch the data to update the list
-    refetch();
+    
+    // Force refetch the data to update the list
+    console.log('Refetching work orders after submit...');
+    await refetch();
+    
+    console.log('Work order submission and refresh completed');
   };
+
+  if (error) {
+    console.error('Work orders page error:', error);
+  }
 
   if (isLoading) {
     return (

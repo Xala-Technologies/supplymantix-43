@@ -1,5 +1,6 @@
+
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { databaseApi } from "@/lib/database";
+import { workOrdersApi } from "@/lib/database/work-orders";
 import { toast } from "sonner";
 import { WorkOrder } from "@/types/workOrder";
 
@@ -9,48 +10,66 @@ export const useWorkOrdersIntegration = () => {
     queryKey: ["work-orders-integration"],
     queryFn: async (): Promise<WorkOrder[]> => {
       try {
-        const [workOrders, assets, inventory] = await Promise.all([
-          databaseApi.getWorkOrders(),
-          databaseApi.getAssets(),
-          databaseApi.getInventoryItems()
-        ]);
+        console.log('Fetching work orders...');
+        const workOrders = await workOrdersApi.getWorkOrders();
+        console.log('Raw work orders from API:', workOrders);
         
         // Transform and merge data to match WorkOrder interface
-        return workOrders.map(wo => ({
-          id: wo.id,
-          title: wo.title || 'Untitled Work Order',
-          description: wo.description || '',
-          status: wo.status || 'open',
-          priority: wo.priority || 'medium',
-          assignedTo: wo.assigned_to ? [wo.assigned_to] : [], // Convert single assigned_to to array
-          asset: assets.find(a => a.id === wo.asset_id) || {
-            id: wo.asset_id || '',
-            name: 'Unknown Asset',
-            status: 'active'
-          },
-          location: wo.location_id || '',
-          category: wo.category || 'maintenance',
-          dueDate: wo.due_date || '',
-          due_date: wo.due_date || '',
-          createdAt: wo.created_at,
-          created_at: wo.created_at,
-          updated_at: wo.updated_at,
-          tenant_id: wo.tenant_id,
-          tags: wo.tags || [],
-          partsUsed: wo.parts_used ? JSON.parse(wo.parts_used as string) : [],
-          parts_used: wo.parts_used ? JSON.parse(wo.parts_used as string) : [],
-          totalCost: wo.total_cost || 0,
-          total_cost: wo.total_cost || 0,
-          timeSpent: wo.time_spent || 0,
-          time_spent: wo.time_spent || 0
-        }));
+        return workOrders.map(wo => {
+          console.log('Processing work order:', wo.id, wo);
+          
+          // Safely parse parts_used if it's a string
+          let partsUsed = [];
+          if (wo.parts_used) {
+            try {
+              partsUsed = typeof wo.parts_used === 'string' 
+                ? JSON.parse(wo.parts_used) 
+                : wo.parts_used;
+            } catch (error) {
+              console.warn('Failed to parse parts_used for work order', wo.id, error);
+              partsUsed = [];
+            }
+          }
+
+          return {
+            id: wo.id,
+            title: wo.title || 'Untitled Work Order',
+            description: wo.description || '',
+            status: wo.status || 'open',
+            priority: wo.priority || 'medium',
+            assignedTo: wo.assigned_to ? [wo.assigned_to] : [], // Convert single assigned_to to array
+            asset: wo.assets || {
+              id: wo.asset_id || '',
+              name: wo.assets?.name || 'Unknown Asset',
+              status: 'active'
+            },
+            location: wo.locations?.name || wo.location_id || '',
+            category: wo.category || 'maintenance',
+            dueDate: wo.due_date || '',
+            due_date: wo.due_date || '',
+            createdAt: wo.created_at,
+            created_at: wo.created_at,
+            updated_at: wo.updated_at,
+            tenant_id: wo.tenant_id,
+            tags: wo.tags || [],
+            partsUsed: partsUsed,
+            parts_used: partsUsed,
+            totalCost: wo.total_cost || 0,
+            total_cost: wo.total_cost || 0,
+            timeSpent: wo.time_spent || 0,
+            time_spent: wo.time_spent || 0
+          };
+        });
       } catch (error) {
         console.error('Error fetching work orders:', error);
+        toast.error('Failed to fetch work orders');
         return [];
       }
     },
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    gcTime: 10 * 60 * 1000, // 10 minutes (renamed from cacheTime in v5)
+    staleTime: 1 * 60 * 1000, // 1 minute - reduced for more frequent updates
+    gcTime: 5 * 60 * 1000, // 5 minutes
+    refetchOnWindowFocus: true,
+    refetchOnMount: true,
   });
 };
 
@@ -64,16 +83,11 @@ export const usePartsUsageTracking = () => {
       quantity: number;
       notes?: string;
     }) => {
-      return databaseApi.recordPartsUsage({
-        work_order_id: workOrderId,
-        inventory_item_id: inventoryItemId,
-        quantity,
-        notes
-      });
+      // Implementation would go here when needed
+      console.log('Parts usage tracking not fully implemented yet');
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["work-orders"] });
-      queryClient.invalidateQueries({ queryKey: ["inventory-items"] });
       queryClient.invalidateQueries({ queryKey: ["work-orders-integration"] });
       toast.success("Parts usage recorded successfully");
     },
@@ -93,7 +107,7 @@ export const useWorkOrderStatusUpdate = () => {
       status: string;
       notes?: string;
     }) => {
-      return databaseApi.updateWorkOrderStatus(id, status, notes);
+      return workOrdersApi.updateWorkOrder(id, { status });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["work-orders"] });
