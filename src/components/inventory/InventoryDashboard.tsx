@@ -21,7 +21,7 @@ const mapInventoryItem = (item: InventoryItemWithStats) => ({
   unitCost: item.unit_cost || 0,
   totalValue: item.total_value || 0,
   location: item.location || '',
-  category: item.category || '',
+  category: item.location || 'General', // Use location as category fallback since category doesn't exist in DB
   status: item.is_low_stock ? 'low_stock' : item.quantity === 0 ? 'out_of_stock' : 'in_stock'
 });
 
@@ -195,6 +195,12 @@ export const InventoryDashboard = () => {
             reorderPoint: selectedItem.minQuantity,
             maxStock: selectedItem.minQuantity * 3,
             transactions: []
+          }}
+          onClose={() => setSelectedItem(null)}
+          onEdit={() => {
+            setEditingItem(selectedItem);
+            setSelectedItem(null);
+            setShowEditForm(true);
           }}
         />
       )}
