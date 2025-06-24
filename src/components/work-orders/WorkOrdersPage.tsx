@@ -5,7 +5,7 @@ import { WorkOrdersContent } from "./WorkOrdersContent";
 import { useWorkOrdersPage } from "@/hooks/useWorkOrdersPage";
 
 export const WorkOrdersPage = () => {
-  const { data: workOrders, isLoading } = useWorkOrdersIntegration();
+  const { data: workOrders, isLoading, refetch } = useWorkOrdersIntegration();
   
   const {
     selectedWorkOrder,
@@ -23,6 +23,13 @@ export const WorkOrdersPage = () => {
     handleFormCancel,
     setViewModeToList
   } = useWorkOrdersPage(workOrders || []);
+
+  // Enhanced form submit handler that refreshes data
+  const handleFormSubmitWithRefresh = async (data: any) => {
+    await handleFormSubmit(data);
+    // Refetch the data to update the list
+    refetch();
+  };
 
   if (isLoading) {
     return (
@@ -55,7 +62,7 @@ export const WorkOrdersPage = () => {
         editingWorkOrder={editingWorkOrder}
         onSelectWorkOrder={handleSelectWorkOrder}
         onEditWorkOrder={handleEditWorkOrder}
-        onFormSubmit={handleFormSubmit}
+        onFormSubmit={handleFormSubmitWithRefresh}
         onFormCancel={handleFormCancel}
         onSetViewModeToList={setViewModeToList}
       />

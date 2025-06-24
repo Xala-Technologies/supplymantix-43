@@ -2,6 +2,7 @@
 import { useState, useMemo } from "react";
 import { WorkOrder, WorkOrderFilters } from "@/types/workOrder";
 import { toast } from "sonner";
+import { workOrdersApi } from "@/lib/database/work-orders";
 
 export const useWorkOrdersPage = (workOrders: WorkOrder[] = []) => {
   const [selectedWorkOrder, setSelectedWorkOrder] = useState<string | null>(null);
@@ -73,12 +74,29 @@ export const useWorkOrdersPage = (workOrders: WorkOrder[] = []) => {
 
   const handleFormSubmit = async (data: any) => {
     try {
-      // Here you would typically call an API to create/update the work order
       console.log('Submitting work order:', data);
       
+      // Transform the form data to match the database schema
+      const workOrderData = {
+        title: data.title,
+        description: data.description || '',
+        status: data.status || 'open',
+        priority: data.priority || 'medium',
+        category: data.category || 'maintenance',
+        assigned_to: Array.isArray(data.assignedTo) ? data.assignedTo[0] : data.assignedTo,
+        asset_id: typeof data.asset === 'object' ? data.asset.id : data.assetId,
+        due_date: data.dueDate,
+        tags: data.tags || [],
+        location_id: data.location
+      };
+
       if (editingWorkOrder) {
+        // Update existing work order
+        await workOrdersApi.updateWorkOrder(editingWorkOrder.id, workOrderData);
         toast.success("Work order updated successfully");
       } else {
+        // Create new work order
+        await workOrdersApi.createWorkOrder(workOrderData);
         toast.success("Work order created successfully");
       }
       
@@ -86,6 +104,7 @@ export const useWorkOrdersPage = (workOrders: WorkOrder[] = []) => {
       setViewMode('list');
       setEditingWorkOrder(null);
       setSelectedWorkOrder(null);
+      
     } catch (error) {
       console.error('Error submitting work order:', error);
       toast.error("Failed to save work order");
