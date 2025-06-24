@@ -23,7 +23,7 @@ export const BasicInfoSection = ({ form, watch, setValue }: BasicInfoSectionProp
         />
         {form.formState.errors.title && (
           <p className="text-sm text-red-600 mt-1">
-            {String(form.formState.errors.title.message)}
+            {form.formState.errors.title.message as string}
           </p>
         )}
       </div>
