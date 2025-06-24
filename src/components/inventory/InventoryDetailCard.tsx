@@ -90,54 +90,57 @@ export const InventoryDetailCard = ({ item, onClose, onEdit }: InventoryDetailCa
 
   const content = (
     <div className="space-y-6 max-h-[85vh] overflow-y-auto">
-      {/* Modern Header */}
-      <div className="flex items-start justify-between pb-4">
+      {/* Clean Header */}
+      <div className="flex items-start justify-between pb-6 border-b">
         <div className="flex-1">
-          <div className="flex items-center gap-3 mb-2">
-            <h1 className="text-2xl font-bold text-gray-900">{item.name}</h1>
+          <div className="flex items-center gap-3 mb-3">
+            <h1 className="text-3xl font-bold text-gray-900">{item.name}</h1>
             <Badge className={cn("border", statusConfig.color)}>
               <statusConfig.icon className="w-3 h-3 mr-1" />
               {statusConfig.text}
             </Badge>
           </div>
-          <div className="flex items-center gap-4 text-sm text-gray-600 mb-2">
-            <span className="font-medium">SKU: {item.sku}</span>
+          <div className="flex items-center gap-4 text-gray-600 mb-2">
+            <span className="text-sm font-medium">SKU: {item.sku}</span>
             <div className="flex items-center gap-1">
               <MapPin className="w-4 h-4" />
-              <span>{item.location}</span>
+              <span className="text-sm">{item.location}</span>
             </div>
           </div>
-          <p className="text-gray-600 text-sm">{item.description}</p>
+          <p className="text-gray-600">{item.description}</p>
         </div>
         
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
           {onEdit && (
-            <Button variant="outline" size="sm" onClick={onEdit}>
+            <Button variant="outline" onClick={onEdit}>
               <Edit className="w-4 h-4 mr-2" />
-              Edit
+              Edit Item
             </Button>
           )}
-          {needsReorder && (
-            <ReorderDialog 
-              items={[currentItemForReorder]}
-              trigger={
-                <Button className="bg-orange-600 hover:bg-orange-700 text-white">
-                  <ShoppingCart className="w-4 h-4 mr-2" />
-                  Reorder
-                </Button>
-              }
-            />
-          )}
+          <ReorderDialog 
+            items={[currentItemForReorder]}
+            trigger={
+              <Button className={cn(
+                "flex items-center gap-2",
+                needsReorder 
+                  ? "bg-orange-600 hover:bg-orange-700 text-white" 
+                  : "bg-blue-600 hover:bg-blue-700 text-white"
+              )}>
+                <ShoppingCart className="w-4 h-4" />
+                {needsReorder ? "Reorder Now" : "Create Order"}
+              </Button>
+            }
+          />
         </div>
       </div>
 
-      {/* Key Metrics Cards */}
+      {/* Key Metrics */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card className="bg-blue-50 border-blue-200">
+        <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs font-medium text-blue-600 uppercase tracking-wide">Current Stock</p>
+                <p className="text-xs font-semibold text-blue-700 uppercase tracking-wide">Current Stock</p>
                 <p className="text-2xl font-bold text-blue-900">{item.quantity}</p>
               </div>
               <Package className="w-8 h-8 text-blue-600" />
@@ -145,11 +148,11 @@ export const InventoryDetailCard = ({ item, onClose, onEdit }: InventoryDetailCa
           </CardContent>
         </Card>
         
-        <Card className="bg-amber-50 border-amber-200">
+        <Card className="bg-gradient-to-br from-amber-50 to-amber-100 border-amber-200">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs font-medium text-amber-600 uppercase tracking-wide">Min Level</p>
+                <p className="text-xs font-semibold text-amber-700 uppercase tracking-wide">Min Level</p>
                 <p className="text-2xl font-bold text-amber-900">{item.minQuantity}</p>
               </div>
               <AlertTriangle className="w-8 h-8 text-amber-600" />
@@ -157,11 +160,11 @@ export const InventoryDetailCard = ({ item, onClose, onEdit }: InventoryDetailCa
           </CardContent>
         </Card>
         
-        <Card className="bg-green-50 border-green-200">
+        <Card className="bg-gradient-to-br from-green-50 to-green-100 border-green-200">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs font-medium text-green-600 uppercase tracking-wide">Unit Cost</p>
+                <p className="text-xs font-semibold text-green-700 uppercase tracking-wide">Unit Cost</p>
                 <p className="text-2xl font-bold text-green-900">{formatCurrency(item.unitCost)}</p>
               </div>
               <DollarSign className="w-8 h-8 text-green-600" />
@@ -169,11 +172,11 @@ export const InventoryDetailCard = ({ item, onClose, onEdit }: InventoryDetailCa
           </CardContent>
         </Card>
         
-        <Card className="bg-purple-50 border-purple-200">
+        <Card className="bg-gradient-to-br from-purple-50 to-purple-100 border-purple-200">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs font-medium text-purple-600 uppercase tracking-wide">Total Value</p>
+                <p className="text-xs font-semibold text-purple-700 uppercase tracking-wide">Total Value</p>
                 <p className="text-2xl font-bold text-purple-900">{formatCurrency(item.totalValue)}</p>
               </div>
               <Package className="w-8 h-8 text-purple-600" />
@@ -182,57 +185,58 @@ export const InventoryDetailCard = ({ item, onClose, onEdit }: InventoryDetailCa
         </Card>
       </div>
 
-      {/* Stock Level Progress */}
+      {/* Stock Level Indicator */}
       <Card>
         <CardContent className="p-6">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-semibold text-gray-900">Stock Level</h3>
-            <span className="text-sm text-gray-600">{item.quantity} / {item.maxStock}</span>
+            <span className="text-sm text-gray-600 font-medium">{item.quantity} / {item.maxStock}</span>
           </div>
           <div className="relative">
-            <div className="w-full bg-gray-200 rounded-full h-3">
+            <div className="w-full bg-gray-200 rounded-full h-4">
               <div 
                 className={cn(
-                  "h-3 rounded-full transition-all duration-300",
-                  stockPercentage <= 20 ? "bg-red-500" :
-                  stockPercentage <= 40 ? "bg-amber-500" : "bg-green-500"
+                  "h-4 rounded-full transition-all duration-500 ease-out",
+                  stockPercentage <= 20 ? "bg-gradient-to-r from-red-500 to-red-600" :
+                  stockPercentage <= 40 ? "bg-gradient-to-r from-amber-500 to-amber-600" : 
+                  "bg-gradient-to-r from-green-500 to-green-600"
                 )}
                 style={{ width: `${stockPercentage}%` }}
               />
             </div>
-            <div className="flex justify-between mt-2">
-              <span className="text-xs text-gray-500">0</span>
-              <span className="text-xs text-gray-500">Reorder: {item.reorderPoint}</span>
-              <span className="text-xs text-gray-500">Max: {item.maxStock}</span>
+            <div className="flex justify-between mt-2 text-xs text-gray-500">
+              <span>0</span>
+              <span>Reorder: {item.reorderPoint}</span>
+              <span>Max: {item.maxStock}</span>
             </div>
           </div>
         </CardContent>
       </Card>
 
-      {/* Details Grid */}
+      {/* Information Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <Card>
           <CardContent className="p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Item Details</h3>
-            <div className="space-y-3">
-              <div className="flex justify-between py-2">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Item Information</h3>
+            <div className="space-y-4">
+              <div className="flex justify-between items-center">
                 <span className="text-gray-600">Category</span>
-                <span className="font-medium">{item.category}</span>
+                <span className="font-medium text-gray-900">{item.category}</span>
               </div>
               <Separator />
-              <div className="flex justify-between py-2">
+              <div className="flex justify-between items-center">
                 <span className="text-gray-600">Supplier</span>
-                <span className="font-medium">{item.supplier}</span>
+                <span className="font-medium text-gray-900">{item.supplier}</span>
               </div>
               <Separator />
-              <div className="flex justify-between py-2">
+              <div className="flex justify-between items-center">
                 <span className="text-gray-600">Part Number</span>
-                <span className="font-medium">{item.partNumber}</span>
+                <span className="font-medium text-gray-900">{item.partNumber}</span>
               </div>
               <Separator />
-              <div className="flex justify-between py-2">
+              <div className="flex justify-between items-center">
                 <span className="text-gray-600">Lead Time</span>
-                <span className="font-medium">{item.leadTime}</span>
+                <span className="font-medium text-gray-900">{item.leadTime}</span>
               </div>
             </div>
           </CardContent>
@@ -250,12 +254,12 @@ export const InventoryDetailCard = ({ item, onClose, onEdit }: InventoryDetailCa
                       transaction.type === 'Usage' ? 'bg-red-500' : 'bg-green-500'
                     )} />
                     <div>
-                      <p className="text-sm font-medium">{transaction.type}</p>
+                      <p className="text-sm font-medium text-gray-900">{transaction.type}</p>
                       <p className="text-xs text-gray-500">{transaction.date}</p>
                     </div>
                   </div>
                   <span className={cn(
-                    "text-sm font-medium",
+                    "text-sm font-semibold",
                     transaction.quantity > 0 ? 'text-green-600' : 'text-red-600'
                   )}>
                     {transaction.quantity > 0 ? '+' : ''}{transaction.quantity}
@@ -263,7 +267,7 @@ export const InventoryDetailCard = ({ item, onClose, onEdit }: InventoryDetailCa
                 </div>
               ))}
               {item.transactions.length === 0 && (
-                <div className="text-center py-4">
+                <div className="text-center py-6">
                   <Calendar className="w-8 h-8 text-gray-400 mx-auto mb-2" />
                   <p className="text-sm text-gray-500">No recent activity</p>
                 </div>
@@ -273,31 +277,25 @@ export const InventoryDetailCard = ({ item, onClose, onEdit }: InventoryDetailCa
         </Card>
       </div>
 
-      {/* Reorder Alert (if needed) */}
+      {/* Smart Reorder Alert */}
       {needsReorder && (
-        <Card className="border-orange-200 bg-gradient-to-r from-orange-50 to-red-50">
+        <Card className="border-orange-200 bg-gradient-to-r from-orange-50 via-red-50 to-orange-50">
           <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center">
-                  <AlertTriangle className="w-5 h-5 text-orange-600" />
-                </div>
-                <div>
-                  <h4 className="font-semibold text-orange-900">Reorder Required</h4>
-                  <p className="text-sm text-orange-700">
-                    Stock level is below minimum threshold. Consider reordering {Math.max(0, item.maxStock - item.quantity)} units.
-                  </p>
+            <div className="flex items-start gap-4">
+              <div className="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center flex-shrink-0">
+                <AlertTriangle className="w-6 h-6 text-orange-600" />
+              </div>
+              <div className="flex-1">
+                <h4 className="font-semibold text-orange-900 text-lg mb-1">Stock Alert</h4>
+                <p className="text-orange-800 mb-3">
+                  Current stock ({item.quantity}) is at or below minimum level ({item.minQuantity}). 
+                  Consider ordering {Math.max(0, item.maxStock - item.quantity)} units to reach optimal stock.
+                </p>
+                <div className="text-sm text-orange-700">
+                  <span className="font-medium">Supplier:</span> {item.supplier} • 
+                  <span className="font-medium ml-2">Lead Time:</span> {item.leadTime}
                 </div>
               </div>
-              <ReorderDialog 
-                items={[currentItemForReorder]}
-                trigger={
-                  <Button className="bg-orange-600 hover:bg-orange-700 text-white">
-                    <ShoppingCart className="w-4 h-4 mr-2" />
-                    Create Order
-                  </Button>
-                }
-              />
             </div>
           </CardContent>
         </Card>
@@ -308,7 +306,7 @@ export const InventoryDetailCard = ({ item, onClose, onEdit }: InventoryDetailCa
   if (onClose) {
     return (
       <Dialog open={true} onOpenChange={onClose}>
-        <DialogContent className="max-w-4xl">
+        <DialogContent className="max-w-5xl">
           <DialogHeader>
             <DialogTitle>Inventory Details</DialogTitle>
           </DialogHeader>
