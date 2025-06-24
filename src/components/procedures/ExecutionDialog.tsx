@@ -7,12 +7,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { 
   Play, 
   CheckCircle,
-  Clock,
-  FileText,
-  User,
   X,
-  Target,
-  BarChart3
+  FileText
 } from "lucide-react";
 import { ProcedureExecution } from "./ProcedureExecution";
 import { ProcedureWithFields } from "@/lib/database/procedures-enhanced";
@@ -71,136 +67,92 @@ export const ExecutionDialog: React.FC<ExecutionDialogProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl w-[95vw] h-[90vh] p-0 overflow-hidden">
+      <DialogContent className="max-w-4xl w-[95vw] h-[90vh] p-0">
         {!isExecuting ? (
-          // Enhanced Start Screen
-          <div className="flex flex-col h-full bg-gradient-to-br from-blue-50 via-white to-indigo-50">
-            {/* Compact Header */}
-            <div className="flex items-center justify-between p-4 border-b bg-white/80 backdrop-blur-sm">
+          <div className="flex flex-col h-full">
+            {/* Header */}
+            <div className="flex items-center justify-between p-6 border-b">
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg">
-                  <Play className="h-6 w-6 text-white" />
+                <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
+                  <Play className="h-5 w-5 text-white" />
                 </div>
                 <div>
-                  <h2 className="font-bold text-xl text-gray-900">{procedure.title}</h2>
-                  <p className="text-sm text-gray-600">Ready to execute procedure</p>
+                  <h2 className="font-bold text-xl">{procedure.title}</h2>
+                  <p className="text-sm text-gray-600">Ready to execute</p>
                 </div>
               </div>
-              <Button variant="ghost" size="sm" onClick={handleCancel} className="hover:bg-red-50">
+              <Button variant="ghost" size="sm" onClick={handleCancel}>
                 <X className="h-4 w-4" />
               </Button>
             </div>
 
-            {/* Content - More Compact */}
-            <div className="flex-1 p-6">
-              {/* Description */}
+            {/* Content */}
+            <div className="flex-1 p-6 overflow-y-auto">
               {procedure.description && (
-                <div className="mb-6 p-4 bg-white/60 rounded-lg border border-blue-100">
+                <div className="mb-6 p-4 bg-gray-50 rounded-lg">
                   <p className="text-gray-700">{procedure.description}</p>
                 </div>
               )}
 
-              {/* Stats Cards - Horizontal Layout */}
-              <div className="grid grid-cols-4 gap-4 mb-6">
-                <Card className="border-blue-200 bg-white/70 hover:bg-white/90 transition-all duration-200">
+              {/* Stats */}
+              <div className="grid grid-cols-3 gap-4 mb-6">
+                <Card>
                   <CardContent className="p-4 text-center">
                     <CheckCircle className="h-8 w-8 text-blue-600 mx-auto mb-2" />
-                    <p className="font-bold text-2xl text-gray-900">{procedure.fields?.length || 0}</p>
+                    <p className="font-bold text-2xl">{procedure.fields?.length || 0}</p>
                     <p className="text-sm text-gray-600">Steps</p>
                   </CardContent>
                 </Card>
                 
-                <Card className="border-green-200 bg-white/70 hover:bg-white/90 transition-all duration-200">
+                <Card>
                   <CardContent className="p-4 text-center">
-                    <Clock className="h-8 w-8 text-green-600 mx-auto mb-2" />
-                    <p className="font-bold text-2xl text-gray-900">~{Math.ceil((procedure.fields?.length || 1) * 1.5)}</p>
-                    <p className="text-sm text-gray-600">Minutes</p>
-                  </CardContent>
-                </Card>
-                
-                <Card className="border-purple-200 bg-white/70 hover:bg-white/90 transition-all duration-200">
-                  <CardContent className="p-4 text-center">
-                    <BarChart3 className="h-8 w-8 text-purple-600 mx-auto mb-2" />
-                    <p className="font-bold text-2xl text-gray-900">{procedure.executions_count || 0}</p>
-                    <p className="text-sm text-gray-600">Completed</p>
+                    <FileText className="h-8 w-8 text-green-600 mx-auto mb-2" />
+                    <p className="font-bold text-2xl">{procedure.executions_count || 0}</p>
+                    <p className="text-sm text-gray-600">Runs</p>
                   </CardContent>
                 </Card>
 
-                <Card className="border-orange-200 bg-white/70 hover:bg-white/90 transition-all duration-200">
+                <Card>
                   <CardContent className="p-4 text-center">
-                    <Target className="h-8 w-8 text-orange-600 mx-auto mb-2" />
-                    <p className="font-bold text-2xl text-gray-900">95%</p>
-                    <p className="text-sm text-gray-600">Success Rate</p>
+                    <Badge className="bg-blue-100 text-blue-800 mb-2">
+                      {procedure.category || 'General'}
+                    </Badge>
+                    <p className="text-sm text-gray-600">Category</p>
                   </CardContent>
                 </Card>
               </div>
 
-              {/* Info Section */}
-              <div className="grid grid-cols-2 gap-4 mb-6">
-                <Card className="bg-white/70 border-gray-200">
-                  <CardContent className="p-4">
-                    <h4 className="font-semibold text-gray-900 mb-2">Procedure Details</h4>
-                    <div className="space-y-2">
-                      <div className="flex justify-between text-sm">
-                        <span className="text-gray-600">Category:</span>
-                        <Badge variant="secondary" className="text-xs">
-                          {procedure.category || 'General'}
-                        </Badge>
-                      </div>
-                      <div className="flex justify-between text-sm">
-                        <span className="text-gray-600">Scope:</span>
-                        <Badge variant={procedure.is_global ? "default" : "outline"} className="text-xs">
-                          {procedure.is_global ? 'Global' : 'Local'}
-                        </Badge>
-                      </div>
-                      <div className="flex justify-between text-sm">
-                        <span className="text-gray-600">Fields:</span>
-                        <div className="flex items-center gap-1">
-                          <FileText className="h-3 w-3" />
-                          <span className="text-xs">{procedure.fields?.length || 0} steps</span>
-                        </div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card className="bg-white/70 border-gray-200">
-                  <CardContent className="p-4">
-                    <h4 className="font-semibold text-gray-900 mb-2">What to Expect</h4>
-                    <ul className="text-sm text-gray-600 space-y-1">
-                      <li>• Step-by-step guided execution</li>
-                      <li>• Auto-save your progress</li>
-                      <li>• Review before submission</li>
-                      <li>• Generate completion report</li>
-                    </ul>
-                  </CardContent>
-                </Card>
-              </div>
+              {/* Info */}
+              <Card>
+                <CardContent className="p-4">
+                  <h4 className="font-medium mb-3">What to expect:</h4>
+                  <ul className="text-sm text-gray-600 space-y-1">
+                    <li>• Step-by-step execution</li>
+                    <li>• Auto-save progress</li>
+                    <li>• Review before completion</li>
+                  </ul>
+                </CardContent>
+              </Card>
             </div>
 
-            {/* Footer Actions */}
-            <div className="p-4 border-t bg-white/80 backdrop-blur-sm">
+            {/* Footer */}
+            <div className="p-6 border-t">
               <div className="flex gap-3">
-                <Button 
-                  variant="outline" 
-                  onClick={handleCancel} 
-                  className="flex-1 border-gray-300 hover:bg-gray-50"
-                >
+                <Button variant="outline" onClick={handleCancel} className="flex-1">
                   Cancel
                 </Button>
                 <Button 
                   onClick={handleStart} 
                   disabled={startExecution.isPending}
-                  className="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg"
+                  className="flex-1 bg-blue-600 hover:bg-blue-700"
                 >
                   <Play className="h-4 w-4 mr-2" />
-                  {startExecution.isPending ? 'Starting...' : 'Start Execution'}
+                  {startExecution.isPending ? 'Starting...' : 'Start'}
                 </Button>
               </div>
             </div>
           </div>
         ) : (
-          // Execution View
           <ProcedureExecution
             procedure={procedure}
             executionId={executionId}
