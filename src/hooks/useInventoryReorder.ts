@@ -1,125 +1,42 @@
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { inventoryEnhancedApi } from "@/lib/database/inventory-enhanced";
-import { purchaseOrdersApi } from "@/lib/database/purchase-orders";
 import { toast } from "sonner";
-import { getCurrentTenantId } from "./useInventoryHelpers";
+import type { InventoryItemWithStats } from "@/lib/database/inventory-enhanced";
 
-export const useCreateReorderPO = () => {
+export const useAutoReorderCheck = () => {
   const queryClient = useQueryClient();
   
   return useMutation({
-    mutationFn: async (items: Array<{
-      id: string;
-      name: string;
-      quantity: number;
-      min_quantity: number;
-      unit_cost: number;
-      reorder_quantity: number;
-    }>) => {
-      console.log('Creating reorder PO for items:', items);
+    mutationFn: async (items: InventoryItemWithStats[]) => {
+      console.log('Running auto reorder check for items:', items);
       
-      const tenantId = await getCurrentTenantId();
-      const poNumber = `AUTO-${Date.now().toString().slice(-8)}`;
+      const lowStockItems = items.filter(item => item.is_low_stock);
+      console.log('Found low stock items:', lowStockItems);
       
-      // Calculate total amount
-      const totalAmount = items.reduce((sum, item) => 
-        sum + (item.reorder_quantity * item.unit_cost), 0
-      );
+      if (lowStockItems.length === 0) {
+        toast.info("No items need reordering at this time");
+        return;
+      }
       
-      // Create purchase order
-      const purchaseOrder = await purchaseOrdersApi.createPurchaseOrder({
-        vendor: "Auto-Reorder Supplier",
-        po_number: poNumber,
-        notes: `Auto-generated reorder for ${items.length} low stock items`,
-        line_items: items.map(item => ({
-          inventory_item_id: item.id,
-          description: `${item.name} - Reorder (Current: ${item.quantity}, Min: ${item.min_quantity})`,
-          quantity: item.reorder_quantity,
-          unit_price: item.unit_cost
-        }))
+      // For now, just show a summary - in the future this could create purchase orders
+      const summary = lowStockItems.map(item => 
+        `${item.name}: ${item.quantity} remaining (min: ${item.min_quantity})`
+      ).join('\n');
+      
+      console.log('Auto reorder summary:', summary);
+      toast.success(`Found ${lowStockItems.length} items that need reordering`, {
+        description: "Review the inventory list to see which items need attention."
       });
       
-      console.log('Reorder PO created:', purchaseOrder);
-      return purchaseOrder;
+      return lowStockItems;
     },
-    onSuccess: (data, items) => {
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["inventory-enhanced"] });
-      queryClient.invalidateQueries({ queryKey: ["purchase-orders"] });
       queryClient.invalidateQueries({ queryKey: ["low-stock-alerts"] });
-      
-      toast.success(`Reorder PO ${data.po_number} created for ${items.length} items`);
     },
     onError: (error) => {
-      console.error("Failed to create reorder PO:", error);
-      toast.error("Failed to create reorder purchase order: " + (error as Error).message);
-    },
-  });
-};
-
-export const useCalculateReorderQuantity = () => {
-  return (item: { quantity: number; min_quantity?: number }) => {
-    const minQty = item.min_quantity || 0;
-    const currentQty = item.quantity || 0;
-    
-    // Economic Order Quantity calculation (simplified)
-    // Reorder to bring stock to 2x minimum quantity
-    const targetStock = Math.max(minQty * 2, 10); // At least 10 units
-    const reorderQty = Math.max(targetStock - currentQty, 1);
-    
-    return reorderQty;
-  };
-};
-
-export const useAutoReorderCheck = () => {
-  const createReorderPO = useCreateReorderPO();
-  const calculateReorderQty = useCalculateReorderQuantity();
-  
-  return useMutation({
-    mutationFn: async (inventoryItems: Array<{
-      id: string;
-      name: string;
-      quantity: number;
-      min_quantity?: number;
-      unit_cost?: number;
-    }>) => {
-      console.log('Checking items for auto-reorder:', inventoryItems);
-      
-      // Filter items that need reordering
-      const itemsToReorder = inventoryItems.filter(item => {
-        const minQty = item.min_quantity || 0;
-        return item.quantity <= minQty && minQty > 0;
-      });
-      
-      console.log('Items needing reorder:', itemsToReorder);
-      
-      if (itemsToReorder.length === 0) {
-        return { message: "No items need reordering" };
-      }
-      
-      // Calculate reorder quantities and ensure required properties
-      const reorderItems = itemsToReorder.map(item => ({
-        id: item.id,
-        name: item.name,
-        quantity: item.quantity,
-        min_quantity: item.min_quantity || 0,
-        unit_cost: item.unit_cost || 0,
-        reorder_quantity: calculateReorderQty(item)
-      }));
-      
-      // Create reorder PO
-      return await createReorderPO.mutateAsync(reorderItems);
-    },
-    onSuccess: (result) => {
-      if ('message' in result) {
-        toast.info(result.message);
-      } else {
-        toast.success("Auto-reorder completed successfully");
-      }
-    },
-    onError: (error) => {
-      console.error("Auto-reorder failed:", error);
-      toast.error("Auto-reorder failed: " + (error as Error).message);
-    },
+      console.error("Auto reorder check failed:", error);
+      toast.error("Failed to check reorder status");
+    }
   });
 };

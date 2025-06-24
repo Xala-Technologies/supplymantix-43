@@ -13,8 +13,29 @@ export interface InventoryItemWithStats extends InventoryItem {
   total_value: number;
 }
 
+export interface SearchParams {
+  search?: string;
+  location?: string;
+  status?: 'low_stock' | 'in_stock' | 'out_of_stock';
+  sortBy?: 'name' | 'quantity' | 'updated_at';
+  sortOrder?: 'asc' | 'desc';
+  limit?: number;
+  offset?: number;
+}
+
+export interface LowStockAlert {
+  id: string;
+  item_name: string;
+  sku: string;
+  current_quantity: number;
+  min_quantity: number;
+  reorder_level: number;
+  alert_type: 'out_of_stock' | 'low_stock';
+  location: string;
+  category: string;
+}
+
 export const inventoryEnhancedApi = {
-  // Get all inventory items
   async getInventoryItemsWithStats(): Promise<InventoryItemWithStats[]> {
     console.log('Fetching inventory items...');
     
@@ -41,25 +62,14 @@ export const inventoryEnhancedApi = {
     return items;
   },
 
-  // Search inventory with filters
-  async searchInventory(params: {
-    search?: string;
-    location?: string;
-    status?: 'low_stock' | 'in_stock' | 'out_of_stock';
-    sortBy?: 'name' | 'quantity' | 'updated_at';
-    sortOrder?: 'asc' | 'desc';
-    limit?: number;
-    offset?: number;
-  } = {}): Promise<{ items: InventoryItemWithStats[]; total: number }> {
+  async searchInventory(params: SearchParams = {}): Promise<{ items: InventoryItemWithStats[]; total: number }> {
     console.log('Searching inventory with params:', params);
     
     let query = supabase
       .from("inventory_items")
       .select("*", { count: 'exact' });
 
-    console.log('Base query created');
-
-    // Apply search filter - search in name, SKU, and description
+    // Apply search filter
     if (params.search && params.search.trim()) {
       const searchTerm = params.search.trim();
       console.log('Applying search filter:', searchTerm);
@@ -103,7 +113,7 @@ export const inventoryEnhancedApi = {
       total_value: (item.quantity || 0) * (item.unit_cost || 0),
     }));
 
-    // Apply status filter after processing (since it depends on calculated fields)
+    // Apply status filter after processing
     let filteredItems = items;
     if (params.status) {
       console.log('Applying status filter:', params.status);
@@ -124,7 +134,6 @@ export const inventoryEnhancedApi = {
     };
   },
 
-  // Create new inventory item
   async createInventoryItem(item: Omit<InventoryItemInsert, 'id' | 'created_at' | 'updated_at'>): Promise<InventoryItem> {
     console.log('Creating inventory item:', item);
     
@@ -143,7 +152,6 @@ export const inventoryEnhancedApi = {
     return data;
   },
 
-  // Update inventory item
   async updateInventoryItem(id: string, updates: InventoryItemUpdate): Promise<InventoryItem> {
     console.log('Updating inventory item:', id, updates);
     
@@ -166,7 +174,6 @@ export const inventoryEnhancedApi = {
     return data;
   },
 
-  // Delete inventory item
   async deleteInventoryItem(id: string): Promise<void> {
     console.log('Deleting inventory item:', id);
     
@@ -183,8 +190,7 @@ export const inventoryEnhancedApi = {
     console.log('Deleted item:', id);
   },
 
-  // Get low stock alerts
-  async getLowStockAlerts() {
+  async getLowStockAlerts(): Promise<LowStockAlert[]> {
     console.log('Fetching low stock alerts...');
     
     const { data, error } = await supabase
@@ -217,7 +223,6 @@ export const inventoryEnhancedApi = {
     return alerts;
   },
 
-  // Stock operations
   async addStock(inventoryId: string, quantity: number, note?: string): Promise<void> {
     console.log('Adding stock:', inventoryId, quantity, note);
     
