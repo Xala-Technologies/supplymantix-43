@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Package, Eye, Edit, Trash2 } from "lucide-react";
+import { Package, Eye, Trash2 } from "lucide-react";
 import { InventoryStatusBadge } from "./InventoryStatusBadge";
 import {
   AlertDialog,
@@ -133,16 +133,7 @@ export const InventoryGrid = ({
                     className="flex-1"
                   >
                     <Eye className="w-4 h-4 mr-1" />
-                    View
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => onEditItem(item)}
-                    className="flex-1"
-                  >
-                    <Edit className="w-4 h-4 mr-1" />
-                    Edit
+                    View Details
                   </Button>
                   {onDeleteItem && (
                     <Button
