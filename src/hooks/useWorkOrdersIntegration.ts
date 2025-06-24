@@ -115,7 +115,8 @@ export const useWorkOrderStatusUpdate = () => {
     }) => {
       // Only pass valid statuses that the API expects
       const validStatuses = ['open', 'in_progress', 'on_hold', 'completed', 'cancelled'] as const;
-      const apiStatus = validStatuses.includes(status as any) ? status : 'open';
+      type ApiStatus = typeof validStatuses[number];
+      const apiStatus: ApiStatus = validStatuses.includes(status as any) ? status as ApiStatus : 'open';
       return workOrdersApi.updateWorkOrder(id, { status: apiStatus });
     },
     onSuccess: () => {
