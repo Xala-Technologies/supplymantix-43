@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { DashboardLayout } from "@/components/Layout/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,17 +11,21 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { 
   Plus, 
   Search, 
+  Filter, 
   Edit, 
   Trash2, 
   Copy, 
   Play, 
   MoreVertical,
+  Clock,
   CheckCircle,
   Globe,
   Building,
   FileText,
+  AlertCircle,
   Loader2,
   Download,
+  Square,
   Activity
 } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
@@ -32,6 +37,7 @@ import {
   useProcedureTemplates
 } from "@/hooks/useProceduresEnhanced";
 import { ProcedureFormBuilder } from "@/components/procedures/ProcedureFormBuilder";
+import { ProcedureExecution } from "@/components/procedures/ProcedureExecution";
 import { ExecutionDialog } from "@/components/procedures/ExecutionDialog";
 import { useCreateProcedure, useUpdateProcedure } from "@/hooks/useProceduresEnhanced";
 import { toast } from "sonner";
@@ -152,10 +158,10 @@ const Procedures = () => {
 
   const canExecuteProcedure = (procedure: any): { canExecute: boolean; reason?: string } => {
     if (!procedure.fields || procedure.fields.length === 0) {
-      return { canExecute: false, reason: "No fields" };
+      return { canExecute: false, reason: "No fields configured" };
     }
     if (executingProcedures.has(procedure.id)) {
-      return { canExecute: false, reason: "Starting..." };
+      return { canExecute: false, reason: "Currently executing" };
     }
     return { canExecute: true };
   };
@@ -164,7 +170,7 @@ const Procedures = () => {
     const { canExecute, reason } = canExecuteProcedure(procedure);
     
     if (!canExecute) {
-      toast.error(reason || "Cannot execute");
+      toast.error(reason || "Cannot execute procedure");
       return;
     }
 
@@ -172,6 +178,7 @@ const Procedures = () => {
       setExecutingProcedures(prev => new Set(prev).add(procedure.id));
       setSelectedProcedure(procedure);
       
+      // Start execution in database
       const execution = await startExecution.mutateAsync({ 
         procedureId: procedure.id 
       });
@@ -180,7 +187,7 @@ const Procedures = () => {
       setShowExecutionDialog(true);
     } catch (error) {
       console.error('Failed to start execution:', error);
-      toast.error('Failed to start execution');
+      toast.error('Failed to start procedure execution');
     } finally {
       setExecutingProcedures(prev => {
         const newSet = new Set(prev);
@@ -191,17 +198,19 @@ const Procedures = () => {
   };
 
   const handleExecutionComplete = (answers: any, score: number) => {
+    // Store the results
     setExecutionResult({
       answers,
       score,
       procedure: selectedProcedure
     });
     
+    // Close execution dialog and show results
     setShowExecutionDialog(false);
     setShowResultsDialog(true);
     setCurrentExecutionId(null);
     
-    toast.success(`Completed with ${score}% score!`);
+    toast.success(`Procedure completed with ${score}% score!`);
   };
 
   const handleExecutionCancel = () => {
@@ -237,23 +246,40 @@ const Procedures = () => {
       return (
         <Button 
           size="sm" 
-          className={`${
+          className={`flex-1 transition-all duration-300 transform hover:scale-105 ${
             canExecute 
-              ? 'bg-blue-600 hover:bg-blue-700 text-white' 
-              : 'bg-gray-200 text-gray-500 cursor-not-allowed'
+              ? 'bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg hover:shadow-xl' 
+              : 'bg-gray-100 text-gray-400 cursor-not-allowed shadow-none'
           }`}
           onClick={() => handleExecuteProcedure(procedure)}
           disabled={!canExecute || isExecuting}
+          title={!canExecute ? reason : 'Execute this procedure'}
         >
           {isExecuting ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
+            <>
+              <div className="w-4 h-4 mr-2 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              Starting...
+            </>
+          ) : !canExecute ? (
+            <>
+              <Square className="h-4 w-4 mr-2" />
+              {reason === "No fields configured" ? "No Fields" : "Cannot Execute"}
+            </>
           ) : (
-            <Play className="h-4 w-4" />
+            <>
+              <div className="flex items-center">
+                <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center mr-2">
+                  <Play className="h-4 w-4" />
+                </div>
+                <span className="font-semibold">Execute</span>
+              </div>
+            </>
           )}
         </Button>
       );
     }
 
+    // Secondary button for dropdown menu
     return (
       <DropdownMenuItem 
         onClick={() => handleExecuteProcedure(procedure)}
@@ -261,11 +287,16 @@ const Procedures = () => {
         className={`${!canExecute ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
       >
         {isExecuting ? (
-          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+          <>
+            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+            Starting...
+          </>
         ) : (
-          <Play className="h-4 w-4 mr-2" />
+          <>
+            <Play className="h-4 w-4 mr-2" />
+            Execute
+          </>
         )}
-        Execute
       </DropdownMenuItem>
     );
   };
@@ -289,8 +320,8 @@ const Procedures = () => {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Procedures</h1>
-            <p className="text-gray-600">Manage standardized procedures</p>
+            <h1 className="text-3xl font-bold text-gray-900">Procedure Library</h1>
+            <p className="text-gray-600">Manage standardized procedures and checklists</p>
           </div>
           <div className="flex space-x-2">
             <Button 
@@ -299,11 +330,11 @@ const Procedures = () => {
               disabled={templatesLoading}
             >
               <Download className="h-4 w-4 mr-2" />
-              Templates
+              Import Templates
             </Button>
             <Button onClick={() => setShowCreateDialog(true)} className="bg-blue-600 hover:bg-blue-700">
               <Plus className="h-4 w-4 mr-2" />
-              Create
+              Create Procedure
             </Button>
           </div>
         </div>
@@ -342,7 +373,7 @@ const Procedures = () => {
                 size="sm"
               >
                 <Globe className="h-4 w-4 mr-2" />
-                Global
+                Global Only
               </Button>
             </div>
           </CardContent>
@@ -352,7 +383,7 @@ const Procedures = () => {
         <div>
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-semibold text-gray-900">
-              Procedures ({procedures.length})
+              {showGlobalOnly ? 'Global Procedures' : 'My Procedures'} ({procedures.length})
             </h2>
           </div>
           
@@ -365,13 +396,13 @@ const Procedures = () => {
                 <h3 className="text-lg font-medium text-gray-900 mb-2">No procedures found</h3>
                 <p className="text-gray-600 mb-4">
                   {searchTerm || selectedCategory !== "all" 
-                    ? "Try adjusting your search"
-                    : "Create your first procedure"}
+                    ? "Try adjusting your search or filters"
+                    : "Get started by creating your first procedure"}
                 </p>
                 {!searchTerm && selectedCategory === "all" && (
                   <Button onClick={() => setShowCreateDialog(true)}>
                     <Plus className="h-4 w-4 mr-2" />
-                    Create Procedure
+                    Create Your First Procedure
                   </Button>
                 )}
               </CardContent>
@@ -380,63 +411,64 @@ const Procedures = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {procedures.map((procedure) => (
                 <div key={procedure.id} className="group relative">
-                  <Card className="hover:shadow-lg transition-shadow">
-                    <CardContent className="p-6">
-                      <div className="flex items-start justify-between mb-4">
-                        <div className="flex-1">
-                          <h3 className="font-semibold text-gray-900 mb-2">
-                            {procedure.title}
-                          </h3>
-                          <p className="text-sm text-gray-600 mb-3">
-                            {procedure.description}
-                          </p>
-                        </div>
-                        
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="sm">
-                              <MoreVertical className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            {renderExecuteButton(procedure, 'secondary')}
-                            <DropdownMenuItem onClick={() => {
-                              setSelectedProcedure(procedure);
-                              setShowEditDialog(true);
-                            }}>
-                              <Edit className="h-4 w-4 mr-2" />
-                              Edit
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => handleDuplicateProcedure(procedure.id)}>
-                              <Copy className="h-4 w-4 mr-2" />
-                              Duplicate
-                            </DropdownMenuItem>
-                            <DropdownMenuItem 
-                              onClick={() => setDeleteConfirm(procedure.id)}
-                              className="text-red-600"
-                            >
-                              <Trash2 className="h-4 w-4 mr-2" />
-                              Delete
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
+                  <div className="absolute inset-0 bg-gradient-to-r from-blue-400 to-indigo-500 rounded-xl opacity-0 group-hover:opacity-10 transition-opacity duration-300" />
+                  <div className="relative bg-white rounded-xl p-6 shadow-sm border border-gray-100 group-hover:shadow-lg transition-all duration-300 group-hover:border-blue-200">
+                    <div className="flex items-start justify-between mb-4">
+                      <div className="flex-1">
+                        <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2 group-hover:text-blue-900 transition-colors">
+                          {procedure.title}
+                        </h3>
+                        <p className="text-sm text-gray-600 line-clamp-2 mb-3">
+                          {procedure.description}
+                        </p>
                       </div>
+                      
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="sm" className="opacity-0 group-hover:opacity-100 transition-opacity">
+                            <MoreVertical className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="bg-white border shadow-lg">
+                          {renderExecuteButton(procedure, 'secondary')}
+                          <DropdownMenuItem onClick={() => {
+                            setSelectedProcedure(procedure);
+                            setShowEditDialog(true);
+                          }}>
+                            <Edit className="h-4 w-4 mr-2" />
+                            Edit
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => handleDuplicateProcedure(procedure.id)}>
+                            <Copy className="h-4 w-4 mr-2" />
+                            Duplicate
+                          </DropdownMenuItem>
+                          <DropdownMenuItem 
+                            onClick={() => setDeleteConfirm(procedure.id)}
+                            className="text-red-600"
+                          >
+                            <Trash2 className="h-4 w-4 mr-2" />
+                            Delete
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
 
-                      <div className="flex items-center justify-between mb-4">
-                        <div className="flex flex-wrap gap-2">
-                          <Badge className={`${getCategoryColor(procedure.category || 'Other')} text-xs`}>
-                            {procedure.category}
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="flex flex-wrap gap-2">
+                        <Badge className={`${getCategoryColor(procedure.category || 'Other')} text-xs`}>
+                          {procedure.category}
+                        </Badge>
+                        {procedure.is_global && (
+                          <Badge variant="outline" className="text-blue-600 border-blue-600 text-xs">
+                            <Globe className="h-3 w-3 mr-1" />
+                            Global
                           </Badge>
-                          {procedure.is_global && (
-                            <Badge variant="outline" className="text-xs">
-                              <Globe className="h-3 w-3 mr-1" />
-                              Global
-                            </Badge>
-                          )}
-                        </div>
+                        )}
                       </div>
+                    </div>
 
-                      <div className="flex items-center justify-between text-sm text-gray-500 mb-4">
+                    <div className="flex items-center justify-between text-sm text-gray-500 mb-6">
+                      <div className="flex items-center gap-4">
                         <span className="flex items-center gap-1">
                           <CheckCircle className="h-4 w-4" />
                           {procedure.fields?.length || 0} steps
@@ -446,22 +478,23 @@ const Procedures = () => {
                           {procedure.executions_count || 0} runs
                         </span>
                       </div>
+                    </div>
 
-                      <div className="flex gap-2">
-                        {renderExecuteButton(procedure, 'primary')}
-                        <Button 
-                          variant="outline" 
-                          size="sm"
-                          onClick={() => {
-                            setSelectedProcedure(procedure);
-                            setShowEditDialog(true);
-                          }}
-                        >
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
+                    <div className="flex gap-3">
+                      {renderExecuteButton(procedure, 'primary')}
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => {
+                          setSelectedProcedure(procedure);
+                          setShowEditDialog(true);
+                        }}
+                        className="px-4 hover:bg-gray-50 hover:border-gray-300"
+                      >
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
                 </div>
               ))}
             </div>

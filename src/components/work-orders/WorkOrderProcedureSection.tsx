@@ -3,7 +3,8 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Play, CheckCircle, FileText, AlertCircle, Settings } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
+import { Play, CheckCircle, Clock, FileText, AlertCircle, Settings } from "lucide-react";
 import { useProceduresEnhanced } from "@/hooks/useProceduresEnhanced";
 import { ExecutionDialog } from "../procedures/ExecutionDialog";
 import { ProcedureSelectionDialog } from "./ProcedureSelectionDialog";
@@ -55,6 +56,7 @@ export const WorkOrderProcedureSection: React.FC<WorkOrderProcedureSectionProps>
 
   const handleProcedureSelected = (procedure: ProcedureWithFields) => {
     setShowSelectionDialog(false);
+    // Here you would typically add the procedure to the work order
     console.log('Adding procedure to work order:', procedure.id, workOrderId);
     if (onProceduresUpdate) {
       onProceduresUpdate();
@@ -73,11 +75,11 @@ export const WorkOrderProcedureSection: React.FC<WorkOrderProcedureSectionProps>
         <CardContent>
           <div className="text-center py-8">
             <AlertCircle className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-            <h3 className="font-semibold text-gray-900 mb-2">No Procedures</h3>
-            <p className="text-gray-600 mb-4">Create procedures first</p>
+            <h3 className="font-semibold text-gray-900 mb-2">No Procedures Available</h3>
+            <p className="text-gray-600 mb-4">Create procedures first to execute them with work orders.</p>
             <Button variant="outline" onClick={() => window.location.href = '/procedures'}>
               <Settings className="h-4 w-4 mr-2" />
-              Manage
+              Manage Procedures
             </Button>
           </div>
         </CardContent>
@@ -96,17 +98,17 @@ export const WorkOrderProcedureSection: React.FC<WorkOrderProcedureSectionProps>
             </CardTitle>
             <Button onClick={handleAddProcedure} size="sm">
               <Play className="h-4 w-4 mr-2" />
-              Add
+              Add Procedure
             </Button>
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
           {availableProcedures.slice(0, 5).map((procedure) => (
-            <div key={procedure.id} className="border rounded-lg p-4">
+            <div key={procedure.id} className="border rounded-lg p-4 hover:bg-gray-50 transition-colors">
               <div className="flex items-center justify-between">
                 <div className="flex-1">
                   <div className="flex items-center gap-3 mb-2">
-                    <h4 className="font-semibold">{procedure.title}</h4>
+                    <h4 className="font-semibold text-gray-900">{procedure.title}</h4>
                     <Badge variant="outline" className="text-xs">
                       {procedure.category || 'General'}
                     </Badge>
@@ -117,27 +119,42 @@ export const WorkOrderProcedureSection: React.FC<WorkOrderProcedureSectionProps>
                   )}
                   
                   <div className="flex items-center gap-4 text-xs text-gray-500">
-                    <span className="flex items-center gap-1">
+                    <div className="flex items-center gap-1">
                       <FileText className="w-3 h-3" />
-                      {procedure.fields?.length || 0} steps
-                    </span>
-                    <span className="flex items-center gap-1">
+                      <span>{procedure.fields?.length || 0} steps</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Clock className="w-3 h-3" />
+                      <span>~{Math.ceil((procedure.fields?.length || 1) * 1.5)} min</span>
+                    </div>
+                    <div className="flex items-center gap-1">
                       <CheckCircle className="w-3 h-3" />
-                      {procedure.executions_count || 0} runs
-                    </span>
+                      <span>{procedure.executions_count || 0} completed</span>
+                    </div>
                   </div>
                 </div>
                 
-                <Button 
-                  size="sm" 
-                  onClick={() => handleExecuteProcedure(procedure)}
-                  className="bg-blue-600 hover:bg-blue-700"
-                >
-                  <Play className="w-4 h-4" />
-                </Button>
+                <div className="flex items-center gap-2">
+                  <Button 
+                    size="sm" 
+                    onClick={() => handleExecuteProcedure(procedure)}
+                    className="bg-blue-600 hover:bg-blue-700"
+                  >
+                    <Play className="w-4 h-4 mr-1" />
+                    Execute
+                  </Button>
+                </div>
               </div>
             </div>
           ))}
+          
+          {availableProcedures.length > 5 && (
+            <div className="text-center py-2">
+              <Button variant="ghost" size="sm" onClick={handleAddProcedure}>
+                View All {availableProcedures.length} Procedures
+              </Button>
+            </div>
+          )}
         </CardContent>
       </Card>
 
