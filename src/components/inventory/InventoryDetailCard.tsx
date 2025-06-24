@@ -1,8 +1,10 @@
+
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Package, DollarSign, MapPin, Calendar, Edit, ShoppingCart, TrendingDown, TrendingUp } from "lucide-react";
+import { Package, DollarSign, MapPin, Calendar, Edit, ShoppingCart, TrendingDown, TrendingUp, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface InventoryDetailCardProps {
@@ -31,18 +33,20 @@ interface InventoryDetailCardProps {
       reason: string;
     }>;
   };
+  onClose?: () => void;
+  onEdit?: () => void;
 }
 
-export const InventoryDetailCard = ({ item }: InventoryDetailCardProps) => {
+export const InventoryDetailCard = ({ item, onClose, onEdit }: InventoryDetailCardProps) => {
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
-      case 'in stock':
+      case 'in_stock':
         return 'bg-green-100 text-green-800 border-green-200';
-      case 'low stock':
+      case 'low_stock':
         return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-      case 'out of stock':
+      case 'out_of_stock':
         return 'bg-red-100 text-red-800 border-red-200';
-      case 'on order':
+      case 'on_order':
         return 'bg-blue-100 text-blue-800 border-blue-200';
       default:
         return 'bg-gray-100 text-gray-800 border-gray-200';
@@ -61,8 +65,8 @@ export const InventoryDetailCard = ({ item }: InventoryDetailCardProps) => {
     return Math.min(100, Math.max(0, percentage));
   };
 
-  return (
-    <div className="space-y-6">
+  const content = (
+    <div className="space-y-6 max-h-[80vh] overflow-y-auto">
       {/* Header */}
       <div className="flex items-start justify-between">
         <div>
@@ -78,12 +82,14 @@ export const InventoryDetailCard = ({ item }: InventoryDetailCardProps) => {
         </div>
         <div className="flex items-center gap-2">
           <Badge className={`border ${getStatusColor(item.status)}`}>
-            {item.status}
+            {item.status.replace('_', ' ')}
           </Badge>
-          <Button variant="outline" size="sm">
-            <Edit className="w-4 h-4 mr-2" />
-            Edit
-          </Button>
+          {onEdit && (
+            <Button variant="outline" size="sm" onClick={onEdit}>
+              <Edit className="w-4 h-4 mr-2" />
+              Edit
+            </Button>
+          )}
           <Button size="sm">
             <ShoppingCart className="w-4 h-4 mr-2" />
             Reorder
@@ -167,7 +173,7 @@ export const InventoryDetailCard = ({ item }: InventoryDetailCardProps) => {
         </CardContent>
       </Card>
 
-      {/* Detailed Information */}
+      {/* Detailed Information Tabs */}
       <Tabs defaultValue="details" className="w-full">
         <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="details">Details</TabsTrigger>
@@ -253,33 +259,37 @@ export const InventoryDetailCard = ({ item }: InventoryDetailCardProps) => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-3">
-                {item.transactions.map((transaction, index) => (
-                  <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
-                    <div className="flex items-center gap-3">
-                      <div className={cn(
-                        "w-8 h-8 rounded-full flex items-center justify-center text-white text-sm",
-                        transaction.type === 'Usage' ? 'bg-red-500' : 'bg-green-500'
-                      )}>
-                        {transaction.type === 'Usage' ? '-' : '+'}
+              {item.transactions.length > 0 ? (
+                <div className="space-y-3">
+                  {item.transactions.map((transaction, index) => (
+                    <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
+                      <div className="flex items-center gap-3">
+                        <div className={cn(
+                          "w-8 h-8 rounded-full flex items-center justify-center text-white text-sm",
+                          transaction.type === 'Usage' ? 'bg-red-500' : 'bg-green-500'
+                        )}>
+                          {transaction.type === 'Usage' ? '-' : '+'}
+                        </div>
+                        <div>
+                          <p className="font-medium text-sm">{transaction.type}</p>
+                          <p className="text-xs text-gray-600">{transaction.reason}</p>
+                        </div>
                       </div>
-                      <div>
-                        <p className="font-medium text-sm">{transaction.type}</p>
-                        <p className="text-xs text-gray-600">{transaction.reason}</p>
+                      <div className="text-right">
+                        <p className={cn(
+                          "font-medium",
+                          transaction.quantity > 0 ? 'text-green-600' : 'text-red-600'
+                        )}>
+                          {transaction.quantity > 0 ? '+' : ''}{transaction.quantity}
+                        </p>
+                        <p className="text-xs text-gray-600">{transaction.date}</p>
                       </div>
                     </div>
-                    <div className="text-right">
-                      <p className={cn(
-                        "font-medium",
-                        transaction.quantity > 0 ? 'text-green-600' : 'text-red-600'
-                      )}>
-                        {transaction.quantity > 0 ? '+' : ''}{transaction.quantity}
-                      </p>
-                      <p className="text-xs text-gray-600">{transaction.date}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-gray-500 text-center py-4">No transactions recorded</p>
+              )}
             </CardContent>
           </Card>
         </TabsContent>
@@ -329,11 +339,11 @@ export const InventoryDetailCard = ({ item }: InventoryDetailCardProps) => {
                     <div className="text-sm space-y-2">
                       <div className="flex justify-between">
                         <span className="text-gray-600">Quantity to Order:</span>
-                        <span>{item.maxStock - item.quantity}</span>
+                        <span>{Math.max(0, item.maxStock - item.quantity)}</span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-gray-600">Estimated Cost:</span>
-                        <span>{formatCurrency((item.maxStock - item.quantity) * item.unitCost)}</span>
+                        <span>{formatCurrency(Math.max(0, item.maxStock - item.quantity) * item.unitCost)}</span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-gray-600">Expected Delivery:</span>
@@ -354,4 +364,19 @@ export const InventoryDetailCard = ({ item }: InventoryDetailCardProps) => {
       </Tabs>
     </div>
   );
+
+  if (onClose) {
+    return (
+      <Dialog open={true} onOpenChange={onClose}>
+        <DialogContent className="max-w-6xl">
+          <DialogHeader>
+            <DialogTitle>Inventory Item Details</DialogTitle>
+          </DialogHeader>
+          {content}
+        </DialogContent>
+      </Dialog>
+    );
+  }
+
+  return content;
 };

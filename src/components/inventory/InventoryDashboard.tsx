@@ -8,6 +8,22 @@ import { InventoryDetailCard } from "./InventoryDetailCard";
 import { useInventoryEnhanced } from "@/hooks/useInventoryEnhanced";
 import { useExportInventory } from "@/hooks/useInventoryExport";
 import { toast } from "sonner";
+import type { InventoryItemWithStats } from "@/lib/database/inventory-enhanced";
+
+// Map database type to component type
+const mapInventoryItem = (item: InventoryItemWithStats) => ({
+  id: item.id,
+  name: item.name,
+  sku: item.sku || '',
+  description: item.description || '',
+  quantity: item.quantity,
+  minQuantity: item.min_quantity || 0,
+  unitCost: item.unit_cost || 0,
+  totalValue: item.total_value || 0,
+  location: item.location || '',
+  category: item.category || '',
+  status: item.is_low_stock ? 'low_stock' : item.quantity === 0 ? 'out_of_stock' : 'in_stock'
+});
 
 export const InventoryDashboard = () => {
   const [search, setSearch] = useState("");
@@ -29,14 +45,15 @@ export const InventoryDashboard = () => {
 
   const exportMutation = useExportInventory();
 
-  const items = inventoryData?.items || [];
+  const rawItems = inventoryData?.items || [];
+  const items = rawItems.map(mapInventoryItem);
   const totalItems = items.length;
-  const lowStockItems = items.filter(item => item.is_low_stock).length;
-  const totalValue = items.reduce((sum, item) => sum + (item.total_value || 0), 0);
-  const categories = new Set(items.map(item => item.location || 'Unknown')).size;
+  const lowStockItems = rawItems.filter(item => item.is_low_stock).length;
+  const totalValue = rawItems.reduce((sum, item) => sum + (item.total_value || 0), 0);
+  const categories = new Set(rawItems.map(item => item.location || 'Unknown')).size;
 
   // Get unique locations for filter
-  const locations = Array.from(new Set(items.map(item => item.location).filter(Boolean)));
+  const locations = Array.from(new Set(rawItems.map(item => item.location).filter(Boolean)));
 
   const handleCreateItem = () => {
     console.log('Creating new inventory item');
@@ -68,7 +85,7 @@ export const InventoryDashboard = () => {
   const handleExportData = async () => {
     console.log('Exporting inventory data');
     try {
-      await exportMutation.mutateAsync(items);
+      await exportMutation.mutateAsync(rawItems);
     } catch (error) {
       console.error('Export error:', error);
     }
@@ -169,12 +186,15 @@ export const InventoryDashboard = () => {
       {/* Detail View Dialog */}
       {selectedItem && (
         <InventoryDetailCard
-          item={selectedItem}
-          onClose={() => setSelectedItem(null)}
-          onEdit={() => {
-            setEditingItem(selectedItem);
-            setSelectedItem(null);
-            setShowEditForm(true);
+          item={{
+            ...selectedItem,
+            supplier: 'N/A',
+            partNumber: 'N/A',
+            lastOrdered: 'N/A',
+            leadTime: 'N/A',
+            reorderPoint: selectedItem.minQuantity,
+            maxStock: selectedItem.minQuantity * 3,
+            transactions: []
           }}
         />
       )}
