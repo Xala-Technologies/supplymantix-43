@@ -35,7 +35,7 @@ export const useWorkOrdersIntegration = () => {
           let asset: WorkOrder['asset'] = wo.asset_id || '';
           if (wo.assets) {
             asset = {
-              id: wo.asset_id || wo.assets.id || '',
+              id: wo.asset_id || '', // Use asset_id from work order, not from assets object
               name: wo.assets.name || 'Unknown Asset',
               status: 'active'
             };
@@ -113,7 +113,10 @@ export const useWorkOrderStatusUpdate = () => {
       status: WorkOrderStatus;
       notes?: string;
     }) => {
-      return workOrdersApi.updateWorkOrder(id, { status });
+      // Only pass valid statuses that the API expects
+      const validStatuses = ['open', 'in_progress', 'on_hold', 'completed', 'cancelled'] as const;
+      const apiStatus = validStatuses.includes(status as any) ? status : 'open';
+      return workOrdersApi.updateWorkOrder(id, { status: apiStatus });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["work-orders"] });
