@@ -248,8 +248,8 @@ const Procedures = () => {
           size="sm" 
           className={`flex-1 transition-all duration-300 transform hover:scale-105 ${
             canExecute 
-              ? 'bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg hover:shadow-xl' 
-              : 'bg-gray-100 text-gray-400 cursor-not-allowed shadow-none'
+              ? 'bg-white text-gray-900 border-2 border-gray-200 hover:border-blue-300 hover:bg-blue-50 shadow-sm hover:shadow-md' 
+              : 'bg-gray-50 text-gray-400 cursor-not-allowed shadow-none border border-gray-200'
           }`}
           onClick={() => handleExecuteProcedure(procedure)}
           disabled={!canExecute || isExecuting}
@@ -257,7 +257,7 @@ const Procedures = () => {
         >
           {isExecuting ? (
             <>
-              <div className="w-4 h-4 mr-2 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              <div className="w-4 h-4 mr-2 border-2 border-gray-400 border-t-transparent rounded-full animate-spin" />
               Starting...
             </>
           ) : !canExecute ? (
@@ -268,8 +268,8 @@ const Procedures = () => {
           ) : (
             <>
               <div className="flex items-center">
-                <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center mr-2">
-                  <Play className="h-4 w-4" />
+                <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center mr-2">
+                  <Play className="h-4 w-4 text-blue-600" />
                 </div>
                 <span className="font-semibold">Execute</span>
               </div>
