@@ -10,7 +10,6 @@ import {
   Clock, 
   Play, 
   Pause, 
-  Archive, 
   AlertCircle,
   FileText,
   RotateCcw
@@ -59,7 +58,6 @@ export const WorkOrderStatusFlow = ({ workOrder, onStatusUpdate }: WorkOrderStat
       'on_hold': 'bg-orange-100 text-orange-800 border-orange-200',
       'completed': 'bg-green-100 text-green-800 border-green-200',
       'cancelled': 'bg-red-100 text-red-800 border-red-200',
-      'archived': 'bg-slate-100 text-slate-800 border-slate-200',
     };
     return colors[status as keyof typeof colors] || colors.open;
   };
@@ -91,14 +89,9 @@ export const WorkOrderStatusFlow = ({ workOrder, onStatusUpdate }: WorkOrderStat
         ];
       case 'completed':
         return [
-          { action: 'archived' as WorkOrderStatus, label: 'Archive', icon: Archive, color: 'gray' },
           { action: 'open' as WorkOrderStatus, label: 'Reopen', icon: RotateCcw, color: 'blue' }
         ];
       case 'cancelled':
-        return [
-          { action: 'open' as WorkOrderStatus, label: 'Reopen', icon: RotateCcw, color: 'blue' }
-        ];
-      case 'archived':
         return [
           { action: 'open' as WorkOrderStatus, label: 'Reopen', icon: RotateCcw, color: 'blue' }
         ];
@@ -108,7 +101,7 @@ export const WorkOrderStatusFlow = ({ workOrder, onStatusUpdate }: WorkOrderStat
   };
 
   const getStatusProgress = () => {
-    const mainFlow = ['draft', 'open', 'in_progress', 'completed', 'archived'];
+    const mainFlow = ['draft', 'open', 'in_progress', 'completed'];
     const currentStatus = workOrder.status;
     
     // Handle special statuses

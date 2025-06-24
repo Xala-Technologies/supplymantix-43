@@ -1,5 +1,5 @@
 
-export type WorkOrderStatus = 'draft' | 'open' | 'in_progress' | 'on_hold' | 'completed' | 'cancelled' | 'archived';
+export type WorkOrderStatus = 'draft' | 'open' | 'in_progress' | 'on_hold' | 'completed' | 'cancelled';
 export type PriorityLevel = 'low' | 'medium' | 'high' | 'urgent';
 
 export interface WorkOrder {
