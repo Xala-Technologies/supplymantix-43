@@ -6,7 +6,7 @@ import { InventoryForm } from "./InventoryForm";
 import { InventoryDetailCard } from "./InventoryDetailCard";
 import { useInventoryEnhanced } from "@/hooks/useInventoryEnhanced";
 import { useExportInventory } from "@/hooks/useInventoryExport";
-import { useDeleteInventoryItem } from "@/hooks/useInventoryMutations";
+import { useDeleteInventoryItem, useCreateInventoryItem } from "@/hooks/useInventoryMutations";
 import { useUndoDelete } from "@/hooks/useUndoDelete";
 import { toast } from "sonner";
 import type { InventoryItemWithStats } from "@/lib/database/inventory-enhanced";
@@ -46,6 +46,7 @@ export const InventoryDashboard = () => {
 
   const exportMutation = useExportInventory();
   const deleteMutation = useDeleteInventoryItem();
+  const createMutation = useCreateInventoryItem();
   const { addUndoItem } = useUndoDelete();
 
   const rawItems = inventoryData?.items || [];
@@ -80,8 +81,11 @@ export const InventoryDashboard = () => {
     try {
       // Store item data for potential undo
       const itemToRestore = {
-        ...item,
-        // Convert back to database format
+        name: item.name,
+        description: item.description,
+        sku: item.sku,
+        location: item.location,
+        quantity: item.quantity,
         min_quantity: item.minQuantity,
         unit_cost: item.unitCost,
       };
@@ -94,10 +98,9 @@ export const InventoryDashboard = () => {
         item.id,
         itemToRestore,
         async () => {
-          // Recreate the item with the same data (minus the ID to create a new one)
-          const { id, ...itemData } = itemToRestore;
-          console.log('Restoring item:', itemData);
-          // We would need a create mutation here, but for now we'll just refetch
+          // Recreate the item with the same data
+          console.log('Restoring item:', itemToRestore);
+          await createMutation.mutateAsync(itemToRestore);
           await refetch();
         },
         item.name
