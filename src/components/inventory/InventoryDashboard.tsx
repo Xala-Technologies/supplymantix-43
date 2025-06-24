@@ -4,67 +4,108 @@ import { InventoryHeader } from "./InventoryHeader";
 import { InventoryStats } from "./InventoryStats";
 import { InventoryGrid } from "./InventoryGrid";
 import { InventoryForm } from "./InventoryForm";
+import { InventoryDetailCard } from "./InventoryDetailCard";
 import { useInventoryEnhanced } from "@/hooks/useInventoryEnhanced";
+import { useExportInventory } from "@/hooks/useInventoryExport";
+import { toast } from "sonner";
 
 export const InventoryDashboard = () => {
   const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [locationFilter, setLocationFilter] = useState<string>("all");
+  const [selectedItem, setSelectedItem] = useState<any>(null);
   const [showCreateForm, setShowCreateForm] = useState(false);
+  const [showEditForm, setShowEditForm] = useState(false);
+  const [editingItem, setEditingItem] = useState<any>(null);
 
-  // Sample data for now - replace with real data
-  const sampleData = [
-    {
-      id: '1',
-      name: 'Hydraulic Oil Filter',
-      sku: 'HYD-001',
-      description: 'High-performance hydraulic oil filter',
-      quantity: 25,
-      minQuantity: 10,
-      unitCost: 45.99,
-      totalValue: 1149.75,
-      location: 'Warehouse A',
-      category: 'Filters',
-      status: 'in_stock'
-    },
-    {
-      id: '2',
-      name: 'Safety Gloves',
-      sku: 'SAF-002',
-      description: 'Cut-resistant safety gloves',
-      quantity: 8,
-      minQuantity: 15,
-      unitCost: 12.50,
-      totalValue: 100.00,
-      location: 'Safety Room',
-      category: 'Safety',
-      status: 'low_stock'
-    }
-  ];
+  // Enhanced inventory query with real data
+  const { data: inventoryData, isLoading, error, refetch } = useInventoryEnhanced({
+    search: search || undefined,
+    status: statusFilter !== "all" ? statusFilter as any : undefined,
+    location: locationFilter !== "all" ? locationFilter : undefined,
+    sortBy: 'name',
+    sortOrder: 'asc'
+  });
 
-  const filteredItems = sampleData.filter(item =>
-    item.name.toLowerCase().includes(search.toLowerCase()) ||
-    item.sku?.toLowerCase().includes(search.toLowerCase())
-  );
+  const exportMutation = useExportInventory();
 
-  const totalItems = sampleData.length;
-  const lowStockItems = sampleData.filter(item => item.quantity <= item.minQuantity).length;
-  const totalValue = sampleData.reduce((sum, item) => sum + item.totalValue, 0);
-  const categories = new Set(sampleData.map(item => item.category)).size;
+  const items = inventoryData?.items || [];
+  const totalItems = items.length;
+  const lowStockItems = items.filter(item => item.is_low_stock).length;
+  const totalValue = items.reduce((sum, item) => sum + (item.total_value || 0), 0);
+  const categories = new Set(items.map(item => item.location || 'Unknown')).size;
+
+  // Get unique locations for filter
+  const locations = Array.from(new Set(items.map(item => item.location).filter(Boolean)));
 
   const handleCreateItem = () => {
+    console.log('Creating new inventory item');
     setShowCreateForm(true);
   };
 
   const handleViewItem = (item: any) => {
-    console.log('View item:', item);
+    console.log('Viewing item:', item);
+    setSelectedItem(item);
   };
 
   const handleEditItem = (item: any) => {
-    console.log('Edit item:', item);
+    console.log('Editing item:', item);
+    setEditingItem(item);
+    setShowEditForm(true);
   };
 
-  const handleRefresh = () => {
-    console.log('Refresh inventory');
+  const handleRefresh = async () => {
+    console.log('Refreshing inventory data');
+    try {
+      await refetch();
+      toast.success("Inventory data refreshed");
+    } catch (error) {
+      console.error('Refresh error:', error);
+      toast.error("Failed to refresh inventory data");
+    }
   };
+
+  const handleExportData = async () => {
+    console.log('Exporting inventory data');
+    try {
+      await exportMutation.mutateAsync(items);
+    } catch (error) {
+      console.error('Export error:', error);
+    }
+  };
+
+  const handleFilterChange = (type: string, value: string) => {
+    console.log(`Filter change - ${type}:`, value);
+    if (type === 'status') {
+      setStatusFilter(value);
+    } else if (type === 'location') {
+      setLocationFilter(value);
+    }
+  };
+
+  const handleFormSuccess = () => {
+    setShowCreateForm(false);
+    setShowEditForm(false);
+    setEditingItem(null);
+    refetch();
+  };
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">Error loading inventory</h2>
+          <p className="text-gray-600 mb-4">{error.message}</p>
+          <button
+            onClick={handleRefresh}
+            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -73,8 +114,15 @@ export const InventoryDashboard = () => {
         searchQuery={search}
         onSearchChange={setSearch}
         onRefresh={handleRefresh}
+        onExport={handleExportData}
+        onFilterChange={handleFilterChange}
+        statusFilter={statusFilter}
+        locationFilter={locationFilter}
+        locations={locations}
         totalItems={totalItems}
         lowStockCount={lowStockItems}
+        isLoading={isLoading}
+        isExporting={exportMutation.isPending}
       />
       
       <div className="p-6">
@@ -85,18 +133,49 @@ export const InventoryDashboard = () => {
           categories={categories}
         />
         
-        <InventoryGrid
-          items={filteredItems}
-          onViewItem={handleViewItem}
-          onEditItem={handleEditItem}
-        />
+        {isLoading ? (
+          <div className="flex items-center justify-center py-12">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+            <span className="ml-2 text-gray-600">Loading inventory...</span>
+          </div>
+        ) : (
+          <InventoryGrid
+            items={items}
+            onViewItem={handleViewItem}
+            onEditItem={handleEditItem}
+          />
+        )}
       </div>
 
+      {/* Create Form Dialog */}
       {showCreateForm && (
         <InventoryForm
           mode="create"
-          onSuccess={() => setShowCreateForm(false)}
+          onSuccess={handleFormSuccess}
           trigger={null}
+        />
+      )}
+
+      {/* Edit Form Dialog */}
+      {showEditForm && editingItem && (
+        <InventoryForm
+          mode="edit"
+          item={editingItem}
+          onSuccess={handleFormSuccess}
+          trigger={null}
+        />
+      )}
+
+      {/* Detail View Dialog */}
+      {selectedItem && (
+        <InventoryDetailCard
+          item={selectedItem}
+          onClose={() => setSelectedItem(null)}
+          onEdit={() => {
+            setEditingItem(selectedItem);
+            setSelectedItem(null);
+            setShowEditForm(true);
+          }}
         />
       )}
     </div>
