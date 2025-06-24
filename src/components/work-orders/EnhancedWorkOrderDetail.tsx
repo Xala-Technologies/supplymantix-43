@@ -24,6 +24,7 @@ import { WorkOrderStatusFlow } from "./WorkOrderStatusFlow";
 import { TimeEntries } from "./TimeEntries";
 import { CostEntries } from "./CostEntries";
 import { WorkOrderChat } from "./WorkOrderChat";
+import { getAssetName } from "@/utils/assetUtils";
 
 interface EnhancedWorkOrderDetailProps {
   workOrder: WorkOrder;
@@ -204,7 +205,7 @@ export const EnhancedWorkOrderDetail = ({ workOrder, onEdit }: EnhancedWorkOrder
                   <div className="space-y-2">
                     <div className="flex justify-between">
                       <span className="font-medium">Asset Name:</span>
-                      <span>{typeof workOrder.asset === 'object' ? workOrder.asset.name : workOrder.asset}</span>
+                      <span>{getAssetName(workOrder.asset)}</span>
                     </div>
                     {typeof workOrder.asset === 'object' && workOrder.asset.status && (
                       <div className="flex justify-between">
