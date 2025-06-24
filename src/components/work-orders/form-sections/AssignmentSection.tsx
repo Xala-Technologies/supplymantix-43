@@ -2,8 +2,8 @@
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Calendar } from "lucide-react";
 import { UseFormReturn } from "react-hook-form";
+import { useUsers } from "@/hooks/useUsers";
 
 interface Asset {
   id: string;
@@ -18,10 +18,12 @@ interface AssignmentSectionProps {
 }
 
 export const AssignmentSection = ({ form, watch, setValue, assets }: AssignmentSectionProps) => {
+  const { data: users, isLoading: usersLoading } = useUsers();
+
   return (
     <div className="space-y-4">
       <div>
-        <Label htmlFor="assignedTo">Assignee</Label>
+        <Label htmlFor="assignedTo">Assigned To</Label>
         <Select
           value={watch("assignedTo")}
           onValueChange={(value) => setValue("assignedTo", value)}
@@ -30,23 +32,21 @@ export const AssignmentSection = ({ form, watch, setValue, assets }: AssignmentS
             <SelectValue placeholder="Select assignee..." />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="user1">John Doe</SelectItem>
-            <SelectItem value="user2">Jane Smith</SelectItem>
-            <SelectItem value="team1">Maintenance Team</SelectItem>
+            <SelectItem value="">Unassigned</SelectItem>
+            {usersLoading ? (
+              <SelectItem value="" disabled>Loading users...</SelectItem>
+            ) : (
+              users?.map((user) => (
+                <SelectItem key={user.id} value={user.id}>
+                  {user.first_name && user.last_name 
+                    ? `${user.first_name} ${user.last_name} (${user.email})`
+                    : user.email
+                  }
+                </SelectItem>
+              ))
+            )}
           </SelectContent>
         </Select>
-      </div>
-
-      <div>
-        <Label htmlFor="dueDate">Due Date</Label>
-        <div className="relative mt-1">
-          <Input
-            id="dueDate"
-            type="date"
-            {...form.register("dueDate")}
-          />
-          <Calendar className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
-        </div>
       </div>
 
       <div>
@@ -59,6 +59,7 @@ export const AssignmentSection = ({ form, watch, setValue, assets }: AssignmentS
             <SelectValue placeholder="Select asset..." />
           </SelectTrigger>
           <SelectContent>
+            <SelectItem value="">No Asset</SelectItem>
             {assets.map((asset) => (
               <SelectItem key={asset.id} value={asset.id}>
                 {asset.name}
@@ -66,6 +67,16 @@ export const AssignmentSection = ({ form, watch, setValue, assets }: AssignmentS
             ))}
           </SelectContent>
         </Select>
+      </div>
+
+      <div>
+        <Label htmlFor="dueDate">Due Date</Label>
+        <Input
+          id="dueDate"
+          type="date"
+          {...form.register("dueDate")}
+          className="mt-1"
+        />
       </div>
     </div>
   );

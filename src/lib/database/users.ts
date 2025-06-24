@@ -1,49 +1,38 @@
 
 import { supabase } from "@/integrations/supabase/client";
-import type { Database } from "@/integrations/supabase/types";
-
-type Tables = Database["public"]["Tables"];
 
 export const usersApi = {
-  async getTenants() {
-    const { data, error } = await supabase
-      .from("tenants")
-      .select("*")
-      .order("created_at", { ascending: false });
-    
-    if (error) throw error;
-    return data;
-  },
-
-  async createTenant(tenant: Tables["tenants"]["Insert"]) {
-    const { data, error } = await supabase
-      .from("tenants")
-      .insert(tenant)
-      .select()
-      .single();
-    
-    if (error) throw error;
-    return data;
-  },
-
   async getUsers() {
     const { data, error } = await supabase
       .from("users")
-      .select("*")
-      .order("created_at", { ascending: false });
+      .select("id, email, first_name, last_name")
+      .eq("status", "active")
+      .order("email");
     
     if (error) throw error;
     return data;
   },
 
-  async createUser(user: Tables["users"]["Insert"]) {
+  async getUsersByTenant() {
+    const { data: currentUser } = await supabase.auth.getUser();
+    if (!currentUser.user) throw new Error("No authenticated user");
+
+    const { data: userData, error: userError } = await supabase
+      .from("users")
+      .select("tenant_id")
+      .eq("id", currentUser.user.id)
+      .single();
+
+    if (userError) throw userError;
+
     const { data, error } = await supabase
       .from("users")
-      .insert(user)
-      .select()
-      .single();
+      .select("id, email, first_name, last_name")
+      .eq("tenant_id", userData.tenant_id)
+      .eq("status", "active")
+      .order("email");
     
     if (error) throw error;
     return data;
-  },
+  }
 };

@@ -90,31 +90,37 @@ export const useWorkOrdersPage = (workOrders: WorkOrder[] = []) => {
         return;
       }
 
-      // Transform the form data to match the database schema
-      const workOrderData = {
-        title: data.title,
-        description: data.description || '',
+      // Validate and clean the form data
+      const cleanData = {
+        title: data.title?.trim(),
+        description: data.description?.trim() || '',
         status: data.status || 'open',
         priority: data.priority || 'medium',
         category: data.category || 'maintenance',
-        assigned_to: Array.isArray(data.assignedTo) ? data.assignedTo[0] : data.assignedTo || null,
+        assigned_to: data.assignedTo && data.assignedTo.trim() !== '' ? data.assignedTo : null,
         asset_id: data.assetId && data.assetId.trim() !== '' ? data.assetId : null,
         due_date: data.dueDate && data.dueDate.trim() !== '' ? data.dueDate : null,
-        tags: data.tags || [],
+        tags: Array.isArray(data.tags) ? data.tags : [],
         location_id: data.location && data.location.trim() !== '' ? data.location : null,
         tenant_id: userData.tenant_id,
         requester_id: (await supabase.auth.getUser()).data.user?.id
       };
 
-      console.log('Transformed work order data:', workOrderData);
+      // Validate required fields
+      if (!cleanData.title) {
+        toast.error("Title is required");
+        return;
+      }
+
+      console.log('Cleaned work order data:', cleanData);
 
       if (editingWorkOrder) {
         // Update existing work order
-        await workOrdersApi.updateWorkOrder(editingWorkOrder.id, workOrderData);
+        await workOrdersApi.updateWorkOrder(editingWorkOrder.id, cleanData);
         toast.success("Work order updated successfully");
       } else {
         // Create new work order
-        await workOrdersApi.createWorkOrder(workOrderData);
+        await workOrdersApi.createWorkOrder(cleanData);
         toast.success("Work order created successfully");
       }
       
@@ -125,7 +131,8 @@ export const useWorkOrdersPage = (workOrders: WorkOrder[] = []) => {
       
     } catch (error) {
       console.error('Error submitting work order:', error);
-      toast.error("Failed to save work order");
+      const errorMessage = error instanceof Error ? error.message : 'Failed to save work order';
+      toast.error(errorMessage);
     }
   };
 
