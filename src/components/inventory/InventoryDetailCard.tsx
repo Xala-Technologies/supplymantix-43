@@ -41,7 +41,15 @@ interface InventoryDetailCardProps {
 export const InventoryDetailCard = ({ item, onClose, onEdit }: InventoryDetailCardProps) => {
   // Get all inventory items for reorder functionality
   const { data: inventoryData } = useInventoryEnhanced();
-  const allItems = inventoryData?.items || [];
+  const rawItems = inventoryData?.items || [];
+
+  // Convert raw items to the format expected by ReorderDialog
+  const allItems = rawItems.map(rawItem => ({
+    ...rawItem,
+    is_low_stock: (rawItem.quantity || 0) <= (rawItem.min_quantity || 0),
+    needs_reorder: (rawItem.quantity || 0) <= (rawItem.min_quantity || 0) * 1.5,
+    total_value: (rawItem.quantity || 0) * (rawItem.unit_cost || 0),
+  }));
 
   // Convert current item to the format expected by ReorderDialog
   const currentItemForReorder = {
@@ -55,7 +63,10 @@ export const InventoryDetailCard = ({ item, onClose, onEdit }: InventoryDetailCa
     tenant_id: '', // This will be handled by the hook
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
-    description: item.description
+    description: item.description,
+    is_low_stock: item.quantity <= item.minQuantity,
+    needs_reorder: item.quantity <= item.minQuantity * 1.5,
+    total_value: item.quantity * item.unitCost,
   };
 
   const getStatusColor = (status: string) => {
