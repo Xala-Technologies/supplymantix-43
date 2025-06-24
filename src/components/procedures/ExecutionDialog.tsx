@@ -8,14 +8,12 @@ import { Card, CardContent } from "@/components/ui/card";
 import { 
   Play, 
   X, 
-  User, 
-  MapPin,
-  Timer,
   CheckCircle,
   ArrowLeft,
+  ArrowRight,
   Clock,
-  Award,
-  Activity
+  FileText,
+  AlertCircle
 } from "lucide-react";
 import { ProcedureExecution } from "./ProcedureExecution";
 
@@ -36,102 +34,123 @@ export const ExecutionDialog: React.FC<ExecutionDialogProps> = ({
   onComplete,
   onCancel
 }) => {
-  const [currentView, setCurrentView] = useState<'start' | 'executing'>('start');
+  const [isExecuting, setIsExecuting] = useState(false);
 
   if (!procedure) {
     return null;
   }
 
   const handleStart = () => {
-    setCurrentView('executing');
+    setIsExecuting(true);
   };
 
   const handleComplete = (answers: any, score: number) => {
+    setIsExecuting(false);
     onComplete(answers, score);
-    setCurrentView('start');
   };
 
   const handleCancel = () => {
+    setIsExecuting(false);
     onCancel();
-    setCurrentView('start');
   };
 
   const handleBack = () => {
-    setCurrentView('start');
+    setIsExecuting(false);
   };
 
-  // Start View
-  if (currentView === 'start') {
+  // Modern Start Screen
+  if (!isExecuting) {
     return (
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="max-w-lg">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
-                <Play className="h-4 w-4 text-blue-600" />
-              </div>
-              Execute Procedure
+        <DialogContent className="max-w-2xl">
+          <DialogHeader className="text-center pb-6">
+            <div className="mx-auto w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center mb-4">
+              <Play className="h-8 w-8 text-white" />
+            </div>
+            <DialogTitle className="text-2xl font-bold text-gray-900">
+              Ready to Execute
             </DialogTitle>
+            <p className="text-gray-600 mt-2">
+              You're about to start the procedure execution
+            </p>
           </DialogHeader>
           
           <div className="space-y-6">
-            {/* Procedure Info */}
-            <div className="text-center py-2">
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                {procedure.title || 'Untitled Procedure'}
-              </h3>
-              {procedure.description && (
-                <p className="text-gray-600">{procedure.description}</p>
-              )}
-            </div>
+            {/* Procedure Info Card */}
+            <Card className="border-2 border-blue-100 bg-gradient-to-r from-blue-50 to-indigo-50">
+              <CardContent className="p-6">
+                <div className="text-center">
+                  <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                    {procedure.title}
+                  </h3>
+                  {procedure.description && (
+                    <p className="text-gray-600 mb-4">{procedure.description}</p>
+                  )}
+                  
+                  <div className="flex items-center justify-center gap-2 mb-4">
+                    {procedure.category && (
+                      <Badge variant="secondary" className="bg-blue-100 text-blue-800">
+                        {procedure.category}
+                      </Badge>
+                    )}
+                    {procedure.is_global && (
+                      <Badge variant="outline" className="border-blue-300 text-blue-700">
+                        Global
+                      </Badge>
+                    )}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
 
             {/* Quick Stats */}
             <div className="grid grid-cols-3 gap-4">
-              <Card className="bg-blue-50 border-blue-200">
-                <CardContent className="p-3 text-center">
-                  <CheckCircle className="h-5 w-5 text-blue-600 mx-auto mb-1" />
-                  <p className="text-sm font-medium text-blue-900">{procedure.fields?.length || 0}</p>
-                  <p className="text-xs text-blue-700">Steps</p>
+              <Card className="text-center">
+                <CardContent className="p-4">
+                  <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center mx-auto mb-2">
+                    <CheckCircle className="h-5 w-5 text-green-600" />
+                  </div>
+                  <p className="text-2xl font-bold text-gray-900">{procedure.fields?.length || 0}</p>
+                  <p className="text-sm text-gray-600">Steps</p>
                 </CardContent>
               </Card>
               
-              <Card className="bg-green-50 border-green-200">
-                <CardContent className="p-3 text-center">
-                  <Timer className="h-5 w-5 text-green-600 mx-auto mb-1" />
-                  <p className="text-sm font-medium text-green-900">~{Math.ceil((procedure.fields?.length || 1) * 2)}</p>
-                  <p className="text-xs text-green-700">Minutes</p>
+              <Card className="text-center">
+                <CardContent className="p-4">
+                  <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-2">
+                    <Clock className="h-5 w-5 text-blue-600" />
+                  </div>
+                  <p className="text-2xl font-bold text-gray-900">~{Math.ceil((procedure.fields?.length || 1) * 2)}</p>
+                  <p className="text-sm text-gray-600">Minutes</p>
                 </CardContent>
               </Card>
               
-              <Card className="bg-purple-50 border-purple-200">
-                <CardContent className="p-3 text-center">
-                  <Activity className="h-5 w-5 text-purple-600 mx-auto mb-1" />
-                  <p className="text-sm font-medium text-purple-900">{procedure.executions_count || 0}</p>
-                  <p className="text-xs text-purple-700">Runs</p>
+              <Card className="text-center">
+                <CardContent className="p-4">
+                  <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center mx-auto mb-2">
+                    <FileText className="h-5 w-5 text-purple-600" />
+                  </div>
+                  <p className="text-2xl font-bold text-gray-900">{procedure.executions_count || 0}</p>
+                  <p className="text-sm text-gray-600">Completed</p>
                 </CardContent>
               </Card>
-            </div>
-
-            {/* Category & Status */}
-            <div className="flex items-center justify-center gap-2">
-              {procedure.category && (
-                <Badge variant="secondary">{procedure.category}</Badge>
-              )}
-              {procedure.is_global && (
-                <Badge variant="outline" className="border-blue-200 text-blue-700">
-                  Global
-                </Badge>
-              )}
             </div>
 
             {/* Action Buttons */}
-            <div className="flex gap-3 pt-2">
-              <Button variant="outline" onClick={handleCancel} className="flex-1">
+            <div className="flex gap-3 pt-4">
+              <Button 
+                variant="outline" 
+                onClick={handleCancel} 
+                className="flex-1 h-12"
+              >
                 Cancel
               </Button>
-              <Button onClick={handleStart} className="flex-1 bg-blue-600 hover:bg-blue-700">
-                <Play className="h-4 w-4 mr-2" />
-                Start Procedure
+              <Button 
+                onClick={handleStart} 
+                className="flex-1 h-12 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold"
+              >
+                <Play className="h-5 w-5 mr-2" />
+                Start Execution
               </Button>
             </div>
           </div>
@@ -140,30 +159,43 @@ export const ExecutionDialog: React.FC<ExecutionDialogProps> = ({
     );
   }
 
-  // Execution View
+  // Clean Execution View
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl w-[95vw] h-[90vh] p-0">
-        <div className="flex flex-col h-full">
-          {/* Header with back button */}
-          <div className="flex items-center justify-between p-4 border-b bg-gray-50">
-            <div className="flex items-center gap-3">
-              <Button variant="ghost" size="sm" onClick={handleBack}>
-                <ArrowLeft className="h-4 w-4 mr-1" />
-                Back
-              </Button>
-              <div>
-                <h3 className="font-semibold text-gray-900">{procedure.title}</h3>
-                <p className="text-sm text-gray-600">Live Execution</p>
+      <DialogContent className="max-w-6xl w-[95vw] h-[90vh] p-0 overflow-hidden">
+        <div className="flex flex-col h-full bg-gray-50">
+          {/* Modern Header */}
+          <div className="bg-white border-b border-gray-200 px-6 py-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  onClick={handleBack}
+                  className="flex items-center gap-2 text-gray-600 hover:text-gray-900"
+                >
+                  <ArrowLeft className="h-4 w-4" />
+                  Back to Overview
+                </Button>
+                <div className="h-6 w-px bg-gray-300" />
+                <div>
+                  <h2 className="text-lg font-semibold text-gray-900">{procedure.title}</h2>
+                  <p className="text-sm text-gray-600">Live Execution</p>
+                </div>
               </div>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={handleCancel}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                <X className="h-5 w-5" />
+              </Button>
             </div>
-            <Button variant="ghost" size="sm" onClick={handleCancel}>
-              <X className="h-4 w-4" />
-            </Button>
           </div>
 
           {/* Execution Content */}
-          <div className="flex-1 overflow-hidden">
+          <div className="flex-1 overflow-hidden bg-white">
             <ProcedureExecution
               procedure={procedure}
               executionId={executionId}
