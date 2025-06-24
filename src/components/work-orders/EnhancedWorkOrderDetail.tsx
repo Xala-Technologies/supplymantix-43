@@ -1,311 +1,256 @@
+
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
-  Clock, 
-  Users, 
-  MapPin, 
-  AlertCircle, 
   Calendar, 
-  Tag,
+  Clock, 
+  User, 
+  MapPin, 
+  Tag, 
+  Edit, 
   FileText,
   CheckSquare,
-  MessageSquare,
-  Timer,
-  Edit
+  DollarSign,
+  Settings,
+  MessageSquare
 } from "lucide-react";
 import { WorkOrder } from "@/types/workOrder";
 import { EnhancedChecklistSimple } from "./EnhancedChecklistSimple";
 import { WorkOrderStatusFlow } from "./WorkOrderStatusFlow";
-import { WorkOrderTimeTracking } from "./WorkOrderTimeTracking";
-import { TimeAndCostTracking } from "./TimeAndCostTracking";
-import { getAssetName, getLocationName } from "@/utils/assetUtils";
-import { useQueryClient } from "@tanstack/react-query";
-import { toast } from "sonner";
+import { TimeEntries } from "./TimeEntries";
+import { CostEntries } from "./CostEntries";
+import { WorkOrderChat } from "./WorkOrderChat";
 
 interface EnhancedWorkOrderDetailProps {
   workOrder: WorkOrder;
-  onEdit?: () => void;
+  onEdit: () => void;
 }
 
-export const EnhancedWorkOrderDetail = ({ 
-  workOrder, 
-  onEdit 
-}: EnhancedWorkOrderDetailProps) => {
-  const [activeTab, setActiveTab] = useState("checklist");
-  const queryClient = useQueryClient();
-
-  const getStatusColor = (status: string) => {
-    const colors = {
-      'draft': 'bg-slate-50 text-slate-600 border-slate-200',
-      'open': 'bg-sky-50 text-sky-700 border-sky-200',
-      'in_progress': 'bg-amber-50 text-amber-700 border-amber-200',
-      'on_hold': 'bg-orange-50 text-orange-700 border-orange-200',
-      'completed': 'bg-emerald-50 text-emerald-700 border-emerald-200',
-      'cancelled': 'bg-rose-50 text-rose-700 border-rose-200',
-      'archived': 'bg-gray-50 text-gray-600 border-gray-200',
-    };
-    return colors[status.toLowerCase()] || colors.open;
-  };
+export const EnhancedWorkOrderDetail = ({ workOrder, onEdit }: EnhancedWorkOrderDetailProps) => {
+  const [activeTab, setActiveTab] = useState("overview");
 
   const getPriorityColor = (priority: string) => {
-    const colors = {
-      'low': 'text-slate-600 bg-slate-50 border-slate-200',
-      'medium': 'text-blue-600 bg-blue-50 border-blue-200',
-      'high': 'text-amber-600 bg-amber-50 border-amber-200',
-      'urgent': 'text-rose-600 bg-rose-50 border-rose-200',
-    };
-    return colors[priority.toLowerCase()] || colors.medium;
+    switch (priority) {
+      case 'urgent':
+        return 'bg-red-100 text-red-800 border-red-200';
+      case 'high':
+        return 'bg-orange-100 text-orange-800 border-orange-200';
+      case 'medium':
+        return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+      case 'low':
+        return 'bg-green-100 text-green-800 border-green-200';
+      default:
+        return 'bg-gray-100 text-gray-800 border-gray-200';
+    }
   };
 
-  const isOverdue = workOrder.due_date && new Date(workOrder.due_date) < new Date() && workOrder.status !== 'completed';
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'completed':
+        return 'bg-green-100 text-green-800 border-green-200';
+      case 'in_progress':
+        return 'bg-blue-100 text-blue-800 border-blue-200';
+      case 'on_hold':
+        return 'bg-orange-100 text-orange-800 border-orange-200';
+      case 'cancelled':
+        return 'bg-red-100 text-red-800 border-red-200';
+      default:
+        return 'bg-gray-100 text-gray-800 border-gray-200';
+    }
+  };
 
   const handleStatusUpdate = async (newStatus: string) => {
-    try {
-      console.log('Updating work order status to:', newStatus);
-      
-      // Invalidate queries to refresh data
-      queryClient.invalidateQueries({ queryKey: ["work-orders"] });
-      queryClient.invalidateQueries({ queryKey: ["work-orders-integration"] });
-      
-      toast.success(`Work order status updated to ${newStatus}`);
-    } catch (error) {
-      console.error('Failed to update work order status:', error);
-      toast.error('Failed to update work order status');
-    }
+    // This would typically update the work order status via API
+    console.log('Updating status to:', newStatus);
   };
 
-  const handleTimeLogSubmit = async (timeData: any) => {
-    try {
-      console.log('Submitting time log:', timeData);
-      
-      // Invalidate queries to refresh data
-      queryClient.invalidateQueries({ queryKey: ["time-logs"] });
-      queryClient.invalidateQueries({ queryKey: ["work-orders"] });
-      
-      toast.success('Time entry saved successfully');
-    } catch (error) {
-      console.error('Failed to save time entry:', error);
-      toast.error('Failed to save time entry');
-    }
-  };
-
-  const handleChecklistUpdate = async () => {
-    try {
-      // Invalidate queries when checklist is updated
-      queryClient.invalidateQueries({ queryKey: ["checklist-items"] });
-      queryClient.invalidateQueries({ queryKey: ["work-orders"] });
-    } catch (error) {
-      console.error('Failed to update checklist:', error);
-    }
+  const handleChecklistUpdate = () => {
+    // This would trigger a refresh of the work order data
+    console.log('Checklist updated');
   };
 
   return (
     <div className="h-full overflow-auto">
-      <Card className="h-full border-0 shadow-none rounded-none bg-white">
-        {/* Enhanced Header */}
-        <CardHeader className="bg-gradient-to-br from-slate-50 via-gray-50 to-slate-50 border-b border-slate-100">
-          <div className="flex items-start justify-between">
-            <div className="space-y-4 flex-1">
-              <div className="flex items-center gap-3">
-                <CardTitle className="text-2xl font-light tracking-wide text-slate-700">{workOrder.title}</CardTitle>
-                {onEdit && (
-                  <Button variant="outline" size="sm" onClick={onEdit} className="shrink-0 bg-white/80 border-slate-200 text-slate-600 hover:bg-white hover:text-slate-700">
-                    <Edit className="w-4 h-4 mr-2" />
-                    Edit
-                  </Button>
-                )}
-              </div>
-              
-              <div className="flex flex-wrap items-center gap-4 text-sm text-slate-500">
-                <span className="flex items-center gap-2 bg-white/70 px-3 py-1.5 rounded-full border border-slate-200">
-                  <FileText className="w-4 h-4" />
-                  #{workOrder.id.slice(-8)}
-                </span>
-                <span className="flex items-center gap-2 bg-white/70 px-3 py-1.5 rounded-full border border-slate-200">
-                  <MapPin className="w-4 h-4" />
-                  {getAssetName(workOrder.asset)}
-                </span>
-                {workOrder.location && (
-                  <span className="flex items-center gap-2 bg-white/70 px-3 py-1.5 rounded-full border border-slate-200">
-                    <MapPin className="w-4 h-4" />
-                    {getLocationName(workOrder.location)}
-                  </span>
-                )}
-              </div>
-
-              <div className="flex flex-wrap gap-3">
-                <Badge className={`border ${getStatusColor(workOrder.status)} font-medium px-3 py-1`}>
-                  {workOrder.status.replace('_', ' ')}
-                </Badge>
-                <Badge className={`border ${getPriorityColor(workOrder.priority)} font-medium px-3 py-1`}>
-                  {workOrder.priority} priority
-                </Badge>
-                {isOverdue && (
-                  <Badge className="bg-rose-50 text-rose-700 border-rose-200 font-medium px-3 py-1">
-                    <AlertCircle className="w-3 h-3 mr-1" />
-                    Overdue
-                  </Badge>
-                )}
-              </div>
+      {/* Header */}
+      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-gray-200 p-6">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
+              <FileText className="w-5 h-5 text-blue-600" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900">{workOrder.title}</h1>
+              <p className="text-sm text-gray-600">Work Order #{workOrder.id.slice(-8)}</p>
             </div>
           </div>
+          <Button onClick={onEdit} className="gap-2">
+            <Edit className="w-4 h-4" />
+            Edit
+          </Button>
+        </div>
 
-          {workOrder.description && (
-            <div className="bg-white/50 rounded-2xl p-6 border border-slate-200 mt-6">
-              <h3 className="font-medium text-slate-600 mb-3 text-lg">Description</h3>
-              <p className="text-slate-600 leading-relaxed">{workOrder.description}</p>
+        {/* Status and Priority Badges */}
+        <div className="flex items-center gap-3 mb-4">
+          <Badge className={`${getStatusColor(workOrder.status)} font-medium border`}>
+            {workOrder.status.replace('_', ' ').toUpperCase()}
+          </Badge>
+          <Badge className={`${getPriorityColor(workOrder.priority)} font-medium border`}>
+            {workOrder.priority.toUpperCase()} PRIORITY
+          </Badge>
+          {workOrder.category && (
+            <Badge variant="outline" className="font-medium">
+              {workOrder.category}
+            </Badge>
+          )}
+        </div>
+
+        {/* Quick Info */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+          {workOrder.assignedTo && workOrder.assignedTo.length > 0 && (
+            <div className="flex items-center gap-2">
+              <User className="w-4 h-4 text-gray-500" />
+              <span className="text-gray-700">{workOrder.assignedTo[0]}</span>
             </div>
           )}
-        </CardHeader>
-
-        <CardContent className="flex-1 p-8">
-          {/* Enhanced Overview Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-            {workOrder.due_date && (
-              <div className="flex items-center gap-4 p-6 bg-slate-50 rounded-2xl border border-slate-100">
-                <div className="p-3 bg-blue-100 rounded-xl">
-                  <Calendar className="w-5 h-5 text-blue-600" />
-                </div>
-                <div>
-                  <div className="font-semibold text-slate-700 mb-1">Due Date</div>
-                  <div className={`text-sm ${isOverdue ? "text-rose-600" : "text-slate-500"}`}>
-                    {new Date(workOrder.due_date).toLocaleDateString()}
-                  </div>
-                </div>
-              </div>
-            )}
-            
-            <div className="flex items-center gap-4 p-6 bg-slate-50 rounded-2xl border border-slate-100">
-              <div className="p-3 bg-sky-100 rounded-xl">
-                <Users className="w-5 h-5 text-sky-600" />
-              </div>
-              <div>
-                <div className="font-semibold text-slate-700 mb-1">Assigned To</div>
-                <div className="text-sm text-slate-500">
-                  {workOrder.assignedTo?.length > 0 ? workOrder.assignedTo.join(', ') : 'Unassigned'}
-                </div>
-              </div>
+          {workOrder.dueDate && (
+            <div className="flex items-center gap-2">
+              <Calendar className="w-4 h-4 text-gray-500" />
+              <span className="text-gray-700">{new Date(workOrder.dueDate).toLocaleDateString()}</span>
             </div>
-            
-            {workOrder.category && (
-              <div className="flex items-center gap-4 p-6 bg-slate-50 rounded-2xl border border-slate-100">
-                <div className="p-3 bg-indigo-100 rounded-xl">
-                  <Tag className="w-5 h-5 text-indigo-600" />
-                </div>
-                <div>
-                  <div className="font-semibold text-slate-700 mb-1">Category</div>
-                  <div className="text-sm text-slate-500 capitalize">{workOrder.category}</div>
-                </div>
-              </div>
-            )}
-
-            {(workOrder.time_spent || workOrder.timeSpent) && (
-              <div className="flex items-center gap-4 p-6 bg-slate-50 rounded-2xl border border-slate-100">
-                <div className="p-3 bg-emerald-100 rounded-xl">
-                  <Timer className="w-5 h-5 text-emerald-600" />
-                </div>
-                <div>
-                  <div className="font-semibold text-slate-700 mb-1">Time Spent</div>
-                  <div className="text-sm text-slate-500">
-                    {workOrder.time_spent || workOrder.timeSpent} hours
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {(workOrder.total_cost || workOrder.totalCost) && (
-              <div className="flex items-center gap-4 p-6 bg-slate-50 rounded-2xl border border-slate-100">
-                <div className="p-3 bg-amber-100 rounded-xl">
-                  <div className="w-5 h-5 text-amber-600 flex items-center justify-center font-bold text-sm">$</div>
-                </div>
-                <div>
-                  <div className="font-semibold text-slate-700 mb-1">Total Cost</div>
-                  <div className="text-sm text-slate-500">
-                    ${(workOrder.total_cost || workOrder.totalCost)?.toFixed(2)}
-                  </div>
-                </div>
-              </div>
-            )}
+          )}
+          {workOrder.location && (
+            <div className="flex items-center gap-2">
+              <MapPin className="w-4 h-4 text-gray-500" />
+              <span className="text-gray-700">{workOrder.location}</span>
+            </div>
+          )}
+          <div className="flex items-center gap-2">
+            <Clock className="w-4 h-4 text-gray-500" />
+            <span className="text-gray-700">{workOrder.timeSpent || 0}h spent</span>
           </div>
+        </div>
+      </div>
 
-          {/* Tags Section */}
-          {workOrder.tags && workOrder.tags.length > 0 && (
-            <div className="mb-8 p-6 bg-slate-50 rounded-2xl border border-slate-100">
-              <div className="flex items-center gap-3 mb-4">
-                <Tag className="w-5 h-5 text-slate-400" />
-                <span className="font-semibold text-slate-700">Tags</span>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {workOrder.tags.map((tag, index) => (
-                  <Badge key={index} variant="outline" className="text-xs bg-white border-slate-200 text-slate-600 hover:bg-slate-50 px-3 py-1">
-                    {tag}
-                  </Badge>
-                ))}
-              </div>
-            </div>
-          )}
+      {/* Tabs Navigation */}
+      <div className="p-6">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="grid w-full grid-cols-6 mb-6">
+            <TabsTrigger value="overview" className="gap-2">
+              <FileText className="w-4 h-4" />
+              Overview
+            </TabsTrigger>
+            <TabsTrigger value="checklist" className="gap-2">
+              <CheckSquare className="w-4 h-4" />
+              Checklist
+            </TabsTrigger>
+            <TabsTrigger value="status" className="gap-2">
+              <Settings className="w-4 h-4" />
+              Status
+            </TabsTrigger>
+            <TabsTrigger value="time" className="gap-2">
+              <Clock className="w-4 h-4" />
+              Time
+            </TabsTrigger>
+            <TabsTrigger value="costs" className="gap-2">
+              <DollarSign className="w-4 h-4" />
+              Costs
+            </TabsTrigger>
+            <TabsTrigger value="chat" className="gap-2">
+              <MessageSquare className="w-4 h-4" />
+              Chat
+            </TabsTrigger>
+          </TabsList>
 
-          {/* Enhanced Tabbed Content */}
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-            <TabsList className="grid w-full grid-cols-4 bg-slate-50 rounded-2xl p-1.5 border border-slate-100">
-              <TabsTrigger value="checklist" className="flex items-center gap-2 rounded-xl data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-slate-700 text-slate-500">
-                <CheckSquare className="w-4 h-4" />
-                Checklist
-              </TabsTrigger>
-              <TabsTrigger value="status" className="flex items-center gap-2 rounded-xl data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-slate-700 text-slate-500">
-                <Clock className="w-4 h-4" />
-                Status
-              </TabsTrigger>
-              <TabsTrigger value="time" className="flex items-center gap-2 rounded-xl data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-slate-700 text-slate-500">
-                <Timer className="w-4 h-4" />
-                Time & Cost
-              </TabsTrigger>
-              <TabsTrigger value="activity" className="flex items-center gap-2 rounded-xl data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-slate-700 text-slate-500">
-                <MessageSquare className="w-4 h-4" />
-                Activity
-              </TabsTrigger>
-            </TabsList>
+          <TabsContent value="overview" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Description</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-gray-700 leading-relaxed">
+                  {workOrder.description || "No description provided."}
+                </p>
+              </CardContent>
+            </Card>
 
-            <div className="bg-white rounded-2xl border border-slate-100 shadow-sm">
-              <TabsContent value="checklist" className="p-6 m-0">
-                <EnhancedChecklistSimple 
-                  workOrderId={workOrder.id} 
-                  onUpdate={handleChecklistUpdate}
-                />
-              </TabsContent>
+            {workOrder.tags && workOrder.tags.length > 0 && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Tags</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex flex-wrap gap-2">
+                    {workOrder.tags.map((tag, index) => (
+                      <Badge key={index} variant="secondary" className="gap-1">
+                        <Tag className="w-3 h-3" />
+                        {tag}
+                      </Badge>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
 
-              <TabsContent value="status" className="p-6 m-0">
-                <WorkOrderStatusFlow 
-                  workOrder={workOrder} 
-                  onStatusUpdate={handleStatusUpdate}
-                />
-              </TabsContent>
-
-              <TabsContent value="time" className="p-6 m-0">
-                <TimeAndCostTracking 
-                  workOrderId={workOrder.id}
-                  onTimeLogSubmit={handleTimeLogSubmit}
-                />
-              </TabsContent>
-
-              <TabsContent value="activity" className="p-6 m-0">
-                <div className="space-y-4">
-                  <div className="text-center py-16 text-slate-400">
-                    <div className="w-20 h-20 bg-slate-50 rounded-2xl flex items-center justify-center mx-auto mb-6">
-                      <MessageSquare className="w-10 h-10 text-slate-300" />
+            {workOrder.asset && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Asset Information</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2">
+                    <div className="flex justify-between">
+                      <span className="font-medium">Asset Name:</span>
+                      <span>{typeof workOrder.asset === 'object' ? workOrder.asset.name : workOrder.asset}</span>
                     </div>
-                    <p className="text-lg font-medium text-slate-600 mb-2">No activity yet</p>
-                    <p className="text-sm text-slate-400">Comments and activity logs will appear here</p>
+                    {typeof workOrder.asset === 'object' && workOrder.asset.status && (
+                      <div className="flex justify-between">
+                        <span className="font-medium">Asset Status:</span>
+                        <Badge variant="outline">{workOrder.asset.status}</Badge>
+                      </div>
+                    )}
                   </div>
-                </div>
-              </TabsContent>
-            </div>
-          </Tabs>
-        </CardContent>
-      </Card>
+                </CardContent>
+              </Card>
+            )}
+          </TabsContent>
+
+          <TabsContent value="checklist">
+            <EnhancedChecklistSimple 
+              workOrderId={workOrder.id}
+              onUpdate={handleChecklistUpdate}
+            />
+          </TabsContent>
+
+          <TabsContent value="status">
+            <WorkOrderStatusFlow 
+              workOrder={workOrder}
+              onStatusUpdate={handleStatusUpdate}
+            />
+          </TabsContent>
+
+          <TabsContent value="time">
+            <TimeEntries 
+              workOrderId={workOrder.id}
+              onSubmit={(timeData) => console.log('Time entry submitted:', timeData)}
+            />
+          </TabsContent>
+
+          <TabsContent value="costs">
+            <CostEntries 
+              workOrderId={workOrder.id}
+              onSubmit={(costData) => console.log('Cost entry submitted:', costData)}
+            />
+          </TabsContent>
+
+          <TabsContent value="chat">
+            <WorkOrderChat workOrderId={workOrder.id} />
+          </TabsContent>
+        </Tabs>
+      </div>
     </div>
   );
 };

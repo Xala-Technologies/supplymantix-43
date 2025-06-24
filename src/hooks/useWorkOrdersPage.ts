@@ -1,83 +1,11 @@
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useMemo } from "react";
 import { WorkOrder, WorkOrderFilters } from "@/types/workOrder";
-import { transformWorkOrderData } from "@/services/workOrderService";
+import { toast } from "sonner";
 
-type ViewMode = 'list' | 'detail' | 'form';
-
-// Sample data for demonstration
-const sampleWorkOrders: WorkOrder[] = [
-  {
-    id: '5969',
-    title: 'Wrapper Malfunction - Items Stuck on Belt',
-    status: 'in_progress',
-    due_date: '2023-10-05T08:43:00Z',
-    priority: 'high',
-    assignedTo: ['Zach Brown'],
-    description: 'The cutter is not fully cutting, and packages are either tearing away from the cutting assembly, or tipping over and causing stoppage.',
-    asset: {
-      id: 'wrapper-001',
-      name: 'Wrapper - Orion Model A',
-      status: 'active',
-    },
-    location: 'Production Line 3',
-    category: 'equipment',
-    time_spent: 2.5,
-    total_cost: 145.50,
-    parts_used: [
-      { name: 'Cutting Blade', quantity: 1, cost: 25.00 },
-      { name: 'Belt Assembly', quantity: 1, cost: 120.50 }
-    ],
-    created_at: '2023-10-05T08:00:00Z',
-    updated_at: '2023-10-05T10:30:00Z',
-    tenant_id: 'sample-tenant-id',
-    tags: ['urgent', 'production']
-  },
-  {
-    id: '5962',
-    title: '[Safety] OSHA Compliance - Daily Site Walk',
-    status: 'on_hold',
-    due_date: '2023-10-04T10:00:00Z',
-    priority: 'medium',
-    assignedTo: ['Safety Team'],
-    description: 'Daily safety inspection and compliance check.',
-    asset: {
-      id: 'facility-001',
-      name: 'Facility',
-      status: 'active',
-    },
-    location: 'Entire Facility',
-    category: 'safety',
-    created_at: '2023-10-04T08:00:00Z',
-    updated_at: '2023-10-04T09:00:00Z',
-    tenant_id: 'sample-tenant-id',
-    tags: ['safety', 'compliance']
-  },
-  {
-    id: '5960',
-    title: '[Inspection] Wrapper Cleaning',
-    status: 'completed',
-    due_date: '2023-10-06T14:00:00Z',
-    priority: 'low',
-    assignedTo: ['Maintenance Team 1'],
-    description: 'Regular cleaning and maintenance of wrapper equipment.',
-    asset: {
-      id: 'wrapper-001',
-      name: 'Wrapper - Orion Model A',
-      status: 'active',
-    },
-    location: 'Production Line 3',
-    category: 'maintenance',
-    created_at: '2023-10-06T08:00:00Z',
-    updated_at: '2023-10-06T10:00:00Z',
-    tenant_id: 'sample-tenant-id',
-    tags: ['maintenance', 'scheduled']
-  }
-];
-
-export const useWorkOrdersPage = (workOrders: WorkOrder[] | undefined) => {
+export const useWorkOrdersPage = (workOrders: WorkOrder[] = []) => {
   const [selectedWorkOrder, setSelectedWorkOrder] = useState<string | null>(null);
-  const [viewMode, setViewMode] = useState<ViewMode>('detail');
+  const [viewMode, setViewMode] = useState<'list' | 'detail' | 'form'>('list');
   const [editingWorkOrder, setEditingWorkOrder] = useState<WorkOrder | null>(null);
   const [filters, setFilters] = useState<WorkOrderFilters>({
     search: '',
@@ -87,38 +15,47 @@ export const useWorkOrdersPage = (workOrders: WorkOrder[] | undefined) => {
     category: 'all'
   });
 
-  // Transform and use real data if available, otherwise use sample data
-  const transformedWorkOrders: WorkOrder[] = workOrders?.length > 0 
-    ? workOrders.map(transformWorkOrderData)
-    : sampleWorkOrders;
+  // Transform work orders to ensure consistent format
+  const transformedWorkOrders = useMemo(() => {
+    return workOrders.map(wo => ({
+      ...wo,
+      assignedTo: wo.assignedTo || (wo.assigned_to ? [wo.assigned_to] : []),
+      dueDate: wo.dueDate || wo.due_date,
+      createdAt: wo.createdAt || wo.created_at,
+      timeSpent: wo.timeSpent || wo.time_spent || 0,
+      totalCost: wo.totalCost || wo.total_cost || 0,
+      partsUsed: wo.partsUsed || wo.parts_used || []
+    }));
+  }, [workOrders]);
 
   // Filter work orders based on current filters
   const filteredWorkOrders = useMemo(() => {
     return transformedWorkOrders.filter(wo => {
-      if (filters.search && !wo.title.toLowerCase().includes(filters.search.toLowerCase()) && 
-          !wo.description.toLowerCase().includes(filters.search.toLowerCase())) {
-        return false;
-      }
-      if (filters.status !== 'all' && wo.status !== filters.status) return false;
-      if (filters.priority !== 'all' && wo.priority !== filters.priority) return false;
-      if (filters.category !== 'all' && wo.category !== filters.category) return false;
-      return true;
+      const matchesSearch = !filters.search || 
+        wo.title?.toLowerCase().includes(filters.search.toLowerCase()) ||
+        wo.description?.toLowerCase().includes(filters.search.toLowerCase()) ||
+        wo.id.toLowerCase().includes(filters.search.toLowerCase());
+
+      const matchesStatus = filters.status === 'all' || wo.status === filters.status;
+      const matchesPriority = filters.priority === 'all' || wo.priority === filters.priority;
+      const matchesCategory = filters.category === 'all' || wo.category === filters.category;
+      
+      const matchesAssignedTo = filters.assignedTo === 'all' || 
+        (filters.assignedTo === 'unassigned' && (!wo.assignedTo || wo.assignedTo.length === 0)) ||
+        (filters.assignedTo === 'me' && wo.assignedTo?.includes('current-user')); // This would need proper user context
+
+      return matchesSearch && matchesStatus && matchesPriority && matchesCategory && matchesAssignedTo;
     });
   }, [transformedWorkOrders, filters]);
 
-  // Auto-select first work order when data loads
-  useEffect(() => {
-    if (filteredWorkOrders.length > 0 && !selectedWorkOrder) {
-      setSelectedWorkOrder(filteredWorkOrders[0].id);
-      setViewMode('detail');
-    }
-  }, [filteredWorkOrders, selectedWorkOrder]);
-
-  const selectedWorkOrderData = filteredWorkOrders.find(wo => wo.id === selectedWorkOrder);
+  const selectedWorkOrderData = useMemo(() => {
+    return transformedWorkOrders.find(wo => wo.id === selectedWorkOrder);
+  }, [transformedWorkOrders, selectedWorkOrder]);
 
   const handleCreateWorkOrder = () => {
     setEditingWorkOrder(null);
     setViewMode('form');
+    setSelectedWorkOrder(null);
   };
 
   const handleEditWorkOrder = () => {
@@ -131,12 +68,28 @@ export const useWorkOrdersPage = (workOrders: WorkOrder[] | undefined) => {
   const handleSelectWorkOrder = (id: string) => {
     setSelectedWorkOrder(id);
     setViewMode('detail');
+    setEditingWorkOrder(null);
   };
 
-  const handleFormSubmit = (data: any) => {
-    console.log('Form submitted:', data);
-    // Handle create/update logic here
-    setViewMode(selectedWorkOrder ? 'detail' : 'list');
+  const handleFormSubmit = async (data: any) => {
+    try {
+      // Here you would typically call an API to create/update the work order
+      console.log('Submitting work order:', data);
+      
+      if (editingWorkOrder) {
+        toast.success("Work order updated successfully");
+      } else {
+        toast.success("Work order created successfully");
+      }
+      
+      // Reset form state
+      setViewMode('list');
+      setEditingWorkOrder(null);
+      setSelectedWorkOrder(null);
+    } catch (error) {
+      console.error('Error submitting work order:', error);
+      toast.error("Failed to save work order");
+    }
   };
 
   const handleFormCancel = () => {
@@ -144,7 +97,11 @@ export const useWorkOrdersPage = (workOrders: WorkOrder[] | undefined) => {
     setEditingWorkOrder(null);
   };
 
-  const setViewModeToList = () => setViewMode('list');
+  const setViewModeToList = () => {
+    setViewMode('list');
+    setSelectedWorkOrder(null);
+    setEditingWorkOrder(null);
+  };
 
   return {
     selectedWorkOrder,
