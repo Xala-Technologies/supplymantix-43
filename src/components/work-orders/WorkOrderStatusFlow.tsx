@@ -144,49 +144,68 @@ export const WorkOrderStatusFlow = ({ workOrder, onStatusUpdate }: WorkOrderStat
       <CardContent className="space-y-6 p-6">
         {/* Status Progress Timeline - Only show for main flow statuses */}
         {!['cancelled', 'on_hold'].includes(currentStatus) && (
-          <div className="bg-gray-50/50 rounded-xl p-4 border border-gray-100">
-            <div className="flex items-center justify-between relative">
-              {statusProgress.map((item, index) => (
-                <div key={item.status} className="flex flex-col items-center space-y-2 flex-1 relative">
-                  <div className={`w-4 h-4 rounded-full transition-colors z-10 ${
-                    item.isActive
-                      ? item.isCurrent 
-                        ? 'bg-blue-500 ring-4 ring-blue-100' 
-                        : 'bg-green-500'
-                      : 'bg-gray-300'
-                  }`} />
-                  <span className={`text-xs font-medium text-center ${
-                    item.isActive ? 'text-gray-900' : 'text-gray-500'
-                  }`}>
-                    {item.status.replace('_', ' ')}
-                  </span>
-                  {index < statusProgress.length - 1 && (
-                    <div className={`absolute top-2 left-1/2 w-full h-0.5 ${
-                      item.isActive ? 'bg-green-300' : 'bg-gray-200'
-                    }`} style={{ transform: 'translateX(50%)', zIndex: 1 }} />
-                  )}
-                </div>
-              ))}
+          <div className="bg-gray-50/50 rounded-xl p-6 border border-gray-100">
+            <div className="relative">
+              <div className="flex items-center justify-between">
+                {statusProgress.map((item, index) => (
+                  <div key={item.status} className="flex flex-col items-center space-y-3 flex-1 relative z-10">
+                    <div className={`w-5 h-5 rounded-full transition-all duration-300 ${
+                      item.isActive
+                        ? item.isCurrent 
+                          ? 'bg-blue-500 ring-4 ring-blue-100 shadow-lg' 
+                          : 'bg-green-500 shadow-md'
+                        : 'bg-gray-300'
+                    }`} />
+                    <span className={`text-sm font-medium text-center px-2 py-1 rounded-md transition-colors ${
+                      item.isActive 
+                        ? item.isCurrent
+                          ? 'text-blue-700 bg-blue-50'
+                          : 'text-green-700 bg-green-50'
+                        : 'text-gray-500'
+                    }`}>
+                      {item.status.replace('_', ' ')}
+                    </span>
+                  </div>
+                ))}
+              </div>
+              
+              {/* Progress line */}
+              <div className="absolute top-2.5 left-0 right-0 h-0.5 bg-gray-200 -z-10">
+                <div 
+                  className="h-full bg-green-400 transition-all duration-500 rounded-full"
+                  style={{ 
+                    width: `${Math.max(0, (statusProgress.findIndex(s => s.isCurrent) / (statusProgress.length - 1)) * 100)}%` 
+                  }}
+                />
+              </div>
             </div>
           </div>
         )}
 
         {/* Special Status Message */}
         {['cancelled', 'on_hold'].includes(currentStatus) && (
-          <div className={`p-4 rounded-xl border ${
+          <div className={`p-4 rounded-xl border-2 border-dashed ${
             currentStatus === 'cancelled' 
               ? 'bg-red-50 border-red-200 text-red-800' 
               : 'bg-orange-50 border-orange-200 text-orange-800'
           }`}>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-3">
               {currentStatus === 'cancelled' ? (
-                <AlertCircle className="w-5 h-5" />
+                <AlertCircle className="w-6 h-6 flex-shrink-0" />
               ) : (
-                <Pause className="w-5 h-5" />
+                <Pause className="w-6 h-6 flex-shrink-0" />
               )}
-              <span className="font-medium">
-                Work order is {currentStatus === 'cancelled' ? 'cancelled' : 'on hold'}
-              </span>
+              <div>
+                <span className="font-semibold block">
+                  Work order is {currentStatus === 'cancelled' ? 'cancelled' : 'on hold'}
+                </span>
+                <span className="text-sm opacity-80">
+                  {currentStatus === 'cancelled' 
+                    ? 'This work order has been cancelled and is no longer active.' 
+                    : 'This work order is temporarily paused and can be resumed.'
+                  }
+                </span>
+              </div>
             </div>
           </div>
         )}
@@ -195,7 +214,7 @@ export const WorkOrderStatusFlow = ({ workOrder, onStatusUpdate }: WorkOrderStat
         {availableActions.length > 0 && (
           <div className="space-y-4">
             <div>
-              <Label htmlFor="status-notes" className="text-sm font-medium">
+              <Label htmlFor="status-notes" className="text-sm font-medium text-gray-700">
                 Status Change Notes (Optional)
               </Label>
               <Textarea
@@ -203,7 +222,7 @@ export const WorkOrderStatusFlow = ({ workOrder, onStatusUpdate }: WorkOrderStat
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
                 placeholder="Add notes about this status change..."
-                className="mt-2 min-h-[80px] border-gray-200 rounded-xl"
+                className="mt-2 min-h-[80px] border-gray-200 rounded-xl resize-none focus:ring-2 focus:ring-blue-100"
               />
             </div>
 
@@ -211,11 +230,11 @@ export const WorkOrderStatusFlow = ({ workOrder, onStatusUpdate }: WorkOrderStat
               {availableActions.map((action) => {
                 const IconComponent = action.icon;
                 const colorClasses = {
-                  green: 'border-green-300 text-green-700 bg-green-50 hover:bg-green-100',
-                  blue: 'border-blue-300 text-blue-700 bg-blue-50 hover:bg-blue-100',
-                  orange: 'border-orange-300 text-orange-700 bg-orange-50 hover:bg-orange-100',
-                  red: 'border-red-300 text-red-700 bg-red-50 hover:bg-red-100',
-                  gray: 'border-gray-300 text-gray-700 bg-gray-50 hover:bg-gray-100'
+                  green: 'border-green-300 text-green-700 bg-green-50 hover:bg-green-100 hover:border-green-400',
+                  blue: 'border-blue-300 text-blue-700 bg-blue-50 hover:bg-blue-100 hover:border-blue-400',
+                  orange: 'border-orange-300 text-orange-700 bg-orange-50 hover:bg-orange-100 hover:border-orange-400',
+                  red: 'border-red-300 text-red-700 bg-red-50 hover:bg-red-100 hover:border-red-400',
+                  gray: 'border-gray-300 text-gray-700 bg-gray-50 hover:bg-gray-100 hover:border-gray-400'
                 };
 
                 return (
@@ -224,7 +243,7 @@ export const WorkOrderStatusFlow = ({ workOrder, onStatusUpdate }: WorkOrderStat
                     onClick={() => handleStatusChange(action.action, notes)}
                     disabled={isChangingStatus || updateStatusMutation.isPending}
                     variant="outline"
-                    className={`flex items-center gap-2 px-4 py-2 rounded-xl font-medium transition-all hover:scale-105 ${
+                    className={`flex items-center gap-2 px-4 py-2 rounded-xl font-medium transition-all duration-200 hover:scale-105 hover:shadow-md ${
                       colorClasses[action.color as keyof typeof colorClasses]
                     }`}
                   >
@@ -243,9 +262,9 @@ export const WorkOrderStatusFlow = ({ workOrder, onStatusUpdate }: WorkOrderStat
             <div className="p-2 bg-white rounded-lg shadow-sm">
               <FileText className="w-4 h-4 text-gray-600" />
             </div>
-            <div>
-              <div>
-                Status: <strong className="text-gray-900">{currentStatus.replace('_', ' ')}</strong>
+            <div className="flex-1">
+              <div className="font-medium">
+                Status: <span className="text-gray-900">{currentStatus.replace('_', ' ')}</span>
               </div>
               {workOrder.updated_at && (
                 <div className="text-gray-500 text-xs mt-1">
