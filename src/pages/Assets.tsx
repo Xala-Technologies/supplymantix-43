@@ -1,3 +1,4 @@
+
 import { DashboardLayout } from "@/components/Layout/DashboardLayout";
 import { PageLayout, PageLayoutHeader, PageFilters, PageLayoutContent } from "@/components/Layout/PageLayout";
 import { AssetsHeader } from "@/components/assets/AssetsHeader";
@@ -296,6 +297,7 @@ export default function Assets() {
           <>
             <PageLayoutHeader 
               title="Assets"
+              description="Manage and track your organization's physical assets and equipment"
             >
               <Button onClick={handleCreateAsset} className="bg-blue-600 hover:bg-blue-700 shadow-sm">
                 <Plus className="h-4 w-4 mr-2" />
