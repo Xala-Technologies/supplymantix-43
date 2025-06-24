@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -13,12 +14,12 @@ import {
   AlertCircle,
   FileText 
 } from "lucide-react";
-import { WorkOrder } from "@/types/workOrder";
+import { WorkOrder, WorkOrderStatus } from "@/types/workOrder";
 import { useWorkOrderStatusUpdate } from "@/hooks/useWorkOrdersIntegration";
 
 interface WorkOrderStatusFlowProps {
   workOrder: WorkOrder;
-  onStatusUpdate?: (newStatus: string) => Promise<void>;
+  onStatusUpdate?: (newStatus: WorkOrderStatus) => Promise<void>;
 }
 
 export const WorkOrderStatusFlow = ({ workOrder, onStatusUpdate }: WorkOrderStatusFlowProps) => {
@@ -26,7 +27,7 @@ export const WorkOrderStatusFlow = ({ workOrder, onStatusUpdate }: WorkOrderStat
   const [isChangingStatus, setIsChangingStatus] = useState(false);
   const updateStatus = useWorkOrderStatusUpdate();
 
-  const handleStatusChange = async (newStatus: string, statusNotes?: string) => {
+  const handleStatusChange = async (newStatus: WorkOrderStatus, statusNotes?: string) => {
     setIsChangingStatus(true);
     try {
       if (onStatusUpdate) {
@@ -65,26 +66,26 @@ export const WorkOrderStatusFlow = ({ workOrder, onStatusUpdate }: WorkOrderStat
     switch (status) {
       case 'draft':
         return [
-          { action: 'open', label: 'Publish', icon: Play, color: 'blue' }
+          { action: 'open' as WorkOrderStatus, label: 'Publish', icon: Play, color: 'blue' }
         ];
       case 'open':
         return [
-          { action: 'in_progress', label: 'Start Work', icon: Play, color: 'blue' },
-          { action: 'on_hold', label: 'Put On Hold', icon: Pause, color: 'orange' }
+          { action: 'in_progress' as WorkOrderStatus, label: 'Start Work', icon: Play, color: 'blue' },
+          { action: 'on_hold' as WorkOrderStatus, label: 'Put On Hold', icon: Pause, color: 'orange' }
         ];
       case 'in_progress':
         return [
-          { action: 'completed', label: 'Mark Complete', icon: CheckCircle, color: 'green' },
-          { action: 'on_hold', label: 'Put On Hold', icon: Pause, color: 'orange' }
+          { action: 'completed' as WorkOrderStatus, label: 'Mark Complete', icon: CheckCircle, color: 'green' },
+          { action: 'on_hold' as WorkOrderStatus, label: 'Put On Hold', icon: Pause, color: 'orange' }
         ];
       case 'on_hold':
         return [
-          { action: 'in_progress', label: 'Resume Work', icon: Play, color: 'blue' },
-          { action: 'cancelled', label: 'Cancel', icon: AlertCircle, color: 'red' }
+          { action: 'in_progress' as WorkOrderStatus, label: 'Resume Work', icon: Play, color: 'blue' },
+          { action: 'cancelled' as WorkOrderStatus, label: 'Cancel', icon: AlertCircle, color: 'red' }
         ];
       case 'completed':
         return [
-          { action: 'archived', label: 'Archive', icon: Archive, color: 'gray' }
+          { action: 'archived' as WorkOrderStatus, label: 'Archive', icon: Archive, color: 'gray' }
         ];
       default:
         return [];

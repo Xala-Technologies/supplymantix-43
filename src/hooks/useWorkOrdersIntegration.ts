@@ -32,11 +32,14 @@ export const useWorkOrdersIntegration = () => {
           }
 
           // Properly handle asset object - ensure it has required id field
-          let asset: WorkOrder['asset'] = wo.assets ? {
-            id: wo.asset_id || wo.assets.id || '',
-            name: wo.assets.name || 'Unknown Asset',
-            status: 'active'
-          } : wo.asset_id || '';
+          let asset: WorkOrder['asset'] = wo.asset_id || '';
+          if (wo.assets) {
+            asset = {
+              id: wo.asset_id || wo.assets.id || '',
+              name: wo.assets.name || 'Unknown Asset',
+              status: 'active'
+            };
+          }
 
           return {
             id: wo.id,
