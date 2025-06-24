@@ -13,17 +13,45 @@ import {
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { useAutoReorderCheck } from "@/hooks/useInventoryReorder";
+import { useExportInventory } from "@/hooks/useInventoryExport";
 import type { InventoryItemWithStats } from "@/lib/database/inventory-enhanced";
 
+interface Location {
+  id: string;
+  name: string;
+  description?: string;
+  location_code?: string;
+  location_type: string;
+  address?: string;
+  is_active: boolean;
+}
+
 interface InventoryHeaderProps {
-  onCreateItem: () => void;
-  searchQuery: string;
-  onSearchChange: (query: string) => void;
+  // Required props for basic inventory header
+  onCreateItem?: () => void;
+  searchQuery?: string;
+  onSearchChange?: (query: string) => void;
+  
+  // Optional props for enhanced dashboard functionality
   onFilterClick?: () => void;
   onExportClick?: () => void;
+  onRefresh?: () => Promise<void>;
+  onStatusFilterChange?: (status: string) => void;
+  onLocationFilterChange?: (location: string) => void;
+  
+  // Data props
   totalItems?: number;
   lowStockCount?: number;
   items?: InventoryItemWithStats[];
+  locations?: Location[];
+  
+  // Filter state props
+  searchValue?: string;
+  statusFilter?: string;
+  locationFilter?: string;
+  
+  // Additional actions
+  extraActions?: React.ReactNode;
 }
 
 export const InventoryHeader = ({
@@ -32,17 +60,43 @@ export const InventoryHeader = ({
   onSearchChange,
   onFilterClick,
   onExportClick,
+  onRefresh,
+  onStatusFilterChange,
+  onLocationFilterChange,
   totalItems = 0,
   lowStockCount = 0,
-  items = []
+  items = [],
+  locations = [],
+  searchValue,
+  statusFilter,
+  locationFilter,
+  extraActions
 }: InventoryHeaderProps) => {
   const autoReorderCheck = useAutoReorderCheck();
+  const exportInventory = useExportInventory();
 
   const handleAutoReorderCheck = () => {
     if (items.length > 0) {
       autoReorderCheck.mutate(items);
     }
   };
+
+  const handleExport = () => {
+    if (onExportClick) {
+      onExportClick();
+    } else if (items.length > 0) {
+      exportInventory.mutate(items);
+    }
+  };
+
+  const handleCreateItem = () => {
+    if (onCreateItem) {
+      onCreateItem();
+    }
+  };
+
+  // Use searchQuery or searchValue depending on which is provided
+  const currentSearchValue = searchQuery || searchValue || "";
 
   return (
     <div className="bg-white border-b border-gray-200">
@@ -69,10 +123,14 @@ export const InventoryHeader = ({
               </Button>
             )}
             
-            <Button onClick={onCreateItem} className="bg-blue-600 hover:bg-blue-700">
-              <Plus className="h-4 w-4 mr-2" />
-              Add Item
-            </Button>
+            {onCreateItem && (
+              <Button onClick={handleCreateItem} className="bg-blue-600 hover:bg-blue-700">
+                <Plus className="h-4 w-4 mr-2" />
+                Add Item
+              </Button>
+            )}
+
+            {extraActions}
           </div>
         </div>
 
@@ -82,8 +140,8 @@ export const InventoryHeader = ({
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
               <Input
                 placeholder="Search inventory..."
-                value={searchQuery}
-                onChange={(e) => onSearchChange(e.target.value)}
+                value={currentSearchValue}
+                onChange={(e) => onSearchChange?.(e.target.value)}
                 className="pl-10 w-80"
               />
             </div>
@@ -111,7 +169,7 @@ export const InventoryHeader = ({
               )}
             </div>
 
-            <Button variant="outline" size="sm" onClick={onExportClick}>
+            <Button variant="outline" size="sm" onClick={handleExport}>
               <Download className="h-4 w-4 mr-2" />
               Export
             </Button>

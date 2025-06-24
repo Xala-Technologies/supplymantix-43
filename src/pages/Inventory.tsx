@@ -3,12 +3,15 @@ import { DashboardLayout } from "@/components/Layout/DashboardLayout";
 import { InventoryHeader } from "@/components/inventory/InventoryHeader";
 import { InventoryList } from "@/components/inventory/InventoryList";
 import { InventoryDetailCard } from "@/components/inventory/InventoryDetailCard";
+import { InventoryForm } from "@/components/inventory/InventoryForm";
 import { useState } from "react";
 import { ChevronLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export default function Inventory() {
   const [selectedItem, setSelectedItem] = useState<string | null>('item-001');
+  const [searchQuery, setSearchQuery] = useState("");
+  const [showCreateForm, setShowCreateForm] = useState(false);
 
   const sampleInventory = [
     {
@@ -59,11 +62,42 @@ export default function Inventory() {
   ];
 
   const selectedItemData = sampleInventory.find(item => item.id === selectedItem) || sampleInventory[0];
+  const lowStockCount = sampleInventory.filter(item => item.quantity <= item.minQuantity).length;
+
+  const handleCreateItem = () => {
+    setShowCreateForm(true);
+  };
+
+  const handleSearchChange = (query: string) => {
+    setSearchQuery(query);
+  };
 
   return (
     <DashboardLayout>
       <div className="h-full flex flex-col bg-gray-50">
-        <InventoryHeader />
+        <InventoryHeader 
+          onCreateItem={handleCreateItem}
+          searchQuery={searchQuery}
+          onSearchChange={handleSearchChange}
+          totalItems={sampleInventory.length}
+          lowStockCount={lowStockCount}
+          items={sampleInventory.map(item => ({
+            id: item.id,
+            tenant_id: '',
+            name: item.name,
+            description: item.description,
+            sku: item.sku,
+            location: item.location,
+            quantity: item.quantity,
+            min_quantity: item.minQuantity,
+            unit_cost: item.unitCost,
+            created_at: '',
+            updated_at: '',
+            is_low_stock: item.quantity <= item.minQuantity,
+            needs_reorder: item.quantity <= item.minQuantity * 1.5,
+            total_value: item.totalValue
+          }))}
+        />
         
         <div className="flex-1 flex overflow-hidden">
           {/* Desktop Layout */}
@@ -116,6 +150,15 @@ export default function Inventory() {
             )}
           </div>
         </div>
+
+        {/* Create Item Form Modal */}
+        {showCreateForm && (
+          <InventoryForm
+            mode="create"
+            onSuccess={() => setShowCreateForm(false)}
+            trigger={null}
+          />
+        )}
       </div>
     </DashboardLayout>
   );
