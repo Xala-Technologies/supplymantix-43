@@ -174,8 +174,7 @@ export const WorkOrderProcedureSection: React.FC<WorkOrderProcedureSectionProps>
       <ProcedureSelectionDialog
         open={showSelectionDialog}
         onOpenChange={setShowSelectionDialog}
-        onProcedureSelect={handleProcedureSelected}
-        workOrderId={workOrderId}
+        onSelect={handleProcedureSelected}
       />
     </>
   );

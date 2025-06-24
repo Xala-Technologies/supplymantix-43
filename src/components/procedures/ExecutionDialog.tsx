@@ -25,6 +25,7 @@ interface ExecutionDialogProps {
   onComplete: (answers: any, score: number) => void;
   onCancel: () => void;
   workOrderId?: string;
+  executionId?: string;
 }
 
 export const ExecutionDialog: React.FC<ExecutionDialogProps> = ({
@@ -33,10 +34,11 @@ export const ExecutionDialog: React.FC<ExecutionDialogProps> = ({
   procedure,
   onComplete,
   onCancel,
-  workOrderId
+  workOrderId,
+  executionId: providedExecutionId
 }) => {
   const [isExecuting, setIsExecuting] = useState(false);
-  const [executionId, setExecutionId] = useState<string | undefined>();
+  const [executionId, setExecutionId] = useState<string | undefined>(providedExecutionId);
   
   const startExecution = useStartExecution();
 
