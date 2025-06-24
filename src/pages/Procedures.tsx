@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { DashboardLayout } from "@/components/Layout/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -37,6 +38,7 @@ import {
 } from "@/hooks/useProceduresEnhanced";
 import { ProcedureFormBuilder } from "@/components/procedures/ProcedureFormBuilder";
 import { ProcedureExecution } from "@/components/procedures/ProcedureExecution";
+import { ExecutionDialog } from "@/components/procedures/ExecutionDialog";
 import { useCreateProcedure, useUpdateProcedure } from "@/hooks/useProceduresEnhanced";
 import { toast } from "sonner";
 
