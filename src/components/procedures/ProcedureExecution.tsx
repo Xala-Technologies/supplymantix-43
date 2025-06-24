@@ -282,56 +282,67 @@ export const ProcedureExecution: React.FC<ProcedureExecutionProps> = ({
   return (
     <div className="h-full flex flex-col bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
       {/* Enhanced Header */}
-      <div className="bg-white/90 backdrop-blur-sm border-b-2 border-blue-200 shadow-sm">
-        {/* Top Bar */}
-        <div className="flex items-center justify-between p-4 pb-3">
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg">
-                <PlayCircle className="h-6 w-6 text-white" />
+      <div className="bg-white/95 backdrop-blur-lg border-b border-blue-200/50 shadow-lg">
+        {/* Top Bar with Enhanced Design */}
+        <div className="flex items-center justify-between px-8 py-6 bg-gradient-to-r from-white to-blue-50/50">
+          <div className="flex items-center gap-6">
+            <div className="flex items-center gap-4">
+              <div className="w-16 h-16 bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-600 rounded-2xl flex items-center justify-center shadow-xl ring-4 ring-blue-100">
+                <PlayCircle className="h-8 w-8 text-white" />
               </div>
               <div>
-                <h2 className="font-bold text-xl text-gray-900">{procedure.title}</h2>
-                <p className="text-sm text-gray-600">Step {currentStep + 1} of {totalSteps}</p>
+                <h2 className="font-bold text-2xl text-gray-900 mb-1">{procedure.title}</h2>
+                <div className="flex items-center gap-4 text-sm text-gray-600">
+                  <div className="flex items-center gap-2 bg-blue-50 px-3 py-1 rounded-full">
+                    <Target className="h-4 w-4 text-blue-600" />
+                    <span className="font-medium text-blue-700">Step {currentStep + 1} of {totalSteps}</span>
+                  </div>
+                  <div className="flex items-center gap-2 bg-green-50 px-3 py-1 rounded-full">
+                    <Clock className="h-4 w-4 text-green-600" />
+                    <span className="font-medium text-green-700">~{Math.ceil(totalSteps * 1.5)} min</span>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
           
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2 text-sm text-gray-500 bg-green-50 px-3 py-1 rounded-full">
+          <div className="flex items-center gap-6">
+            <div className="flex items-center gap-3 text-sm text-gray-500 bg-gradient-to-r from-green-50 to-emerald-50 px-4 py-2 rounded-full border border-green-200">
               <Save className="h-4 w-4 text-green-600" />
-              <span className="text-green-700 font-medium">Auto-saved</span>
+              <span className="text-green-700 font-semibold">Auto-saved</span>
             </div>
-            <Badge variant="outline" className="font-bold text-base px-3 py-1 bg-blue-50 border-blue-200">
-              {Math.round(progress)}% Complete
-            </Badge>
-            <Button variant="ghost" size="sm" onClick={onCancel} className="p-2 hover:bg-red-50">
-              <X className="h-4 w-4 text-red-500" />
-            </Button>
+            <div className="flex items-center gap-3">
+              <Badge variant="outline" className="font-bold text-base px-4 py-2 bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-300 text-blue-700">
+                {Math.round(progress)}% Complete
+              </Badge>
+              <Button variant="ghost" size="sm" onClick={onCancel} className="p-3 hover:bg-red-50 rounded-xl transition-all duration-200">
+                <X className="h-5 w-5 text-red-500" />
+              </Button>
+            </div>
           </div>
         </div>
         
-        {/* Enhanced Progress Bar */}
-        <div className="px-4 pb-4">
-          <div className="mb-3">
-            <Progress value={progress} className="h-3 bg-gray-200 rounded-full overflow-hidden">
+        {/* Enhanced Progress Section */}
+        <div className="px-8 pb-6">
+          <div className="mb-4">
+            <Progress value={progress} className="h-4 bg-gray-100 rounded-full overflow-hidden shadow-inner">
               <div 
-                className="h-full bg-gradient-to-r from-blue-500 to-indigo-600 transition-all duration-500 ease-out rounded-full"
+                className="h-full bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 transition-all duration-700 ease-out rounded-full shadow-sm"
                 style={{ width: `${progress}%` }}
               />
             </Progress>
           </div>
-          <div className="flex justify-center gap-1">
+          <div className="flex justify-center gap-2">
             {fields.map((_, index) => (
               <button
                 key={index}
                 onClick={() => jumpToStep(index)}
-                className={`h-3 rounded-full transition-all duration-300 ${
+                className={`h-4 rounded-full transition-all duration-300 shadow-sm hover:shadow-md ${
                   answers[fields[index].id || `field_${index}`] ? 
-                    'bg-green-500 w-8 shadow-md' : 
+                    'bg-gradient-to-r from-green-500 to-emerald-500 w-10 shadow-green-200' : 
                   index === currentStep ? 
-                    'bg-blue-500 w-10 shadow-lg' : 
-                    'bg-gray-300 hover:bg-gray-400 w-3'
+                    'bg-gradient-to-r from-blue-500 to-indigo-500 w-12 shadow-blue-200 ring-2 ring-blue-200' : 
+                    'bg-gray-300 hover:bg-gray-400 w-4'
                 }`}
               />
             ))}
@@ -417,12 +428,12 @@ export const ProcedureExecution: React.FC<ProcedureExecutionProps> = ({
       </div>
 
       {/* Enhanced Bottom Navigation */}
-      <div className="bg-white/90 backdrop-blur-sm border-t-2 border-blue-200 p-6 shadow-lg">
+      <div className="bg-white/95 backdrop-blur-lg border-t border-blue-200/50 p-6 shadow-lg">
         <div className="flex justify-between items-center max-w-5xl mx-auto">
           <Button 
             variant="outline" 
             onClick={currentStep === 0 ? onCancel : goToPreviousStep}
-            className="flex items-center gap-2 px-6 py-3 hover:bg-gray-50"
+            className="flex items-center gap-3 px-8 py-3 hover:bg-gray-50 border-gray-300 rounded-xl transition-all duration-200"
           >
             <ArrowLeft className="h-5 w-5" />
             {currentStep === 0 ? 'Cancel' : 'Previous'}
@@ -430,7 +441,7 @@ export const ProcedureExecution: React.FC<ProcedureExecutionProps> = ({
           
           <Button 
             onClick={goToNextStep} 
-            className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white flex items-center gap-2 px-8 py-3 shadow-lg"
+            className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 hover:from-blue-700 hover:via-indigo-700 hover:to-purple-700 text-white flex items-center gap-3 px-10 py-3 shadow-xl rounded-xl transition-all duration-200 transform hover:scale-105"
           >
             {currentStep === totalSteps - 1 ? (
               <>
