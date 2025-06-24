@@ -11,7 +11,7 @@ export const workOrdersApi = {
       .select(`
         *,
         assets(name, location),
-        users(email),
+        users!work_orders_assigned_to_fkey(email),
         locations(name)
       `)
       .order("created_at", { ascending: false });

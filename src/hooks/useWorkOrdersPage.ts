@@ -1,3 +1,4 @@
+
 import { useState, useMemo } from "react";
 import { WorkOrder, WorkOrderFilters } from "@/types/workOrder";
 import { toast } from "sonner";
@@ -96,13 +97,16 @@ export const useWorkOrdersPage = (workOrders: WorkOrder[] = []) => {
         status: data.status || 'open',
         priority: data.priority || 'medium',
         category: data.category || 'maintenance',
-        assigned_to: Array.isArray(data.assignedTo) ? data.assignedTo[0] : data.assignedTo,
-        asset_id: data.assetId || null,
-        due_date: data.dueDate || null,
+        assigned_to: Array.isArray(data.assignedTo) ? data.assignedTo[0] : data.assignedTo || null,
+        asset_id: data.assetId && data.assetId.trim() !== '' ? data.assetId : null,
+        due_date: data.dueDate && data.dueDate.trim() !== '' ? data.dueDate : null,
         tags: data.tags || [],
-        location_id: data.location || null,
-        tenant_id: userData.tenant_id
+        location_id: data.location && data.location.trim() !== '' ? data.location : null,
+        tenant_id: userData.tenant_id,
+        requester_id: (await supabase.auth.getUser()).data.user?.id
       };
+
+      console.log('Transformed work order data:', workOrderData);
 
       if (editingWorkOrder) {
         // Update existing work order
