@@ -1,8 +1,8 @@
-
 import { useState, useMemo } from "react";
 import { WorkOrder, WorkOrderFilters } from "@/types/workOrder";
 import { toast } from "sonner";
 import { workOrdersApi } from "@/lib/database/work-orders";
+import { supabase } from "@/integrations/supabase/client";
 
 export const useWorkOrdersPage = (workOrders: WorkOrder[] = []) => {
   const [selectedWorkOrder, setSelectedWorkOrder] = useState<string | null>(null);
@@ -76,6 +76,19 @@ export const useWorkOrdersPage = (workOrders: WorkOrder[] = []) => {
     try {
       console.log('Submitting work order:', data);
       
+      // Get current user's tenant_id
+      const { data: userData, error: userError } = await supabase
+        .from('users')
+        .select('tenant_id')
+        .eq('id', (await supabase.auth.getUser()).data.user?.id)
+        .single();
+
+      if (userError) {
+        console.error('Error getting user tenant:', userError);
+        toast.error("Failed to get user information");
+        return;
+      }
+
       // Transform the form data to match the database schema
       const workOrderData = {
         title: data.title,
@@ -87,7 +100,8 @@ export const useWorkOrdersPage = (workOrders: WorkOrder[] = []) => {
         asset_id: typeof data.asset === 'object' ? data.asset.id : data.assetId,
         due_date: data.dueDate,
         tags: data.tags || [],
-        location_id: data.location
+        location_id: data.location,
+        tenant_id: userData.tenant_id
       };
 
       if (editingWorkOrder) {
