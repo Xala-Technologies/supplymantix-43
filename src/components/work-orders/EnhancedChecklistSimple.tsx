@@ -5,8 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Plus, X, CheckSquare } from "lucide-react";
-import { useChecklistItems, useCreateChecklistItem, useUpdateChecklistItem } from "@/hooks/useWorkOrdersEnhanced";
+import { Plus, X, CheckSquare, Trash2 } from "lucide-react";
+import { useChecklistItems, useCreateChecklistItem, useUpdateChecklistItem, useDeleteChecklistItem } from "@/hooks/useWorkOrdersEnhanced";
 
 interface EnhancedChecklistSimpleProps {
   workOrderId: string;
@@ -21,6 +21,7 @@ export const EnhancedChecklistSimple = ({ workOrderId, onUpdate }: EnhancedCheck
   const { data: checklistItems = [], isLoading } = useChecklistItems(workOrderId);
   const createChecklistItem = useCreateChecklistItem();
   const updateChecklistItem = useUpdateChecklistItem();
+  const deleteChecklistItem = useDeleteChecklistItem();
 
   const handleAddItem = async () => {
     if (!newItemTitle.trim()) return;
@@ -50,6 +51,17 @@ export const EnhancedChecklistSimple = ({ workOrderId, onUpdate }: EnhancedCheck
       onUpdate?.();
     } catch (error) {
       console.error("Failed to toggle checklist item:", error);
+    }
+  };
+
+  const handleDeleteItem = async (id: string) => {
+    if (window.confirm("Are you sure you want to delete this checklist item?")) {
+      try {
+        await deleteChecklistItem.mutateAsync(id);
+        onUpdate?.();
+      } catch (error) {
+        console.error("Failed to delete checklist item:", error);
+      }
     }
   };
 
@@ -124,7 +136,7 @@ export const EnhancedChecklistSimple = ({ workOrderId, onUpdate }: EnhancedCheck
 
         <div className="space-y-3">
           {checklistItems.map((item) => (
-            <div key={item.id} className="flex items-start gap-3 p-3 border rounded-lg hover:bg-gray-50">
+            <div key={item.id} className="flex items-start gap-3 p-3 border rounded-lg hover:bg-gray-50 group">
               <Checkbox
                 checked={item.completed}
                 onCheckedChange={(checked) => 
@@ -151,6 +163,16 @@ export const EnhancedChecklistSimple = ({ workOrderId, onUpdate }: EnhancedCheck
                   </p>
                 )}
               </div>
+
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => handleDeleteItem(item.id)}
+                disabled={deleteChecklistItem.isPending}
+                className="opacity-0 group-hover:opacity-100 text-red-500 hover:text-red-700 hover:bg-red-50"
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
             </div>
           ))}
 
