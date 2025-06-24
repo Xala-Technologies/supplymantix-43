@@ -12,7 +12,8 @@ import {
   Pause, 
   Archive, 
   AlertCircle,
-  FileText 
+  FileText,
+  RotateCcw
 } from "lucide-react";
 import { WorkOrder, WorkOrderStatus } from "@/types/workOrder";
 import { useWorkOrderStatusUpdate } from "@/hooks/useWorkOrdersIntegration";
@@ -64,9 +65,9 @@ export const WorkOrderStatusFlow = ({ workOrder, onStatusUpdate }: WorkOrderStat
   };
 
   const getAvailableActions = () => {
-    const { status } = workOrder;
+    const currentStatus = workOrder.status;
     
-    switch (status) {
+    switch (currentStatus) {
       case 'draft':
         return [
           { action: 'open' as WorkOrderStatus, label: 'Open Work Order', icon: Play, color: 'blue' }
@@ -90,7 +91,16 @@ export const WorkOrderStatusFlow = ({ workOrder, onStatusUpdate }: WorkOrderStat
         ];
       case 'completed':
         return [
-          { action: 'archived' as WorkOrderStatus, label: 'Archive', icon: Archive, color: 'gray' }
+          { action: 'archived' as WorkOrderStatus, label: 'Archive', icon: Archive, color: 'gray' },
+          { action: 'open' as WorkOrderStatus, label: 'Reopen', icon: RotateCcw, color: 'blue' }
+        ];
+      case 'cancelled':
+        return [
+          { action: 'open' as WorkOrderStatus, label: 'Reopen', icon: RotateCcw, color: 'blue' }
+        ];
+      case 'archived':
+        return [
+          { action: 'open' as WorkOrderStatus, label: 'Reopen', icon: RotateCcw, color: 'blue' }
         ];
       default:
         return [];
@@ -98,9 +108,20 @@ export const WorkOrderStatusFlow = ({ workOrder, onStatusUpdate }: WorkOrderStat
   };
 
   const getStatusProgress = () => {
-    const statusOrder = ['draft', 'open', 'in_progress', 'completed', 'archived'];
-    const currentIndex = statusOrder.indexOf(workOrder.status);
-    return statusOrder.map((status, index) => ({
+    const mainFlow = ['draft', 'open', 'in_progress', 'completed', 'archived'];
+    const currentStatus = workOrder.status;
+    
+    // Handle special statuses
+    if (currentStatus === 'cancelled' || currentStatus === 'on_hold') {
+      return mainFlow.map((status, index) => ({
+        status,
+        isActive: false,
+        isCurrent: false
+      }));
+    }
+    
+    const currentIndex = mainFlow.indexOf(currentStatus);
+    return mainFlow.map((status, index) => ({
       status,
       isActive: index <= currentIndex,
       isCurrent: index === currentIndex
@@ -109,6 +130,7 @@ export const WorkOrderStatusFlow = ({ workOrder, onStatusUpdate }: WorkOrderStat
 
   const availableActions = getAvailableActions();
   const statusProgress = getStatusProgress();
+  const currentStatus = workOrder.status;
 
   return (
     <Card className="border-gray-200 shadow-sm rounded-2xl">
@@ -120,39 +142,61 @@ export const WorkOrderStatusFlow = ({ workOrder, onStatusUpdate }: WorkOrderStat
             </div>
             Status Management
           </span>
-          <Badge className={`${getStatusColor(workOrder.status)} font-medium border`}>
-            {workOrder.status.replace('_', ' ').toUpperCase()}
+          <Badge className={`${getStatusColor(currentStatus)} font-medium border`}>
+            {currentStatus.replace('_', ' ').toUpperCase()}
           </Badge>
         </CardTitle>
       </CardHeader>
       
       <CardContent className="space-y-6 p-6">
-        {/* Status Progress Timeline */}
-        <div className="bg-gray-50/50 rounded-xl p-4 border border-gray-100">
-          <div className="flex items-center justify-between">
-            {statusProgress.map((item, index) => (
-              <div key={item.status} className="flex flex-col items-center space-y-2 flex-1">
-                <div className={`w-4 h-4 rounded-full transition-colors ${
-                  item.isActive
-                    ? item.isCurrent 
-                      ? 'bg-blue-500 ring-4 ring-blue-100' 
-                      : 'bg-green-500'
-                    : 'bg-gray-300'
-                }`} />
-                <span className={`text-xs font-medium ${
-                  item.isActive ? 'text-gray-900' : 'text-gray-500'
-                }`}>
-                  {item.status.replace('_', ' ')}
-                </span>
-                {index < statusProgress.length - 1 && (
-                  <div className={`absolute h-0.5 w-full top-2 left-1/2 ${
-                    item.isActive ? 'bg-green-300' : 'bg-gray-200'
-                  }`} style={{ transform: 'translateX(50%)' }} />
-                )}
-              </div>
-            ))}
+        {/* Status Progress Timeline - Only show for main flow statuses */}
+        {!['cancelled', 'on_hold'].includes(currentStatus) && (
+          <div className="bg-gray-50/50 rounded-xl p-4 border border-gray-100">
+            <div className="flex items-center justify-between relative">
+              {statusProgress.map((item, index) => (
+                <div key={item.status} className="flex flex-col items-center space-y-2 flex-1 relative">
+                  <div className={`w-4 h-4 rounded-full transition-colors z-10 ${
+                    item.isActive
+                      ? item.isCurrent 
+                        ? 'bg-blue-500 ring-4 ring-blue-100' 
+                        : 'bg-green-500'
+                      : 'bg-gray-300'
+                  }`} />
+                  <span className={`text-xs font-medium text-center ${
+                    item.isActive ? 'text-gray-900' : 'text-gray-500'
+                  }`}>
+                    {item.status.replace('_', ' ')}
+                  </span>
+                  {index < statusProgress.length - 1 && (
+                    <div className={`absolute top-2 left-1/2 w-full h-0.5 ${
+                      item.isActive ? 'bg-green-300' : 'bg-gray-200'
+                    }`} style={{ transform: 'translateX(50%)', zIndex: 1 }} />
+                  )}
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
+        )}
+
+        {/* Special Status Message */}
+        {['cancelled', 'on_hold'].includes(currentStatus) && (
+          <div className={`p-4 rounded-xl border ${
+            currentStatus === 'cancelled' 
+              ? 'bg-red-50 border-red-200 text-red-800' 
+              : 'bg-orange-50 border-orange-200 text-orange-800'
+          }`}>
+            <div className="flex items-center gap-2">
+              {currentStatus === 'cancelled' ? (
+                <AlertCircle className="w-5 h-5" />
+              ) : (
+                <Pause className="w-5 h-5" />
+              )}
+              <span className="font-medium">
+                Work order is {currentStatus === 'cancelled' ? 'cancelled' : 'on hold'}
+              </span>
+            </div>
+          </div>
+        )}
 
         {/* Status Change Actions */}
         {availableActions.length > 0 && (
@@ -208,7 +252,7 @@ export const WorkOrderStatusFlow = ({ workOrder, onStatusUpdate }: WorkOrderStat
             </div>
             <div>
               <div>
-                Status: <strong className="text-gray-900">{workOrder.status.replace('_', ' ')}</strong>
+                Status: <strong className="text-gray-900">{currentStatus.replace('_', ' ')}</strong>
               </div>
               {workOrder.updated_at && (
                 <div className="text-gray-500 text-xs mt-1">
