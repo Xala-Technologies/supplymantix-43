@@ -2,7 +2,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { workOrdersApi } from "@/lib/database/work-orders";
 import { toast } from "sonner";
-import { WorkOrder } from "@/types/workOrder";
+import { WorkOrder, WorkOrderStatus } from "@/types/workOrder";
 
 // Enhanced work orders hook with asset and inventory integration
 export const useWorkOrdersIntegration = () => {
@@ -31,18 +31,21 @@ export const useWorkOrdersIntegration = () => {
             }
           }
 
+          // Properly handle asset object - ensure it has required id field
+          let asset: WorkOrder['asset'] = wo.assets ? {
+            id: wo.asset_id || wo.assets.id || '',
+            name: wo.assets.name || 'Unknown Asset',
+            status: 'active'
+          } : wo.asset_id || '';
+
           return {
             id: wo.id,
             title: wo.title || 'Untitled Work Order',
             description: wo.description || '',
-            status: wo.status || 'open',
+            status: (wo.status as WorkOrderStatus) || 'open',
             priority: wo.priority || 'medium',
             assignedTo: wo.assigned_to ? [wo.assigned_to] : [], // Convert single assigned_to to array
-            asset: wo.assets || {
-              id: wo.asset_id || '',
-              name: wo.assets?.name || 'Unknown Asset',
-              status: 'active'
-            },
+            asset,
             location: wo.locations?.name || wo.location_id || '',
             category: wo.category || 'maintenance',
             dueDate: wo.due_date || '',
@@ -104,7 +107,7 @@ export const useWorkOrderStatusUpdate = () => {
   return useMutation({
     mutationFn: async ({ id, status, notes }: {
       id: string;
-      status: string;
+      status: WorkOrderStatus;
       notes?: string;
     }) => {
       return workOrdersApi.updateWorkOrder(id, { status });
