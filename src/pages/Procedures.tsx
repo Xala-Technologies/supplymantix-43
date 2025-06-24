@@ -23,7 +23,9 @@ import {
   FileText,
   AlertCircle,
   Loader2,
-  Download
+  Download,
+  Square,
+  Activity
 } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { 
@@ -241,12 +243,11 @@ const Procedures = () => {
     if (variant === 'primary') {
       return (
         <Button 
-          variant="outline" 
           size="sm" 
-          className={`flex-1 transition-all duration-200 ${
+          className={`flex-1 transition-all duration-300 transform hover:scale-105 ${
             canExecute 
-              ? 'hover:bg-blue-50 hover:border-blue-300 hover:text-blue-700' 
-              : 'opacity-50 cursor-not-allowed'
+              ? 'bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg hover:shadow-xl' 
+              : 'bg-gray-100 text-gray-400 cursor-not-allowed shadow-none'
           }`}
           onClick={() => handleExecuteProcedure(procedure)}
           disabled={!canExecute || isExecuting}
@@ -254,18 +255,22 @@ const Procedures = () => {
         >
           {isExecuting ? (
             <>
-              <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+              <div className="w-4 h-4 mr-2 border-2 border-white border-t-transparent rounded-full animate-spin" />
               Starting...
             </>
           ) : !canExecute ? (
             <>
-              <AlertCircle className="h-4 w-4 mr-1" />
+              <Square className="h-4 w-4 mr-2" />
               {reason === "No fields configured" ? "No Fields" : "Cannot Execute"}
             </>
           ) : (
             <>
-              <Play className="h-4 w-4 mr-1" />
-              Execute
+              <div className="flex items-center">
+                <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center mr-2">
+                  <Play className="h-4 w-4" />
+                </div>
+                <span className="font-semibold">Execute</span>
+              </div>
             </>
           )}
         </Button>
@@ -401,27 +406,28 @@ const Procedures = () => {
               </CardContent>
             </Card>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {procedures.map((procedure) => (
-                <Card key={procedure.id} className="hover:shadow-md transition-shadow">
-                  <CardContent className="p-4">
-                    <div className="flex items-start justify-between mb-3">
+                <div key={procedure.id} className="group relative">
+                  <div className="absolute inset-0 bg-gradient-to-r from-blue-400 to-indigo-500 rounded-xl opacity-0 group-hover:opacity-10 transition-opacity duration-300" />
+                  <div className="relative bg-white rounded-xl p-6 shadow-sm border border-gray-100 group-hover:shadow-lg transition-all duration-300 group-hover:border-blue-200">
+                    <div className="flex items-start justify-between mb-4">
                       <div className="flex-1">
-                        <h3 className="font-semibold text-gray-900 mb-1 line-clamp-2">
+                        <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2 group-hover:text-blue-900 transition-colors">
                           {procedure.title}
                         </h3>
-                        <p className="text-sm text-gray-600 line-clamp-2 mb-2">
+                        <p className="text-sm text-gray-600 line-clamp-2 mb-3">
                           {procedure.description}
                         </p>
                       </div>
                       
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="sm">
+                          <Button variant="ghost" size="sm" className="opacity-0 group-hover:opacity-100 transition-opacity">
                             <MoreVertical className="h-4 w-4" />
                           </Button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
+                        <DropdownMenuContent align="end" className="bg-white border shadow-lg">
                           {renderExecuteButton(procedure, 'secondary')}
                           <DropdownMenuItem onClick={() => {
                             setSelectedProcedure(procedure);
@@ -445,13 +451,13 @@ const Procedures = () => {
                       </DropdownMenu>
                     </div>
 
-                    <div className="flex items-center justify-between mb-3">
-                      <div className="flex flex-wrap gap-1">
-                        <Badge className={getCategoryColor(procedure.category || 'Other')}>
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="flex flex-wrap gap-2">
+                        <Badge className={`${getCategoryColor(procedure.category || 'Other')} text-xs`}>
                           {procedure.category}
                         </Badge>
                         {procedure.is_global && (
-                          <Badge variant="outline" className="text-blue-600 border-blue-600">
+                          <Badge variant="outline" className="text-blue-600 border-blue-600 text-xs">
                             <Globe className="h-3 w-3 mr-1" />
                             Global
                           </Badge>
@@ -459,26 +465,35 @@ const Procedures = () => {
                       </div>
                     </div>
 
-                    <div className="flex items-center justify-between text-sm text-gray-500 mb-4">
-                      <span>{procedure.fields?.length || 0} fields</span>
-                      <span>{procedure.executions_count || 0} executions</span>
+                    <div className="flex items-center justify-between text-sm text-gray-500 mb-6">
+                      <div className="flex items-center gap-4">
+                        <span className="flex items-center gap-1">
+                          <CheckCircle className="h-4 w-4" />
+                          {procedure.fields?.length || 0} steps
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <Activity className="h-4 w-4" />
+                          {procedure.executions_count || 0} runs
+                        </span>
+                      </div>
                     </div>
 
-                    <div className="flex space-x-2">
+                    <div className="flex gap-3">
                       {renderExecuteButton(procedure, 'primary')}
                       <Button 
-                        variant="ghost" 
+                        variant="outline" 
                         size="sm"
                         onClick={() => {
                           setSelectedProcedure(procedure);
                           setShowEditDialog(true);
                         }}
+                        className="px-4 hover:bg-gray-50 hover:border-gray-300"
                       >
                         <Edit className="h-4 w-4" />
                       </Button>
                     </div>
-                  </CardContent>
-                </Card>
+                  </div>
+                </div>
               ))}
             </div>
           )}
@@ -593,21 +608,15 @@ const Procedures = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Execution Dialog */}
-      <Dialog open={showExecutionDialog} onOpenChange={setShowExecutionDialog}>
-        <DialogContent className="max-w-4xl w-[95vw] h-[95vh] p-0 overflow-hidden border-0 bg-transparent shadow-2xl">
-          {selectedProcedure && (
-            <div className="h-full bg-white rounded-lg overflow-hidden shadow-xl">
-              <ProcedureExecution
-                procedure={selectedProcedure}
-                executionId={currentExecutionId || undefined}
-                onComplete={handleExecutionComplete}
-                onCancel={handleExecutionCancel}
-              />
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
+      {/* Enhanced Execution Dialog */}
+      <ExecutionDialog
+        open={showExecutionDialog}
+        onOpenChange={setShowExecutionDialog}
+        procedure={selectedProcedure}
+        executionId={currentExecutionId || undefined}
+        onComplete={handleExecutionComplete}
+        onCancel={handleExecutionCancel}
+      />
 
       {/* Results Dialog */}
       <Dialog open={showResultsDialog} onOpenChange={setShowResultsDialog}>
