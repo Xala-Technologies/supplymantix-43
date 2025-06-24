@@ -48,6 +48,11 @@ export const ExecutionDialog: React.FC<ExecutionDialogProps> = ({
     return () => clearInterval(interval);
   }, []);
 
+  // Early return if procedure is null or undefined
+  if (!procedure) {
+    return null;
+  }
+
   const handleStart = () => {
     setIsExecuting(true);
   };
@@ -81,8 +86,8 @@ export const ExecutionDialog: React.FC<ExecutionDialogProps> = ({
 
             {/* Procedure Info */}
             <div className="bg-white rounded-xl p-6 mb-8 shadow-sm border border-white/50">
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">{procedure.title}</h3>
-              <p className="text-gray-600 mb-4">{procedure.description}</p>
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">{procedure.title || 'Untitled Procedure'}</h3>
+              <p className="text-gray-600 mb-4">{procedure.description || 'No description available'}</p>
               
               <div className="flex items-center justify-center gap-6 text-sm text-gray-500">
                 <div className="flex items-center gap-2">
@@ -175,7 +180,7 @@ export const ExecutionDialog: React.FC<ExecutionDialogProps> = ({
                   <Zap className="h-4 w-4 text-slate-400" />
                 </div>
                 <div className="text-sm font-medium text-white truncate">
-                  {procedure.title}
+                  {procedure.title || 'Untitled Procedure'}
                 </div>
               </div>
             </div>
