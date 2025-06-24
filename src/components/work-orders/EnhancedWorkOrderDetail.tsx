@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -14,16 +13,17 @@ import {
   FileText,
   CheckSquare,
   MessageSquare,
-  Paperclip,
   Timer,
   Edit
 } from "lucide-react";
 import { WorkOrder } from "@/types/workOrder";
-import { EnhancedChecklist } from "./EnhancedChecklist";
+import { EnhancedChecklistSimple } from "./EnhancedChecklistSimple";
 import { WorkOrderStatusFlow } from "./WorkOrderStatusFlow";
 import { WorkOrderTimeTracking } from "./WorkOrderTimeTracking";
 import { TimeAndCostTracking } from "./TimeAndCostTracking";
 import { getAssetName, getLocationName } from "@/utils/assetUtils";
+import { useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 
 interface EnhancedWorkOrderDetailProps {
   workOrder: WorkOrder;
@@ -34,7 +34,8 @@ export const EnhancedWorkOrderDetail = ({
   workOrder, 
   onEdit 
 }: EnhancedWorkOrderDetailProps) => {
-  const [activeTab, setActiveTab] = useState("overview");
+  const [activeTab, setActiveTab] = useState("checklist");
+  const queryClient = useQueryClient();
 
   const getStatusColor = (status: string) => {
     const colors = {
@@ -61,17 +62,57 @@ export const EnhancedWorkOrderDetail = ({
 
   const isOverdue = workOrder.due_date && new Date(workOrder.due_date) < new Date() && workOrder.status !== 'completed';
 
+  const handleStatusUpdate = async (newStatus: string) => {
+    try {
+      console.log('Updating work order status to:', newStatus);
+      
+      // Invalidate queries to refresh data
+      queryClient.invalidateQueries({ queryKey: ["work-orders"] });
+      queryClient.invalidateQueries({ queryKey: ["work-orders-integration"] });
+      
+      toast.success(`Work order status updated to ${newStatus}`);
+    } catch (error) {
+      console.error('Failed to update work order status:', error);
+      toast.error('Failed to update work order status');
+    }
+  };
+
+  const handleTimeLogSubmit = async (timeData: any) => {
+    try {
+      console.log('Submitting time log:', timeData);
+      
+      // Invalidate queries to refresh data
+      queryClient.invalidateQueries({ queryKey: ["time-logs"] });
+      queryClient.invalidateQueries({ queryKey: ["work-orders"] });
+      
+      toast.success('Time entry saved successfully');
+    } catch (error) {
+      console.error('Failed to save time entry:', error);
+      toast.error('Failed to save time entry');
+    }
+  };
+
+  const handleChecklistUpdate = async () => {
+    try {
+      // Invalidate queries when checklist is updated
+      queryClient.invalidateQueries({ queryKey: ["checklist-items"] });
+      queryClient.invalidateQueries({ queryKey: ["work-orders"] });
+    } catch (error) {
+      console.error('Failed to update checklist:', error);
+    }
+  };
+
   return (
     <div className="h-full overflow-auto">
       <Card className="h-full border-0 shadow-none rounded-none bg-white">
-        {/* Elegant Header with Soft Blue Gradient */}
-        <CardHeader className="bg-gradient-to-br from-blue-50 via-sky-50 to-slate-50 border-b border-slate-100">
+        {/* Enhanced Header */}
+        <CardHeader className="bg-gradient-to-br from-slate-50 via-gray-50 to-slate-50 border-b border-slate-100">
           <div className="flex items-start justify-between">
             <div className="space-y-4 flex-1">
               <div className="flex items-center gap-3">
                 <CardTitle className="text-2xl font-light tracking-wide text-slate-700">{workOrder.title}</CardTitle>
                 {onEdit && (
-                  <Button variant="outline" size="sm" onClick={onEdit} className="shrink-0 bg-white/80 border-slate-200 text-slate-600 hover:bg-white hover:text-slate-700 backdrop-blur-sm">
+                  <Button variant="outline" size="sm" onClick={onEdit} className="shrink-0 bg-white/80 border-slate-200 text-slate-600 hover:bg-white hover:text-slate-700">
                     <Edit className="w-4 h-4 mr-2" />
                     Edit
                   </Button>
@@ -79,16 +120,16 @@ export const EnhancedWorkOrderDetail = ({
               </div>
               
               <div className="flex flex-wrap items-center gap-4 text-sm text-slate-500">
-                <span className="flex items-center gap-2 bg-white/70 px-3 py-1.5 rounded-full backdrop-blur-sm border border-slate-200">
+                <span className="flex items-center gap-2 bg-white/70 px-3 py-1.5 rounded-full border border-slate-200">
                   <FileText className="w-4 h-4" />
                   #{workOrder.id.slice(-8)}
                 </span>
-                <span className="flex items-center gap-2 bg-white/70 px-3 py-1.5 rounded-full backdrop-blur-sm border border-slate-200">
+                <span className="flex items-center gap-2 bg-white/70 px-3 py-1.5 rounded-full border border-slate-200">
                   <MapPin className="w-4 h-4" />
                   {getAssetName(workOrder.asset)}
                 </span>
                 {workOrder.location && (
-                  <span className="flex items-center gap-2 bg-white/70 px-3 py-1.5 rounded-full backdrop-blur-sm border border-slate-200">
+                  <span className="flex items-center gap-2 bg-white/70 px-3 py-1.5 rounded-full border border-slate-200">
                     <MapPin className="w-4 h-4" />
                     {getLocationName(workOrder.location)}
                   </span>
@@ -113,7 +154,7 @@ export const EnhancedWorkOrderDetail = ({
           </div>
 
           {workOrder.description && (
-            <div className="bg-white/50 rounded-2xl p-6 border border-slate-200 mt-6 backdrop-blur-sm">
+            <div className="bg-white/50 rounded-2xl p-6 border border-slate-200 mt-6">
               <h3 className="font-medium text-slate-600 mb-3 text-lg">Description</h3>
               <p className="text-slate-600 leading-relaxed">{workOrder.description}</p>
             </div>
@@ -121,7 +162,7 @@ export const EnhancedWorkOrderDetail = ({
         </CardHeader>
 
         <CardContent className="flex-1 p-8">
-          {/* Refined Overview Grid */}
+          {/* Enhanced Overview Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
             {workOrder.due_date && (
               <div className="flex items-center gap-4 p-6 bg-slate-50 rounded-2xl border border-slate-100">
@@ -190,7 +231,7 @@ export const EnhancedWorkOrderDetail = ({
             )}
           </div>
 
-          {/* Elegant Tags Section */}
+          {/* Tags Section */}
           {workOrder.tags && workOrder.tags.length > 0 && (
             <div className="mb-8 p-6 bg-slate-50 rounded-2xl border border-slate-100">
               <div className="flex items-center gap-3 mb-4">
@@ -207,10 +248,10 @@ export const EnhancedWorkOrderDetail = ({
             </div>
           )}
 
-          {/* Refined Tabbed Content */}
+          {/* Enhanced Tabbed Content */}
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
             <TabsList className="grid w-full grid-cols-4 bg-slate-50 rounded-2xl p-1.5 border border-slate-100">
-              <TabsTrigger value="overview" className="flex items-center gap-2 rounded-xl data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-slate-700 text-slate-500">
+              <TabsTrigger value="checklist" className="flex items-center gap-2 rounded-xl data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-slate-700 text-slate-500">
                 <CheckSquare className="w-4 h-4" />
                 Checklist
               </TabsTrigger>
@@ -229,25 +270,36 @@ export const EnhancedWorkOrderDetail = ({
             </TabsList>
 
             <div className="bg-white rounded-2xl border border-slate-100 shadow-sm">
-              <TabsContent value="overview" className="p-6 m-0">
-                <EnhancedChecklist workOrderId={workOrder.id} />
+              <TabsContent value="checklist" className="p-6 m-0">
+                <EnhancedChecklistSimple 
+                  workOrderId={workOrder.id} 
+                  onUpdate={handleChecklistUpdate}
+                />
               </TabsContent>
 
               <TabsContent value="status" className="p-6 m-0">
-                <WorkOrderStatusFlow workOrder={workOrder} />
+                <WorkOrderStatusFlow 
+                  workOrder={workOrder} 
+                  onStatusUpdate={handleStatusUpdate}
+                />
               </TabsContent>
 
               <TabsContent value="time" className="p-6 m-0">
-                <TimeAndCostTracking workOrderId={workOrder.id} />
+                <TimeAndCostTracking 
+                  workOrderId={workOrder.id}
+                  onTimeLogSubmit={handleTimeLogSubmit}
+                />
               </TabsContent>
 
               <TabsContent value="activity" className="p-6 m-0">
-                <div className="text-center py-16 text-slate-400">
-                  <div className="w-20 h-20 bg-slate-50 rounded-2xl flex items-center justify-center mx-auto mb-6">
-                    <MessageSquare className="w-10 h-10 text-slate-300" />
+                <div className="space-y-4">
+                  <div className="text-center py-16 text-slate-400">
+                    <div className="w-20 h-20 bg-slate-50 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                      <MessageSquare className="w-10 h-10 text-slate-300" />
+                    </div>
+                    <p className="text-lg font-medium text-slate-600 mb-2">No activity yet</p>
+                    <p className="text-sm text-slate-400">Comments and activity logs will appear here</p>
                   </div>
-                  <p className="text-lg font-medium text-slate-600 mb-2">No activity yet</p>
-                  <p className="text-sm text-slate-400">Comments and activity logs will appear here</p>
                 </div>
               </TabsContent>
             </div>
