@@ -20,9 +20,11 @@ interface WorkOrdersContentProps {
 export const WorkOrdersContent = (props: WorkOrdersContentProps) => {
   return (
     <div className="flex-1 p-6">
-      <Card className="h-full flex overflow-hidden">
-        <WorkOrdersDesktopLayout {...props} />
-        <WorkOrdersMobileLayout {...props} />
+      <Card className="h-full overflow-hidden">
+        <div className="h-full flex">
+          <WorkOrdersDesktopLayout {...props} />
+          <WorkOrdersMobileLayout {...props} />
+        </div>
       </Card>
     </div>
   );
