@@ -104,6 +104,22 @@ export const useUpdateChecklistItem = () => {
   });
 };
 
+export const useDeleteChecklistItem = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: workOrdersEnhancedApi.deleteChecklistItem,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["checklist-items"] });
+      toast.success("Checklist item deleted");
+    },
+    onError: (error) => {
+      toast.error("Failed to delete checklist item");
+      console.error("Checklist item deletion error:", error);
+    }
+  });
+};
+
 // Attachments
 export const useWorkOrderAttachments = (workOrderId: string) => {
   return useQuery({

@@ -1,3 +1,4 @@
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -11,15 +12,7 @@ import { Clock, Plus, Trash2, User } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { format } from "date-fns";
-
-interface TimeEntry {
-  id: string;
-  user: string;
-  timeSpent: number; // hours
-  timeType: 'Work' | 'Inspection' | 'Travel' | 'Setup' | 'Cleanup';
-  notes: string;
-  createdAt: string;
-}
+import { useTimeLogs, useCreateTimeLog } from "@/hooks/useWorkOrdersEnhanced";
 
 interface TimeEntriesProps {
   workOrderId: string;
@@ -27,77 +20,55 @@ interface TimeEntriesProps {
 }
 
 export const TimeEntries = ({ workOrderId, onSubmit }: TimeEntriesProps) => {
-  const [timeEntries, setTimeEntries] = useState<TimeEntry[]>([
-    {
-      id: '1',
-      user: 'Zach Brown',
-      timeSpent: 2.5,
-      timeType: 'Work',
-      notes: 'Diagnosed wrapper malfunction, found cutting assembly issue',
-      createdAt: '2023-10-05T10:30:00Z'
-    },
-    {
-      id: '2',
-      user: 'Maintenance Team 1',
-      timeSpent: 1.0,
-      timeType: 'Inspection',
-      notes: 'Initial safety inspection and LOTO procedures',
-      createdAt: '2023-10-05T09:00:00Z'
-    }
-  ]);
-
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const { data: timeLogs = [], isLoading } = useTimeLogs(workOrderId);
+  const createTimeLog = useCreateTimeLog();
   
   const form = useForm({
     defaultValues: {
-      user: '',
-      timeSpent: '',
-      timeType: '',
-      notes: ''
+      duration_minutes: '',
+      note: ''
     }
   });
 
-  const handleSubmit = (data: any) => {
-    const newEntry: TimeEntry = {
-      id: Date.now().toString(),
-      user: data.user,
-      timeSpent: parseFloat(data.timeSpent),
-      timeType: data.timeType,
-      notes: data.notes,
-      createdAt: new Date().toISOString()
-    };
-    
-    setTimeEntries([...timeEntries, newEntry]);
-    setIsDialogOpen(false);
-    form.reset();
-    
-    if (onSubmit) {
-      onSubmit(newEntry);
+  const handleSubmit = async (data: any) => {
+    try {
+      await createTimeLog.mutateAsync({
+        work_order_id: workOrderId,
+        user_id: '', // Will be set automatically by the API
+        duration_minutes: parseInt(data.duration_minutes),
+        note: data.note
+      });
+      
+      setIsDialogOpen(false);
+      form.reset();
+      
+      if (onSubmit) {
+        onSubmit(data);
+      }
+    } catch (error) {
+      console.error("Failed to create time log:", error);
     }
   };
 
-  const deleteEntry = (id: string) => {
-    setTimeEntries(timeEntries.filter(entry => entry.id !== id));
-  };
+  const totalMinutes = timeLogs.reduce((sum, entry) => sum + entry.duration_minutes, 0);
+  const totalHours = (totalMinutes / 60).toFixed(1);
 
-  const getTimeTypeColor = (type: string) => {
-    switch (type) {
-      case 'Work':
-        return 'bg-blue-100 text-blue-800';
-      case 'Inspection':
-        return 'bg-green-100 text-green-800';
-      case 'Travel':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'Setup':
-        return 'bg-purple-100 text-purple-800';
-      case 'Cleanup':
-        return 'bg-gray-100 text-gray-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
-    }
-  };
-
-  const totalHours = timeEntries.reduce((sum, entry) => sum + entry.timeSpent, 0);
+  if (isLoading) {
+    return (
+      <Card>
+        <CardContent className="p-6">
+          <div className="animate-pulse space-y-4">
+            <div className="h-4 bg-gray-200 rounded w-1/4"></div>
+            <div className="space-y-2">
+              <div className="h-4 bg-gray-200 rounded"></div>
+              <div className="h-4 bg-gray-200 rounded"></div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card>
@@ -127,36 +98,12 @@ export const TimeEntries = ({ workOrderId, onSubmit }: TimeEntriesProps) => {
                 <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
                   <FormField
                     control={form.control}
-                    name="user"
+                    name="duration_minutes"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>User</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select user" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="Zach Brown">Zach Brown</SelectItem>
-                            <SelectItem value="Maintenance Team 1">Maintenance Team 1</SelectItem>
-                            <SelectItem value="Operations">Operations</SelectItem>
-                            <SelectItem value="Safety">Safety</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  
-                  <FormField
-                    control={form.control}
-                    name="timeSpent"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Time Spent (hours)</FormLabel>
+                        <FormLabel>Duration (minutes)</FormLabel>
                         <FormControl>
-                          <Input type="number" step="0.25" placeholder="e.g., 2.5" {...field} />
+                          <Input type="number" placeholder="e.g., 120" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -165,32 +112,7 @@ export const TimeEntries = ({ workOrderId, onSubmit }: TimeEntriesProps) => {
                   
                   <FormField
                     control={form.control}
-                    name="timeType"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Time Type</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select time type" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="Work">Work</SelectItem>
-                            <SelectItem value="Inspection">Inspection</SelectItem>
-                            <SelectItem value="Travel">Travel</SelectItem>
-                            <SelectItem value="Setup">Setup</SelectItem>
-                            <SelectItem value="Cleanup">Cleanup</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  
-                  <FormField
-                    control={form.control}
-                    name="notes"
+                    name="note"
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Notes</FormLabel>
@@ -203,7 +125,9 @@ export const TimeEntries = ({ workOrderId, onSubmit }: TimeEntriesProps) => {
                   />
                   
                   <div className="flex gap-2 pt-4">
-                    <Button type="submit" className="flex-1">Add Entry</Button>
+                    <Button type="submit" className="flex-1" disabled={createTimeLog.isPending}>
+                      {createTimeLog.isPending ? "Adding..." : "Add Entry"}
+                    </Button>
                     <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
                       Cancel
                     </Button>
@@ -215,54 +139,49 @@ export const TimeEntries = ({ workOrderId, onSubmit }: TimeEntriesProps) => {
         </div>
       </CardHeader>
       <CardContent>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>User</TableHead>
-              <TableHead>Time</TableHead>
-              <TableHead>Type</TableHead>
-              <TableHead>Notes</TableHead>
-              <TableHead>Date</TableHead>
-              <TableHead className="w-12"></TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {timeEntries.map((entry) => (
-              <TableRow key={entry.id}>
-                <TableCell>
-                  <div className="flex items-center gap-2">
-                    <User className="w-4 h-4 text-gray-500" />
-                    <span className="font-medium">{entry.user}</span>
-                  </div>
-                </TableCell>
-                <TableCell>
-                  <span className="font-semibold">{entry.timeSpent}h</span>
-                </TableCell>
-                <TableCell>
-                  <Badge className={getTimeTypeColor(entry.timeType)}>
-                    {entry.timeType}
-                  </Badge>
-                </TableCell>
-                <TableCell className="max-w-xs">
-                  <p className="text-sm text-gray-600 truncate">{entry.notes}</p>
-                </TableCell>
-                <TableCell className="text-sm text-gray-500">
-                  {format(new Date(entry.createdAt), 'MMM dd, yyyy h:mm a')}
-                </TableCell>
-                <TableCell>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => deleteEntry(entry.id)}
-                    className="text-red-600 hover:text-red-800 hover:bg-red-50"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
-                </TableCell>
+        {timeLogs.length === 0 ? (
+          <div className="text-center py-8 text-gray-500">
+            <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center mx-auto mb-3">
+              <Clock className="w-6 h-6 text-gray-400" />
+            </div>
+            <p className="text-sm">No time entries yet</p>
+            <p className="text-xs text-gray-400 mt-1">Add time entries to track work progress</p>
+          </div>
+        ) : (
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>User</TableHead>
+                <TableHead>Duration</TableHead>
+                <TableHead>Notes</TableHead>
+                <TableHead>Date</TableHead>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+            </TableHeader>
+            <TableBody>
+              {timeLogs.map((entry) => (
+                <TableRow key={entry.id}>
+                  <TableCell>
+                    <div className="flex items-center gap-2">
+                      <User className="w-4 h-4 text-gray-500" />
+                      <span className="font-medium">
+                        {entry.users?.email || 'Unknown User'}
+                      </span>
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <span className="font-semibold">{(entry.duration_minutes / 60).toFixed(1)}h</span>
+                  </TableCell>
+                  <TableCell className="max-w-xs">
+                    <p className="text-sm text-gray-600 truncate">{entry.note || 'No notes'}</p>
+                  </TableCell>
+                  <TableCell className="text-sm text-gray-500">
+                    {format(new Date(entry.logged_at), 'MMM dd, yyyy h:mm a')}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        )}
       </CardContent>
     </Card>
   );

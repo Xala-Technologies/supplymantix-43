@@ -3,134 +3,115 @@ import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Send, MessageSquare } from "lucide-react";
+import { MessageSquare, Send, User } from "lucide-react";
+import { useWorkOrderComments, useCreateWorkOrderComment } from "@/hooks/useWorkOrdersEnhanced";
 import { format } from "date-fns";
-
-interface ChatMessage {
-  id: string;
-  user: string;
-  message: string;
-  timestamp: string;
-  isCurrentUser?: boolean;
-}
 
 interface WorkOrderChatProps {
   workOrderId: string;
 }
 
 export const WorkOrderChat = ({ workOrderId }: WorkOrderChatProps) => {
-  const [messages, setMessages] = useState<ChatMessage[]>([
-    {
-      id: '1',
-      user: 'Zach Brown',
-      message: 'Starting work on the wrapper malfunction. Will update with progress.',
-      timestamp: '2023-10-05T10:30:00Z',
-      isCurrentUser: true
-    },
-    {
-      id: '2',
-      user: 'Maintenance Team 1',
-      message: 'Safety inspection completed. All clear to proceed.',
-      timestamp: '2023-10-05T09:15:00Z',
-      isCurrentUser: false
-    }
-  ]);
   const [newMessage, setNewMessage] = useState("");
+  const { data: comments = [], isLoading } = useWorkOrderComments(workOrderId);
+  const createComment = useCreateWorkOrderComment();
 
-  const handleSendMessage = () => {
+  const handleSendMessage = async (e: React.FormEvent) => {
+    e.preventDefault();
     if (!newMessage.trim()) return;
 
-    const message: ChatMessage = {
-      id: Date.now().toString(),
-      user: 'Current User',
-      message: newMessage.trim(),
-      timestamp: new Date().toISOString(),
-      isCurrentUser: true
-    };
-
-    setMessages([...messages, message]);
-    setNewMessage("");
-  };
-
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      handleSendMessage();
+    try {
+      await createComment.mutateAsync({
+        work_order_id: workOrderId,
+        user_id: '', // Will be set automatically by the API
+        content: newMessage.trim()
+      });
+      
+      setNewMessage("");
+    } catch (error) {
+      console.error("Failed to send message:", error);
     }
   };
 
+  if (isLoading) {
+    return (
+      <Card>
+        <CardContent className="p-6">
+          <div className="animate-pulse space-y-4">
+            <div className="h-4 bg-gray-200 rounded w-1/4"></div>
+            <div className="space-y-2">
+              <div className="h-4 bg-gray-200 rounded"></div>
+              <div className="h-4 bg-gray-200 rounded"></div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
-    <Card className="h-[600px] flex flex-col">
+    <Card className="h-[500px] flex flex-col">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <MessageSquare className="w-5 h-5" />
-          Work Order Communication
-        </CardTitle>
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+            <MessageSquare className="w-5 h-5 text-purple-600" />
+          </div>
+          <CardTitle className="text-lg">Comments & Communication</CardTitle>
+        </div>
       </CardHeader>
       
-      <CardContent className="flex-1 flex flex-col">
-        {/* Messages */}
+      <CardContent className="flex-1 flex flex-col p-6">
+        {/* Messages Area */}
         <div className="flex-1 overflow-y-auto space-y-4 mb-4">
-          {messages.map((message) => (
-            <div
-              key={message.id}
-              className={`flex gap-3 ${
-                message.isCurrentUser ? 'justify-end' : 'justify-start'
-              }`}
-            >
-              {!message.isCurrentUser && (
-                <Avatar className="w-8 h-8">
-                  <AvatarFallback className="text-xs">
-                    {message.user.split(' ').map(n => n[0]).join('')}
-                  </AvatarFallback>
-                </Avatar>
-              )}
-              
-              <div
-                className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
-                  message.isCurrentUser
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-gray-100 text-gray-900'
-                }`}
-              >
-                {!message.isCurrentUser && (
-                  <div className="text-xs font-medium mb-1">{message.user}</div>
-                )}
-                <div className="text-sm">{message.message}</div>
-                <div
-                  className={`text-xs mt-1 ${
-                    message.isCurrentUser ? 'text-blue-100' : 'text-gray-500'
-                  }`}
-                >
-                  {format(new Date(message.timestamp), 'MMM dd, h:mm a')}
+          {comments.length === 0 ? (
+            <div className="text-center py-8 text-gray-500">
+              <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center mx-auto mb-3">
+                <MessageSquare className="w-6 h-6 text-gray-400" />
+              </div>
+              <p className="text-sm">No comments yet</p>
+              <p className="text-xs text-gray-400 mt-1">Start a conversation about this work order</p>
+            </div>
+          ) : (
+            comments.map((comment) => (
+              <div key={comment.id} className="flex gap-3">
+                <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center flex-shrink-0">
+                  <User className="w-4 h-4 text-gray-600" />
+                </div>
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="text-sm font-medium">
+                      {comment.user?.email || 'Unknown User'}
+                    </span>
+                    <span className="text-xs text-gray-500">
+                      {format(new Date(comment.created_at), 'MMM dd, yyyy h:mm a')}
+                    </span>
+                  </div>
+                  <div className="bg-gray-50 rounded-lg p-3">
+                    <p className="text-sm text-gray-800">{comment.content}</p>
+                  </div>
                 </div>
               </div>
-              
-              {message.isCurrentUser && (
-                <Avatar className="w-8 h-8">
-                  <AvatarFallback className="text-xs">
-                    {message.user.split(' ').map(n => n[0]).join('')}
-                  </AvatarFallback>
-                </Avatar>
-              )}
-            </div>
-          ))}
+            ))
+          )}
         </div>
 
-        {/* Input */}
-        <div className="flex gap-2">
+        {/* Message Input */}
+        <form onSubmit={handleSendMessage} className="flex gap-2">
           <Input
             value={newMessage}
             onChange={(e) => setNewMessage(e.target.value)}
-            onKeyPress={handleKeyPress}
-            placeholder="Type a message..."
+            placeholder="Type your message..."
             className="flex-1"
           />
-          <Button onClick={handleSendMessage} disabled={!newMessage.trim()}>
+          <Button 
+            type="submit" 
+            size="sm" 
+            disabled={!newMessage.trim() || createComment.isPending}
+            className="bg-purple-600 hover:bg-purple-700"
+          >
             <Send className="w-4 h-4" />
           </Button>
-        </div>
+        </form>
       </CardContent>
     </Card>
   );

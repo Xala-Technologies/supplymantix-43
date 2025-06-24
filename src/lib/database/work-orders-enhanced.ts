@@ -1,7 +1,6 @@
 
 import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/integrations/supabase/types";
-import { WorkOrder, ChecklistItem, WorkOrderTemplate, TemplateChecklistItem, WorkOrderAttachment, TimeLog, WorkOrderComment } from "@/types/workOrder";
 
 type Tables = Database["public"]["Tables"];
 
@@ -105,7 +104,7 @@ export const workOrdersEnhancedApi = {
       .order("created_at", { ascending: true });
     
     if (error) throw error;
-    return data;
+    return data || [];
   },
 
   async createChecklistItem(item: Tables["checklist_items"]["Insert"]) {
@@ -149,7 +148,7 @@ export const workOrdersEnhancedApi = {
       .order("uploaded_at", { ascending: false });
     
     if (error) throw error;
-    return data;
+    return data || [];
   },
 
   async createAttachment(attachment: Tables["attachments"]["Insert"]) {
@@ -174,6 +173,9 @@ export const workOrdersEnhancedApi = {
 
   // Time Logs
   async getTimeLogs(workOrderId: string) {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error("Not authenticated");
+
     const { data, error } = await supabase
       .from("time_logs")
       .select(`
@@ -184,13 +186,19 @@ export const workOrdersEnhancedApi = {
       .order("logged_at", { ascending: false });
     
     if (error) throw error;
-    return data;
+    return data || [];
   },
 
-  async createTimeLog(timeLog: Tables["time_logs"]["Insert"]) {
+  async createTimeLog(timeLog: Omit<Tables["time_logs"]["Insert"], "user_id">) {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error("Not authenticated");
+
     const { data, error } = await supabase
       .from("time_logs")
-      .insert(timeLog)
+      .insert({
+        ...timeLog,
+        user_id: user.id
+      })
       .select()
       .single();
     
@@ -231,13 +239,19 @@ export const workOrdersEnhancedApi = {
       .order("created_at", { ascending: true });
     
     if (error) throw error;
-    return data;
+    return data || [];
   },
 
-  async createWorkOrderComment(comment: Tables["work_order_comments"]["Insert"]) {
+  async createWorkOrderComment(comment: Omit<Tables["work_order_comments"]["Insert"], "user_id">) {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error("Not authenticated");
+
     const { data, error } = await supabase
       .from("work_order_comments")
-      .insert(comment)
+      .insert({
+        ...comment,
+        user_id: user.id
+      })
       .select(`
         *,
         users(email, first_name, last_name)
@@ -352,7 +366,6 @@ export const workOrdersEnhancedApi = {
       if (user) {
         await this.createWorkOrderComment({
           work_order_id: id,
-          user_id: user.id,
           content: `Status changed to ${status}. ${notes}`,
         });
       }

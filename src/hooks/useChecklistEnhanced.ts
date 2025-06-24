@@ -1,78 +1,32 @@
 
 import { useState } from "react";
-import { useChecklistItems, useCreateChecklistItem, useUpdateChecklistItem } from "./useWorkOrdersEnhanced";
-import { useWorkOrderStatusUpdate } from "./useWorkOrdersIntegration";
+import { useChecklistItems, useCreateChecklistItem, useUpdateChecklistItem, useDeleteChecklistItem } from "./useWorkOrdersEnhanced";
 
 export const useChecklistEnhanced = (workOrderId: string) => {
   const { data: checklistItems = [], isLoading } = useChecklistItems(workOrderId);
   const createItem = useCreateChecklistItem();
   const updateItem = useUpdateChecklistItem();
-  const updateWorkOrderStatus = useWorkOrderStatusUpdate();
-
-  const [isCreating, setIsCreating] = useState(false);
-  const [isRemoving, setIsRemoving] = useState(false);
-  const [isToggling, setIsToggling] = useState(false);
-
-  const createChecklistItem = async (data: any) => {
-    setIsCreating(true);
-    try {
-      await createItem.mutateAsync(data);
-    } finally {
-      setIsCreating(false);
-    }
-  };
-
-  const removeItem = async (id: string) => {
-    setIsRemoving(true);
-    try {
-      // Implementation would delete the item
-      console.log('Remove item:', id);
-    } finally {
-      setIsRemoving(false);
-    }
-  };
+  const deleteItem = useDeleteChecklistItem();
 
   const toggleComplete = async ({ itemId, completed }: { itemId: string; completed: boolean }) => {
-    setIsToggling(true);
-    try {
-      await updateItem.mutateAsync({
-        id: itemId,
-        updates: { completed }
-      });
+    return updateItem.mutateAsync({
+      id: itemId,
+      updates: { completed }
+    });
+  };
 
-      // Auto-update work order status based on checklist progress
-      const completedCount = checklistItems.filter(item => 
-        item.id === itemId ? completed : item.completed
-      ).length;
-      
-      const totalCount = checklistItems.length;
-
-      // First item checked → status changes to "In Progress"
-      if (completedCount === 1 && completed) {
-        await updateWorkOrderStatus.mutateAsync({
-          id: workOrderId,
-          status: 'in_progress',
-          notes: 'Work started - first checklist item completed'
-        });
-      }
-      
-      // All items completed → enable "Mark as Done"
-      if (completedCount === totalCount && totalCount > 0) {
-        console.log('All checklist items completed - work order can be marked as done');
-      }
-    } finally {
-      setIsToggling(false);
-    }
+  const removeItem = async (itemId: string) => {
+    return deleteItem.mutateAsync(itemId);
   };
 
   return {
     checklistItems,
     isLoading,
-    createItem: createChecklistItem,
+    createItem: createItem.mutateAsync,
     removeItem,
     toggleComplete,
-    isCreating,
-    isRemoving,
-    isToggling,
+    isCreating: createItem.isPending,
+    isRemoving: deleteItem.isPending,
+    isToggling: updateItem.isPending,
   };
 };
