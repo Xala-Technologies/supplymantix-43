@@ -97,10 +97,10 @@ export const useWorkOrdersPage = (workOrders: WorkOrder[] = []) => {
         priority: data.priority || 'medium',
         category: data.category || 'maintenance',
         assigned_to: Array.isArray(data.assignedTo) ? data.assignedTo[0] : data.assignedTo,
-        asset_id: typeof data.asset === 'object' ? data.asset.id : data.assetId,
-        due_date: data.dueDate,
+        asset_id: data.assetId || null,
+        due_date: data.dueDate || null,
         tags: data.tags || [],
-        location_id: data.location,
+        location_id: data.location || null,
         tenant_id: userData.tenant_id
       };
 

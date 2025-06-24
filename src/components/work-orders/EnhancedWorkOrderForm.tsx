@@ -1,4 +1,5 @@
-import { useState } from "react";
+
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -11,6 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import { Calendar, User, Tag, Clock, FileText, Plus, X } from "lucide-react";
 import { WorkOrder } from "@/types/workOrder";
+import { supabase } from "@/integrations/supabase/client";
 
 const workOrderSchema = z.object({
   title: z.string().min(1, "Title is required"),
@@ -21,6 +23,7 @@ const workOrderSchema = z.object({
   dueDate: z.string().optional(),
   category: z.string().default("maintenance"),
   tags: z.array(z.string()).default([]),
+  location: z.string().optional(),
 });
 
 type WorkOrderFormData = z.infer<typeof workOrderSchema>;
@@ -32,6 +35,16 @@ interface EnhancedWorkOrderFormProps {
   isLoading?: boolean;
 }
 
+interface Asset {
+  id: string;
+  name: string;
+}
+
+interface Location {
+  id: string;
+  name: string;
+}
+
 export const EnhancedWorkOrderForm = ({
   workOrder,
   onSubmit,
@@ -40,6 +53,9 @@ export const EnhancedWorkOrderForm = ({
 }: EnhancedWorkOrderFormProps) => {
   const [newTag, setNewTag] = useState("");
   const [selectedTemplate, setSelectedTemplate] = useState<string>("");
+  const [assets, setAssets] = useState<Asset[]>([]);
+  const [locations, setLocations] = useState<Location[]>([]);
+  const [loadingData, setLoadingData] = useState(true);
 
   const form = useForm<WorkOrderFormData>({
     resolver: zodResolver(workOrderSchema),
@@ -51,11 +67,39 @@ export const EnhancedWorkOrderForm = ({
       category: workOrder?.category || "maintenance",
       tags: workOrder?.tags || [],
       dueDate: workOrder?.due_date ? new Date(workOrder.due_date).toISOString().split('T')[0] : "",
+      assetId: typeof workOrder?.asset === 'object' ? workOrder.asset.id : workOrder?.asset || "",
+      location: workOrder?.location || "",
     },
   });
 
   const { watch, setValue, getValues } = form;
   const currentTags = watch("tags");
+
+  // Fetch assets and locations
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [assetsResponse, locationsResponse] = await Promise.all([
+          supabase.from('assets').select('id, name'),
+          supabase.from('locations').select('id, name')
+        ]);
+
+        if (assetsResponse.data) {
+          setAssets(assetsResponse.data);
+        }
+
+        if (locationsResponse.data) {
+          setLocations(locationsResponse.data);
+        }
+      } catch (error) {
+        console.error('Error fetching form data:', error);
+      } finally {
+        setLoadingData(false);
+      }
+    };
+
+    fetchData();
+  }, []);
 
   const addTag = () => {
     if (newTag.trim() && !currentTags.includes(newTag.trim())) {
@@ -77,6 +121,17 @@ export const EnhancedWorkOrderForm = ({
   const handleSubmit = (data: WorkOrderFormData) => {
     onSubmit(data);
   };
+
+  if (loadingData) {
+    return (
+      <div className="flex items-center justify-center p-8">
+        <div className="text-center space-y-3">
+          <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto"></div>
+          <p className="text-muted-foreground text-sm">Loading form data...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -206,13 +261,35 @@ export const EnhancedWorkOrderForm = ({
                       <SelectValue placeholder="Select asset..." />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="asset1">Conveyor Belt A</SelectItem>
-                      <SelectItem value="asset2">Packaging Machine B</SelectItem>
-                      <SelectItem value="asset3">HVAC System</SelectItem>
+                      {assets.map((asset) => (
+                        <SelectItem key={asset.id} value={asset.id}>
+                          {asset.name}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
               </div>
+            </div>
+
+            {/* Location */}
+            <div>
+              <Label htmlFor="location">Location</Label>
+              <Select
+                value={watch("location")}
+                onValueChange={(value) => setValue("location", value)}
+              >
+                <SelectTrigger className="mt-1">
+                  <SelectValue placeholder="Select location..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {locations.map((location) => (
+                    <SelectItem key={location.id} value={location.id}>
+                      {location.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             {/* Description */}
