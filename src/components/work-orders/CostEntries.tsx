@@ -1,4 +1,3 @@
-
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -25,9 +24,10 @@ interface CostEntry {
 
 interface CostEntriesProps {
   workOrderId: string;
+  onSubmit?: (costData: any) => void;
 }
 
-export const CostEntries = ({ workOrderId }: CostEntriesProps) => {
+export const CostEntries = ({ workOrderId, onSubmit }: CostEntriesProps) => {
   const [costEntries, setCostEntries] = useState<CostEntry[]>([
     {
       id: '1',
@@ -59,7 +59,7 @@ export const CostEntries = ({ workOrderId }: CostEntriesProps) => {
     }
   });
 
-  const onSubmit = (data: any) => {
+  const handleSubmit = (data: any) => {
     const newEntry: CostEntry = {
       id: Date.now().toString(),
       user: data.user,
@@ -72,6 +72,10 @@ export const CostEntries = ({ workOrderId }: CostEntriesProps) => {
     setCostEntries([...costEntries, newEntry]);
     setIsDialogOpen(false);
     form.reset();
+    
+    if (onSubmit) {
+      onSubmit(newEntry);
+    }
   };
 
   const deleteEntry = (id: string) => {
@@ -122,7 +126,7 @@ export const CostEntries = ({ workOrderId }: CostEntriesProps) => {
                 <DialogTitle>Add Cost Entry</DialogTitle>
               </DialogHeader>
               <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
                   <FormField
                     control={form.control}
                     name="user"

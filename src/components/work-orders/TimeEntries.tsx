@@ -1,4 +1,3 @@
-
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -24,9 +23,10 @@ interface TimeEntry {
 
 interface TimeEntriesProps {
   workOrderId: string;
+  onSubmit?: (timeData: any) => void;
 }
 
-export const TimeEntries = ({ workOrderId }: TimeEntriesProps) => {
+export const TimeEntries = ({ workOrderId, onSubmit }: TimeEntriesProps) => {
   const [timeEntries, setTimeEntries] = useState<TimeEntry[]>([
     {
       id: '1',
@@ -57,7 +57,7 @@ export const TimeEntries = ({ workOrderId }: TimeEntriesProps) => {
     }
   });
 
-  const onSubmit = (data: any) => {
+  const handleSubmit = (data: any) => {
     const newEntry: TimeEntry = {
       id: Date.now().toString(),
       user: data.user,
@@ -70,6 +70,10 @@ export const TimeEntries = ({ workOrderId }: TimeEntriesProps) => {
     setTimeEntries([...timeEntries, newEntry]);
     setIsDialogOpen(false);
     form.reset();
+    
+    if (onSubmit) {
+      onSubmit(newEntry);
+    }
   };
 
   const deleteEntry = (id: string) => {
@@ -120,7 +124,7 @@ export const TimeEntries = ({ workOrderId }: TimeEntriesProps) => {
                 <DialogTitle>Add Time Entry</DialogTitle>
               </DialogHeader>
               <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
                   <FormField
                     control={form.control}
                     name="user"

@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -19,9 +18,10 @@ import { useWorkOrderStatusUpdate } from "@/hooks/useWorkOrdersIntegration";
 
 interface WorkOrderStatusFlowProps {
   workOrder: WorkOrder;
+  onStatusUpdate?: (newStatus: string) => Promise<void>;
 }
 
-export const WorkOrderStatusFlow = ({ workOrder }: WorkOrderStatusFlowProps) => {
+export const WorkOrderStatusFlow = ({ workOrder, onStatusUpdate }: WorkOrderStatusFlowProps) => {
   const [notes, setNotes] = useState("");
   const [isChangingStatus, setIsChangingStatus] = useState(false);
   const updateStatus = useWorkOrderStatusUpdate();
@@ -29,11 +29,15 @@ export const WorkOrderStatusFlow = ({ workOrder }: WorkOrderStatusFlowProps) => 
   const handleStatusChange = async (newStatus: string, statusNotes?: string) => {
     setIsChangingStatus(true);
     try {
-      await updateStatus.mutateAsync({
-        id: workOrder.id,
-        status: newStatus,
-        notes: statusNotes || notes
-      });
+      if (onStatusUpdate) {
+        await onStatusUpdate(newStatus);
+      } else {
+        await updateStatus.mutateAsync({
+          id: workOrder.id,
+          status: newStatus,
+          notes: statusNotes || notes
+        });
+      }
       setNotes("");
     } catch (error) {
       console.error("Failed to update status:", error);
