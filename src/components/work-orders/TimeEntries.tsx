@@ -7,8 +7,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Clock, Plus, Trash2, User } from "lucide-react";
+import { Clock, Plus, User } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { format } from "date-fns";
@@ -35,7 +34,6 @@ export const TimeEntries = ({ workOrderId, onSubmit }: TimeEntriesProps) => {
     try {
       await createTimeLog.mutateAsync({
         work_order_id: workOrderId,
-        user_id: '', // Will be set automatically by the API
         duration_minutes: parseInt(data.duration_minutes),
         note: data.note
       });

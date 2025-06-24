@@ -7,7 +7,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Clock, Plus, User } from "lucide-react";
 import { useTimeLogs, useCreateTimeLog } from "@/hooks/useWorkOrdersEnhanced";
-import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
 
 interface WorkOrderTimeTrackingProps {
@@ -25,12 +24,8 @@ export const WorkOrderTimeTracking = ({ workOrderId }: WorkOrderTimeTrackingProp
   const handleAddTime = async () => {
     if (!duration || isNaN(Number(duration))) return;
 
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
-
     await createTimeLog.mutateAsync({
       work_order_id: workOrderId,
-      user_id: user.id,
       duration_minutes: Number(duration),
       note: note.trim() || undefined,
     });
