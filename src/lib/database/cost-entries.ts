@@ -19,7 +19,7 @@ export const costEntriesApi = {
       .order("created_at", { ascending: false });
     
     if (error) throw error;
-    return (data || []) as CostEntry[];
+    return (data || []) as unknown as CostEntry[];
   },
 
   async createCostEntry(costEntry: Omit<CostEntry, "id" | "created_at" | "created_by">): Promise<CostEntry> {
@@ -36,6 +36,6 @@ export const costEntriesApi = {
       .single();
     
     if (error) throw error;
-    return data as CostEntry;
+    return data as unknown as CostEntry;
   }
 };
