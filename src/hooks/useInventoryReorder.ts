@@ -40,3 +40,52 @@ export const useAutoReorderCheck = () => {
     }
   });
 };
+
+export const useCreateReorderPO = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: async (items: Array<{
+      id: string;
+      name: string;
+      quantity: number;
+      min_quantity: number;
+      unit_cost: number;
+      reorder_quantity: number;
+    }>) => {
+      console.log('Creating reorder PO for items:', items);
+      
+      // Simulate PO creation - in a real app this would call an API
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      return {
+        po_number: `PO-${Date.now()}`,
+        items: items,
+        total_amount: items.reduce((sum, item) => sum + (item.reorder_quantity * item.unit_cost), 0)
+      };
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["inventory-enhanced"] });
+      queryClient.invalidateQueries({ queryKey: ["purchase-orders"] });
+      toast.success(`Purchase Order ${data.po_number} created successfully`);
+    },
+    onError: (error) => {
+      console.error("Failed to create reorder PO:", error);
+      toast.error("Failed to create purchase order");
+    }
+  });
+};
+
+export const useCalculateReorderQuantity = () => {
+  return (item: InventoryItemWithStats): number => {
+    const minQty = item.min_quantity || 0;
+    const currentQty = item.quantity || 0;
+    
+    // Calculate suggested reorder quantity
+    // Reorder enough to reach 2x minimum quantity
+    const targetQty = minQty * 2;
+    const reorderQty = Math.max(0, targetQty - currentQty);
+    
+    return reorderQty;
+  };
+};
