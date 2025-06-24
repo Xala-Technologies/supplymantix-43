@@ -44,14 +44,6 @@ export const InventoryDetailCard = ({ item, onClose, onEdit }: InventoryDetailCa
   const { data: inventoryData } = useInventoryEnhanced();
   const rawItems = inventoryData?.items || [];
 
-  // Convert raw items to the format expected by ReorderDialog
-  const allItems = rawItems.map(rawItem => ({
-    ...rawItem,
-    is_low_stock: (rawItem.quantity || 0) <= (rawItem.min_quantity || 0),
-    needs_reorder: (rawItem.quantity || 0) <= (rawItem.min_quantity || 0) * 1.5,
-    total_value: (rawItem.quantity || 0) * (rawItem.unit_cost || 0),
-  }));
-
   // Convert current item to the format expected by ReorderDialog
   const currentItemForReorder = {
     id: item.id,
@@ -100,11 +92,6 @@ export const InventoryDetailCard = ({ item, onClose, onEdit }: InventoryDetailCa
   // Check if current item needs reordering
   const needsReorder = item.quantity <= item.minQuantity;
 
-  // Filter items that need reordering for the reorder dialog
-  const itemsNeedingReorder = allItems.filter(inventoryItem => 
-    inventoryItem.quantity <= (inventoryItem.min_quantity || 0)
-  );
-
   const content = (
     <div className="space-y-6 max-h-[80vh] overflow-y-auto">
       {/* Header */}
@@ -130,15 +117,6 @@ export const InventoryDetailCard = ({ item, onClose, onEdit }: InventoryDetailCa
               Edit
             </Button>
           )}
-          <ReorderDialog 
-            items={needsReorder ? [currentItemForReorder] : itemsNeedingReorder}
-            trigger={
-              <Button size="sm" className={needsReorder ? "bg-orange-600 hover:bg-orange-700" : ""}>
-                <ShoppingCart className="w-4 h-4 mr-2" />
-                {needsReorder ? "Reorder Now" : "Reorder"}
-              </Button>
-            }
-          />
         </div>
       </div>
 
@@ -222,22 +200,31 @@ export const InventoryDetailCard = ({ item, onClose, onEdit }: InventoryDetailCa
       {needsReorder && (
         <Card className="border-orange-200 bg-orange-50">
           <CardContent className="p-4">
-            <div className="flex items-center gap-2">
-              <ShoppingCart className="w-5 h-5 text-orange-600" />
-              <div>
-                <h4 className="font-medium text-orange-900">Reorder Required</h4>
-                <p className="text-sm text-orange-800">
-                  Current stock ({item.quantity}) is at or below minimum level ({item.minQuantity}). 
-                  Click the Reorder button above to create a purchase order.
-                </p>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <ShoppingCart className="w-5 h-5 text-orange-600" />
+                <div>
+                  <h4 className="font-medium text-orange-900">Reorder Required</h4>
+                  <p className="text-sm text-orange-800">
+                    Current stock ({item.quantity}) is at or below minimum level ({item.minQuantity}).
+                  </p>
+                </div>
               </div>
+              <ReorderDialog 
+                items={[currentItemForReorder]}
+                trigger={
+                  <Button className="bg-orange-600 hover:bg-orange-700">
+                    <ShoppingCart className="w-4 h-4 mr-2" />
+                    Reorder Now
+                  </Button>
+                }
+              />
             </div>
           </CardContent>
         </Card>
       )}
 
       {/* Detailed Information Tabs */}
-      
       <Tabs defaultValue="details" className="w-full">
         <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="details">Details</TabsTrigger>
@@ -361,10 +348,10 @@ export const InventoryDetailCard = ({ item, onClose, onEdit }: InventoryDetailCa
         <TabsContent value="reorder" className="mt-6">
           <Card>
             <CardHeader>
-              <CardTitle>Reorder Information</CardTitle>
+              <CardTitle>Reorder Information & Actions</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
+              <div className="space-y-6">
                 <div className={cn(
                   "p-4 border rounded-lg",
                   needsReorder 
@@ -375,10 +362,10 @@ export const InventoryDetailCard = ({ item, onClose, onEdit }: InventoryDetailCa
                     "font-medium mb-2",
                     needsReorder ? "text-orange-900" : "text-blue-900"
                   )}>
-                    Reorder Recommendation
+                    Reorder Status
                   </h4>
                   <p className={cn(
-                    "text-sm",
+                    "text-sm mb-3",
                     needsReorder ? "text-orange-800" : "text-blue-800"
                   )}>
                     {item.quantity <= item.reorderPoint 
@@ -386,6 +373,22 @@ export const InventoryDetailCard = ({ item, onClose, onEdit }: InventoryDetailCa
                       : `Stock level is adequate. Reorder when quantity reaches ${item.reorderPoint}.`
                     }
                   </p>
+                  
+                  {/* Single Reorder Action */}
+                  <ReorderDialog 
+                    items={[currentItemForReorder]}
+                    trigger={
+                      <Button className={cn(
+                        "w-full",
+                        needsReorder 
+                          ? "bg-orange-600 hover:bg-orange-700" 
+                          : "bg-blue-600 hover:bg-blue-700"
+                      )}>
+                        <ShoppingCart className="w-4 h-4 mr-2" />
+                        {needsReorder ? "Create Urgent Purchase Order" : "Create Purchase Order"}
+                      </Button>
+                    }
+                  />
                 </div>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -427,16 +430,6 @@ export const InventoryDetailCard = ({ item, onClose, onEdit }: InventoryDetailCa
                         <span>Within {item.leadTime}</span>
                       </div>
                     </div>
-                    
-                    <ReorderDialog 
-                      items={[currentItemForReorder]}
-                      trigger={
-                        <Button className="w-full mt-4">
-                          <ShoppingCart className="w-4 h-4 mr-2" />
-                          Create Purchase Order
-                        </Button>
-                      }
-                    />
                   </div>
                 </div>
               </div>
