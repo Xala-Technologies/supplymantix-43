@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { WorkOrder, WorkOrderStatus } from "@/types/workOrder";
 import { useWorkOrderStatusUpdate } from "@/hooks/useWorkOrdersIntegration";
+import { toast } from "sonner";
 
 interface WorkOrderStatusFlowProps {
   workOrder: WorkOrder;
@@ -25,7 +26,7 @@ interface WorkOrderStatusFlowProps {
 export const WorkOrderStatusFlow = ({ workOrder, onStatusUpdate }: WorkOrderStatusFlowProps) => {
   const [notes, setNotes] = useState("");
   const [isChangingStatus, setIsChangingStatus] = useState(false);
-  const updateStatus = useWorkOrderStatusUpdate();
+  const updateStatusMutation = useWorkOrderStatusUpdate();
 
   const handleStatusChange = async (newStatus: WorkOrderStatus, statusNotes?: string) => {
     setIsChangingStatus(true);
@@ -33,15 +34,17 @@ export const WorkOrderStatusFlow = ({ workOrder, onStatusUpdate }: WorkOrderStat
       if (onStatusUpdate) {
         await onStatusUpdate(newStatus);
       } else {
-        await updateStatus.mutateAsync({
+        await updateStatusMutation.mutateAsync({
           id: workOrder.id,
           status: newStatus,
           notes: statusNotes || notes
         });
       }
       setNotes("");
+      toast.success(`Work order status updated to ${newStatus.replace('_', ' ')}`);
     } catch (error) {
       console.error("Failed to update status:", error);
+      toast.error("Failed to update work order status");
     } finally {
       setIsChangingStatus(false);
     }
@@ -49,15 +52,15 @@ export const WorkOrderStatusFlow = ({ workOrder, onStatusUpdate }: WorkOrderStat
 
   const getStatusColor = (status: string) => {
     const colors = {
-      'draft': 'bg-gray-100 text-gray-800',
-      'open': 'bg-blue-100 text-blue-800',
-      'in_progress': 'bg-yellow-100 text-yellow-800',
-      'on_hold': 'bg-orange-100 text-orange-800',
-      'completed': 'bg-green-100 text-green-800',
-      'cancelled': 'bg-red-100 text-red-800',
-      'archived': 'bg-slate-100 text-slate-800',
+      'draft': 'bg-gray-100 text-gray-800 border-gray-200',
+      'open': 'bg-blue-100 text-blue-800 border-blue-200',
+      'in_progress': 'bg-yellow-100 text-yellow-800 border-yellow-200',
+      'on_hold': 'bg-orange-100 text-orange-800 border-orange-200',
+      'completed': 'bg-green-100 text-green-800 border-green-200',
+      'cancelled': 'bg-red-100 text-red-800 border-red-200',
+      'archived': 'bg-slate-100 text-slate-800 border-slate-200',
     };
-    return colors[status] || colors.open;
+    return colors[status as keyof typeof colors] || colors.open;
   };
 
   const getAvailableActions = () => {
@@ -66,17 +69,19 @@ export const WorkOrderStatusFlow = ({ workOrder, onStatusUpdate }: WorkOrderStat
     switch (status) {
       case 'draft':
         return [
-          { action: 'open' as WorkOrderStatus, label: 'Publish', icon: Play, color: 'blue' }
+          { action: 'open' as WorkOrderStatus, label: 'Open Work Order', icon: Play, color: 'blue' }
         ];
       case 'open':
         return [
           { action: 'in_progress' as WorkOrderStatus, label: 'Start Work', icon: Play, color: 'blue' },
-          { action: 'on_hold' as WorkOrderStatus, label: 'Put On Hold', icon: Pause, color: 'orange' }
+          { action: 'on_hold' as WorkOrderStatus, label: 'Put On Hold', icon: Pause, color: 'orange' },
+          { action: 'cancelled' as WorkOrderStatus, label: 'Cancel', icon: AlertCircle, color: 'red' }
         ];
       case 'in_progress':
         return [
           { action: 'completed' as WorkOrderStatus, label: 'Mark Complete', icon: CheckCircle, color: 'green' },
-          { action: 'on_hold' as WorkOrderStatus, label: 'Put On Hold', icon: Pause, color: 'orange' }
+          { action: 'on_hold' as WorkOrderStatus, label: 'Put On Hold', icon: Pause, color: 'orange' },
+          { action: 'cancelled' as WorkOrderStatus, label: 'Cancel', icon: AlertCircle, color: 'red' }
         ];
       case 'on_hold':
         return [
@@ -92,7 +97,18 @@ export const WorkOrderStatusFlow = ({ workOrder, onStatusUpdate }: WorkOrderStat
     }
   };
 
+  const getStatusProgress = () => {
+    const statusOrder = ['draft', 'open', 'in_progress', 'completed', 'archived'];
+    const currentIndex = statusOrder.indexOf(workOrder.status);
+    return statusOrder.map((status, index) => ({
+      status,
+      isActive: index <= currentIndex,
+      isCurrent: index === currentIndex
+    }));
+  };
+
   const availableActions = getAvailableActions();
+  const statusProgress = getStatusProgress();
 
   return (
     <Card className="border-gray-200 shadow-sm rounded-2xl">
@@ -111,48 +127,40 @@ export const WorkOrderStatusFlow = ({ workOrder, onStatusUpdate }: WorkOrderStat
       </CardHeader>
       
       <CardContent className="space-y-6 p-6">
-        {/* Enhanced Status Progress Timeline */}
+        {/* Status Progress Timeline */}
         <div className="bg-gray-50/50 rounded-xl p-4 border border-gray-100">
-          <div className="flex items-center justify-between text-sm">
-            <div className="flex flex-col items-center space-y-2">
-              <div className={`w-4 h-4 rounded-full transition-colors ${
-                ['draft', 'open', 'in_progress', 'on_hold', 'completed', 'archived'].includes(workOrder.status)
-                  ? 'bg-blue-500 ring-4 ring-blue-100' : 'bg-gray-300'
-              }`} />
-              <span className="text-xs font-medium">Draft</span>
-            </div>
-            <div className="flex-1 h-0.5 bg-gray-200 mx-3" />
-            <div className="flex flex-col items-center space-y-2">
-              <div className={`w-4 h-4 rounded-full transition-colors ${
-                ['open', 'in_progress', 'on_hold', 'completed', 'archived'].includes(workOrder.status)
-                  ? 'bg-blue-500 ring-4 ring-blue-100' : 'bg-gray-300'
-              }`} />
-              <span className="text-xs font-medium">Open</span>
-            </div>
-            <div className="flex-1 h-0.5 bg-gray-200 mx-3" />
-            <div className="flex flex-col items-center space-y-2">
-              <div className={`w-4 h-4 rounded-full transition-colors ${
-                ['in_progress', 'completed', 'archived'].includes(workOrder.status)
-                  ? 'bg-yellow-500 ring-4 ring-yellow-100' : 'bg-gray-300'
-              }`} />
-              <span className="text-xs font-medium">In Progress</span>
-            </div>
-            <div className="flex-1 h-0.5 bg-gray-200 mx-3" />
-            <div className="flex flex-col items-center space-y-2">
-              <div className={`w-4 h-4 rounded-full transition-colors ${
-                ['completed', 'archived'].includes(workOrder.status)
-                  ? 'bg-green-500 ring-4 ring-green-100' : 'bg-gray-300'
-              }`} />
-              <span className="text-xs font-medium">Complete</span>
-            </div>
+          <div className="flex items-center justify-between">
+            {statusProgress.map((item, index) => (
+              <div key={item.status} className="flex flex-col items-center space-y-2 flex-1">
+                <div className={`w-4 h-4 rounded-full transition-colors ${
+                  item.isActive
+                    ? item.isCurrent 
+                      ? 'bg-blue-500 ring-4 ring-blue-100' 
+                      : 'bg-green-500'
+                    : 'bg-gray-300'
+                }`} />
+                <span className={`text-xs font-medium ${
+                  item.isActive ? 'text-gray-900' : 'text-gray-500'
+                }`}>
+                  {item.status.replace('_', ' ')}
+                </span>
+                {index < statusProgress.length - 1 && (
+                  <div className={`absolute h-0.5 w-full top-2 left-1/2 ${
+                    item.isActive ? 'bg-green-300' : 'bg-gray-200'
+                  }`} style={{ transform: 'translateX(50%)' }} />
+                )}
+              </div>
+            ))}
           </div>
         </div>
 
-        {/* Status Change Notes */}
+        {/* Status Change Actions */}
         {availableActions.length > 0 && (
           <div className="space-y-4">
             <div>
-              <Label htmlFor="status-notes" className="text-sm font-medium">Status Change Notes (Optional)</Label>
+              <Label htmlFor="status-notes" className="text-sm font-medium">
+                Status Change Notes (Optional)
+              </Label>
               <Textarea
                 id="status-notes"
                 value={notes}
@@ -162,26 +170,29 @@ export const WorkOrderStatusFlow = ({ workOrder, onStatusUpdate }: WorkOrderStat
               />
             </div>
 
-            {/* Enhanced Action Buttons */}
             <div className="flex flex-wrap gap-3">
               {availableActions.map((action) => {
                 const IconComponent = action.icon;
+                const colorClasses = {
+                  green: 'border-green-300 text-green-700 bg-green-50 hover:bg-green-100',
+                  blue: 'border-blue-300 text-blue-700 bg-blue-50 hover:bg-blue-100',
+                  orange: 'border-orange-300 text-orange-700 bg-orange-50 hover:bg-orange-100',
+                  red: 'border-red-300 text-red-700 bg-red-50 hover:bg-red-100',
+                  gray: 'border-gray-300 text-gray-700 bg-gray-50 hover:bg-gray-100'
+                };
+
                 return (
                   <Button
                     key={action.action}
                     onClick={() => handleStatusChange(action.action, notes)}
-                    disabled={isChangingStatus}
+                    disabled={isChangingStatus || updateStatusMutation.isPending}
                     variant="outline"
                     className={`flex items-center gap-2 px-4 py-2 rounded-xl font-medium transition-all hover:scale-105 ${
-                      action.color === 'green' ? 'border-green-300 text-green-700 bg-green-50 hover:bg-green-100' :
-                      action.color === 'blue' ? 'border-blue-300 text-blue-700 bg-blue-50 hover:bg-blue-100' :
-                      action.color === 'orange' ? 'border-orange-300 text-orange-700 bg-orange-50 hover:bg-orange-100' :
-                      action.color === 'red' ? 'border-red-300 text-red-700 bg-red-50 hover:bg-red-100' :
-                      'border-gray-300 text-gray-700 bg-gray-50 hover:bg-gray-100'
+                      colorClasses[action.color as keyof typeof colorClasses]
                     }`}
                   >
                     <IconComponent className="w-4 h-4" />
-                    {action.label}
+                    {isChangingStatus || updateStatusMutation.isPending ? "Updating..." : action.label}
                   </Button>
                 );
               })}
@@ -189,20 +200,22 @@ export const WorkOrderStatusFlow = ({ workOrder, onStatusUpdate }: WorkOrderStat
           </div>
         )}
 
-        {/* Enhanced Current Status Info */}
+        {/* Current Status Info */}
         <div className="bg-gradient-to-r from-gray-50 to-blue-50 p-4 rounded-xl border border-gray-200">
           <div className="flex items-center gap-3 text-sm text-gray-700">
             <div className="p-2 bg-white rounded-lg shadow-sm">
               <FileText className="w-4 h-4 text-gray-600" />
             </div>
-            <span>
-              Status: <strong className="text-gray-900">{workOrder.status.replace('_', ' ')}</strong>
+            <div>
+              <div>
+                Status: <strong className="text-gray-900">{workOrder.status.replace('_', ' ')}</strong>
+              </div>
               {workOrder.updated_at && (
-                <span className="ml-2 text-gray-500">
-                  • Last updated {new Date(workOrder.updated_at).toLocaleDateString()}
-                </span>
+                <div className="text-gray-500 text-xs mt-1">
+                  Last updated: {new Date(workOrder.updated_at).toLocaleString()}
+                </div>
               )}
-            </span>
+            </div>
           </div>
         </div>
       </CardContent>

@@ -113,20 +113,41 @@ export const useWorkOrderStatusUpdate = () => {
       status: WorkOrderStatus;
       notes?: string;
     }) => {
-      // Only pass valid statuses that the API expects
-      const validStatuses = ['open', 'in_progress', 'on_hold', 'completed', 'cancelled'] as const;
-      type ApiStatus = typeof validStatuses[number];
-      const apiStatus: ApiStatus = validStatuses.includes(status as any) ? status as ApiStatus : 'open';
-      return workOrdersApi.updateWorkOrder(id, { status: apiStatus });
+      console.log('Updating work order status:', { id, status, notes });
+      
+      // Update the work order status
+      const updatedWorkOrder = await workOrdersApi.updateWorkOrder(id, { 
+        status: status as any,
+        updated_at: new Date().toISOString()
+      });
+
+      // If notes are provided, create a comment
+      if (notes && notes.trim()) {
+        try {
+          await workOrdersApi.createChatMessage({
+            work_order_id: id,
+            message: `Status changed to ${status.replace('_', ' ').toUpperCase()}. ${notes}`,
+            tenant_id: updatedWorkOrder.tenant_id
+          });
+        } catch (error) {
+          console.warn('Failed to create status change comment:', error);
+          // Don't fail the status update if comment creation fails
+        }
+      }
+
+      return updatedWorkOrder;
     },
-    onSuccess: () => {
+    onSuccess: (data, variables) => {
+      // Invalidate and refetch all work order related queries
       queryClient.invalidateQueries({ queryKey: ["work-orders"] });
       queryClient.invalidateQueries({ queryKey: ["work-orders-integration"] });
-      toast.success("Work order status updated");
+      queryClient.invalidateQueries({ queryKey: ["work-order-comments", variables.id] });
+      
+      console.log('Work order status updated successfully:', data);
     },
-    onError: (error) => {
-      toast.error("Failed to update work order status");
+    onError: (error, variables) => {
       console.error("Status update error:", error);
+      toast.error(`Failed to update work order status to ${variables.status.replace('_', ' ')}`);
     }
   });
 };

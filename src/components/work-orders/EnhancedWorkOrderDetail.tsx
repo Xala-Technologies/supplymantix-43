@@ -25,6 +25,7 @@ import { TimeEntries } from "./TimeEntries";
 import { CostEntries } from "./CostEntries";
 import { WorkOrderChat } from "./WorkOrderChat";
 import { getAssetName, getLocationName } from "@/utils/assetUtils";
+import { useWorkOrderStatusUpdate } from "@/hooks/useWorkOrdersIntegration";
 
 interface EnhancedWorkOrderDetailProps {
   workOrder: WorkOrder;
@@ -33,6 +34,7 @@ interface EnhancedWorkOrderDetailProps {
 
 export const EnhancedWorkOrderDetail = ({ workOrder, onEdit }: EnhancedWorkOrderDetailProps) => {
   const [activeTab, setActiveTab] = useState("overview");
+  const updateStatus = useWorkOrderStatusUpdate();
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
@@ -65,8 +67,15 @@ export const EnhancedWorkOrderDetail = ({ workOrder, onEdit }: EnhancedWorkOrder
   };
 
   const handleStatusUpdate = async (newStatus: string) => {
-    // This would typically update the work order status via API
-    console.log('Updating status to:', newStatus);
+    try {
+      await updateStatus.mutateAsync({
+        id: workOrder.id,
+        status: newStatus as any,
+        notes: `Status changed to ${newStatus.replace('_', ' ')}`
+      });
+    } catch (error) {
+      console.error('Failed to update status:', error);
+    }
   };
 
   const handleChecklistUpdate = () => {
