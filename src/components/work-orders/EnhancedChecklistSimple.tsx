@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
-import { Plus, Trash2, CheckCircle2, Clock, Target } from "lucide-react";
+import { Plus, Trash2, CheckCircle2, Clock, Target, Trash } from "lucide-react";
 import { toast } from "sonner";
 
 interface ChecklistItem {
@@ -97,6 +97,15 @@ export const EnhancedChecklistSimple = ({ workOrderId, onUpdate }: EnhancedCheck
     }
   };
 
+  const handleClearAll = () => {
+    setItems([]);
+    toast.success("All checklist items cleared successfully");
+    
+    if (onUpdate) {
+      onUpdate();
+    }
+  };
+
   const handleUpdateNote = (id: string, note: string) => {
     setItems(prev => prev.map(item => 
       item.id === id 
@@ -132,13 +141,26 @@ export const EnhancedChecklistSimple = ({ workOrderId, onUpdate }: EnhancedCheck
               </div>
             </div>
           </div>
-          <div className="text-right">
-            <div className="text-lg font-bold text-gray-800">
-              {completedCount}/{totalCount}
+          <div className="flex items-center gap-3">
+            <div className="text-right">
+              <div className="text-lg font-bold text-gray-800">
+                {completedCount}/{totalCount}
+              </div>
+              <div className="text-xs text-gray-500 font-medium">
+                {Math.round(completionPercentage)}% complete
+              </div>
             </div>
-            <div className="text-xs text-gray-500 font-medium">
-              {Math.round(completionPercentage)}% complete
-            </div>
+            {totalCount > 0 && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleClearAll}
+                className="text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200 hover:border-red-300"
+              >
+                <Trash className="w-4 h-4 mr-1" />
+                Clear All
+              </Button>
+            )}
           </div>
         </CardTitle>
         
