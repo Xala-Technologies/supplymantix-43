@@ -23,6 +23,16 @@ export default {
         sans: ["Inter", "ui-sans-serif", "system-ui", "sans-serif"],
         mono: ["JetBrains Mono", "ui-monospace", "monospace"],
       },
+      fontSize: {
+        // Simplified font size system
+        'xs': ['12px', { lineHeight: '1.5' }],
+        'sm': ['14px', { lineHeight: '1.6' }],
+        'base': ['16px', { lineHeight: '1.6' }],
+        'lg': ['18px', { lineHeight: '1.4' }],
+        'xl': ['20px', { lineHeight: '1.4' }],
+        '2xl': ['24px', { lineHeight: '1.3' }],
+        '3xl': ['30px', { lineHeight: '1.2' }],
+      },
       colors: {
         border: "rgb(var(--border))",
         input: "rgb(var(--input))",
@@ -66,6 +76,19 @@ export default {
           "accent-foreground": "rgb(var(--sidebar-accent-foreground))",
           border: "rgb(var(--sidebar-border))",
           ring: "rgb(var(--sidebar-ring))",
+        },
+        // Enhanced color palette for better design consistency
+        slate: {
+          50: '#f8fafc',
+          100: '#f1f5f9',
+          200: '#e2e8f0',
+          300: '#cbd5e1',
+          400: '#94a3b8',
+          500: '#64748b',
+          600: '#475569',
+          700: '#334155',
+          800: '#1e293b',
+          900: '#0f172a',
         },
       },
       borderRadius: {
