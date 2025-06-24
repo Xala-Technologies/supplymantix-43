@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { InventoryHeader } from "./InventoryHeader";
 import { InventoryStats } from "./InventoryStats";
@@ -165,23 +164,21 @@ export const InventoryDashboard = () => {
       </div>
 
       {/* Create Form Dialog */}
-      {showCreateForm && (
-        <InventoryForm
-          mode="create"
-          onSuccess={handleFormSuccess}
-          trigger={null}
-        />
-      )}
+      <InventoryForm
+        mode="create"
+        onSuccess={handleFormSuccess}
+        open={showCreateForm}
+        onOpenChange={setShowCreateForm}
+      />
 
       {/* Edit Form Dialog */}
-      {showEditForm && editingItem && (
-        <InventoryForm
-          mode="edit"
-          item={editingItem}
-          onSuccess={handleFormSuccess}
-          trigger={null}
-        />
-      )}
+      <InventoryForm
+        mode="edit"
+        item={editingItem}
+        onSuccess={handleFormSuccess}
+        open={showEditForm}
+        onOpenChange={setShowEditForm}
+      />
 
       {/* Detail View Dialog */}
       {selectedItem && (

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -26,10 +25,24 @@ interface InventoryFormProps {
   onSuccess?: () => void;
   trigger?: React.ReactNode;
   mode?: 'create' | 'edit';
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 
-export const InventoryForm = ({ item, onSuccess, trigger, mode = 'create' }: InventoryFormProps) => {
-  const [open, setOpen] = useState(false);
+export const InventoryForm = ({ 
+  item, 
+  onSuccess, 
+  trigger, 
+  mode = 'create',
+  open: controlledOpen,
+  onOpenChange: controlledOnOpenChange
+}: InventoryFormProps) => {
+  const [internalOpen, setInternalOpen] = useState(false);
+  
+  // Use controlled or internal state
+  const isControlled = controlledOpen !== undefined;
+  const open = isControlled ? controlledOpen : internalOpen;
+  const setOpen = isControlled ? (controlledOnOpenChange || (() => {})) : setInternalOpen;
   
   const createMutation = useCreateInventoryItem();
   const updateMutation = useUpdateInventoryItem();
@@ -164,6 +177,149 @@ export const InventoryForm = ({ item, onSuccess, trigger, mode = 'create' }: Inv
   const watchedValues = watch();
   console.log('InventoryForm: Current form values:', watchedValues);
 
+  const formContent = (
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+      <div>
+        <Label htmlFor="name">Item Name *</Label>
+        <Input
+          id="name"
+          {...register("name", { required: "Item name is required" })}
+          placeholder="Enter item name"
+          disabled={isSubmitting}
+        />
+        {errors.name && (
+          <span className="text-sm text-red-500">{errors.name.message}</span>
+        )}
+      </div>
+
+      <div>
+        <Label htmlFor="sku">SKU</Label>
+        <Input
+          id="sku"
+          {...register("sku")}
+          placeholder="Enter SKU"
+          disabled={isSubmitting}
+        />
+      </div>
+
+      <div>
+        <Label htmlFor="description">Description</Label>
+        <Textarea
+          id="description"
+          {...register("description")}
+          placeholder="Enter item description"
+          rows={3}
+          disabled={isSubmitting}
+        />
+      </div>
+
+      <div>
+        <Label htmlFor="location">Location</Label>
+        <Input
+          id="location"
+          {...register("location")}
+          placeholder="Enter location"
+          disabled={isSubmitting}
+        />
+      </div>
+
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <Label htmlFor="quantity">Quantity *</Label>
+          <Input
+            id="quantity"
+            type="number"
+            min="0"
+            {...register("quantity", { 
+              required: "Quantity is required",
+              valueAsNumber: true,
+              min: { value: 0, message: "Quantity must be 0 or greater" }
+            })}
+            placeholder="0"
+            disabled={isSubmitting}
+          />
+          {errors.quantity && (
+            <span className="text-sm text-red-500">{errors.quantity.message}</span>
+          )}
+        </div>
+
+        <div>
+          <Label htmlFor="min_quantity">Min Quantity</Label>
+          <Input
+            id="min_quantity"
+            type="number"
+            min="0"
+            {...register("min_quantity", { 
+              valueAsNumber: true,
+              min: { value: 0, message: "Min quantity must be 0 or greater" }
+            })}
+            placeholder="0"
+            disabled={isSubmitting}
+          />
+          {errors.min_quantity && (
+            <span className="text-sm text-red-500">{errors.min_quantity.message}</span>
+          )}
+        </div>
+      </div>
+
+      <div>
+        <Label htmlFor="unit_cost">Unit Cost</Label>
+        <Input
+          id="unit_cost"
+          type="number"
+          min="0"
+          step="0.01"
+          {...register("unit_cost", { 
+            valueAsNumber: true,
+            min: { value: 0, message: "Unit cost must be 0 or greater" }
+          })}
+          placeholder="0.00"
+          disabled={isSubmitting}
+        />
+        {errors.unit_cost && (
+          <span className="text-sm text-red-500">{errors.unit_cost.message}</span>
+        )}
+      </div>
+
+      <div className="flex justify-end gap-2 pt-4">
+        <Button
+          type="button"
+          variant="outline"
+          onClick={() => handleOpenChange(false)}
+          disabled={isSubmitting}
+        >
+          Cancel
+        </Button>
+        <Button type="submit" disabled={isSubmitting}>
+          {isSubmitting ? 'Saving...' : mode === 'edit' ? 'Update Item' : 'Create Item'}
+        </Button>
+      </div>
+    </form>
+  );
+
+  // If no trigger is provided, render as controlled dialog
+  if (!trigger) {
+    return (
+      <Dialog open={open} onOpenChange={handleOpenChange}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>
+              {mode === 'edit' ? 'Edit Inventory Item' : 'Add New Inventory Item'}
+            </DialogTitle>
+            <DialogDescription>
+              {mode === 'edit' 
+                ? 'Update the details of your inventory item.' 
+                : 'Enter the details for your new inventory item.'
+              }
+            </DialogDescription>
+          </DialogHeader>
+          {formContent}
+        </DialogContent>
+      </Dialog>
+    );
+  }
+
+  // Render with trigger
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
@@ -186,124 +342,7 @@ export const InventoryForm = ({ item, onSuccess, trigger, mode = 'create' }: Inv
             }
           </DialogDescription>
         </DialogHeader>
-        
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          <div>
-            <Label htmlFor="name">Item Name *</Label>
-            <Input
-              id="name"
-              {...register("name", { required: "Item name is required" })}
-              placeholder="Enter item name"
-              disabled={isSubmitting}
-            />
-            {errors.name && (
-              <span className="text-sm text-red-500">{errors.name.message}</span>
-            )}
-          </div>
-
-          <div>
-            <Label htmlFor="sku">SKU</Label>
-            <Input
-              id="sku"
-              {...register("sku")}
-              placeholder="Enter SKU"
-              disabled={isSubmitting}
-            />
-          </div>
-
-          <div>
-            <Label htmlFor="description">Description</Label>
-            <Textarea
-              id="description"
-              {...register("description")}
-              placeholder="Enter item description"
-              rows={3}
-              disabled={isSubmitting}
-            />
-          </div>
-
-          <div>
-            <Label htmlFor="location">Location</Label>
-            <Input
-              id="location"
-              {...register("location")}
-              placeholder="Enter location"
-              disabled={isSubmitting}
-            />
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="quantity">Quantity *</Label>
-              <Input
-                id="quantity"
-                type="number"
-                min="0"
-                {...register("quantity", { 
-                  required: "Quantity is required",
-                  valueAsNumber: true,
-                  min: { value: 0, message: "Quantity must be 0 or greater" }
-                })}
-                placeholder="0"
-                disabled={isSubmitting}
-              />
-              {errors.quantity && (
-                <span className="text-sm text-red-500">{errors.quantity.message}</span>
-              )}
-            </div>
-
-            <div>
-              <Label htmlFor="min_quantity">Min Quantity</Label>
-              <Input
-                id="min_quantity"
-                type="number"
-                min="0"
-                {...register("min_quantity", { 
-                  valueAsNumber: true,
-                  min: { value: 0, message: "Min quantity must be 0 or greater" }
-                })}
-                placeholder="0"
-                disabled={isSubmitting}
-              />
-              {errors.min_quantity && (
-                <span className="text-sm text-red-500">{errors.min_quantity.message}</span>
-              )}
-            </div>
-          </div>
-
-          <div>
-            <Label htmlFor="unit_cost">Unit Cost</Label>
-            <Input
-              id="unit_cost"
-              type="number"
-              min="0"
-              step="0.01"
-              {...register("unit_cost", { 
-                valueAsNumber: true,
-                min: { value: 0, message: "Unit cost must be 0 or greater" }
-              })}
-              placeholder="0.00"
-              disabled={isSubmitting}
-            />
-            {errors.unit_cost && (
-              <span className="text-sm text-red-500">{errors.unit_cost.message}</span>
-            )}
-          </div>
-
-          <div className="flex justify-end gap-2 pt-4">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => handleOpenChange(false)}
-              disabled={isSubmitting}
-            >
-              Cancel
-            </Button>
-            <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? 'Saving...' : mode === 'edit' ? 'Update Item' : 'Create Item'}
-            </Button>
-          </div>
-        </form>
+        {formContent}
       </DialogContent>
     </Dialog>
   );
