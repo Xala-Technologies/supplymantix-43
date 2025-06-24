@@ -1,51 +1,129 @@
 
 import React from "react";
-import { InventoryCard } from "./InventoryCard";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Package, Eye, Edit, Trash2 } from "lucide-react";
+import { InventoryStatusBadge } from "./InventoryStatusBadge";
 
 interface InventoryItem {
   id: string;
   name: string;
-  sku?: string;
-  description?: string;
+  sku: string;
+  description: string;
   quantity: number;
   minQuantity: number;
   unitCost: number;
   totalValue: number;
-  location?: string;
-  category?: string;
+  location: string;
+  category: string;
   status: string;
 }
 
 interface InventoryGridProps {
   items: InventoryItem[];
-  onViewItem?: (item: InventoryItem) => void;
-  onEditItem?: (item: InventoryItem) => void;
+  onViewItem: (item: InventoryItem) => void;
+  onEditItem: (item: InventoryItem) => void;
+  onDeleteItem?: (item: InventoryItem) => void;
 }
 
-export const InventoryGrid = ({ items, onViewItem, onEditItem }: InventoryGridProps) => {
+export const InventoryGrid = ({ 
+  items, 
+  onViewItem, 
+  onEditItem,
+  onDeleteItem
+}: InventoryGridProps) => {
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD'
+    }).format(amount);
+  };
+
   if (items.length === 0) {
     return (
       <div className="text-center py-12">
-        <div className="text-gray-400 mb-4">
-          <svg className="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-5.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H1" />
-          </svg>
-        </div>
-        <h3 className="text-lg font-medium text-gray-900 mb-2">No inventory items</h3>
-        <p className="text-gray-500">Get started by adding your first inventory item.</p>
+        <Package className="mx-auto h-12 w-12 text-gray-400" />
+        <h3 className="mt-2 text-sm font-medium text-gray-900">No inventory items</h3>
+        <p className="mt-1 text-sm text-gray-500">Get started by adding a new inventory item.</p>
       </div>
     );
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       {items.map((item) => (
-        <InventoryCard
-          key={item.id}
-          item={item}
-          onView={onViewItem}
-          onEdit={onEditItem}
-        />
+        <Card key={item.id} className="hover:shadow-md transition-shadow">
+          <CardHeader className="pb-3">
+            <div className="flex items-start justify-between">
+              <div className="flex-1 min-w-0">
+                <CardTitle className="text-lg font-semibold truncate">
+                  {item.name}
+                </CardTitle>
+                <p className="text-sm text-gray-600 mt-1">SKU: {item.sku}</p>
+              </div>
+              <InventoryStatusBadge status={item.status} />
+            </div>
+          </CardHeader>
+          
+          <CardContent className="pt-0">
+            <div className="space-y-3">
+              <p className="text-sm text-gray-600 line-clamp-2">
+                {item.description || "No description available"}
+              </p>
+              
+              <div className="grid grid-cols-2 gap-4 text-sm">
+                <div>
+                  <p className="text-gray-600">Quantity</p>
+                  <p className="font-semibold">{item.quantity}</p>
+                </div>
+                <div>
+                  <p className="text-gray-600">Location</p>
+                  <p className="font-semibold">{item.location || "N/A"}</p>
+                </div>
+                <div>
+                  <p className="text-gray-600">Unit Cost</p>
+                  <p className="font-semibold">{formatCurrency(item.unitCost)}</p>
+                </div>
+                <div>
+                  <p className="text-gray-600">Total Value</p>
+                  <p className="font-semibold">{formatCurrency(item.totalValue)}</p>
+                </div>
+              </div>
+              
+              <div className="flex gap-2 pt-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => onViewItem(item)}
+                  className="flex-1"
+                >
+                  <Eye className="w-4 h-4 mr-1" />
+                  View
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => onEditItem(item)}
+                  className="flex-1"
+                >
+                  <Edit className="w-4 h-4 mr-1" />
+                  Edit
+                </Button>
+                {onDeleteItem && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => onDeleteItem(item)}
+                    className="text-red-600 hover:text-red-700 hover:border-red-200 hover:bg-red-50"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
+                )}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       ))}
     </div>
   );

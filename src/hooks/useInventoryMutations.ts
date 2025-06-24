@@ -119,7 +119,7 @@ export const useDeleteInventoryItem = () => {
       queryClient.refetchQueries({ queryKey: ["inventory-enhanced"] });
       queryClient.refetchQueries({ queryKey: ["low-stock-alerts"] });
       
-      toast.success("Inventory item deleted successfully");
+      // Don't show success toast here as it will be handled by the undo system
     },
     onError: (error) => {
       console.error("useDeleteInventoryItem: Failed to delete inventory item:", error);
