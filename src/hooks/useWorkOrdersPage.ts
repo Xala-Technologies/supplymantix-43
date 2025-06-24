@@ -1,5 +1,4 @@
-
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { WorkOrder, WorkOrderFilters } from "@/types/workOrder";
 import { toast } from "sonner";
 import { workOrdersApi } from "@/lib/database/work-orders";
@@ -49,6 +48,20 @@ export const useWorkOrdersPage = (workOrders: WorkOrder[] = []) => {
       return matchesSearch && matchesStatus && matchesPriority && matchesCategory && matchesAssignedTo;
     });
   }, [transformedWorkOrders, filters]);
+
+  // Auto-select first work order when filtered list changes
+  useEffect(() => {
+    if (filteredWorkOrders.length > 0) {
+      const firstWorkOrderId = filteredWorkOrders[0].id;
+      if (!selectedWorkOrder || !filteredWorkOrders.find(wo => wo.id === selectedWorkOrder)) {
+        setSelectedWorkOrder(firstWorkOrderId);
+        setViewMode('detail');
+      }
+    } else {
+      setSelectedWorkOrder(null);
+      setViewMode('list');
+    }
+  }, [filteredWorkOrders, selectedWorkOrder]);
 
   const selectedWorkOrderData = useMemo(() => {
     return transformedWorkOrders.find(wo => wo.id === selectedWorkOrder);
