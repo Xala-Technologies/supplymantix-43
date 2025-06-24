@@ -13,13 +13,13 @@ export interface CostEntry {
 export const costEntriesApi = {
   async getCostEntries(workOrderId: string): Promise<CostEntry[]> {
     const { data, error } = await supabase
-      .from("work_order_cost_entries")
+      .from("work_order_cost_entries" as any)
       .select("*")
       .eq("work_order_id", workOrderId)
       .order("created_at", { ascending: false });
     
     if (error) throw error;
-    return data || [];
+    return (data || []) as CostEntry[];
   },
 
   async createCostEntry(costEntry: Omit<CostEntry, "id" | "created_at" | "created_by">): Promise<CostEntry> {
@@ -27,7 +27,7 @@ export const costEntriesApi = {
     if (!user) throw new Error("Not authenticated");
 
     const { data, error } = await supabase
-      .from("work_order_cost_entries")
+      .from("work_order_cost_entries" as any)
       .insert({
         ...costEntry,
         created_by: user.id
@@ -36,6 +36,6 @@ export const costEntriesApi = {
       .single();
     
     if (error) throw error;
-    return data;
+    return data as CostEntry;
   }
 };

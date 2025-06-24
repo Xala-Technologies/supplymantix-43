@@ -21,8 +21,8 @@ export const useCreateCostEntry = () => {
       toast.success("Cost entry added successfully");
     },
     onError: (error) => {
-      toast.error("Failed to add cost entry");
       console.error("Cost entry creation error:", error);
+      toast.error("Failed to add cost entry");
     }
   });
 };
