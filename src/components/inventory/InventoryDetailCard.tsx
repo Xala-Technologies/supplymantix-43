@@ -1,3 +1,4 @@
+
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -99,6 +100,11 @@ export const InventoryDetailCard = ({ item, onClose, onEdit }: InventoryDetailCa
   // Check if current item needs reordering
   const needsReorder = item.quantity <= item.minQuantity;
 
+  // Filter items that need reordering for the reorder dialog
+  const itemsNeedingReorder = allItems.filter(inventoryItem => 
+    inventoryItem.quantity <= (inventoryItem.min_quantity || 0)
+  );
+
   const content = (
     <div className="space-y-6 max-h-[80vh] overflow-y-auto">
       {/* Header */}
@@ -125,7 +131,7 @@ export const InventoryDetailCard = ({ item, onClose, onEdit }: InventoryDetailCa
             </Button>
           )}
           <ReorderDialog 
-            items={needsReorder ? [currentItemForReorder] : allItems}
+            items={needsReorder ? [currentItemForReorder] : itemsNeedingReorder}
             trigger={
               <Button size="sm" className={needsReorder ? "bg-orange-600 hover:bg-orange-700" : ""}>
                 <ShoppingCart className="w-4 h-4 mr-2" />
