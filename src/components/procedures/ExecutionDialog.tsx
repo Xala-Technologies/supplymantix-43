@@ -1,23 +1,12 @@
-
 import React, { useState } from 'react';
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { 
-  Play, 
-  CheckCircle,
-  Clock,
-  FileText,
-  User,
-  X,
-  Target,
-  BarChart3
-} from "lucide-react";
+import { Play, CheckCircle, Clock, FileText, User, X, Target, BarChart3 } from "lucide-react";
 import { ProcedureExecution } from "./ProcedureExecution";
 import { ProcedureWithFields } from "@/lib/database/procedures-enhanced";
 import { useStartExecution } from "@/hooks/useProceduresEnhanced";
-
 interface ExecutionDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -27,7 +16,6 @@ interface ExecutionDialogProps {
   workOrderId?: string;
   executionId?: string;
 }
-
 export const ExecutionDialog: React.FC<ExecutionDialogProps> = ({
   open,
   onOpenChange,
@@ -39,13 +27,10 @@ export const ExecutionDialog: React.FC<ExecutionDialogProps> = ({
 }) => {
   const [isExecuting, setIsExecuting] = useState(false);
   const [executionId, setExecutionId] = useState<string | undefined>(providedExecutionId);
-  
   const startExecution = useStartExecution();
-
   if (!procedure) {
     return null;
   }
-
   const handleStart = async () => {
     try {
       const execution = await startExecution.mutateAsync({
@@ -58,23 +43,19 @@ export const ExecutionDialog: React.FC<ExecutionDialogProps> = ({
       console.error('Failed to start execution:', error);
     }
   };
-
   const handleComplete = (answers: any, score: number) => {
     setIsExecuting(false);
     onComplete(answers, score);
   };
-
   const handleCancel = () => {
     setIsExecuting(false);
     onCancel();
   };
-
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+  return <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl w-[95vw] h-[90vh] p-0 overflow-hidden">
-        {!isExecuting ? (
-          // Enhanced Start Screen
-          <div className="flex flex-col h-full bg-gradient-to-br from-blue-50 via-white to-indigo-50">
+        {!isExecuting ?
+      // Enhanced Start Screen
+      <div className="flex flex-col h-full bg-gradient-to-br from-blue-50 via-white to-indigo-50">
             {/* Compact Header */}
             <div className="flex items-center justify-between p-4 border-b bg-white/80 backdrop-blur-sm">
               <div className="flex items-center gap-3">
@@ -86,19 +67,15 @@ export const ExecutionDialog: React.FC<ExecutionDialogProps> = ({
                   <p className="text-sm text-gray-600">Ready to execute procedure</p>
                 </div>
               </div>
-              <Button variant="ghost" size="sm" onClick={handleCancel} className="hover:bg-red-50">
-                <X className="h-4 w-4" />
-              </Button>
+              
             </div>
 
             {/* Content - More Compact */}
             <div className="flex-1 p-6">
               {/* Description */}
-              {procedure.description && (
-                <div className="mb-6 p-4 bg-white/60 rounded-lg border border-blue-100">
+              {procedure.description && <div className="mb-6 p-4 bg-white/60 rounded-lg border border-blue-100">
                   <p className="text-gray-700">{procedure.description}</p>
-                </div>
-              )}
+                </div>}
 
               {/* Stats Cards - Horizontal Layout */}
               <div className="grid grid-cols-4 gap-4 mb-6">
@@ -181,35 +158,18 @@ export const ExecutionDialog: React.FC<ExecutionDialogProps> = ({
             {/* Footer Actions */}
             <div className="p-4 border-t bg-white/80 backdrop-blur-sm">
               <div className="flex gap-3">
-                <Button 
-                  variant="outline" 
-                  onClick={handleCancel} 
-                  className="flex-1 border-gray-300 hover:bg-gray-50"
-                >
+                <Button variant="outline" onClick={handleCancel} className="flex-1 border-gray-300 hover:bg-gray-50">
                   Cancel
                 </Button>
-                <Button 
-                  onClick={handleStart} 
-                  disabled={startExecution.isPending}
-                  className="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg"
-                >
+                <Button onClick={handleStart} disabled={startExecution.isPending} className="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg">
                   <Play className="h-4 w-4 mr-2" />
                   {startExecution.isPending ? 'Starting...' : 'Start Execution'}
                 </Button>
               </div>
             </div>
-          </div>
-        ) : (
-          // Execution View
-          <ProcedureExecution
-            procedure={procedure}
-            executionId={executionId}
-            workOrderId={workOrderId}
-            onComplete={handleComplete}
-            onCancel={handleCancel}
-          />
-        )}
+          </div> :
+      // Execution View
+      <ProcedureExecution procedure={procedure} executionId={executionId} workOrderId={workOrderId} onComplete={handleComplete} onCancel={handleCancel} />}
       </DialogContent>
-    </Dialog>
-  );
+    </Dialog>;
 };
