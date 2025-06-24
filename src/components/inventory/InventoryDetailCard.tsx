@@ -1,4 +1,3 @@
-
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -6,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Package, DollarSign, MapPin, Calendar, Edit, ShoppingCart, TrendingDown, TrendingUp, X } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { ReorderDialog } from "./ReorderDialog";
+import { useInventoryEnhanced } from "@/hooks/useInventoryEnhanced";
 
 interface InventoryDetailCardProps {
   item: {
@@ -38,6 +39,25 @@ interface InventoryDetailCardProps {
 }
 
 export const InventoryDetailCard = ({ item, onClose, onEdit }: InventoryDetailCardProps) => {
+  // Get all inventory items for reorder functionality
+  const { data: inventoryData } = useInventoryEnhanced();
+  const allItems = inventoryData?.items || [];
+
+  // Convert current item to the format expected by ReorderDialog
+  const currentItemForReorder = {
+    id: item.id,
+    name: item.name,
+    sku: item.sku,
+    quantity: item.quantity,
+    min_quantity: item.minQuantity,
+    unit_cost: item.unitCost,
+    location: item.location,
+    tenant_id: '', // This will be handled by the hook
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    description: item.description
+  };
+
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
       case 'in_stock':
@@ -65,6 +85,9 @@ export const InventoryDetailCard = ({ item, onClose, onEdit }: InventoryDetailCa
     return Math.min(100, Math.max(0, percentage));
   };
 
+  // Check if current item needs reordering
+  const needsReorder = item.quantity <= item.minQuantity;
+
   const content = (
     <div className="space-y-6 max-h-[80vh] overflow-y-auto">
       {/* Header */}
@@ -90,10 +113,15 @@ export const InventoryDetailCard = ({ item, onClose, onEdit }: InventoryDetailCa
               Edit
             </Button>
           )}
-          <Button size="sm">
-            <ShoppingCart className="w-4 h-4 mr-2" />
-            Reorder
-          </Button>
+          <ReorderDialog 
+            items={needsReorder ? [currentItemForReorder] : allItems}
+            trigger={
+              <Button size="sm" className={needsReorder ? "bg-orange-600 hover:bg-orange-700" : ""}>
+                <ShoppingCart className="w-4 h-4 mr-2" />
+                {needsReorder ? "Reorder Now" : "Reorder"}
+              </Button>
+            }
+          />
         </div>
       </div>
 
@@ -173,7 +201,26 @@ export const InventoryDetailCard = ({ item, onClose, onEdit }: InventoryDetailCa
         </CardContent>
       </Card>
 
+      {/* Reorder Alert */}
+      {needsReorder && (
+        <Card className="border-orange-200 bg-orange-50">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-2">
+              <ShoppingCart className="w-5 h-5 text-orange-600" />
+              <div>
+                <h4 className="font-medium text-orange-900">Reorder Required</h4>
+                <p className="text-sm text-orange-800">
+                  Current stock ({item.quantity}) is at or below minimum level ({item.minQuantity}). 
+                  Click the Reorder button above to create a purchase order.
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Detailed Information Tabs */}
+      
       <Tabs defaultValue="details" className="w-full">
         <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="details">Details</TabsTrigger>
@@ -301,11 +348,24 @@ export const InventoryDetailCard = ({ item, onClose, onEdit }: InventoryDetailCa
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                  <h4 className="font-medium text-blue-900 mb-2">Reorder Recommendation</h4>
-                  <p className="text-sm text-blue-800">
+                <div className={cn(
+                  "p-4 border rounded-lg",
+                  needsReorder 
+                    ? "bg-orange-50 border-orange-200" 
+                    : "bg-blue-50 border-blue-200"
+                )}>
+                  <h4 className={cn(
+                    "font-medium mb-2",
+                    needsReorder ? "text-orange-900" : "text-blue-900"
+                  )}>
+                    Reorder Recommendation
+                  </h4>
+                  <p className={cn(
+                    "text-sm",
+                    needsReorder ? "text-orange-800" : "text-blue-800"
+                  )}>
                     {item.quantity <= item.reorderPoint 
-                      ? `Current stock (${item.quantity}) is at or below reorder point (${item.reorderPoint}). Consider reordering.`
+                      ? `Current stock (${item.quantity}) is at or below reorder point (${item.reorderPoint}). Immediate reordering recommended.`
                       : `Stock level is adequate. Reorder when quantity reaches ${item.reorderPoint}.`
                     }
                   </p>
@@ -351,10 +411,15 @@ export const InventoryDetailCard = ({ item, onClose, onEdit }: InventoryDetailCa
                       </div>
                     </div>
                     
-                    <Button className="w-full mt-4">
-                      <ShoppingCart className="w-4 h-4 mr-2" />
-                      Create Purchase Order
-                    </Button>
+                    <ReorderDialog 
+                      items={[currentItemForReorder]}
+                      trigger={
+                        <Button className="w-full mt-4">
+                          <ShoppingCart className="w-4 h-4 mr-2" />
+                          Create Purchase Order
+                        </Button>
+                      }
+                    />
                   </div>
                 </div>
               </div>
