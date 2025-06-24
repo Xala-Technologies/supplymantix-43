@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -58,6 +57,20 @@ export const EnhancedWorkOrderForm = ({
   const [locations, setLocations] = useState<Location[]>([]);
   const [loadingData, setLoadingData] = useState(true);
 
+  // Helper function to extract asset ID
+  const getAssetId = (asset: string | { id: string; name: string } | undefined): string => {
+    if (!asset) return "";
+    if (typeof asset === "string") return asset;
+    return asset.id;
+  };
+
+  // Helper function to extract location ID
+  const getLocationId = (location: string | { id: string; name: string } | undefined): string => {
+    if (!location) return "";
+    if (typeof location === "string") return location;
+    return location.id;
+  };
+
   const form = useForm<WorkOrderFormData>({
     resolver: zodResolver(workOrderSchema),
     defaultValues: {
@@ -68,8 +81,8 @@ export const EnhancedWorkOrderForm = ({
       category: workOrder?.category || "maintenance",
       tags: workOrder?.tags || [],
       dueDate: workOrder?.due_date ? new Date(workOrder.due_date).toISOString().split('T')[0] : "",
-      assetId: typeof workOrder?.asset === 'object' ? workOrder.asset.id : workOrder?.asset || "",
-      location: workOrder?.location || "",
+      assetId: getAssetId(workOrder?.asset),
+      location: getLocationId(workOrder?.location),
     },
   });
 
