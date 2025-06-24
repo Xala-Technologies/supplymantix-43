@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { DollarSign, Plus } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
+import { useCostEntries, useCreateCostEntry } from "@/hooks/useCostEntries";
 
 interface CostEntriesProps {
   workOrderId: string;
@@ -17,8 +18,8 @@ interface CostEntriesProps {
 
 export const CostEntries = ({ workOrderId, onSubmit }: CostEntriesProps) => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  // For now, using empty array - will be replaced with real data hook when available
-  const costEntries: any[] = [];
+  const { data: costEntries = [], isLoading } = useCostEntries(workOrderId);
+  const createCostEntryMutation = useCreateCostEntry();
   
   const form = useForm({
     defaultValues: {
@@ -28,14 +29,21 @@ export const CostEntries = ({ workOrderId, onSubmit }: CostEntriesProps) => {
   });
 
   const handleSubmit = async (data: any) => {
-    // This will be implemented when cost entries API is available
-    console.log('Cost entry data:', data);
-    
-    setIsDialogOpen(false);
-    form.reset();
-    
-    if (onSubmit) {
-      onSubmit(data);
+    try {
+      await createCostEntryMutation.mutateAsync({
+        work_order_id: workOrderId,
+        amount: parseFloat(data.amount),
+        description: data.description
+      });
+      
+      setIsDialogOpen(false);
+      form.reset();
+      
+      if (onSubmit) {
+        onSubmit(data);
+      }
+    } catch (error) {
+      console.error('Failed to create cost entry:', error);
     }
   };
 
@@ -74,7 +82,13 @@ export const CostEntries = ({ workOrderId, onSubmit }: CostEntriesProps) => {
                       <FormItem>
                         <FormLabel>Amount ($)</FormLabel>
                         <FormControl>
-                          <Input type="number" step="0.01" placeholder="e.g., 125.50" {...field} />
+                          <Input 
+                            type="number" 
+                            step="0.01" 
+                            placeholder="e.g., 125.50" 
+                            {...field}
+                            required
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -96,7 +110,13 @@ export const CostEntries = ({ workOrderId, onSubmit }: CostEntriesProps) => {
                   />
                   
                   <div className="flex gap-2 pt-4">
-                    <Button type="submit" className="flex-1">Add Entry</Button>
+                    <Button 
+                      type="submit" 
+                      className="flex-1"
+                      disabled={createCostEntryMutation.isPending}
+                    >
+                      {createCostEntryMutation.isPending ? "Adding..." : "Add Entry"}
+                    </Button>
                     <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
                       Cancel
                     </Button>
@@ -108,7 +128,11 @@ export const CostEntries = ({ workOrderId, onSubmit }: CostEntriesProps) => {
         </div>
       </CardHeader>
       <CardContent>
-        {costEntries.length === 0 ? (
+        {isLoading ? (
+          <div className="text-center py-8 text-gray-500">
+            <p className="text-sm">Loading cost entries...</p>
+          </div>
+        ) : costEntries.length === 0 ? (
           <div className="text-center py-8 text-gray-500">
             <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center mx-auto mb-3">
               <DollarSign className="w-6 h-6 text-gray-400" />
