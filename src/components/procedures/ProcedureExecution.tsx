@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -15,7 +16,6 @@ interface ProcedureExecutionProps {
   workOrderId?: string;
   onComplete: (answers: any, score: number) => void;
   onCancel: () => void;
-  onBack?: () => void;
 }
 
 interface FieldAnswer {
@@ -30,8 +30,7 @@ export const ProcedureExecution: React.FC<ProcedureExecutionProps> = ({
   executionId,
   workOrderId,
   onComplete,
-  onCancel,
-  onBack
+  onCancel
 }) => {
   const [currentStep, setCurrentStep] = useState(0);
   const [answers, setAnswers] = useState<Record<string, any>>({});
@@ -287,11 +286,6 @@ export const ProcedureExecution: React.FC<ProcedureExecutionProps> = ({
         {/* Top Bar */}
         <div className="flex items-center justify-between p-4 pb-3">
           <div className="flex items-center gap-4">
-            {onBack && (
-              <Button variant="ghost" size="sm" onClick={onBack} className="p-2 hover:bg-blue-50">
-                <ArrowLeft className="h-5 w-5" />
-              </Button>
-            )}
             <div className="flex items-center gap-3">
               <div className="w-12 h-12 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg">
                 <PlayCircle className="h-6 w-6 text-white" />

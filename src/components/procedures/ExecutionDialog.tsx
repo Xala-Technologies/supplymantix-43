@@ -15,32 +15,46 @@ import {
   BarChart3
 } from "lucide-react";
 import { ProcedureExecution } from "./ProcedureExecution";
+import { ProcedureWithFields } from "@/lib/database/procedures-enhanced";
+import { useStartExecution } from "@/hooks/useProceduresEnhanced";
 
 interface ExecutionDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  procedure: any;
-  executionId?: string;
+  procedure: ProcedureWithFields;
   onComplete: (answers: any, score: number) => void;
   onCancel: () => void;
+  workOrderId?: string;
 }
 
 export const ExecutionDialog: React.FC<ExecutionDialogProps> = ({
   open,
   onOpenChange,
   procedure,
-  executionId,
   onComplete,
-  onCancel
+  onCancel,
+  workOrderId
 }) => {
   const [isExecuting, setIsExecuting] = useState(false);
+  const [executionId, setExecutionId] = useState<string | undefined>();
+  
+  const startExecution = useStartExecution();
 
   if (!procedure) {
     return null;
   }
 
-  const handleStart = () => {
-    setIsExecuting(true);
+  const handleStart = async () => {
+    try {
+      const execution = await startExecution.mutateAsync({
+        procedureId: procedure.id,
+        workOrderId
+      });
+      setExecutionId(execution.id);
+      setIsExecuting(true);
+    } catch (error) {
+      console.error('Failed to start execution:', error);
+    }
   };
 
   const handleComplete = (answers: any, score: number) => {
@@ -51,10 +65,6 @@ export const ExecutionDialog: React.FC<ExecutionDialogProps> = ({
   const handleCancel = () => {
     setIsExecuting(false);
     onCancel();
-  };
-
-  const handleBack = () => {
-    setIsExecuting(false);
   };
 
   return (
@@ -142,10 +152,10 @@ export const ExecutionDialog: React.FC<ExecutionDialogProps> = ({
                         </Badge>
                       </div>
                       <div className="flex justify-between text-sm">
-                        <span className="text-gray-600">Assigned to:</span>
+                        <span className="text-gray-600">Fields:</span>
                         <div className="flex items-center gap-1">
-                          <User className="h-3 w-3" />
-                          <span className="text-xs">You</span>
+                          <FileText className="h-3 w-3" />
+                          <span className="text-xs">{procedure.fields?.length || 0} steps</span>
                         </div>
                       </div>
                     </div>
@@ -178,10 +188,11 @@ export const ExecutionDialog: React.FC<ExecutionDialogProps> = ({
                 </Button>
                 <Button 
                   onClick={handleStart} 
+                  disabled={startExecution.isPending}
                   className="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg"
                 >
                   <Play className="h-4 w-4 mr-2" />
-                  Start Execution
+                  {startExecution.isPending ? 'Starting...' : 'Start Execution'}
                 </Button>
               </div>
             </div>
@@ -191,9 +202,9 @@ export const ExecutionDialog: React.FC<ExecutionDialogProps> = ({
           <ProcedureExecution
             procedure={procedure}
             executionId={executionId}
+            workOrderId={workOrderId}
             onComplete={handleComplete}
             onCancel={handleCancel}
-            onBack={handleBack}
           />
         )}
       </DialogContent>
