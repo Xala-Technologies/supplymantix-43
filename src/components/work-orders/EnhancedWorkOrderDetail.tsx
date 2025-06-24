@@ -24,7 +24,7 @@ import { WorkOrderStatusFlow } from "./WorkOrderStatusFlow";
 import { TimeEntries } from "./TimeEntries";
 import { CostEntries } from "./CostEntries";
 import { WorkOrderChat } from "./WorkOrderChat";
-import { getAssetName } from "@/utils/assetUtils";
+import { getAssetName, getLocationName } from "@/utils/assetUtils";
 
 interface EnhancedWorkOrderDetailProps {
   workOrder: WorkOrder;
@@ -126,7 +126,7 @@ export const EnhancedWorkOrderDetail = ({ workOrder, onEdit }: EnhancedWorkOrder
           {workOrder.location && (
             <div className="flex items-center gap-2">
               <MapPin className="w-4 h-4 text-gray-500" />
-              <span className="text-gray-700">{workOrder.location}</span>
+              <span className="text-gray-700">{getLocationName(workOrder.location)}</span>
             </div>
           )}
           <div className="flex items-center gap-2">
