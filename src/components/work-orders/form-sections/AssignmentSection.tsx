@@ -25,16 +25,16 @@ export const AssignmentSection = ({ form, watch, setValue, assets }: AssignmentS
       <div>
         <Label htmlFor="assignedTo">Assigned To</Label>
         <Select
-          value={watch("assignedTo")}
-          onValueChange={(value) => setValue("assignedTo", value)}
+          value={watch("assignedTo") || "unassigned"}
+          onValueChange={(value) => setValue("assignedTo", value === "unassigned" ? "" : value)}
         >
           <SelectTrigger className="mt-1">
             <SelectValue placeholder="Select assignee..." />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">Unassigned</SelectItem>
+            <SelectItem value="unassigned">Unassigned</SelectItem>
             {usersLoading ? (
-              <SelectItem value="" disabled>Loading users...</SelectItem>
+              <SelectItem value="loading" disabled>Loading users...</SelectItem>
             ) : (
               users?.map((user) => (
                 <SelectItem key={user.id} value={user.id}>
@@ -52,14 +52,14 @@ export const AssignmentSection = ({ form, watch, setValue, assets }: AssignmentS
       <div>
         <Label htmlFor="assetId">Asset</Label>
         <Select
-          value={watch("assetId")}
-          onValueChange={(value) => setValue("assetId", value)}
+          value={watch("assetId") || "none"}
+          onValueChange={(value) => setValue("assetId", value === "none" ? "" : value)}
         >
           <SelectTrigger className="mt-1">
             <SelectValue placeholder="Select asset..." />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">No Asset</SelectItem>
+            <SelectItem value="none">No Asset</SelectItem>
             {assets.map((asset) => (
               <SelectItem key={asset.id} value={asset.id}>
                 {asset.name}
