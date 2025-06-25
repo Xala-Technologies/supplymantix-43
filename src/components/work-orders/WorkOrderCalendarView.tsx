@@ -1,6 +1,6 @@
 
 import { useState, useCallback } from "react";
-import { WorkOrder } from "@/types/workOrder";
+import { WorkOrder } from "@/features/workOrders/types";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -8,6 +8,8 @@ import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, isToday
 import { workOrdersApi } from "@/lib/database/work-orders";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { WORK_ORDER_QUERY_KEYS } from "@/features/workOrders/constants";
+import { getPriorityColor, getStatusColor } from "@/features/workOrders/utils";
 
 interface WorkOrderCalendarViewProps {
   workOrders: WorkOrder[];
@@ -28,7 +30,6 @@ export const WorkOrderCalendarView = ({
   const monthEnd = endOfMonth(currentDate);
   const monthDays = eachDayOfInterval({ start: monthStart, end: monthEnd });
 
-  // Get work orders for a specific day
   const getWorkOrdersForDay = (day: Date) => {
     return workOrders.filter(wo => {
       if (!wo.dueDate && !wo.due_date) return false;
@@ -40,26 +41,6 @@ export const WorkOrderCalendarView = ({
         return false;
       }
     });
-  };
-
-  const getPriorityColor = (priority: string) => {
-    switch (priority) {
-      case 'urgent': return 'bg-red-500 text-white';
-      case 'high': return 'bg-orange-500 text-white';
-      case 'medium': return 'bg-yellow-500 text-white';
-      case 'low': return 'bg-green-500 text-white';
-      default: return 'bg-gray-500 text-white';
-    }
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'completed': return 'border-l-green-500';
-      case 'in_progress': return 'border-l-blue-500';
-      case 'on_hold': return 'border-l-yellow-500';
-      case 'open': return 'border-l-gray-500';
-      default: return 'border-l-gray-500';
-    }
   };
 
   const handleDragStart = (e: React.DragEvent, workOrder: WorkOrder) => {
@@ -84,9 +65,7 @@ export const WorkOrderCalendarView = ({
         due_date: newDueDate
       });
 
-      // Invalidate work orders data to trigger refresh
-      await queryClient.invalidateQueries({ queryKey: ["work-orders"] });
-      await queryClient.invalidateQueries({ queryKey: ["work-orders-integration"] });
+      await queryClient.invalidateQueries({ queryKey: WORK_ORDER_QUERY_KEYS.all });
 
       toast.success(`Work order moved to ${format(targetDate, 'MMM dd, yyyy')}`);
     } catch (error) {
@@ -177,7 +156,7 @@ export const WorkOrderCalendarView = ({
                       className={`
                         cursor-pointer p-2 rounded border-l-4 bg-gray-50 hover:bg-gray-100 
                         text-xs transition-colors duration-200
-                        ${getStatusColor(workOrder.status)}
+                        ${getStatusColor(workOrder.status).replace('bg-', 'border-l-')}
                         ${selectedWorkOrderId === workOrder.id ? 'ring-2 ring-blue-500 bg-blue-50' : ''}
                       `}
                     >

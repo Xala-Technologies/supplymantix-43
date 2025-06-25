@@ -1,10 +1,10 @@
 
-import { useWorkOrdersIntegration } from "@/hooks/useWorkOrdersIntegration";
+import { useState } from "react";
+import { useWorkOrdersIntegration } from "@/features/workOrders/hooks/useWorkOrdersIntegration";
+import { useWorkOrdersPage } from "@/hooks/useWorkOrdersPage";
 import { WorkOrdersTopHeader } from "./WorkOrdersTopHeader";
 import { WorkOrdersContent } from "./WorkOrdersContent";
 import { WorkOrderCalendarView } from "./WorkOrderCalendarView";
-import { useWorkOrdersPage } from "@/hooks/useWorkOrdersPage";
-import { useState } from "react";
 
 export const WorkOrdersPage = () => {
   const { data: workOrders, isLoading, error } = useWorkOrdersIntegration();
@@ -44,7 +44,6 @@ export const WorkOrdersPage = () => {
 
   return (
     <div className="h-full flex flex-col w-full bg-gray-50/30">
-      {/* Top Header */}
       <WorkOrdersTopHeader
         workOrdersCount={filteredWorkOrders.length}
         totalCount={transformedWorkOrders.length}
@@ -55,7 +54,6 @@ export const WorkOrdersPage = () => {
         onViewModeChange={setViewMode}
       />
 
-      {/* Main Content */}
       {viewMode === 'calendar' ? (
         <div className="flex-1 p-6">
           <div className="h-full bg-white rounded-lg shadow-sm border">
