@@ -1,6 +1,7 @@
 
 import React, { useState } from "react";
 import { DashboardLayout } from "@/components/Layout/DashboardLayout";
+import { StandardPageLayout, StandardPageHeader, StandardPageFilters, StandardPageContent } from "@/components/Layout/StandardPageLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -304,44 +305,43 @@ const Procedures = () => {
   if (isLoading) {
     return (
       <DashboardLayout>
-        <div className="flex items-center justify-center h-64">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-            <p className="mt-4 text-gray-600">Loading procedures...</p>
-          </div>
-        </div>
+        <StandardPageLayout>
+          <StandardPageContent>
+            <div className="flex items-center justify-center h-[60vh]">
+              <div className="text-center space-y-3">
+                <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto"></div>
+                <p className="text-muted-foreground text-sm">Loading procedures...</p>
+              </div>
+            </div>
+          </StandardPageContent>
+        </StandardPageLayout>
       </DashboardLayout>
     );
   }
 
   return (
     <DashboardLayout>
-      <div className="space-y-6">
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">Procedure Library</h1>
-            <p className="text-gray-600">Manage standardized procedures and checklists</p>
-          </div>
-          <div className="flex space-x-2">
-            <Button 
-              variant="outline" 
-              onClick={() => setShowTemplatesDialog(true)}
-              disabled={templatesLoading}
-            >
-              <Download className="h-4 w-4 mr-2" />
-              Import Templates
-            </Button>
-            <Button onClick={() => setShowCreateDialog(true)} className="bg-blue-600 hover:bg-blue-700">
-              <Plus className="h-4 w-4 mr-2" />
-              Create Procedure
-            </Button>
-          </div>
-        </div>
+      <StandardPageLayout>
+        <StandardPageHeader
+          title="Procedure Library"
+          description="Manage standardized procedures and checklists"
+        >
+          <Button 
+            variant="outline" 
+            onClick={() => setShowTemplatesDialog(true)}
+            disabled={templatesLoading}
+          >
+            <Download className="h-4 w-4 mr-2" />
+            Import Templates
+          </Button>
+          <Button onClick={() => setShowCreateDialog(true)} className="bg-blue-600 hover:bg-blue-700">
+            <Plus className="h-4 w-4 mr-2" />
+            Create Procedure
+          </Button>
+        </StandardPageHeader>
 
-        {/* Filters */}
-        <Card>
-          <CardContent className="p-4">
+        <StandardPageFilters>
+          <div className="p-6">
             <div className="flex flex-wrap gap-4 items-center">
               <div className="relative flex-1 min-w-[200px]">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
@@ -376,131 +376,132 @@ const Procedures = () => {
                 Global Only
               </Button>
             </div>
-          </CardContent>
-        </Card>
-
-        {/* Procedures Grid */}
-        <div>
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-gray-900">
-              {showGlobalOnly ? 'Global Procedures' : 'My Procedures'} ({procedures.length})
-            </h2>
           </div>
-          
-          {procedures.length === 0 ? (
-            <Card>
-              <CardContent className="text-center py-12">
-                <div className="text-gray-400 mb-4">
-                  <Building className="h-12 w-12 mx-auto" />
-                </div>
-                <h3 className="text-lg font-medium text-gray-900 mb-2">No procedures found</h3>
-                <p className="text-gray-600 mb-4">
-                  {searchTerm || selectedCategory !== "all" 
-                    ? "Try adjusting your search or filters"
-                    : "Get started by creating your first procedure"}
-                </p>
-                {!searchTerm && selectedCategory === "all" && (
-                  <Button onClick={() => setShowCreateDialog(true)}>
-                    <Plus className="h-4 w-4 mr-2" />
-                    Create Your First Procedure
-                  </Button>
-                )}
-              </CardContent>
-            </Card>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {procedures.map((procedure) => (
-                <div key={procedure.id} className="group relative">
-                  <div className="absolute inset-0 bg-gradient-to-r from-blue-400 to-indigo-500 rounded-xl opacity-0 group-hover:opacity-10 transition-opacity duration-300" />
-                  <div className="relative bg-white rounded-xl p-6 shadow-sm border border-gray-100 group-hover:shadow-lg transition-all duration-300 group-hover:border-blue-200">
-                    <div className="flex items-start justify-between mb-4">
-                      <div className="flex-1">
-                        <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2 group-hover:text-blue-900 transition-colors">
-                          {procedure.title}
-                        </h3>
-                        <p className="text-sm text-gray-600 line-clamp-2 mb-3">
-                          {procedure.description}
-                        </p>
+        </StandardPageFilters>
+
+        <StandardPageContent>
+          <div className="space-y-6">
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg font-semibold text-gray-900">
+                {showGlobalOnly ? 'Global Procedures' : 'My Procedures'} ({procedures.length})
+              </h2>
+            </div>
+            
+            {procedures.length === 0 ? (
+              <Card>
+                <CardContent className="text-center py-12">
+                  <div className="text-gray-400 mb-4">
+                    <Building className="h-12 w-12 mx-auto" />
+                  </div>
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">No procedures found</h3>
+                  <p className="text-gray-600 mb-4">
+                    {searchTerm || selectedCategory !== "all" 
+                      ? "Try adjusting your search or filters"
+                      : "Get started by creating your first procedure"}
+                  </p>
+                  {!searchTerm && selectedCategory === "all" && (
+                    <Button onClick={() => setShowCreateDialog(true)}>
+                      <Plus className="h-4 w-4 mr-2" />
+                      Create Your First Procedure
+                    </Button>
+                  )}
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {procedures.map((procedure) => (
+                  <div key={procedure.id} className="group relative">
+                    <div className="absolute inset-0 bg-gradient-to-r from-blue-400 to-indigo-500 rounded-xl opacity-0 group-hover:opacity-10 transition-opacity duration-300" />
+                    <div className="relative bg-white rounded-xl p-6 shadow-sm border border-gray-100 group-hover:shadow-lg transition-all duration-300 group-hover:border-blue-200">
+                      <div className="flex items-start justify-between mb-4">
+                        <div className="flex-1">
+                          <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2 group-hover:text-blue-900 transition-colors">
+                            {procedure.title}
+                          </h3>
+                          <p className="text-sm text-gray-600 line-clamp-2 mb-3">
+                            {procedure.description}
+                          </p>
+                        </div>
+                        
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="sm" className="opacity-0 group-hover:opacity-100 transition-opacity">
+                              <MoreVertical className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end" className="bg-white border shadow-lg">
+                            {renderExecuteButton(procedure, 'secondary')}
+                            <DropdownMenuItem onClick={() => {
+                              setSelectedProcedure(procedure);
+                              setShowEditDialog(true);
+                            }}>
+                              <Edit className="h-4 w-4 mr-2" />
+                              Edit
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleDuplicateProcedure(procedure.id)}>
+                              <Copy className="h-4 w-4 mr-2" />
+                              Duplicate
+                            </DropdownMenuItem>
+                            <DropdownMenuItem 
+                              onClick={() => setDeleteConfirm(procedure.id)}
+                              className="text-red-600"
+                            >
+                              <Trash2 className="h-4 w-4 mr-2" />
+                              Delete
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       </div>
-                      
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="sm" className="opacity-0 group-hover:opacity-100 transition-opacity">
-                            <MoreVertical className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="bg-white border shadow-lg">
-                          {renderExecuteButton(procedure, 'secondary')}
-                          <DropdownMenuItem onClick={() => {
+
+                      <div className="flex items-center justify-between mb-4">
+                        <div className="flex flex-wrap gap-2">
+                          <Badge className={`${getCategoryColor(procedure.category || 'Other')} text-xs`}>
+                            {procedure.category}
+                          </Badge>
+                          {procedure.is_global && (
+                            <Badge variant="outline" className="text-blue-600 border-blue-600 text-xs">
+                              <Globe className="h-3 w-3 mr-1" />
+                              Global
+                            </Badge>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="flex items-center justify-between text-sm text-gray-500 mb-6">
+                        <div className="flex items-center gap-4">
+                          <span className="flex items-center gap-1">
+                            <CheckCircle className="h-4 w-4" />
+                            {procedure.fields?.length || 0} steps
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <Activity className="h-4 w-4" />
+                            {procedure.executions_count || 0} runs
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="flex gap-3">
+                        {renderExecuteButton(procedure, 'primary')}
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => {
                             setSelectedProcedure(procedure);
                             setShowEditDialog(true);
-                          }}>
-                            <Edit className="h-4 w-4 mr-2" />
-                            Edit
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => handleDuplicateProcedure(procedure.id)}>
-                            <Copy className="h-4 w-4 mr-2" />
-                            Duplicate
-                          </DropdownMenuItem>
-                          <DropdownMenuItem 
-                            onClick={() => setDeleteConfirm(procedure.id)}
-                            className="text-red-600"
-                          >
-                            <Trash2 className="h-4 w-4 mr-2" />
-                            Delete
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </div>
-
-                    <div className="flex items-center justify-between mb-4">
-                      <div className="flex flex-wrap gap-2">
-                        <Badge className={`${getCategoryColor(procedure.category || 'Other')} text-xs`}>
-                          {procedure.category}
-                        </Badge>
-                        {procedure.is_global && (
-                          <Badge variant="outline" className="text-blue-600 border-blue-600 text-xs">
-                            <Globe className="h-3 w-3 mr-1" />
-                            Global
-                          </Badge>
-                        )}
+                          }}
+                          className="px-4 hover:bg-gray-50 hover:border-gray-300"
+                        >
+                          <Edit className="h-4 w-4" />
+                        </Button>
                       </div>
-                    </div>
-
-                    <div className="flex items-center justify-between text-sm text-gray-500 mb-6">
-                      <div className="flex items-center gap-4">
-                        <span className="flex items-center gap-1">
-                          <CheckCircle className="h-4 w-4" />
-                          {procedure.fields?.length || 0} steps
-                        </span>
-                        <span className="flex items-center gap-1">
-                          <Activity className="h-4 w-4" />
-                          {procedure.executions_count || 0} runs
-                        </span>
-                      </div>
-                    </div>
-
-                    <div className="flex gap-3">
-                      {renderExecuteButton(procedure, 'primary')}
-                      <Button 
-                        variant="outline" 
-                        size="sm"
-                        onClick={() => {
-                          setSelectedProcedure(procedure);
-                          setShowEditDialog(true);
-                        }}
-                        className="px-4 hover:bg-gray-50 hover:border-gray-300"
-                      >
-                        <Edit className="h-4 w-4" />
-                      </Button>
                     </div>
                   </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </StandardPageContent>
+      </StandardPageLayout>
 
       {/* Templates Dialog */}
       <Dialog open={showTemplatesDialog} onOpenChange={setShowTemplatesDialog}>
@@ -702,7 +703,7 @@ const Procedures = () => {
               Delete
             </AlertDialogAction>
           </AlertDialogFooter>
-        </AlertDialogContent>
+        </AlertDialogFooter>
       </AlertDialog>
     </DashboardLayout>
   );
