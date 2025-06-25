@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -135,6 +136,11 @@ export const EnhancedWorkOrderForm = ({
     onSubmit(data);
   };
 
+  // Create a wrapper function for tags setValue
+  const handleTagsChange = (tags: string[]) => {
+    setValue("tags", tags);
+  };
+
   if (loadingData) {
     return (
       <div className="flex items-center justify-center p-8">
@@ -204,7 +210,7 @@ export const EnhancedWorkOrderForm = ({
             {/* Tags */}
             <TagsSection
               currentTags={currentTags}
-              setValue={setValue}
+              setValue={handleTagsChange}
             />
 
             {/* Actions */}
