@@ -6,23 +6,23 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, isToday, addMonths, subMonths, parseISO } from "date-fns";
 import { workOrdersApi } from "@/lib/database/work-orders";
+import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
 interface WorkOrderCalendarViewProps {
   workOrders: WorkOrder[];
   onSelectWorkOrder: (id: string) => void;
   selectedWorkOrderId: string | null;
-  onRefetch: () => void;
 }
 
 export const WorkOrderCalendarView = ({ 
   workOrders, 
   onSelectWorkOrder, 
-  selectedWorkOrderId,
-  onRefetch 
+  selectedWorkOrderId
 }: WorkOrderCalendarViewProps) => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [draggedWorkOrder, setDraggedWorkOrder] = useState<WorkOrder | null>(null);
+  const queryClient = useQueryClient();
 
   const monthStart = startOfMonth(currentDate);
   const monthEnd = endOfMonth(currentDate);
@@ -84,8 +84,11 @@ export const WorkOrderCalendarView = ({
         due_date: newDueDate
       });
 
+      // Invalidate work orders data to trigger refresh
+      await queryClient.invalidateQueries({ queryKey: ["work-orders"] });
+      await queryClient.invalidateQueries({ queryKey: ["work-orders-integration"] });
+
       toast.success(`Work order moved to ${format(targetDate, 'MMM dd, yyyy')}`);
-      onRefetch();
     } catch (error) {
       console.error('Error updating work order date:', error);
       toast.error('Failed to update work order date');
