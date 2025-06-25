@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -23,14 +23,15 @@ import {
 } from "@/components/ui/select";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { CalendarIcon, Plus } from "lucide-react";
+import { CalendarIcon, Plus, Edit } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
-import { useCreateWorkOrder } from "@/hooks/useWorkOrders";
+import { useCreateWorkOrder, useUpdateWorkOrder } from "@/hooks/useWorkOrders";
 import { useLocations } from "@/hooks/useLocations";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Label } from "@/components/ui/label";
+import { WorkOrder } from "@/types/workOrder";
 
 const workOrderSchema = z.object({
   title: z.string().min(1, "Title is required"),
@@ -46,12 +47,49 @@ const workOrderSchema = z.object({
 
 type WorkOrderFormData = z.infer<typeof workOrderSchema>;
 
-export const NewWorkOrderDialog = () => {
-  const [open, setOpen] = useState(false);
+interface NewWorkOrderDialogProps {
+  workOrder?: WorkOrder;
+  onSuccess?: () => void;
+  children?: React.ReactNode;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+}
+
+export const NewWorkOrderDialog = ({ 
+  workOrder, 
+  onSuccess,
+  children,
+  open: controlledOpen,
+  onOpenChange: controlledOnOpenChange
+}: NewWorkOrderDialogProps) => {
+  const [internalOpen, setInternalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   
+  // Use controlled or internal state
+  const open = controlledOpen !== undefined ? controlledOpen : internalOpen;
+  const setOpen = controlledOnOpenChange || setInternalOpen;
+  
   const createWorkOrder = useCreateWorkOrder();
+  const updateWorkOrder = useUpdateWorkOrder();
   const { data: locations } = useLocations();
+  
+  const isEditMode = !!workOrder;
+  
+  // Helper function to safely extract assignee
+  const getAssignee = (assignedTo: WorkOrder['assignedTo']): string => {
+    if (!assignedTo) return "";
+    if (Array.isArray(assignedTo)) return assignedTo[0] || "";
+    if (typeof assignedTo === "string") return assignedTo;
+    return "";
+  };
+
+  // Helper function to safely extract location
+  const getLocationName = (location: WorkOrder['location']): string => {
+    if (!location) return "";
+    if (typeof location === "string") return location;
+    if (typeof location === "object" && location.name) return location.name;
+    return "";
+  };
   
   const form = useForm<WorkOrderFormData>({
     resolver: zodResolver(workOrderSchema),
@@ -67,13 +105,50 @@ export const NewWorkOrderDialog = () => {
     },
   });
 
+  // Reset form when workOrder changes or dialog opens
+  useEffect(() => {
+    if (open) {
+      if (workOrder) {
+        // Pre-populate form for editing
+        const tagsString = workOrder.tags && Array.isArray(workOrder.tags) 
+          ? workOrder.tags.join(', ') 
+          : '';
+
+        form.reset({
+          title: workOrder.title || "",
+          description: workOrder.description || "",
+          priority: workOrder.priority || "medium",
+          assignedTo: getAssignee(workOrder.assignedTo),
+          asset: typeof workOrder.asset === 'object' ? workOrder.asset?.name || "" : workOrder.asset || "",
+          location: getLocationName(workOrder.location),
+          category: workOrder.category || "maintenance",
+          tags: tagsString,
+          dueDate: workOrder.due_date ? new Date(workOrder.due_date) : undefined,
+        });
+      } else {
+        // Reset form for new work order
+        form.reset({
+          title: "",
+          description: "",
+          priority: "medium",
+          assignedTo: "",
+          asset: "",
+          location: "",
+          category: "maintenance",
+          tags: "",
+          dueDate: undefined,
+        });
+      }
+    }
+  }, [workOrder, open, form]);
+
   const onSubmit = async (data: WorkOrderFormData) => {
     try {
       setIsSubmitting(true);
       
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
-        toast.error("Please log in to create work orders");
+        toast.error("Please log in to manage work orders");
         return;
       }
 
@@ -95,7 +170,7 @@ export const NewWorkOrderDialog = () => {
         ? data.tags.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0)
         : [];
       
-      await createWorkOrder.mutateAsync({
+      const workOrderData = {
         title: data.title,
         description: data.description || "",
         due_date: data.dueDate?.toISOString(),
@@ -103,35 +178,60 @@ export const NewWorkOrderDialog = () => {
         asset_id: data.asset || null,
         location_id: selectedLocation?.id || null,
         tenant_id: userData.tenant_id,
-        status: "open",
+        status: "open" as const,
         priority: data.priority,
         category: data.category,
         tags: tagsArray,
         requester_id: user.id,
-      });
+      };
+
+      if (isEditMode && workOrder) {
+        await updateWorkOrder.mutateAsync({
+          id: workOrder.id,
+          ...workOrderData,
+        });
+        toast.success("Work order updated successfully!");
+      } else {
+        await createWorkOrder.mutateAsync(workOrderData);
+        toast.success("Work order created successfully!");
+      }
       
-      toast.success("Work order created successfully!");
       setOpen(false);
       form.reset();
+      onSuccess?.();
     } catch (error) {
-      console.error("Error creating work order:", error);
-      toast.error("Failed to create work order. Please try again.");
+      console.error("Error managing work order:", error);
+      toast.error(`Failed to ${isEditMode ? 'update' : 'create'} work order. Please try again.`);
     } finally {
       setIsSubmitting(false);
     }
   };
 
+  const handleClose = () => {
+    setOpen(false);
+    form.reset();
+  };
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm">
-          <Plus className="h-4 w-4 mr-2" />
-          New Work Order
-        </Button>
-      </DialogTrigger>
+      {children && (
+        <DialogTrigger asChild>
+          {children}
+        </DialogTrigger>
+      )}
+      {!children && !controlledOpen && (
+        <DialogTrigger asChild>
+          <Button className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm">
+            <Plus className="h-4 w-4 mr-2" />
+            New Work Order
+          </Button>
+        </DialogTrigger>
+      )}
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="text-xl font-semibold">Create New Work Order</DialogTitle>
+          <DialogTitle className="text-xl font-semibold">
+            {isEditMode ? 'Edit Work Order' : 'Create New Work Order'}
+          </DialogTitle>
         </DialogHeader>
         
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
@@ -335,7 +435,7 @@ export const NewWorkOrderDialog = () => {
             <Button
               type="button"
               variant="outline"
-              onClick={() => setOpen(false)}
+              onClick={handleClose}
               disabled={isSubmitting}
             >
               Cancel
@@ -345,7 +445,7 @@ export const NewWorkOrderDialog = () => {
               disabled={isSubmitting}
               className="bg-blue-600 hover:bg-blue-700"
             >
-              {isSubmitting ? "Creating..." : "Create Work Order"}
+              {isSubmitting ? (isEditMode ? "Updating..." : "Creating...") : (isEditMode ? "Update Work Order" : "Create Work Order")}
             </Button>
           </DialogFooter>
         </form>
