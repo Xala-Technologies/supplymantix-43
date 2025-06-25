@@ -21,14 +21,14 @@ interface Location {
 
 interface WorkOrderFormData {
   title: string;
-  description?: string;
+  description: string;
   priority: "low" | "medium" | "high" | "urgent";
   dueDate?: Date;
-  assignedTo?: string;
-  asset?: string;
-  location?: string;
+  assignedTo: string;
+  asset: string;
+  location: string;
   category: string;
-  tags?: string;
+  tags: string;
 }
 
 export const processWorkOrderSubmission = async (

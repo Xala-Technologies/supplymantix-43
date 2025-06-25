@@ -56,7 +56,11 @@ export const WorkOrderFormFields = ({ form, users, assets, locations }: WorkOrde
           className="w-full"
         />
         {form.formState.errors.title && (
-          <p className="text-sm text-red-500">{form.formState.errors.title.message}</p>
+          <p className="text-sm text-red-500">
+            {typeof form.formState.errors.title.message === 'string' 
+              ? form.formState.errors.title.message 
+              : 'Title is required'}
+          </p>
         )}
       </div>
 

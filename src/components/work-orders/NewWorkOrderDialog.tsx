@@ -122,7 +122,20 @@ export const NewWorkOrderDialog = ({
     try {
       setIsSubmitting(true);
       
-      const workOrderData = await processWorkOrderSubmission(data, users, assets, locations);
+      // Ensure all required fields are properly typed
+      const formData = {
+        title: data.title,
+        description: data.description || "",
+        priority: data.priority,
+        dueDate: data.dueDate,
+        assignedTo: data.assignedTo || "",
+        asset: data.asset || "",
+        location: data.location || "",
+        category: data.category,
+        tags: data.tags || "",
+      };
+
+      const workOrderData = await processWorkOrderSubmission(formData, users, assets, locations);
 
       if (isEditMode && workOrder) {
         // For updates, we need to pass { id, updates } structure
