@@ -16,6 +16,7 @@ import { CalendarIcon } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { TagsSection } from "./TagsSection";
 
 interface User {
   id: string;
@@ -42,6 +43,15 @@ interface WorkOrderFormFieldsProps {
 }
 
 export const WorkOrderFormFields = ({ form, users, assets, locations }: WorkOrderFormFieldsProps) => {
+  // Convert tags string to array for TagsSection
+  const currentTags = form.watch("tags") 
+    ? form.watch("tags").split(',').map((tag: string) => tag.trim()).filter((tag: string) => tag.length > 0)
+    : [];
+
+  const handleTagsChange = (tags: string[]) => {
+    form.setValue("tags", tags.join(', '));
+  };
+
   return (
     <>
       {/* Title */}
@@ -235,16 +245,11 @@ export const WorkOrderFormFields = ({ form, users, assets, locations }: WorkOrde
         </div>
       </div>
 
-      {/* Tags */}
-      <div className="space-y-2">
-        <Label htmlFor="tags" className="text-sm font-medium">Tags</Label>
-        <Input
-          id="tags"
-          placeholder="Enter tags separated by commas"
-          {...form.register("tags")}
-        />
-        <p className="text-xs text-gray-500">Separate multiple tags with commas</p>
-      </div>
+      {/* Enhanced Tags Section */}
+      <TagsSection 
+        currentTags={currentTags}
+        setValue={handleTagsChange}
+      />
     </>
   );
 };

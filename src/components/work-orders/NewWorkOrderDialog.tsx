@@ -182,7 +182,7 @@ export const NewWorkOrderDialog = ({
       )}
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="text-xl font-semibold">
+          <DialogTitle className="text-xl font-semibold text-slate-900">
             {isEditMode ? 'Edit Work Order' : 'Create New Work Order'}
           </DialogTitle>
         </DialogHeader>
@@ -201,13 +201,14 @@ export const NewWorkOrderDialog = ({
               variant="outline"
               onClick={handleClose}
               disabled={isSubmitting}
+              className="border-slate-300 text-slate-700 hover:bg-slate-50"
             >
               Cancel
             </Button>
             <Button 
               type="submit" 
               disabled={isSubmitting}
-              className="bg-blue-600 hover:bg-blue-700"
+              className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm"
             >
               {isSubmitting ? (isEditMode ? "Updating..." : "Creating...") : (isEditMode ? "Update Work Order" : "Create Work Order")}
             </Button>
