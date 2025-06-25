@@ -70,11 +70,22 @@ export const WorkOrdersList = ({
     return name.split(' ').map(n => n[0]).join('').toUpperCase();
   };
 
+  const getCategoryIcon = (category: string) => {
+    const icons = {
+      'emergency': '🚨',
+      'maintenance': '🔧',
+      'repair': '🛠️',
+      'inspection': '🔍',
+      'calibration': '⚖️'
+    };
+    return icons[category.toLowerCase()] || '⚙️';
+  };
+
   // Filter and sort work orders
   const filteredAndSortedWorkOrders = React.useMemo(() => {
     let filtered = workOrders.filter(wo => {
       const matchesSearch = wo.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                           wo.description.toLowerCase().includes(searchTerm.toLowerCase());
+                           wo.description?.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesStatus = statusFilter === 'all' || wo.status === statusFilter;
       const matchesPriority = priorityFilter === 'all' || wo.priority === priorityFilter;
       
@@ -86,8 +97,8 @@ export const WorkOrdersList = ({
       
       switch (sortBy) {
         case 'due_date':
-          aValue = new Date(a.dueDate).getTime();
-          bValue = new Date(b.dueDate).getTime();
+          aValue = new Date(a.dueDate || a.due_date || '').getTime();
+          bValue = new Date(b.dueDate || b.due_date || '').getTime();
           break;
         case 'priority':
           const priorityOrder = { high: 3, medium: 2, low: 1 };
@@ -103,8 +114,8 @@ export const WorkOrdersList = ({
           bValue = b.title.toLowerCase();
           break;
         default:
-          aValue = new Date(a.createdAt).getTime();
-          bValue = new Date(b.createdAt).getTime();
+          aValue = new Date(a.createdAt || a.created_at || '').getTime();
+          bValue = new Date(b.createdAt || b.created_at || '').getTime();
       }
       
       if (sortOrder === 'asc') {
@@ -219,9 +230,7 @@ export const WorkOrdersList = ({
                   <div className="flex flex-col items-center gap-2 flex-shrink-0">
                     <div className="w-10 h-10 bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg flex items-center justify-center">
                       <span className="text-sm">
-                        {workOrder.category === 'safety' ? '🔥' : 
-                         workOrder.category === 'maintenance' ? '🔧' : 
-                         workOrder.category === 'inspection' ? '🔍' : '⚙️'}
+                        {getCategoryIcon(workOrder.category)}
                       </span>
                     </div>
                     <div className={cn("w-3 h-3 rounded-full", getPriorityColor(workOrder.priority))} />
