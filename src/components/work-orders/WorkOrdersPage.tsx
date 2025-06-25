@@ -1,113 +1,85 @@
 
 import { useState } from "react";
-import { WorkOrdersContent } from "./WorkOrdersContent";
-import { WorkOrdersTopHeader } from "./WorkOrdersTopHeader";
 import { useWorkOrdersIntegration } from "@/features/workOrders/hooks/useWorkOrdersIntegration";
-import { WorkOrder, WorkOrderFilters } from "@/types/workOrder";
+import { useWorkOrdersPage } from "@/hooks/useWorkOrdersPage";
+import { WorkOrdersTopHeader } from "./WorkOrdersTopHeader";
+import { WorkOrdersContent } from "./WorkOrdersContent";
+import { WorkOrderCalendarView } from "./WorkOrderCalendarView";
 
 export const WorkOrdersPage = () => {
-  const { data: workOrders = [], isLoading } = useWorkOrdersIntegration();
-  const [selectedWorkOrder, setSelectedWorkOrder] = useState<string | null>(null);
-  const [viewMode, setViewMode] = useState<'list' | 'detail' | 'form'>('list');
-  const [editingWorkOrder, setEditingWorkOrder] = useState<WorkOrder | null>(null);
+  const { data: workOrders, isLoading, error } = useWorkOrdersIntegration();
+  const [viewMode, setViewMode] = useState<'list' | 'calendar'>('list');
   
-  // Add filters state
-  const [filters, setFilters] = useState<WorkOrderFilters>({
-    search: '',
-    status: 'all',
-    priority: 'all',
-    category: 'all',
-    assignedTo: 'all',
-    location: 'all',
-    dateRange: {
-      from: new Date(),
-      to: new Date()
-    }
-  });
+  const {
+    selectedWorkOrder,
+    viewMode: pageViewMode,
+    editingWorkOrder,
+    filters,
+    setFilters,
+    transformedWorkOrders,
+    filteredWorkOrders,
+    selectedWorkOrderData,
+    handleCreateWorkOrder,
+    handleEditWorkOrder,
+    handleSelectWorkOrder,
+    handleFormSubmit,
+    handleFormCancel,
+    setViewModeToList
+  } = useWorkOrdersPage(workOrders || []);
 
-  // Filter work orders based on current filters
-  const filteredWorkOrders = workOrders.filter(wo => {
-    if (filters.search && !wo.title.toLowerCase().includes(filters.search.toLowerCase())) {
-      return false;
-    }
-    if (filters.status !== 'all' && wo.status !== filters.status) {
-      return false;
-    }
-    if (filters.priority !== 'all' && wo.priority !== filters.priority) {
-      return false;
-    }
-    if (filters.category !== 'all' && wo.category !== filters.category) {
-      return false;
-    }
-    return true;
-  });
-
-  const selectedWorkOrderData = workOrders.find(wo => wo.id === selectedWorkOrder);
-
-  const handleSelectWorkOrder = (id: string) => {
-    setSelectedWorkOrder(id);
-    setViewMode('list');
-    setTimeout(() => setViewMode('detail'), 50);
-  };
-
-  const handleEditWorkOrder = () => {
-    if (selectedWorkOrderData) {
-      setEditingWorkOrder(selectedWorkOrderData);
-      setViewMode('form');
-    }
-  };
-
-  const handleFormSubmit = (data: any) => {
-    console.log('Form submitted:', data);
-    setViewMode('list');
-    setEditingWorkOrder(null);
-  };
-
-  const handleFormCancel = () => {
-    setViewMode(selectedWorkOrder ? 'detail' : 'list');
-    setEditingWorkOrder(null);
-  };
-
-  const handleSetViewModeToList = () => {
-    setViewMode('list');
-    setSelectedWorkOrder(null);
-  };
-
-  const handleCreateWorkOrder = () => {
-    setEditingWorkOrder(null);
-    setViewMode('form');
-  };
+  if (error) {
+    console.error('Work orders page error:', error);
+  }
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-gray-500">Loading work orders...</div>
+      <div className="flex items-center justify-center h-[60vh]">
+        <div className="text-center space-y-3">
+          <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto"></div>
+          <p className="text-muted-foreground text-sm">Loading work orders...</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="h-full flex flex-col">
-      <WorkOrdersTopHeader 
+    <div className="h-full flex flex-col w-full bg-gray-50/30">
+      <WorkOrdersTopHeader
         workOrdersCount={filteredWorkOrders.length}
-        totalCount={workOrders.length}
+        totalCount={transformedWorkOrders.length}
         filters={filters}
         onFiltersChange={setFilters}
         onCreateWorkOrder={handleCreateWorkOrder}
+        viewMode={viewMode}
+        onViewModeChange={setViewMode}
       />
-      <div className="flex-1 overflow-hidden">
-        <WorkOrdersContent
-          filteredWorkOrders={filteredWorkOrders}
-          selectedWorkOrder={selectedWorkOrder}
-          viewMode={viewMode}
-          selectedWorkOrderData={selectedWorkOrderData}
-          editingWorkOrder={editingWorkOrder}
-          onSelectWorkOrder={handleSelectWorkOrder}
-          onEditWorkOrder={handleEditWorkOrder}
-          onFormSubmit={handleFormSubmit}
-          onFormCancel={handleFormCancel}
-          onSetViewModeToList={handleSetViewModeToList}
-        />
+
+      {/* Content area with top margin to account for fixed header */}
+      <div className="flex-1 pt-[160px] overflow-hidden">
+        {viewMode === 'calendar' ? (
+          <div className="h-full p-6">
+            <div className="h-full bg-white rounded-lg shadow-sm border overflow-hidden">
+              <WorkOrderCalendarView
+                workOrders={filteredWorkOrders}
+                onSelectWorkOrder={handleSelectWorkOrder}
+                selectedWorkOrderId={selectedWorkOrder}
+              />
+            </div>
+          </div>
+        ) : (
+          <WorkOrdersContent
+            filteredWorkOrders={filteredWorkOrders}
+            selectedWorkOrder={selectedWorkOrder}
+            viewMode={pageViewMode}
+            selectedWorkOrderData={selectedWorkOrderData}
+            editingWorkOrder={editingWorkOrder}
+            onSelectWorkOrder={handleSelectWorkOrder}
+            onEditWorkOrder={handleEditWorkOrder}
+            onFormSubmit={handleFormSubmit}
+            onFormCancel={handleFormCancel}
+            onSetViewModeToList={setViewModeToList}
+          />
+        )}
       </div>
     </div>
   );

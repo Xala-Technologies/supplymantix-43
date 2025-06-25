@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -14,7 +15,7 @@ import {
   RotateCcw
 } from "lucide-react";
 import { WorkOrder, WorkOrderStatus } from "@/types/workOrder";
-import { useWorkOrderStatusUpdate } from "@/features/workOrders/hooks/useWorkOrdersIntegration";
+import { useWorkOrderStatusUpdate } from "@/hooks/useWorkOrdersIntegration";
 import { toast } from "sonner";
 
 interface WorkOrderStatusFlowProps {
