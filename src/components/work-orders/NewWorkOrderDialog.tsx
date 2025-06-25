@@ -1,21 +1,16 @@
 
 import { useState } from "react";
 import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
+  DialogFooter
 } from "@/components/ui/dialog";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -27,52 +22,58 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { CalendarIcon, Plus } from "lucide-react";
 import { format } from "date-fns";
+import { cn } from "@/lib/utils";
 import { useCreateWorkOrder } from "@/hooks/useWorkOrders";
 import { useLocations } from "@/hooks/useLocations";
 import { supabase } from "@/integrations/supabase/client";
-import { NewWorkOrderProcedureSection } from "./NewWorkOrderProcedureSection";
+import { toast } from "sonner";
+import { Label } from "@/components/ui/label";
 
-interface NewWorkOrderFormData {
-  title: string;
-  description: string;
-  priority: "low" | "medium" | "high" | "urgent";
-  dueDate: Date;
-  assignedTo: string;
-  asset: string;
-  location: string;
-  category: string;
-  tags: string;
-}
+const workOrderSchema = z.object({
+  title: z.string().min(1, "Title is required"),
+  description: z.string().optional(),
+  priority: z.enum(["low", "medium", "high", "urgent"]),
+  dueDate: z.date().optional(),
+  assignedTo: z.string().optional(),
+  asset: z.string().optional(),
+  location: z.string().optional(),
+  category: z.string().default("maintenance"),
+  tags: z.string().optional(),
+});
+
+type WorkOrderFormData = z.infer<typeof workOrderSchema>;
 
 export const NewWorkOrderDialog = () => {
   const [open, setOpen] = useState(false);
-  const [showCalendar, setShowCalendar] = useState(false);
-  const [selectedProcedures, setSelectedProcedures] = useState<string[]>([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   
   const createWorkOrder = useCreateWorkOrder();
   const { data: locations } = useLocations();
   
-  const form = useForm<NewWorkOrderFormData>({
+  const form = useForm<WorkOrderFormData>({
+    resolver: zodResolver(workOrderSchema),
     defaultValues: {
       title: "",
       description: "",
       priority: "medium",
-      dueDate: new Date(),
       assignedTo: "",
       asset: "",
       location: "",
-      category: "Equipment",
+      category: "maintenance",
       tags: "",
     },
   });
 
-  const onSubmit = async (data: NewWorkOrderFormData) => {
+  const onSubmit = async (data: WorkOrderFormData) => {
     try {
+      setIsSubmitting(true);
+      
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
-        console.error("No authenticated user found");
+        toast.error("Please log in to create work orders");
         return;
       }
 
@@ -83,7 +84,7 @@ export const NewWorkOrderDialog = () => {
         .single();
 
       if (userError || !userData) {
-        console.error("Error getting user tenant:", userError);
+        toast.error("Error getting user information");
         return;
       }
 
@@ -96,11 +97,11 @@ export const NewWorkOrderDialog = () => {
       
       await createWorkOrder.mutateAsync({
         title: data.title,
-        description: data.description,
-        due_date: data.dueDate.toISOString(),
-        assigned_to: data.assignedTo,
-        asset_id: data.asset,
-        location_id: selectedLocation?.id,
+        description: data.description || "",
+        due_date: data.dueDate?.toISOString(),
+        assigned_to: data.assignedTo || null,
+        asset_id: data.asset || null,
+        location_id: selectedLocation?.id || null,
         tenant_id: userData.tenant_id,
         status: "open",
         priority: data.priority,
@@ -109,277 +110,245 @@ export const NewWorkOrderDialog = () => {
         requester_id: user.id,
       });
       
+      toast.success("Work order created successfully!");
       setOpen(false);
       form.reset();
-      setSelectedProcedures([]);
     } catch (error) {
       console.error("Error creating work order:", error);
+      toast.error("Failed to create work order. Please try again.");
+    } finally {
+      setIsSubmitting(false);
     }
-  };
-
-  const handleAddProcedure = (procedureId: string) => {
-    if (!selectedProcedures.includes(procedureId)) {
-      setSelectedProcedures([...selectedProcedures, procedureId]);
-    }
-  };
-
-  const handleRemoveProcedure = (procedureId: string) => {
-    setSelectedProcedures(selectedProcedures.filter(id => id !== procedureId));
   };
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className="bg-blue-600 hover:bg-blue-700 whitespace-nowrap">
+        <Button className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm">
           <Plus className="h-4 w-4 mr-2" />
           New Work Order
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>New Work Order</DialogTitle>
+          <DialogTitle className="text-xl font-semibold">Create New Work Order</DialogTitle>
         </DialogHeader>
         
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="title"
-                render={({ field }) => (
-                  <FormItem className="md:col-span-2">
-                    <FormLabel>Title *</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Enter work order title" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          {/* Title */}
+          <div className="space-y-2">
+            <Label htmlFor="title" className="text-sm font-medium">
+              Title <span className="text-red-500">*</span>
+            </Label>
+            <Input
+              id="title"
+              placeholder="Enter work order title"
+              {...form.register("title")}
+              className="w-full"
+            />
+            {form.formState.errors.title && (
+              <p className="text-sm text-red-500">{form.formState.errors.title.message}</p>
+            )}
+          </div>
 
-              <FormField
-                control={form.control}
-                name="description"
-                render={({ field }) => (
-                  <FormItem className="md:col-span-2">
-                    <FormLabel>Description</FormLabel>
-                    <FormControl>
-                      <Textarea 
-                        placeholder="Add a description"
-                        className="min-h-[100px]"
-                        {...field} 
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+          {/* Description */}
+          <div className="space-y-2">
+            <Label htmlFor="description" className="text-sm font-medium">Description</Label>
+            <Textarea
+              id="description"
+              placeholder="Describe the work to be performed..."
+              className="min-h-[100px] resize-none"
+              {...form.register("description")}
+            />
+          </div>
 
-              <FormField
-                control={form.control}
-                name="priority"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Priority</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select priority" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="low">Low</SelectItem>
-                        <SelectItem value="medium">Medium</SelectItem>
-                        <SelectItem value="high">High</SelectItem>
-                        <SelectItem value="urgent">Urgent</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="dueDate"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Due Date</FormLabel>
-                    <div className="relative">
-                      <FormControl>
-                        <Button
-                          variant="outline"
-                          className="w-full justify-start text-left font-normal"
-                          onClick={() => setShowCalendar(!showCalendar)}
-                          type="button"
-                        >
-                          <CalendarIcon className="mr-2 h-4 w-4" />
-                          {field.value ? format(field.value, "PPP") : "Select date"}
-                        </Button>
-                      </FormControl>
-                      {showCalendar && (
-                        <div className="absolute top-full left-0 z-50 mt-1">
-                          <Calendar
-                            mode="single"
-                            selected={field.value}
-                            onSelect={(date) => {
-                              field.onChange(date);
-                              setShowCalendar(false);
-                            }}
-                            className="rounded-md border bg-white shadow-lg"
-                          />
-                        </div>
-                      )}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Priority */}
+            <div className="space-y-2">
+              <Label className="text-sm font-medium">Priority</Label>
+              <Select
+                value={form.watch("priority")}
+                onValueChange={(value: "low" | "medium" | "high" | "urgent") => 
+                  form.setValue("priority", value)
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select priority" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="low">
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 rounded-full bg-green-500"></div>
+                      Low
                     </div>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="assignedTo"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Assigned To</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Start typing..." />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="Zach Brown">Zach Brown</SelectItem>
-                        <SelectItem value="Maintenance Team 1">Maintenance Team 1</SelectItem>
-                        <SelectItem value="Maintenance Team 2">Maintenance Team 2</SelectItem>
-                        <SelectItem value="Safety Team">Safety Team</SelectItem>
-                        <SelectItem value="Operations">Operations</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="asset"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Asset</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select asset" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="Wrapper - Orion Model A">Wrapper - Orion Model A</SelectItem>
-                        <SelectItem value="Conveyor - 3200 Series Modular">Conveyor - 3200 Series Modular</SelectItem>
-                        <SelectItem value="35-005 - Air Compressor - VSS Single Screw">35-005 - Air Compressor - VSS Single Screw</SelectItem>
-                        <SelectItem value="ABC Fire Extinguisher (5 lb)">ABC Fire Extinguisher (5 lb)</SelectItem>
-                        <SelectItem value="Facility">Facility</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="location"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Location</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select location" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {locations?.map((location) => (
-                          <SelectItem key={location.id} value={location.name}>
-                            {location.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="category"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Category</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select category" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="Equipment">Equipment</SelectItem>
-                        <SelectItem value="Safety">Safety</SelectItem>
-                        <SelectItem value="Maintenance">Maintenance</SelectItem>
-                        <SelectItem value="Inspection">Inspection</SelectItem>
-                        <SelectItem value="PM">Preventive Maintenance</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="tags"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Tags</FormLabel>
-                    <FormControl>
-                      <Input 
-                        placeholder="Enter tags separated by commas" 
-                        {...field} 
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                  </SelectItem>
+                  <SelectItem value="medium">
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 rounded-full bg-yellow-500"></div>
+                      Medium
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="high">
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 rounded-full bg-orange-500"></div>
+                      High
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="urgent">
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 rounded-full bg-red-500"></div>
+                      Urgent
+                    </div>
+                  </SelectItem>
+                </SelectContent>
+              </Select>
             </div>
 
-            <div className="border-t pt-6">
-              <NewWorkOrderProcedureSection
-                selectedProcedures={selectedProcedures}
-                onProcedureAdd={handleAddProcedure}
-                onProcedureRemove={handleRemoveProcedure}
-              />
+            {/* Due Date */}
+            <div className="space-y-2">
+              <Label className="text-sm font-medium">Due Date</Label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className={cn(
+                      "w-full justify-start text-left font-normal",
+                      !form.watch("dueDate") && "text-muted-foreground"
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {form.watch("dueDate") ? (
+                      format(form.watch("dueDate")!, "PPP")
+                    ) : (
+                      "Pick a date"
+                    )}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={form.watch("dueDate")}
+                    onSelect={(date) => form.setValue("dueDate", date)}
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
             </div>
+          </div>
 
-            <div className="flex justify-end space-x-4 pt-4">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setOpen(false)}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Assigned To */}
+            <div className="space-y-2">
+              <Label className="text-sm font-medium">Assigned To</Label>
+              <Select
+                value={form.watch("assignedTo")}
+                onValueChange={(value) => form.setValue("assignedTo", value)}
               >
-                Cancel
-              </Button>
-              <Button 
-                type="submit" 
-                disabled={createWorkOrder.isPending}
-                className="bg-blue-600 hover:bg-blue-700"
-              >
-                {createWorkOrder.isPending ? "Creating..." : "Create"}
-              </Button>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select assignee" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Zach Brown">Zach Brown</SelectItem>
+                  <SelectItem value="Maintenance Team 1">Maintenance Team 1</SelectItem>
+                  <SelectItem value="Maintenance Team 2">Maintenance Team 2</SelectItem>
+                  <SelectItem value="Safety Team">Safety Team</SelectItem>
+                  <SelectItem value="Operations">Operations</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
-          </form>
-        </Form>
+
+            {/* Category */}
+            <div className="space-y-2">
+              <Label className="text-sm font-medium">Category</Label>
+              <Select
+                value={form.watch("category")}
+                onValueChange={(value) => form.setValue("category", value)}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select category" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="maintenance">🔧 Maintenance</SelectItem>
+                  <SelectItem value="repair">⚙️ Repair</SelectItem>
+                  <SelectItem value="inspection">🔍 Inspection</SelectItem>
+                  <SelectItem value="installation">🔨 Installation</SelectItem>
+                  <SelectItem value="safety">🔥 Safety</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Asset */}
+            <div className="space-y-2">
+              <Label className="text-sm font-medium">Asset</Label>
+              <Select
+                value={form.watch("asset")}
+                onValueChange={(value) => form.setValue("asset", value)}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select asset" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Wrapper - Orion Model A">Wrapper - Orion Model A</SelectItem>
+                  <SelectItem value="Conveyor - 3200 Series Modular">Conveyor - 3200 Series Modular</SelectItem>
+                  <SelectItem value="35-005 - Air Compressor - VSS Single Screw">35-005 - Air Compressor - VSS Single Screw</SelectItem>
+                  <SelectItem value="ABC Fire Extinguisher (5 lb)">ABC Fire Extinguisher (5 lb)</SelectItem>
+                  <SelectItem value="Facility">Facility</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Location */}
+            <div className="space-y-2">
+              <Label className="text-sm font-medium">Location</Label>
+              <Select
+                value={form.watch("location")}
+                onValueChange={(value) => form.setValue("location", value)}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select location" />
+                </SelectTrigger>
+                <SelectContent>
+                  {locations?.map((location) => (
+                    <SelectItem key={location.id} value={location.name}>
+                      {location.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          {/* Tags */}
+          <div className="space-y-2">
+            <Label htmlFor="tags" className="text-sm font-medium">Tags</Label>
+            <Input
+              id="tags"
+              placeholder="Enter tags separated by commas"
+              {...form.register("tags")}
+            />
+            <p className="text-xs text-gray-500">Separate multiple tags with commas</p>
+          </div>
+
+          <DialogFooter className="gap-2 pt-4">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setOpen(false)}
+              disabled={isSubmitting}
+            >
+              Cancel
+            </Button>
+            <Button 
+              type="submit" 
+              disabled={isSubmitting}
+              className="bg-blue-600 hover:bg-blue-700"
+            >
+              {isSubmitting ? "Creating..." : "Create Work Order"}
+            </Button>
+          </DialogFooter>
+        </form>
       </DialogContent>
     </Dialog>
   );

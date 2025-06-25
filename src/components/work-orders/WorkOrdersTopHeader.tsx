@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { WorkOrderFilters } from "@/types/workOrder";
 import { Dispatch, SetStateAction } from "react";
+import { NewWorkOrderDialog } from "./NewWorkOrderDialog";
 
 interface WorkOrdersTopHeaderProps {
   workOrdersCount: number;
@@ -60,13 +61,7 @@ export const WorkOrdersTopHeader = ({
               </div>
             )}
             
-            <Button 
-              onClick={onCreateWorkOrder} 
-              className="bg-blue-600 hover:bg-blue-700 text-white"
-            >
-              <Plus className="w-4 h-4 mr-2" />
-              New Work Order
-            </Button>
+            <NewWorkOrderDialog />
           </div>
         </div>
 
