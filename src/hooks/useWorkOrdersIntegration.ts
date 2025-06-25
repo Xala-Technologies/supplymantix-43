@@ -72,7 +72,7 @@ export const useWorkOrdersIntegration = () => {
         return [];
       }
     },
-    staleTime: 1 * 60 * 1000, // 1 minute - reduced for more frequent updates
+    staleTime: 0, // Always consider data stale to force refresh
     gcTime: 5 * 60 * 1000, // 5 minutes
     refetchOnWindowFocus: true,
     refetchOnMount: true,

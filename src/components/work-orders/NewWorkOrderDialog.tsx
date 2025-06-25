@@ -17,6 +17,7 @@ import { useCreateWorkOrder, useUpdateWorkOrder } from "@/hooks/useWorkOrders";
 import { useLocations } from "@/hooks/useLocations";
 import { useAssets } from "@/hooks/useAssets";
 import { useUsers } from "@/hooks/useUsers";
+import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { WorkOrder } from "@/types/workOrder";
 import { WorkOrderFormFields } from "./form-sections/WorkOrderFormFields";
@@ -54,6 +55,7 @@ export const NewWorkOrderDialog = ({
 }: NewWorkOrderDialogProps) => {
   const [internalOpen, setInternalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const queryClient = useQueryClient();
   
   // Use controlled or internal state
   const open = controlledOpen !== undefined ? controlledOpen : internalOpen;
@@ -148,6 +150,10 @@ export const NewWorkOrderDialog = ({
         await createWorkOrder.mutateAsync(workOrderData);
         toast.success("Work order created successfully!");
       }
+
+      // Invalidate and refetch work orders data to show new work order immediately
+      await queryClient.invalidateQueries({ queryKey: ["work-orders"] });
+      await queryClient.invalidateQueries({ queryKey: ["work-orders-integration"] });
       
       setOpen(false);
       form.reset();

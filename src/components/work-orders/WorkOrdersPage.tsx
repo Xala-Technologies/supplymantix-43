@@ -7,7 +7,7 @@ import { useWorkOrdersPage } from "@/hooks/useWorkOrdersPage";
 import { useState } from "react";
 
 export const WorkOrdersPage = () => {
-  const { data: workOrders, isLoading, refetch, error } = useWorkOrdersIntegration();
+  const { data: workOrders, isLoading, error } = useWorkOrdersIntegration();
   const [viewMode, setViewMode] = useState<'list' | 'calendar'>('list');
   
   const {
@@ -26,18 +26,6 @@ export const WorkOrdersPage = () => {
     handleFormCancel,
     setViewModeToList
   } = useWorkOrdersPage(workOrders || []);
-
-  // Enhanced form submit handler that refreshes data
-  const handleFormSubmitWithRefresh = async (data: any) => {
-    console.log('Submitting work order with refresh...');
-    await handleFormSubmit(data);
-    
-    // Force refetch the data to update the list
-    console.log('Refetching work orders after submit...');
-    await refetch();
-    
-    console.log('Work order submission and refresh completed');
-  };
 
   if (error) {
     console.error('Work orders page error:', error);
@@ -75,7 +63,6 @@ export const WorkOrdersPage = () => {
               workOrders={filteredWorkOrders}
               onSelectWorkOrder={handleSelectWorkOrder}
               selectedWorkOrderId={selectedWorkOrder}
-              onRefetch={refetch}
             />
           </div>
         </div>
@@ -88,7 +75,7 @@ export const WorkOrdersPage = () => {
           editingWorkOrder={editingWorkOrder}
           onSelectWorkOrder={handleSelectWorkOrder}
           onEditWorkOrder={handleEditWorkOrder}
-          onFormSubmit={handleFormSubmitWithRefresh}
+          onFormSubmit={handleFormSubmit}
           onFormCancel={handleFormCancel}
           onSetViewModeToList={setViewModeToList}
         />
