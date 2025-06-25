@@ -2,12 +2,11 @@
 import { useState } from "react";
 import { useWorkOrdersIntegration } from "@/hooks/useWorkOrdersIntegration";
 import { useWorkOrdersPage } from "@/hooks/useWorkOrdersPage";
-import { WorkOrderViewToggle } from "./WorkOrderViewToggle";
+import { WorkOrdersHeader } from "./WorkOrdersHeader";
+import { WorkOrdersContent } from "./WorkOrdersContent";
 import { WorkOrderCalendar } from "./WorkOrderCalendar";
-import { EnhancedWorkOrdersList } from "./EnhancedWorkOrdersList";
-import { WorkOrderDetailPanel } from "./WorkOrderDetailPanel";
-import { WorkOrderForm } from "./WorkOrderForm";
-import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Calendar, List } from "lucide-react";
 
 export const WorkOrdersPageEnhanced = () => {
   const [viewMode, setViewMode] = useState<'list' | 'calendar'>('list');
@@ -35,12 +34,6 @@ export const WorkOrdersPageEnhanced = () => {
     await refetch();
   };
 
-  const handleStatusUpdate = async (status: string) => {
-    // This would call an API to update the status
-    console.log('Updating status to:', status);
-    await refetch();
-  };
-
   if (error) {
     console.error('Work orders page error:', error);
   }
@@ -56,79 +49,64 @@ export const WorkOrdersPageEnhanced = () => {
     );
   }
 
-  // If in form mode, show the form
-  if (formViewMode === 'form') {
-    return (
-      <div className="h-full bg-gray-50">
-        <WorkOrderForm
-          initialData={editingWorkOrder}
-          onSubmit={handleFormSubmitWithRefresh}
-          onCancel={handleFormCancel}
-          mode={editingWorkOrder ? 'edit' : 'create'}
-        />
-      </div>
-    );
-  }
-
   return (
-    <div className="h-full flex flex-col bg-gray-50">
-      {/* Top Navigation */}
-      <WorkOrderViewToggle
-        viewMode={viewMode}
-        onViewModeChange={setViewMode}
-        filters={filters}
-        onFiltersChange={setFilters}
-        workOrdersCount={filteredWorkOrders.length}
-        onCreateWorkOrder={handleCreateWorkOrder}
-      />
-
-      {/* Main Content */}
-      <div className="flex-1 overflow-hidden">
-        <div className="h-full flex">
-          {/* Left Panel - List or Calendar */}
-          <div className="w-1/2 border-r border-gray-200">
-            <Card className="h-full rounded-none border-0">
-              {viewMode === 'calendar' ? (
-                <WorkOrderCalendar
-                  workOrders={filteredWorkOrders}
-                  onSelectWorkOrder={handleSelectWorkOrder}
-                  selectedWorkOrderId={selectedWorkOrder}
-                />
-              ) : (
-                <EnhancedWorkOrdersList
-                  workOrders={filteredWorkOrders}
-                  selectedWorkOrderId={selectedWorkOrder}
-                  onSelectWorkOrder={handleSelectWorkOrder}
-                />
-              )}
-            </Card>
-          </div>
-
-          {/* Right Panel - Work Order Details */}
-          <div className="flex-1">
-            {selectedWorkOrderData ? (
-              <WorkOrderDetailPanel
-                workOrder={selectedWorkOrderData}
-                onEdit={handleEditWorkOrder}
-                onStatusUpdate={handleStatusUpdate}
-              />
-            ) : (
-              <div className="h-full flex items-center justify-center text-gray-500">
-                <div className="text-center">
-                  <div className="w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center mx-auto mb-4">
-                    <span className="text-2xl">📋</span>
-                  </div>
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">
-                    Select a Work Order
-                  </h3>
-                  <p className="text-sm text-gray-500">
-                    Choose a work order from the {viewMode} to view details
-                  </p>
-                </div>
-              </div>
-            )}
+    <div className="h-full flex flex-col">
+      {/* Header with view toggle */}
+      <div className="border-b border-gray-200">
+        <WorkOrdersHeader
+          workOrdersCount={filteredWorkOrders.length}
+          onCreateWorkOrder={handleCreateWorkOrder}
+          filters={filters}
+          onFiltersChange={setFilters}
+        />
+        
+        {/* View Toggle */}
+        <div className="px-6 pb-4">
+          <div className="flex items-center gap-2">
+            <Button
+              variant={viewMode === 'list' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setViewMode('list')}
+              className="gap-2"
+            >
+              <List className="w-4 h-4" />
+              List View
+            </Button>
+            <Button
+              variant={viewMode === 'calendar' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setViewMode('calendar')}
+              className="gap-2"
+            >
+              <Calendar className="w-4 h-4" />
+              Calendar View
+            </Button>
           </div>
         </div>
+      </div>
+
+      {/* Content */}
+      <div className="flex-1 overflow-hidden">
+        {viewMode === 'calendar' ? (
+          <WorkOrderCalendar
+            workOrders={filteredWorkOrders}
+            onSelectWorkOrder={handleSelectWorkOrder}
+            selectedWorkOrderId={selectedWorkOrder}
+          />
+        ) : (
+          <WorkOrdersContent
+            filteredWorkOrders={filteredWorkOrders}
+            selectedWorkOrder={selectedWorkOrder}
+            viewMode={formViewMode}
+            selectedWorkOrderData={selectedWorkOrderData}
+            editingWorkOrder={editingWorkOrder}
+            onSelectWorkOrder={handleSelectWorkOrder}
+            onEditWorkOrder={handleEditWorkOrder}
+            onFormSubmit={handleFormSubmitWithRefresh}
+            onFormCancel={handleFormCancel}
+            onSetViewModeToList={setViewModeToList}
+          />
+        )}
       </div>
     </div>
   );
