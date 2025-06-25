@@ -126,6 +126,16 @@ export const EnhancedWorkOrderForm = ({
     fetchData();
   }, []);
 
+  // Update form values when workOrder data is loaded and locations are available
+  useEffect(() => {
+    if (workOrder && locations.length > 0) {
+      const locationId = getLocationId(workOrder.location);
+      if (locationId) {
+        setValue("location", locationId);
+      }
+    }
+  }, [workOrder, locations, setValue]);
+
   const applyTemplate = (templateId: string) => {
     console.log("Applying template:", templateId);
     // Implementation would fetch template and update form values
