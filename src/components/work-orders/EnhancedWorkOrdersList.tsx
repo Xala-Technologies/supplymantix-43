@@ -1,4 +1,3 @@
-
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
@@ -28,8 +27,8 @@ export const EnhancedWorkOrdersList = ({
       {/* Work Orders List */}
       <div className="flex-1 overflow-hidden">
         {workOrders.length > 0 ? (
-          <ScrollArea className="h-full w-full">
-            <div className="p-3 space-y-2 pr-6">
+          <ScrollArea className="h-full">
+            <div className="p-3 space-y-2 pr-3">
               {workOrders.map((workOrder) => (
                 <WorkOrderCard
                   key={workOrder.id}
