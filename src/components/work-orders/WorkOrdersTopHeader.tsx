@@ -27,7 +27,7 @@ export const WorkOrdersTopHeader = ({
   onViewModeChange
 }: WorkOrdersTopHeaderProps) => {
   return (
-    <div className="bg-white border-b border-gray-200">
+    <div className="fixed top-16 left-[var(--sidebar-width)] right-0 z-30 bg-white border-b border-gray-200 transition-[left] duration-300 ease-linear peer-data-[state=collapsed]:left-[var(--sidebar-width-icon)]">
       {/* Main Header */}
       <div className="px-6 py-4">
         <div className="flex items-center justify-between mb-6">
