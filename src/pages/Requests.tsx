@@ -187,7 +187,7 @@ export default function Requests() {
           requests={requests}
           onImportRequests={handleImportRequests}
         />
-        <div className="flex-1 overflow-auto">
+        <div className="flex-1 overflow-auto bg-gray-50">
           <div className="p-6">
             {isLoading ? (
               <div className="text-center py-8">Loading requests...</div>
