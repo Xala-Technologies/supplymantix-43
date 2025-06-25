@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { WorkOrdersTopHeader } from "./WorkOrdersTopHeader";
@@ -9,6 +10,7 @@ import { WorkOrder, WorkOrderFilters } from "@/types/workOrder";
 import { supabase } from "@/integrations/supabase/client";
 import { StandardPageLayout } from "@/components/Layout/StandardPageLayout";
 import { normalizeWorkOrderData } from "@/features/workOrders/utils";
+import { useQueryClient } from "@tanstack/react-query";
 
 export const WorkOrdersPage = () => {
   const [selectedWorkOrder, setSelectedWorkOrder] = useState<string | null>(null);
@@ -29,6 +31,7 @@ export const WorkOrdersPage = () => {
   const { data: rawWorkOrders = [], refetch } = useWorkOrders();
   const createWorkOrderMutation = useCreateWorkOrder();
   const updateWorkOrderMutation = useUpdateWorkOrder();
+  const queryClient = useQueryClient();
 
   // Transform raw work orders to proper WorkOrder type
   const workOrders: WorkOrder[] = rawWorkOrders.map(normalizeWorkOrderData);
@@ -174,6 +177,9 @@ export const WorkOrdersPage = () => {
       setEditingWorkOrder(null);
       setIsCreating(false);
       setSelectedWorkOrder(null);
+      
+      // Invalidate and refetch work orders to ensure calendar view updates
+      await queryClient.invalidateQueries({ queryKey: ['work-orders'] });
       await refetch();
       
     } catch (error) {

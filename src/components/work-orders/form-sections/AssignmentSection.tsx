@@ -20,6 +20,11 @@ interface AssignmentSectionProps {
 export const AssignmentSection = ({ form, watch, setValue, assets }: AssignmentSectionProps) => {
   const { data: users, isLoading: usersLoading } = useUsers();
 
+  const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setValue("dueDate", value);
+  };
+
   return (
     <div className="space-y-4">
       <div>
@@ -74,7 +79,8 @@ export const AssignmentSection = ({ form, watch, setValue, assets }: AssignmentS
         <Input
           id="dueDate"
           type="date"
-          {...form.register("dueDate")}
+          value={watch("dueDate") || ""}
+          onChange={handleDateChange}
           className="mt-1"
         />
       </div>
