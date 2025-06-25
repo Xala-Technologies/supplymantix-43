@@ -4,6 +4,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { WorkOrder, WorkOrderStatus, WorkOrderCategory } from "@/types/workOrder";
 import { toast } from "sonner";
 
+// Database work order status type (matches the actual Supabase enum)
+type DatabaseWorkOrderStatus = 'open' | 'in_progress' | 'on_hold' | 'completed' | 'cancelled';
+
 export const useWorkOrdersIntegration = () => {
   return useQuery({
     queryKey: ["work-orders-integration"],
@@ -69,9 +72,26 @@ export const useWorkOrderStatusUpdate = () => {
   
   return useMutation({
     mutationFn: async ({ id, status, notes }: { id: string; status: WorkOrderStatus; notes?: string }) => {
+      // Convert our WorkOrderStatus to database-compatible status
+      let dbStatus: DatabaseWorkOrderStatus;
+      switch (status) {
+        case 'draft':
+          dbStatus = 'open'; // Convert draft to open for database
+          break;
+        case 'open':
+        case 'in_progress':
+        case 'on_hold':
+        case 'completed':
+        case 'cancelled':
+          dbStatus = status;
+          break;
+        default:
+          dbStatus = 'open';
+      }
+
       const { data, error } = await supabase
         .from("work_orders")
-        .update({ status, updated_at: new Date().toISOString() })
+        .update({ status: dbStatus, updated_at: new Date().toISOString() })
         .eq("id", id)
         .select()
         .single();
