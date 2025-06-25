@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { FileText } from "lucide-react";
 import { WorkOrder } from "@/types/workOrder";
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 import { BasicInfoSection } from "./form-sections/BasicInfoSection";
 import { AssignmentSection } from "./form-sections/AssignmentSection";
 import { LocationSection } from "./form-sections/LocationSection";
@@ -97,7 +98,7 @@ export const EnhancedWorkOrderForm = ({
     },
   });
 
-  const { watch, setValue } = form;
+  const { watch, setValue, reset } = form;
   const currentTags = watch("tags");
 
   // Fetch assets and locations
@@ -118,6 +119,7 @@ export const EnhancedWorkOrderForm = ({
         }
       } catch (error) {
         console.error('Error fetching form data:', error);
+        toast.error('Failed to load form data');
       } finally {
         setLoadingData(false);
       }
@@ -126,24 +128,53 @@ export const EnhancedWorkOrderForm = ({
     fetchData();
   }, []);
 
-  // Update form values when workOrder data is loaded and locations are available
+  // Reset form values when workOrder changes
   useEffect(() => {
-    if (workOrder && locations.length > 0) {
-      const locationId = getLocationId(workOrder.location);
-      if (locationId) {
-        setValue("location", locationId);
-      }
+    if (workOrder) {
+      console.log('Setting form values for work order:', workOrder);
+      const formData = {
+        title: workOrder.title || "",
+        description: workOrder.description || "",
+        priority: workOrder.priority || "medium",
+        assignedTo: getAssignee(workOrder.assignedTo),
+        category: workOrder.category || "maintenance",
+        tags: workOrder.tags || [],
+        dueDate: workOrder.due_date ? new Date(workOrder.due_date).toISOString().split('T')[0] : "",
+        assetId: getAssetId(workOrder.asset),
+        location: getLocationId(workOrder.location),
+      };
+      console.log('Form data being set:', formData);
+      reset(formData);
     }
-  }, [workOrder, locations, setValue]);
+  }, [workOrder, reset]);
 
   const applyTemplate = (templateId: string) => {
     console.log("Applying template:", templateId);
     // Implementation would fetch template and update form values
   };
 
-  const handleSubmit = (data: WorkOrderFormData) => {
+  const handleSubmit = async (data: WorkOrderFormData) => {
     console.log("Form data before submission:", data);
-    onSubmit(data);
+    
+    try {
+      // Transform the form data to match the expected format
+      const transformedData = {
+        ...data,
+        // Ensure we're passing the correct field names
+        assignedTo: data.assignedTo || undefined,
+        assetId: data.assetId || undefined,
+        location: data.location || undefined,
+        dueDate: data.dueDate || undefined,
+      };
+      
+      console.log("Transformed data:", transformedData);
+      
+      // Call the parent's onSubmit with transformed data
+      onSubmit(transformedData);
+    } catch (error) {
+      console.error('Error in form submission:', error);
+      toast.error('Failed to submit work order');
+    }
   };
 
   // Create a wrapper function for tags setValue
