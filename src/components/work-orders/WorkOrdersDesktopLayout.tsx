@@ -32,7 +32,7 @@ export const WorkOrdersDesktopLayout = ({
   onFormCancel
 }: WorkOrdersDesktopLayoutProps) => {
   return (
-    <div className="hidden lg:flex h-full w-full gap-3 p-3">
+    <div className="hidden lg:flex h-full w-full gap-4 p-4 pl-6">
       {/* Left Panel - Work Orders List Card */}
       <div className="w-[30%]">
         <Card className="h-full overflow-hidden shadow-sm">
