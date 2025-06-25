@@ -1,6 +1,7 @@
 
 import { DashboardLayout } from "@/components/Layout/DashboardLayout";
-import { PageLayout, PageLayoutHeader, PageFilters, PageLayoutContent, PageContainer } from "@/components/Layout/PageLayout";
+import { PageLayout, PageLayoutHeader, PageFilters, PageLayoutContent } from "@/components/Layout/PageLayout";
+import { PageContainer } from "@/components/Layout/PageContainer";
 import { AssetsHeader } from "@/components/assets/AssetsHeader";
 import { AssetsGrid } from "@/components/assets/AssetsGrid";
 import { AssetDetailCard } from "@/components/assets/AssetDetailCard";
