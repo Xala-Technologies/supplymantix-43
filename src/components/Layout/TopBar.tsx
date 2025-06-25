@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 
 export const TopBar = () => {
   return (
-    <header className="fixed top-0 right-0 left-0 md:left-[var(--sidebar-width)] md:peer-data-[state=collapsed]:left-[var(--sidebar-width-icon)] h-16 bg-white/95 backdrop-blur-sm border-b border-gray-200/50 z-30 transition-[left] duration-300 ease-linear">
+    <header className="fixed top-0 right-0 left-[var(--sidebar-width)] peer-data-[state=collapsed]:left-[var(--sidebar-width-icon)] h-16 bg-white/95 backdrop-blur-sm border-b border-gray-200/50 z-30 transition-[left] duration-300 ease-linear">
       <div className="flex items-center justify-between h-full px-6">
         {/* Left side with modern sidebar toggle */}
         <div className="flex items-center gap-4">
