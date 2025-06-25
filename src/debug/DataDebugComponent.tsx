@@ -4,14 +4,14 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useWorkOrdersIntegration } from '@/features/workOrders/hooks/useWorkOrdersIntegration';
 import { useRequests } from '@/hooks/useRequests';
 import { useAssets } from '@/hooks/useAssets';
-import { useInventory } from '@/hooks/useInventory';
+import { useInventoryItems } from '@/hooks/useInventory';
 
 export const DataDebugComponent = () => {
   const { user, loading: authLoading } = useAuth();
   const { data: workOrders, isLoading: workOrdersLoading, error: workOrdersError } = useWorkOrdersIntegration();
   const { data: requests, isLoading: requestsLoading } = useRequests();
   const { data: assets, isLoading: assetsLoading } = useAssets();
-  const { data: inventory, isLoading: inventoryLoading } = useInventory();
+  const { data: inventory, isLoading: inventoryLoading } = useInventoryItems();
 
   console.log('Debug Info:', {
     user: user?.email,
