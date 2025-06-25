@@ -23,7 +23,7 @@ import {
 } from "@/components/ui/select";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { CalendarIcon, Plus, Edit } from "lucide-react";
+import { CalendarIcon, Plus } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { useCreateWorkOrder, useUpdateWorkOrder } from "@/hooks/useWorkOrders";
@@ -83,7 +83,7 @@ export const NewWorkOrderDialog = ({
     return "";
   };
 
-  // Helper function to safely extract location
+  // Helper function to safely extract location name
   const getLocationName = (location: WorkOrder['location']): string => {
     if (!location) return "";
     if (typeof location === "string") return location;
@@ -186,9 +186,10 @@ export const NewWorkOrderDialog = ({
       };
 
       if (isEditMode && workOrder) {
+        // For updates, we need to pass { id, updates } structure
         await updateWorkOrder.mutateAsync({
           id: workOrder.id,
-          ...workOrderData,
+          updates: workOrderData,
         });
         toast.success("Work order updated successfully!");
       } else {
