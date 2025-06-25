@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { WorkOrdersTopHeader } from "./WorkOrdersTopHeader";
@@ -30,6 +31,37 @@ export const WorkOrdersPage = () => {
 
   // Transform raw work orders to proper WorkOrder type
   const workOrders: WorkOrder[] = rawWorkOrders.map(normalizeWorkOrderData);
+
+  // Apply filters to work orders
+  const filteredWorkOrders = workOrders.filter(wo => {
+    if (filters.search && !wo.title.toLowerCase().includes(filters.search.toLowerCase())) {
+      return false;
+    }
+    if (filters.status !== 'all' && wo.status !== filters.status) {
+      return false;
+    }
+    if (filters.priority !== 'all' && wo.priority !== filters.priority) {
+      return false;
+    }
+    if (filters.category !== 'all' && wo.category !== filters.category) {
+      return false;
+    }
+    return true;
+  });
+
+  // Auto-select first work order when filtered list changes
+  useEffect(() => {
+    if (filteredWorkOrders.length > 0) {
+      const firstWorkOrderId = filteredWorkOrders[0].id;
+      if (!selectedWorkOrder || !filteredWorkOrders.find(wo => wo.id === selectedWorkOrder)) {
+        setSelectedWorkOrder(firstWorkOrderId);
+        setViewMode('detail');
+      }
+    } else {
+      setSelectedWorkOrder(null);
+      setViewMode('list');
+    }
+  }, [filteredWorkOrders, selectedWorkOrder]);
 
   const selectedWorkOrderData = workOrders.find(wo => wo.id === selectedWorkOrder);
 
@@ -144,23 +176,6 @@ export const WorkOrdersPage = () => {
     setEditingWorkOrder(null);
     setIsCreating(false);
   };
-
-  // Apply filters to work orders
-  const filteredWorkOrders = workOrders.filter(wo => {
-    if (filters.search && !wo.title.toLowerCase().includes(filters.search.toLowerCase())) {
-      return false;
-    }
-    if (filters.status !== 'all' && wo.status !== filters.status) {
-      return false;
-    }
-    if (filters.priority !== 'all' && wo.priority !== filters.priority) {
-      return false;
-    }
-    if (filters.category !== 'all' && wo.category !== filters.category) {
-      return false;
-    }
-    return true;
-  });
 
   return (
     <StandardPageLayout>
