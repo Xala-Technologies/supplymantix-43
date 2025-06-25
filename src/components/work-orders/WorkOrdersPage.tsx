@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { WorkOrdersTopHeader } from "./WorkOrdersTopHeader";
@@ -57,6 +56,13 @@ export const WorkOrdersPage = () => {
       setIsCreating(false);
       setViewMode('form');
     }
+  };
+
+  const handleSetViewModeToList = () => {
+    setViewMode('list');
+    setSelectedWorkOrder(null);
+    setEditingWorkOrder(null);
+    setIsCreating(false);
   };
 
   const handleFormSubmit = async (data: any) => {
@@ -193,6 +199,7 @@ export const WorkOrdersPage = () => {
           onEditWorkOrder={handleEditWorkOrder}
           onFormSubmit={handleFormSubmit}
           onFormCancel={handleFormCancel}
+          onSetViewModeToList={handleSetViewModeToList}
         />
       </div>
     </StandardPageLayout>
