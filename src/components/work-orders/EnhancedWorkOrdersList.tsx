@@ -1,4 +1,3 @@
-
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
@@ -6,6 +5,7 @@ import { Clock, Users, MapPin, Search } from "lucide-react";
 import { WorkOrder } from "@/types/workOrder";
 import { getStatusColor, getPriorityColor, formatDueDate } from "@/services/workOrderService";
 import { getAssetName, getLocationName } from '@/utils/assetUtils';
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface EnhancedWorkOrdersListProps {
   workOrders: WorkOrder[];
@@ -25,19 +25,21 @@ export const EnhancedWorkOrdersList = ({
   return (
     <div className="h-full flex flex-col bg-white">
       {/* Work Orders List */}
-      <div className="flex-1 overflow-y-auto">
+      <div className="flex-1 overflow-hidden">
         {workOrders.length > 0 ? (
-          <div className="p-3 space-y-2">
-            {workOrders.map((workOrder) => (
-              <WorkOrderCard
-                key={workOrder.id}
-                workOrder={workOrder}
-                isSelected={selectedWorkOrderId === workOrder.id}
-                onClick={() => onSelectWorkOrder(workOrder.id)}
-                getInitials={getInitials}
-              />
-            ))}
-          </div>
+          <ScrollArea className="h-full">
+            <div className="p-3 space-y-2">
+              {workOrders.map((workOrder) => (
+                <WorkOrderCard
+                  key={workOrder.id}
+                  workOrder={workOrder}
+                  isSelected={selectedWorkOrderId === workOrder.id}
+                  onClick={() => onSelectWorkOrder(workOrder.id)}
+                  getInitials={getInitials}
+                />
+              ))}
+            </div>
+          </ScrollArea>
         ) : (
           <div className="flex-1 flex items-center justify-center p-6">
             <div className="text-center">
