@@ -212,6 +212,7 @@ export default function Assets() {
   if (error) {
     return (
       <DashboardLayout>
+        <PageContainer>
         <PageLayout>
           <div className="h-full flex items-center justify-center">
             <div className="text-center">
@@ -222,12 +223,14 @@ export default function Assets() {
             </div>
           </div>
         </PageLayout>
+        </PageContainer>
       </DashboardLayout>
     );
   }
 
   return (
     <DashboardLayout>
+      <PageContainer>
       <PageLayout>
         {(viewMode === 'create' || viewMode === 'edit') ? (
           // Form View
@@ -327,6 +330,7 @@ export default function Assets() {
           </>
         )}
       </PageLayout>
+      </PageContainer>
     </DashboardLayout>
   );
 }
