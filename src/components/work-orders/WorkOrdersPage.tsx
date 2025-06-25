@@ -44,8 +44,8 @@ export const WorkOrdersPage = () => {
   }
 
   return (
-    <div className="h-full p-6 bg-gray-50/30">
-      <Card className="h-full flex flex-col overflow-hidden">
+    <div className="h-full p-6 bg-gray-50/30 transition-all duration-300 ease-linear">
+      <Card className="h-full flex flex-col overflow-hidden shadow-lg">
         {/* Fixed Header */}
         <div className="flex-shrink-0 border-b bg-white">
           <WorkOrdersTopHeader
@@ -59,8 +59,8 @@ export const WorkOrdersPage = () => {
           />
         </div>
 
-        {/* Scrollable Content */}
-        <div className="flex-1 overflow-hidden">
+        {/* Scrollable Content - Responsive to sidebar state */}
+        <div className="flex-1 overflow-hidden transition-all duration-300 ease-linear">
           {viewMode === 'calendar' ? (
             <div className="h-full p-6">
               <div className="h-full bg-white rounded-lg shadow-sm border overflow-hidden">

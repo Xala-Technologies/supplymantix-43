@@ -32,9 +32,9 @@ export const WorkOrdersDesktopLayout = ({
   onFormCancel
 }: WorkOrdersDesktopLayoutProps) => {
   return (
-    <div className="hidden lg:flex h-full w-full">
-      {/* Left Panel - Work Orders List Card */}
-      <div className="w-[30%] border-r border-gray-200 bg-white">
+    <div className="hidden lg:flex h-full w-full transition-all duration-300 ease-linear">
+      {/* Left Panel - Work Orders List Card - Responsive width */}
+      <div className="w-[400px] min-w-[350px] max-w-[500px] border-r border-gray-200 bg-white transition-all duration-300 ease-linear">
         <EnhancedWorkOrdersList 
           workOrders={filteredWorkOrders}
           selectedWorkOrderId={selectedWorkOrder}
@@ -42,8 +42,8 @@ export const WorkOrdersDesktopLayout = ({
         />
       </div>
       
-      {/* Main Content Area - 70% */}
-      <div className="w-[70%] flex flex-col overflow-hidden bg-white">
+      {/* Main Content Area - Takes remaining space */}
+      <div className="flex-1 flex flex-col overflow-hidden bg-white transition-all duration-300 ease-linear">
         {viewMode === 'detail' && selectedWorkOrderData && (
           <EnhancedWorkOrderDetail 
             workOrder={selectedWorkOrderData}
