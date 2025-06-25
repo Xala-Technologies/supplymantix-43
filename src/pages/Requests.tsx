@@ -12,6 +12,7 @@ import { useRequests, useCreateRequest, useUpdateRequest, useDeleteRequest } fro
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
 import type { Request, CreateRequestRequest } from "@/types/request";
 
 export default function Requests() {
@@ -92,33 +93,35 @@ export default function Requests() {
       <DashboardLayout>
         <PageContainer>
           <PageLayout>
-            <div className="fixed top-16 left-0 right-0 z-30 bg-white border-b border-gray-200 transition-[left] duration-300 ease-linear peer-data-[state=expanded]:left-0 peer-data-[state=collapsed]:left-0 md:peer-data-[state=expanded]:left-[var(--sidebar-width)] md:peer-data-[state=collapsed]:left-[var(--sidebar-width-icon)]">
-              <div className="px-6 py-4">
-                <div className="flex items-center gap-4">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setView("list")}
-                    className="text-gray-600 hover:text-gray-900 hover:bg-gray-100"
-                  >
-                    <ArrowLeft className="w-4 h-4 mr-2" />
-                    Back to Requests
-                  </Button>
-                  <div>
-                    <h1 className="text-2xl font-bold text-gray-900">Create New Request</h1>
-                    <p className="text-sm text-gray-600 mt-1">Submit a new request for maintenance, repairs, or services</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div className="pt-[100px] h-full overflow-hidden">
+            <div className="pt-6 h-full overflow-hidden">
               <PageContent>
-                <RequestForm
-                  onSubmit={handleCreateRequest}
-                  onCancel={() => setView("list")}
-                  isLoading={createRequest.isPending}
-                  mode="create"
-                />
+                <Card className="h-full flex flex-col">
+                  <div className="p-6 border-b border-gray-200">
+                    <div className="flex items-center gap-4">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setView("list")}
+                        className="text-gray-600 hover:text-gray-900 hover:bg-gray-100"
+                      >
+                        <ArrowLeft className="w-4 h-4 mr-2" />
+                        Back to Requests
+                      </Button>
+                      <div>
+                        <h1 className="text-2xl font-bold text-gray-900">Create New Request</h1>
+                        <p className="text-sm text-gray-600 mt-1">Submit a new request for maintenance, repairs, or services</p>
+                      </div>
+                    </div>
+                  </div>
+                  <CardContent className="flex-1 overflow-y-auto p-6">
+                    <RequestForm
+                      onSubmit={handleCreateRequest}
+                      onCancel={() => setView("list")}
+                      isLoading={createRequest.isPending}
+                      mode="create"
+                    />
+                  </CardContent>
+                </Card>
               </PageContent>
             </div>
           </PageLayout>
@@ -132,40 +135,42 @@ export default function Requests() {
       <DashboardLayout>
         <PageContainer>
           <PageLayout>
-            <div className="fixed top-16 left-0 right-0 z-30 bg-white border-b border-gray-200 transition-[left] duration-300 ease-linear peer-data-[state=expanded]:left-0 peer-data-[state=collapsed]:left-0 md:peer-data-[state=expanded]:left-[var(--sidebar-width)] md:peer-data-[state=collapsed]:left-[var(--sidebar-width-icon)]">
-              <div className="px-6 py-4">
-                <div className="flex items-center gap-4">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => {
-                      setView("list");
-                      setSelectedRequest(null);
-                    }}
-                    className="text-gray-600 hover:text-gray-900 hover:bg-gray-100"
-                  >
-                    <ArrowLeft className="w-4 h-4 mr-2" />
-                    Back to Requests
-                  </Button>
-                  <div>
-                    <h1 className="text-2xl font-bold text-gray-900">Edit Request</h1>
-                    <p className="text-sm text-gray-600 mt-1">Update request details and information</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div className="pt-[100px] h-full overflow-hidden">
+            <div className="pt-6 h-full overflow-hidden">
               <PageContent>
-                <RequestForm
-                  onSubmit={handleEditRequest}
-                  onCancel={() => {
-                    setView("list");
-                    setSelectedRequest(null);
-                  }}
-                  isLoading={updateRequest.isPending}
-                  initialData={selectedRequest}
-                  mode="edit"
-                />
+                <Card className="h-full flex flex-col">
+                  <div className="p-6 border-b border-gray-200">
+                    <div className="flex items-center gap-4">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          setView("list");
+                          setSelectedRequest(null);
+                        }}
+                        className="text-gray-600 hover:text-gray-900 hover:bg-gray-100"
+                      >
+                        <ArrowLeft className="w-4 h-4 mr-2" />
+                        Back to Requests
+                      </Button>
+                      <div>
+                        <h1 className="text-2xl font-bold text-gray-900">Edit Request</h1>
+                        <p className="text-sm text-gray-600 mt-1">Update request details and information</p>
+                      </div>
+                    </div>
+                  </div>
+                  <CardContent className="flex-1 overflow-y-auto p-6">
+                    <RequestForm
+                      onSubmit={handleEditRequest}
+                      onCancel={() => {
+                        setView("list");
+                        setSelectedRequest(null);
+                      }}
+                      isLoading={updateRequest.isPending}
+                      initialData={selectedRequest}
+                      mode="edit"
+                    />
+                  </CardContent>
+                </Card>
               </PageContent>
             </div>
           </PageLayout>
@@ -178,34 +183,40 @@ export default function Requests() {
     <DashboardLayout>
       <PageContainer>
         <PageLayout>
-          <RequestsPageHeader
-            onCreateRequest={() => setView("create")}
-            searchQuery={searchQuery}
-            onSearchChange={setSearchQuery}
-            statusFilter={statusFilter}
-            onStatusFilterChange={setStatusFilter}
-            priorityFilter={priorityFilter}
-            onPriorityFilterChange={setPriorityFilter}
-            viewMode={viewMode}
-            onViewModeChange={setViewMode}
-            userRole={userRole}
-            requests={requests}
-            onImportRequests={handleImportRequests}
-          />
-          <div className="pt-[140px] h-full overflow-hidden">
+          <div className="pt-6 h-full overflow-hidden">
             <PageContent>
-              {isLoading ? (
-                <div className="text-center py-8">Loading requests...</div>
-              ) : (
-                <RequestsList
-                  requests={filteredRequests}
-                  onEditRequest={handleEditMode}
-                  onDeleteRequest={handleDeleteRequest}
-                  onViewRequest={handleViewRequest}
-                  viewMode={viewMode}
-                  userRole={userRole}
-                />
-              )}
+              <Card className="h-full flex flex-col">
+                <div className="border-b border-gray-200">
+                  <RequestsPageHeader
+                    onCreateRequest={() => setView("create")}
+                    searchQuery={searchQuery}
+                    onSearchChange={setSearchQuery}
+                    statusFilter={statusFilter}
+                    onStatusFilterChange={setStatusFilter}
+                    priorityFilter={priorityFilter}
+                    onPriorityFilterChange={setPriorityFilter}
+                    viewMode={viewMode}
+                    onViewModeChange={setViewMode}
+                    userRole={userRole}
+                    requests={requests}
+                    onImportRequests={handleImportRequests}
+                  />
+                </div>
+                <CardContent className="flex-1 overflow-y-auto p-6">
+                  {isLoading ? (
+                    <div className="text-center py-8">Loading requests...</div>
+                  ) : (
+                    <RequestsList
+                      requests={filteredRequests}
+                      onEditRequest={handleEditMode}
+                      onDeleteRequest={handleDeleteRequest}
+                      onViewRequest={handleViewRequest}
+                      viewMode={viewMode}
+                      userRole={userRole}
+                    />
+                  )}
+                </CardContent>
+              </Card>
 
               <RequestDetailDialog
                 request={selectedRequest}
