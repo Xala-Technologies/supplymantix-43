@@ -5,7 +5,7 @@ import { useWorkOrdersPage } from "@/hooks/useWorkOrdersPage";
 import { WorkOrdersTopHeader } from "./WorkOrdersTopHeader";
 import { WorkOrdersContent } from "./WorkOrdersContent";
 import { WorkOrderCalendarView } from "./WorkOrderCalendarView";
-import { Card } from "@/components/ui/card";
+import { StandardPageLayout, StandardPageFilters, StandardPageContent } from "@/components/Layout/StandardPageLayout";
 
 export const WorkOrdersPage = () => {
   const { data: workOrders, isLoading, error } = useWorkOrdersIntegration();
@@ -34,59 +34,59 @@ export const WorkOrdersPage = () => {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-[60vh]">
-        <div className="text-center space-y-3">
-          <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto"></div>
-          <p className="text-muted-foreground text-sm">Loading work orders...</p>
-        </div>
-      </div>
+      <StandardPageLayout>
+        <StandardPageContent>
+          <div className="flex items-center justify-center h-[60vh]">
+            <div className="text-center space-y-3">
+              <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto"></div>
+              <p className="text-muted-foreground text-sm">Loading work orders...</p>
+            </div>
+          </div>
+        </StandardPageContent>
+      </StandardPageLayout>
     );
   }
 
   return (
-    <div className="h-full p-6 bg-gray-50/30 transition-all duration-300 ease-linear">
-      <Card className="h-full flex flex-col overflow-hidden shadow-lg">
-        {/* Fixed Header */}
-        <div className="flex-shrink-0 border-b bg-white">
-          <WorkOrdersTopHeader
-            workOrdersCount={filteredWorkOrders.length}
-            totalCount={transformedWorkOrders.length}
-            filters={filters}
-            onFiltersChange={setFilters}
-            onCreateWorkOrder={handleCreateWorkOrder}
-            viewMode={viewMode}
-            onViewModeChange={setViewMode}
-          />
-        </div>
+    <StandardPageLayout>
+      <StandardPageFilters>
+        <WorkOrdersTopHeader
+          workOrdersCount={filteredWorkOrders.length}
+          totalCount={transformedWorkOrders.length}
+          filters={filters}
+          onFiltersChange={setFilters}
+          onCreateWorkOrder={handleCreateWorkOrder}
+          viewMode={viewMode}
+          onViewModeChange={setViewMode}
+        />
+      </StandardPageFilters>
 
-        {/* Scrollable Content - Responsive to sidebar state */}
-        <div className="flex-1 overflow-hidden transition-all duration-300 ease-linear">
-          {viewMode === 'calendar' ? (
-            <div className="h-full p-6">
-              <div className="h-full bg-white rounded-lg shadow-sm border overflow-hidden">
-                <WorkOrderCalendarView
-                  workOrders={filteredWorkOrders}
-                  onSelectWorkOrder={handleSelectWorkOrder}
-                  selectedWorkOrderId={selectedWorkOrder}
-                />
-              </div>
+      <StandardPageContent padding={false}>
+        {viewMode === 'calendar' ? (
+          <div className="h-full p-6">
+            <div className="h-full bg-white rounded-lg shadow-sm border overflow-hidden">
+              <WorkOrderCalendarView
+                workOrders={filteredWorkOrders}
+                onSelectWorkOrder={handleSelectWorkOrder}
+                selectedWorkOrderId={selectedWorkOrder}
+              />
             </div>
-          ) : (
-            <WorkOrdersContent
-              filteredWorkOrders={filteredWorkOrders}
-              selectedWorkOrder={selectedWorkOrder}
-              viewMode={pageViewMode}
-              selectedWorkOrderData={selectedWorkOrderData}
-              editingWorkOrder={editingWorkOrder}
-              onSelectWorkOrder={handleSelectWorkOrder}
-              onEditWorkOrder={handleEditWorkOrder}
-              onFormSubmit={handleFormSubmit}
-              onFormCancel={handleFormCancel}
-              onSetViewModeToList={setViewModeToList}
-            />
-          )}
-        </div>
-      </Card>
-    </div>
+          </div>
+        ) : (
+          <WorkOrdersContent
+            filteredWorkOrders={filteredWorkOrders}
+            selectedWorkOrder={selectedWorkOrder}
+            viewMode={pageViewMode}
+            selectedWorkOrderData={selectedWorkOrderData}
+            editingWorkOrder={editingWorkOrder}
+            onSelectWorkOrder={handleSelectWorkOrder}
+            onEditWorkOrder={handleEditWorkOrder}
+            onFormSubmit={handleFormSubmit}
+            onFormCancel={handleFormCancel}
+            onSetViewModeToList={setViewModeToList}
+          />
+        )}
+      </StandardPageContent>
+    </StandardPageLayout>
   );
 };

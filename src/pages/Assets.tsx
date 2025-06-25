@@ -1,17 +1,14 @@
-
 import { DashboardLayout } from "@/components/Layout/DashboardLayout";
-import { PageLayout, PageLayoutHeader, PageFilters, PageLayoutContent } from "@/components/Layout/PageLayout";
-import { PageContainer } from "@/components/Layout/PageContainer";
+import { StandardPageLayout, StandardPageHeader, StandardPageFilters, StandardPageContent } from "@/components/Layout/StandardPageLayout";
 import { AssetsHeader } from "@/components/assets/AssetsHeader";
 import { AssetsGrid } from "@/components/assets/AssetsGrid";
 import { AssetDetailCard } from "@/components/assets/AssetDetailCard";
 import { AssetForm } from "@/components/assets/AssetForm";
 import { useState } from "react";
-import { ChevronLeft, Plus, ArrowLeft } from "lucide-react";
+import { ChevronLeft, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAssets, useCreateAsset, useUpdateAsset, useDeleteAsset, type Asset as DatabaseAsset } from "@/hooks/useAssets";
 import { toast } from "sonner";
-import { useNavigate } from "react-router-dom";
 
 // UI Asset type for AssetsGrid component
 interface UIAsset {
@@ -51,7 +48,6 @@ interface DetailAsset {
 type ViewMode = 'grid' | 'detail' | 'create' | 'edit';
 
 export default function Assets() {
-  const navigate = useNavigate();
   const [selectedAsset, setSelectedAsset] = useState<DatabaseAsset | null>(null);
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
   const [filters, setFilters] = useState({
@@ -68,7 +64,7 @@ export default function Assets() {
   const updateAsset = useUpdateAsset();
   const deleteAsset = useDeleteAsset();
 
-  console.log('Assets data:', assets); // Debug log
+  console.log('Assets data:', assets);
 
   // Convert database assets to UI assets
   const convertToUIAssets = (dbAssets: DatabaseAsset[]): UIAsset[] => {
@@ -80,9 +76,9 @@ export default function Assets() {
       location: asset.location || 'Unassigned',
       category: asset.category || 'Equipment',
       criticality: asset.criticality || 'Medium',
-      nextMaintenance: '2024-07-01', // Placeholder - would come from maintenance schedules
-      workOrders: 0, // Placeholder - would come from work orders
-      totalDowntime: '0h' // Placeholder - would come from downtime tracking
+      nextMaintenance: '2024-07-01',
+      workOrders: 0,
+      totalDowntime: '0h'
     }));
   };
 
@@ -96,20 +92,20 @@ export default function Assets() {
       location: dbAsset.location || 'Unassigned',
       category: dbAsset.category || 'Equipment',
       criticality: dbAsset.criticality || 'Medium',
-      manufacturer: 'Unknown', // Placeholder - would be added to database schema
-      model: 'Unknown', // Placeholder - would be added to database schema
-      serialNumber: dbAsset.asset_tag || 'N/A', // Using asset_tag as placeholder
+      manufacturer: 'Unknown',
+      model: 'Unknown',
+      serialNumber: dbAsset.asset_tag || 'N/A',
       installDate: dbAsset.created_at?.split('T')[0] || '2024-01-01',
-      lastMaintenance: '2024-06-01', // Placeholder - would come from maintenance records
-      nextMaintenance: '2024-07-01', // Placeholder - would come from maintenance schedules
-      workOrders: 0, // Placeholder - would come from work orders
-      totalDowntime: '0h', // Placeholder - would come from downtime tracking
+      lastMaintenance: '2024-06-01',
+      nextMaintenance: '2024-07-01',
+      workOrders: 0,
+      totalDowntime: '0h',
       specifications: {
         'Power': 'N/A',
         'Weight': 'N/A',
         'Dimensions': 'N/A'
       },
-      documentation: [] // Now empty - will be loaded from database
+      documentation: []
     };
   };
 
@@ -197,15 +193,6 @@ export default function Assets() {
     }
   };
 
-  const handleBackToGrid = () => {
-    setViewMode('grid');
-    setSelectedAsset(null);
-  };
-
-  const handleBackToDashboard = () => {
-    navigate('/dashboard');
-  };
-
   const handleFiltersChange = (newFilters: typeof filters) => {
     setFilters(newFilters);
   };
@@ -213,30 +200,28 @@ export default function Assets() {
   if (error) {
     return (
       <DashboardLayout>
-        <PageContainer>
-        <PageLayout>
-          <div className="h-full flex items-center justify-center">
-            <div className="text-center">
-              <p className="text-red-600 mb-4">Error loading assets: {error.message}</p>
-              <Button onClick={() => refetch()}>
-                Retry
-              </Button>
+        <StandardPageLayout>
+          <StandardPageContent>
+            <div className="h-full flex items-center justify-center">
+              <div className="text-center">
+                <p className="text-red-600 mb-4">Error loading assets: {error.message}</p>
+                <Button onClick={() => refetch()}>
+                  Retry
+                </Button>
+              </div>
             </div>
-          </div>
-        </PageLayout>
-        </PageContainer>
+          </StandardPageContent>
+        </StandardPageLayout>
       </DashboardLayout>
     );
   }
 
   return (
     <DashboardLayout>
-      <PageContainer>
-      <PageLayout>
+      <StandardPageLayout>
         {(viewMode === 'create' || viewMode === 'edit') ? (
-          // Form View
           <>
-            <PageLayoutHeader 
+            <StandardPageHeader 
               title={viewMode === 'create' ? 'Create Asset' : 'Edit Asset'}
               leftContent={
                 <Button 
@@ -251,28 +236,25 @@ export default function Assets() {
               }
             />
             
-            <PageLayoutContent>
-              <div className="p-6 bg-white">
-                <AssetForm
-                  initialData={selectedAsset}
-                  onSubmit={handleFormSubmit}
-                  onCancel={handleFormCancel}
-                  isLoading={createAsset.isPending || updateAsset.isPending}
-                  mode={viewMode === 'create' ? 'create' : 'edit'}
-                />
-              </div>
-            </PageLayoutContent>
+            <StandardPageContent>
+              <AssetForm
+                initialData={selectedAsset}
+                onSubmit={handleFormSubmit}
+                onCancel={handleFormCancel}
+                isLoading={createAsset.isPending || updateAsset.isPending}
+                mode={viewMode === 'create' ? 'create' : 'edit'}
+              />
+            </StandardPageContent>
           </>
         ) : viewMode === 'detail' ? (
-          // Detail View
           <>
-            <PageLayoutHeader 
+            <StandardPageHeader 
               title={selectedAsset?.name || 'Asset Details'}
               leftContent={
                 <Button 
                   variant="ghost" 
                   size="sm"
-                  onClick={handleBackToGrid}
+                  onClick={() => setViewMode('grid')}
                   className="text-gray-600 hover:text-gray-900 hover:bg-gray-100"
                 >
                   <ChevronLeft className="w-4 h-4 mr-2" />
@@ -281,25 +263,22 @@ export default function Assets() {
               }
             />
             
-            <PageLayoutContent>
-              <div className="p-6 bg-white h-full overflow-y-auto">
-                {selectedAsset && (
-                  <AssetDetailCard 
-                    asset={convertToDetailAsset(selectedAsset)}
-                    onEdit={() => setViewMode('edit')}
-                    onDelete={() => {
-                      const uiAsset = convertToUIAssets([selectedAsset])[0];
-                      handleDeleteAsset(uiAsset);
-                    }}
-                  />
-                )}
-              </div>
-            </PageLayoutContent>
+            <StandardPageContent>
+              {selectedAsset && (
+                <AssetDetailCard 
+                  asset={convertToDetailAsset(selectedAsset)}
+                  onEdit={() => setViewMode('edit')}
+                  onDelete={() => {
+                    const uiAsset = convertToUIAssets([selectedAsset])[0];
+                    handleDeleteAsset(uiAsset);
+                  }}
+                />
+              )}
+            </StandardPageContent>
           </>
         ) : (
-          // Grid View - Clean without back button
           <>
-            <PageLayoutHeader 
+            <StandardPageHeader 
               title="Assets"
               description="Manage and track your organization's physical assets and equipment"
             >
@@ -307,17 +286,17 @@ export default function Assets() {
                 <Plus className="h-4 w-4 mr-2" />
                 New Asset
               </Button>
-            </PageLayoutHeader>
+            </StandardPageHeader>
 
-            <PageFilters>
+            <StandardPageFilters>
               <AssetsHeader 
                 onFiltersChange={handleFiltersChange}
                 onCreateAsset={handleCreateAsset}
                 assets={assets}
               />
-            </PageFilters>
+            </StandardPageFilters>
             
-            <PageLayoutContent>
+            <StandardPageContent>
               <AssetsGrid
                 assets={uiAssets}
                 selectedAssetId={selectedAsset?.id || null}
@@ -327,11 +306,10 @@ export default function Assets() {
                 onDeleteAsset={handleDeleteAsset}
                 isLoading={isLoading}
               />
-            </PageLayoutContent>
+            </StandardPageContent>
           </>
         )}
-      </PageLayout>
-      </PageContainer>
+      </StandardPageLayout>
     </DashboardLayout>
   );
 }

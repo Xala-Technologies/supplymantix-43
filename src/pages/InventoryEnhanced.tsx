@@ -1,14 +1,14 @@
 
 import { DashboardLayout } from "@/components/Layout/DashboardLayout";
-import { PageLayout, PageLayoutHeader, PageLayoutContent } from "@/components/Layout/PageLayout";
+import { StandardPageLayout, StandardPageHeader, StandardPageContent } from "@/components/Layout/StandardPageLayout";
 import { InventoryDashboard } from "@/components/inventory/InventoryDashboard";
 import { Package } from "lucide-react";
 
 export default function InventoryEnhanced() {
   return (
     <DashboardLayout>
-      <PageLayout>
-        <PageLayoutHeader
+      <StandardPageLayout>
+        <StandardPageHeader
           title="Inventory Management"
           description="Manage your inventory items, track stock levels, and monitor usage"
           leftContent={
@@ -18,10 +18,10 @@ export default function InventoryEnhanced() {
           }
         />
         
-        <PageLayoutContent className="p-6">
+        <StandardPageContent>
           <InventoryDashboard />
-        </PageLayoutContent>
-      </PageLayout>
+        </StandardPageContent>
+      </StandardPageLayout>
     </DashboardLayout>
   );
 }

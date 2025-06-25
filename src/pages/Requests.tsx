@@ -1,9 +1,7 @@
 
 import { useState } from "react";
 import { DashboardLayout } from "@/components/Layout/DashboardLayout";
-import { PageContainer } from "@/components/Layout/PageContainer";
-import { PageLayout } from "@/components/Layout/PageLayout";
-import { PageContent } from "@/components/Layout/PageContent";
+import { StandardPageLayout, StandardPageHeader, StandardPageFilters, StandardPageContent } from "@/components/Layout/StandardPageLayout";
 import { RequestsPageHeader } from "@/components/requests/RequestsPageHeader";
 import { RequestsList } from "@/components/requests/RequestsList";
 import { RequestForm } from "@/components/requests/RequestForm";
@@ -12,7 +10,6 @@ import { useRequests, useCreateRequest, useUpdateRequest, useDeleteRequest } fro
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
 import type { Request, CreateRequestRequest } from "@/types/request";
 
 export default function Requests() {
@@ -24,8 +21,7 @@ export default function Requests() {
   const [priorityFilter, setPriorityFilter] = useState("all");
   const [viewMode, setViewMode] = useState<'grid' | 'table'>('grid');
 
-  // Simulate user role - in real app this would come from auth context
-  const userRole = 'admin'; // or 'user'
+  const userRole = 'admin';
 
   const { data: requests = [], isLoading } = useRequests();
   const createRequest = useCreateRequest();
@@ -82,8 +78,6 @@ export default function Requests() {
   };
 
   const handleImportRequests = (importedRequests: any[]) => {
-    // Here you would typically process and create the imported requests
-    // For now, just show a success message
     toast.success(`Ready to process ${importedRequests.length} imported requests`);
     console.log("Imported requests:", importedRequests);
   };
@@ -91,41 +85,32 @@ export default function Requests() {
   if (view === "create") {
     return (
       <DashboardLayout>
-        <PageContainer>
-          <PageLayout>
-            <div className="pt-6 h-full overflow-hidden">
-              <PageContent>
-                <Card className="h-full flex flex-col">
-                  <div className="p-6 border-b border-gray-200">
-                    <div className="flex items-center gap-4">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => setView("list")}
-                        className="text-gray-600 hover:text-gray-900 hover:bg-gray-100"
-                      >
-                        <ArrowLeft className="w-4 h-4 mr-2" />
-                        Back to Requests
-                      </Button>
-                      <div>
-                        <h1 className="text-2xl font-bold text-gray-900">Create New Request</h1>
-                        <p className="text-sm text-gray-600 mt-1">Submit a new request for maintenance, repairs, or services</p>
-                      </div>
-                    </div>
-                  </div>
-                  <CardContent className="flex-1 overflow-y-auto p-6">
-                    <RequestForm
-                      onSubmit={handleCreateRequest}
-                      onCancel={() => setView("list")}
-                      isLoading={createRequest.isPending}
-                      mode="create"
-                    />
-                  </CardContent>
-                </Card>
-              </PageContent>
-            </div>
-          </PageLayout>
-        </PageContainer>
+        <StandardPageLayout>
+          <StandardPageHeader
+            title="Create New Request"
+            description="Submit a new request for maintenance, repairs, or services"
+            leftContent={
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setView("list")}
+                className="text-gray-600 hover:text-gray-900 hover:bg-gray-100"
+              >
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Back to Requests
+              </Button>
+            }
+          />
+          
+          <StandardPageContent>
+            <RequestForm
+              onSubmit={handleCreateRequest}
+              onCancel={() => setView("list")}
+              isLoading={createRequest.isPending}
+              mode="create"
+            />
+          </StandardPageContent>
+        </StandardPageLayout>
       </DashboardLayout>
     );
   }
@@ -133,100 +118,84 @@ export default function Requests() {
   if (view === "edit" && selectedRequest) {
     return (
       <DashboardLayout>
-        <PageContainer>
-          <PageLayout>
-            <div className="pt-6 h-full overflow-hidden">
-              <PageContent>
-                <Card className="h-full flex flex-col">
-                  <div className="p-6 border-b border-gray-200">
-                    <div className="flex items-center gap-4">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => {
-                          setView("list");
-                          setSelectedRequest(null);
-                        }}
-                        className="text-gray-600 hover:text-gray-900 hover:bg-gray-100"
-                      >
-                        <ArrowLeft className="w-4 h-4 mr-2" />
-                        Back to Requests
-                      </Button>
-                      <div>
-                        <h1 className="text-2xl font-bold text-gray-900">Edit Request</h1>
-                        <p className="text-sm text-gray-600 mt-1">Update request details and information</p>
-                      </div>
-                    </div>
-                  </div>
-                  <CardContent className="flex-1 overflow-y-auto p-6">
-                    <RequestForm
-                      onSubmit={handleEditRequest}
-                      onCancel={() => {
-                        setView("list");
-                        setSelectedRequest(null);
-                      }}
-                      isLoading={updateRequest.isPending}
-                      initialData={selectedRequest}
-                      mode="edit"
-                    />
-                  </CardContent>
-                </Card>
-              </PageContent>
-            </div>
-          </PageLayout>
-        </PageContainer>
+        <StandardPageLayout>
+          <StandardPageHeader
+            title="Edit Request"
+            description="Update request details and information"
+            leftContent={
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  setView("list");
+                  setSelectedRequest(null);
+                }}
+                className="text-gray-600 hover:text-gray-900 hover:bg-gray-100"
+              >
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Back to Requests
+              </Button>
+            }
+          />
+          
+          <StandardPageContent>
+            <RequestForm
+              onSubmit={handleEditRequest}
+              onCancel={() => {
+                setView("list");
+                setSelectedRequest(null);
+              }}
+              isLoading={updateRequest.isPending}
+              initialData={selectedRequest}
+              mode="edit"
+            />
+          </StandardPageContent>
+        </StandardPageLayout>
       </DashboardLayout>
     );
   }
 
   return (
     <DashboardLayout>
-      <PageContainer>
-        <PageLayout>
-          <div className="pt-6 h-full overflow-hidden">
-            <PageContent>
-              <Card className="h-full flex flex-col">
-                <div className="border-b border-gray-200">
-                  <RequestsPageHeader
-                    onCreateRequest={() => setView("create")}
-                    searchQuery={searchQuery}
-                    onSearchChange={setSearchQuery}
-                    statusFilter={statusFilter}
-                    onStatusFilterChange={setStatusFilter}
-                    priorityFilter={priorityFilter}
-                    onPriorityFilterChange={setPriorityFilter}
-                    viewMode={viewMode}
-                    onViewModeChange={setViewMode}
-                    userRole={userRole}
-                    requests={requests}
-                    onImportRequests={handleImportRequests}
-                  />
-                </div>
-                <CardContent className="flex-1 overflow-y-auto p-6">
-                  {isLoading ? (
-                    <div className="text-center py-8">Loading requests...</div>
-                  ) : (
-                    <RequestsList
-                      requests={filteredRequests}
-                      onEditRequest={handleEditMode}
-                      onDeleteRequest={handleDeleteRequest}
-                      onViewRequest={handleViewRequest}
-                      viewMode={viewMode}
-                      userRole={userRole}
-                    />
-                  )}
-                </CardContent>
-              </Card>
+      <StandardPageLayout>
+        <StandardPageFilters>
+          <RequestsPageHeader
+            onCreateRequest={() => setView("create")}
+            searchQuery={searchQuery}
+            onSearchChange={setSearchQuery}
+            statusFilter={statusFilter}
+            onStatusFilterChange={setStatusFilter}
+            priorityFilter={priorityFilter}
+            onPriorityFilterChange={setPriorityFilter}
+            viewMode={viewMode}
+            onViewModeChange={setViewMode}
+            userRole={userRole}
+            requests={requests}
+            onImportRequests={handleImportRequests}
+          />
+        </StandardPageFilters>
+        
+        <StandardPageContent>
+          {isLoading ? (
+            <div className="text-center py-8">Loading requests...</div>
+          ) : (
+            <RequestsList
+              requests={filteredRequests}
+              onEditRequest={handleEditMode}
+              onDeleteRequest={handleDeleteRequest}
+              onViewRequest={handleViewRequest}
+              viewMode={viewMode}
+              userRole={userRole}
+            />
+          )}
+        </StandardPageContent>
 
-              <RequestDetailDialog
-                request={selectedRequest}
-                open={detailDialogOpen}
-                onOpenChange={setDetailDialogOpen}
-              />
-            </PageContent>
-          </div>
-        </PageLayout>
-      </PageContainer>
+        <RequestDetailDialog
+          request={selectedRequest}
+          open={detailDialogOpen}
+          onOpenChange={setDetailDialogOpen}
+        />
+      </StandardPageLayout>
     </DashboardLayout>
   );
 }
