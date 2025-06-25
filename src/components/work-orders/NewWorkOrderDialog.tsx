@@ -28,6 +28,8 @@ import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { useCreateWorkOrder, useUpdateWorkOrder } from "@/hooks/useWorkOrders";
 import { useLocations } from "@/hooks/useLocations";
+import { useAssets } from "@/hooks/useAssets";
+import { useUsers } from "@/hooks/useUsers";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Label } from "@/components/ui/label";
@@ -72,6 +74,8 @@ export const NewWorkOrderDialog = ({
   const createWorkOrder = useCreateWorkOrder();
   const updateWorkOrder = useUpdateWorkOrder();
   const { data: locations } = useLocations();
+  const { data: assets } = useAssets();
+  const { data: users } = useUsers();
   
   const isEditMode = !!workOrder;
   
@@ -88,6 +92,14 @@ export const NewWorkOrderDialog = ({
     if (!location) return "";
     if (typeof location === "string") return location;
     if (typeof location === "object" && location.name) return location.name;
+    return "";
+  };
+
+  // Helper function to safely extract asset name
+  const getAssetName = (asset: WorkOrder['asset']): string => {
+    if (!asset) return "";
+    if (typeof asset === "string") return asset;
+    if (typeof asset === "object" && asset.name) return asset.name;
     return "";
   };
   
@@ -119,7 +131,7 @@ export const NewWorkOrderDialog = ({
           description: workOrder.description || "",
           priority: workOrder.priority || "medium",
           assignedTo: getAssignee(workOrder.assignedTo),
-          asset: typeof workOrder.asset === 'object' ? workOrder.asset?.name || "" : workOrder.asset || "",
+          asset: getAssetName(workOrder.asset),
           location: getLocationName(workOrder.location),
           category: workOrder.category || "maintenance",
           tags: tagsString,
@@ -163,7 +175,21 @@ export const NewWorkOrderDialog = ({
         return;
       }
 
-      const selectedLocation = locations?.find(loc => loc.name === data.location);
+      // Find actual IDs for location and asset
+      const selectedLocation = locations?.find(loc => 
+        loc.name === data.location || loc.id === data.location
+      );
+      
+      const selectedAsset = assets?.find(asset => 
+        asset.name === data.asset || asset.id === data.asset
+      );
+
+      // Find actual user ID for assignee
+      const selectedUser = users?.find(user => 
+        user.email === data.assignedTo || 
+        `${user.first_name} ${user.last_name}`.trim() === data.assignedTo ||
+        user.id === data.assignedTo
+      );
       
       // Convert tags string to array
       const tagsArray = data.tags 
@@ -174,8 +200,8 @@ export const NewWorkOrderDialog = ({
         title: data.title,
         description: data.description || "",
         due_date: data.dueDate?.toISOString(),
-        assigned_to: data.assignedTo || null,
-        asset_id: data.asset || null,
+        assigned_to: selectedUser?.id || null,
+        asset_id: selectedAsset?.id || null,
         location_id: selectedLocation?.id || null,
         tenant_id: userData.tenant_id,
         status: "open" as const,
@@ -349,11 +375,13 @@ export const NewWorkOrderDialog = ({
                   <SelectValue placeholder="Select assignee" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="Zach Brown">Zach Brown</SelectItem>
-                  <SelectItem value="Maintenance Team 1">Maintenance Team 1</SelectItem>
-                  <SelectItem value="Maintenance Team 2">Maintenance Team 2</SelectItem>
-                  <SelectItem value="Safety Team">Safety Team</SelectItem>
-                  <SelectItem value="Operations">Operations</SelectItem>
+                  {users?.map((user) => (
+                    <SelectItem key={user.id} value={user.email}>
+                      {user.first_name && user.last_name 
+                        ? `${user.first_name} ${user.last_name}` 
+                        : user.email}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
@@ -391,11 +419,11 @@ export const NewWorkOrderDialog = ({
                   <SelectValue placeholder="Select asset" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="Wrapper - Orion Model A">Wrapper - Orion Model A</SelectItem>
-                  <SelectItem value="Conveyor - 3200 Series Modular">Conveyor - 3200 Series Modular</SelectItem>
-                  <SelectItem value="35-005 - Air Compressor - VSS Single Screw">35-005 - Air Compressor - VSS Single Screw</SelectItem>
-                  <SelectItem value="ABC Fire Extinguisher (5 lb)">ABC Fire Extinguisher (5 lb)</SelectItem>
-                  <SelectItem value="Facility">Facility</SelectItem>
+                  {assets?.map((asset) => (
+                    <SelectItem key={asset.id} value={asset.name}>
+                      {asset.name}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
