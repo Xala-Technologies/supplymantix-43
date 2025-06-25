@@ -54,8 +54,8 @@ export const WorkOrdersPage = () => {
         onViewModeChange={setViewMode}
       />
 
-      {/* Content area with top margin to account for fixed header */}
-      <div className="flex-1 pt-[160px] overflow-hidden">
+      {/* Content area with proper spacing for the fixed header */}
+      <div className="flex-1 pt-[140px] overflow-hidden">
         {viewMode === 'calendar' ? (
           <div className="h-full p-6">
             <div className="h-full bg-white rounded-lg shadow-sm border overflow-hidden">

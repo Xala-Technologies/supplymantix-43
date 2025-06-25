@@ -13,7 +13,7 @@ export const DashboardLayout = ({ children }: DashboardLayoutProps) => {
     <SidebarProvider>
       <div className="min-h-screen flex w-full bg-gray-50/30">
         <AppSidebar />
-        <div className="flex-1 flex flex-col overflow-hidden transition-all duration-300 ease-linear">
+        <div className="flex-1 flex flex-col overflow-hidden">
           <TopBar />
           <main className="flex-1 overflow-hidden pt-16">
             {children}
