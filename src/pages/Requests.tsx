@@ -2,9 +2,9 @@
 import { useState } from "react";
 import { DashboardLayout } from "@/components/Layout/DashboardLayout";
 import { PageContainer } from "@/components/Layout/PageContainer";
-import { PageLayout, PageLayoutHeader } from "@/components/Layout/PageLayout";
+import { PageLayout } from "@/components/Layout/PageLayout";
 import { PageContent } from "@/components/Layout/PageContent";
-import { RequestsHeader } from "@/components/requests/RequestsHeader";
+import { RequestsPageHeader } from "@/components/requests/RequestsPageHeader";
 import { RequestsList } from "@/components/requests/RequestsList";
 import { RequestForm } from "@/components/requests/RequestForm";
 import { RequestDetailDialog } from "@/components/requests/RequestDetailDialog";
@@ -92,10 +92,8 @@ export default function Requests() {
       <DashboardLayout>
         <PageContainer>
           <PageLayout>
-            <PageLayoutHeader
-              title="Create New Request"
-              description="Submit a new request for maintenance, repairs, or services"
-              leftContent={
+            <div className="bg-white border-b border-gray-200 px-6 py-4">
+              <div className="flex items-center gap-4">
                 <Button
                   variant="ghost"
                   size="sm"
@@ -105,8 +103,12 @@ export default function Requests() {
                   <ArrowLeft className="w-4 h-4 mr-2" />
                   Back to Requests
                 </Button>
-              }
-            />
+                <div>
+                  <h1 className="text-2xl font-bold text-gray-900">Create New Request</h1>
+                  <p className="text-sm text-gray-600 mt-1">Submit a new request for maintenance, repairs, or services</p>
+                </div>
+              </div>
+            </div>
             <PageContent>
               <RequestForm
                 onSubmit={handleCreateRequest}
@@ -126,10 +128,8 @@ export default function Requests() {
       <DashboardLayout>
         <PageContainer>
           <PageLayout>
-            <PageLayoutHeader
-              title="Edit Request"
-              description="Update request details and information"
-              leftContent={
+            <div className="bg-white border-b border-gray-200 px-6 py-4">
+              <div className="flex items-center gap-4">
                 <Button
                   variant="ghost"
                   size="sm"
@@ -142,8 +142,12 @@ export default function Requests() {
                   <ArrowLeft className="w-4 h-4 mr-2" />
                   Back to Requests
                 </Button>
-              }
-            />
+                <div>
+                  <h1 className="text-2xl font-bold text-gray-900">Edit Request</h1>
+                  <p className="text-sm text-gray-600 mt-1">Update request details and information</p>
+                </div>
+              </div>
+            </div>
             <PageContent>
               <RequestForm
                 onSubmit={handleEditRequest}
@@ -166,46 +170,39 @@ export default function Requests() {
     <DashboardLayout>
       <PageContainer>
         <PageLayout>
-          <PageLayoutHeader
-            title="Requests"
-            description="Manage and track maintenance requests and service tickets"
+          <RequestsPageHeader
+            onCreateRequest={() => setView("create")}
+            searchQuery={searchQuery}
+            onSearchChange={setSearchQuery}
+            statusFilter={statusFilter}
+            onStatusFilterChange={setStatusFilter}
+            priorityFilter={priorityFilter}
+            onPriorityFilterChange={setPriorityFilter}
+            viewMode={viewMode}
+            onViewModeChange={setViewMode}
+            userRole={userRole}
+            requests={requests}
+            onImportRequests={handleImportRequests}
           />
           <PageContent>
-            <div className="space-y-6">
-              <RequestsHeader
-                onCreateRequest={() => setView("create")}
-                searchQuery={searchQuery}
-                onSearchChange={setSearchQuery}
-                statusFilter={statusFilter}
-                onStatusFilterChange={setStatusFilter}
-                priorityFilter={priorityFilter}
-                onPriorityFilterChange={setPriorityFilter}
+            {isLoading ? (
+              <div className="text-center py-8">Loading requests...</div>
+            ) : (
+              <RequestsList
+                requests={filteredRequests}
+                onEditRequest={handleEditMode}
+                onDeleteRequest={handleDeleteRequest}
+                onViewRequest={handleViewRequest}
                 viewMode={viewMode}
-                onViewModeChange={setViewMode}
                 userRole={userRole}
-                requests={requests}
-                onImportRequests={handleImportRequests}
               />
+            )}
 
-              {isLoading ? (
-                <div className="text-center py-8">Loading requests...</div>
-              ) : (
-                <RequestsList
-                  requests={filteredRequests}
-                  onEditRequest={handleEditMode}
-                  onDeleteRequest={handleDeleteRequest}
-                  onViewRequest={handleViewRequest}
-                  viewMode={viewMode}
-                  userRole={userRole}
-                />
-              )}
-
-              <RequestDetailDialog
-                request={selectedRequest}
-                open={detailDialogOpen}
-                onOpenChange={setDetailDialogOpen}
-              />
-            </div>
+            <RequestDetailDialog
+              request={selectedRequest}
+              open={detailDialogOpen}
+              onOpenChange={setDetailDialogOpen}
+            />
           </PageContent>
         </PageLayout>
       </PageContainer>
