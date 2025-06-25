@@ -8,6 +8,10 @@ export { RequestActions } from './RequestActions';
 export { RequestForm } from './RequestForm';
 export { RequestDetailDialog } from './RequestDetailDialog';
 export { RequestsList } from './RequestsList';
+export { RequestsGrid } from './RequestsGrid';
+export { RequestsTable } from './RequestsTable';
+export { RequestsEmptyState } from './RequestsEmptyState';
+export { RequestsListContainer } from './RequestsListContainer';
 
 // Default exports
 export { default as RequestStatusBadgeDefault } from './RequestStatusBadge';
