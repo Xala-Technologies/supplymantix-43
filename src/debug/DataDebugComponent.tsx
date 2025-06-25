@@ -17,6 +17,7 @@ export const DataDebugComponent = () => {
     user: user?.email,
     authLoading,
     workOrders: workOrders?.length || 0,
+    workOrdersRaw: workOrders,
     workOrdersLoading,
     workOrdersError,
     requests: requests?.length || 0,
@@ -34,6 +35,7 @@ export const DataDebugComponent = () => {
         <div>User: {user?.email || 'Not logged in'}</div>
         <div>Auth Loading: {authLoading ? 'Yes' : 'No'}</div>
         <div>Work Orders: {workOrdersLoading ? 'Loading...' : `${workOrders?.length || 0} items`}</div>
+        <div>WO Raw Data: {workOrders ? JSON.stringify(workOrders.slice(0, 1)) : 'null'}</div>
         <div>Requests: {requestsLoading ? 'Loading...' : `${requests?.length || 0} items`}</div>
         <div>Assets: {assetsLoading ? 'Loading...' : `${assets?.length || 0} items`}</div>
         <div>Inventory: {inventoryLoading ? 'Loading...' : `${inventory?.length || 0} items`}</div>
