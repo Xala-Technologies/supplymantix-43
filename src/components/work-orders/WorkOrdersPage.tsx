@@ -5,6 +5,7 @@ import { useWorkOrdersPage } from "@/hooks/useWorkOrdersPage";
 import { WorkOrdersTopHeader } from "./WorkOrdersTopHeader";
 import { WorkOrdersContent } from "./WorkOrdersContent";
 import { WorkOrderCalendarView } from "./WorkOrderCalendarView";
+import { Card } from "@/components/ui/card";
 
 export const WorkOrdersPage = () => {
   const { data: workOrders, isLoading, error } = useWorkOrdersIntegration();
@@ -43,44 +44,49 @@ export const WorkOrdersPage = () => {
   }
 
   return (
-    <div className="h-full flex flex-col w-full bg-gray-50/30">
-      <WorkOrdersTopHeader
-        workOrdersCount={filteredWorkOrders.length}
-        totalCount={transformedWorkOrders.length}
-        filters={filters}
-        onFiltersChange={setFilters}
-        onCreateWorkOrder={handleCreateWorkOrder}
-        viewMode={viewMode}
-        onViewModeChange={setViewMode}
-      />
-
-      {/* Content area with top margin to account for fixed header */}
-      <div className="flex-1 pt-[160px] overflow-hidden">
-        {viewMode === 'calendar' ? (
-          <div className="h-full p-6">
-            <div className="h-full bg-white rounded-lg shadow-sm border overflow-hidden">
-              <WorkOrderCalendarView
-                workOrders={filteredWorkOrders}
-                onSelectWorkOrder={handleSelectWorkOrder}
-                selectedWorkOrderId={selectedWorkOrder}
-              />
-            </div>
-          </div>
-        ) : (
-          <WorkOrdersContent
-            filteredWorkOrders={filteredWorkOrders}
-            selectedWorkOrder={selectedWorkOrder}
-            viewMode={pageViewMode}
-            selectedWorkOrderData={selectedWorkOrderData}
-            editingWorkOrder={editingWorkOrder}
-            onSelectWorkOrder={handleSelectWorkOrder}
-            onEditWorkOrder={handleEditWorkOrder}
-            onFormSubmit={handleFormSubmit}
-            onFormCancel={handleFormCancel}
-            onSetViewModeToList={setViewModeToList}
+    <div className="h-full p-6 bg-gray-50/30">
+      <Card className="h-full flex flex-col overflow-hidden">
+        {/* Fixed Header */}
+        <div className="flex-shrink-0 border-b bg-white">
+          <WorkOrdersTopHeader
+            workOrdersCount={filteredWorkOrders.length}
+            totalCount={transformedWorkOrders.length}
+            filters={filters}
+            onFiltersChange={setFilters}
+            onCreateWorkOrder={handleCreateWorkOrder}
+            viewMode={viewMode}
+            onViewModeChange={setViewMode}
           />
-        )}
-      </div>
+        </div>
+
+        {/* Scrollable Content */}
+        <div className="flex-1 overflow-hidden">
+          {viewMode === 'calendar' ? (
+            <div className="h-full p-6">
+              <div className="h-full bg-white rounded-lg shadow-sm border overflow-hidden">
+                <WorkOrderCalendarView
+                  workOrders={filteredWorkOrders}
+                  onSelectWorkOrder={handleSelectWorkOrder}
+                  selectedWorkOrderId={selectedWorkOrder}
+                />
+              </div>
+            </div>
+          ) : (
+            <WorkOrdersContent
+              filteredWorkOrders={filteredWorkOrders}
+              selectedWorkOrder={selectedWorkOrder}
+              viewMode={pageViewMode}
+              selectedWorkOrderData={selectedWorkOrderData}
+              editingWorkOrder={editingWorkOrder}
+              onSelectWorkOrder={handleSelectWorkOrder}
+              onEditWorkOrder={handleEditWorkOrder}
+              onFormSubmit={handleFormSubmit}
+              onFormCancel={handleFormCancel}
+              onSetViewModeToList={setViewModeToList}
+            />
+          )}
+        </div>
+      </Card>
     </div>
   );
 };
