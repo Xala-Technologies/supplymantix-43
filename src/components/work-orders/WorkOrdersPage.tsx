@@ -1,9 +1,9 @@
-
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { WorkOrdersTopHeader } from "./WorkOrdersTopHeader";
 import { WorkOrdersDesktopLayout } from "./WorkOrdersDesktopLayout";
 import { WorkOrdersMobileLayout } from "./WorkOrdersMobileLayout";
+import { WorkOrderCalendarView } from "./WorkOrderCalendarView";
 import { useWorkOrders, useCreateWorkOrder, useUpdateWorkOrder } from "@/hooks/useWorkOrders";
 import { WorkOrder, WorkOrderFilters } from "@/types/workOrder";
 import { supabase } from "@/integrations/supabase/client";
@@ -15,6 +15,7 @@ export const WorkOrdersPage = () => {
   const [viewMode, setViewMode] = useState<'list' | 'detail' | 'form'>('list');
   const [editingWorkOrder, setEditingWorkOrder] = useState<WorkOrder | null>(null);
   const [isCreating, setIsCreating] = useState(false);
+  const [calendarViewMode, setCalendarViewMode] = useState<'list' | 'calendar'>('list');
 
   // Add filters state
   const [filters, setFilters] = useState<WorkOrderFilters>({
@@ -49,19 +50,19 @@ export const WorkOrdersPage = () => {
     return true;
   });
 
-  // Auto-select first work order when filtered list changes
+  // Auto-select first work order when filtered list changes (only for list view)
   useEffect(() => {
-    if (filteredWorkOrders.length > 0) {
+    if (calendarViewMode === 'list' && filteredWorkOrders.length > 0) {
       const firstWorkOrderId = filteredWorkOrders[0].id;
       if (!selectedWorkOrder || !filteredWorkOrders.find(wo => wo.id === selectedWorkOrder)) {
         setSelectedWorkOrder(firstWorkOrderId);
         setViewMode('detail');
       }
-    } else {
+    } else if (filteredWorkOrders.length === 0) {
       setSelectedWorkOrder(null);
       setViewMode('list');
     }
-  }, [filteredWorkOrders, selectedWorkOrder]);
+  }, [filteredWorkOrders, selectedWorkOrder, calendarViewMode]);
 
   const selectedWorkOrderData = workOrders.find(wo => wo.id === selectedWorkOrder);
 
@@ -95,6 +96,16 @@ export const WorkOrdersPage = () => {
     setSelectedWorkOrder(null);
     setEditingWorkOrder(null);
     setIsCreating(false);
+  };
+
+  const handleViewModeChange = (mode: 'list' | 'calendar') => {
+    setCalendarViewMode(mode);
+    if (mode === 'calendar') {
+      setViewMode('list'); // Reset to list view when switching to calendar
+      setSelectedWorkOrder(null);
+      setEditingWorkOrder(null);
+      setIsCreating(false);
+    }
   };
 
   const handleFormSubmit = async (data: any) => {
@@ -185,38 +196,52 @@ export const WorkOrdersPage = () => {
         filters={filters}
         onFiltersChange={setFilters}
         onCreateWorkOrder={handleCreateWorkOrder}
+        viewMode={calendarViewMode}
+        onViewModeChange={handleViewModeChange}
       />
       
-      {/* Desktop Layout */}
-      <div className="hidden lg:block h-full">
-        <WorkOrdersDesktopLayout
-          filteredWorkOrders={filteredWorkOrders}
-          selectedWorkOrder={selectedWorkOrder}
-          viewMode={viewMode}
-          selectedWorkOrderData={selectedWorkOrderData}
-          editingWorkOrder={editingWorkOrder}
-          onSelectWorkOrder={handleSelectWorkOrder}
-          onEditWorkOrder={handleEditWorkOrder}
-          onFormSubmit={handleFormSubmit}
-          onFormCancel={handleFormCancel}
-        />
-      </div>
+      {calendarViewMode === 'calendar' ? (
+        <div className="h-full">
+          <WorkOrderCalendarView
+            workOrders={filteredWorkOrders}
+            onSelectWorkOrder={handleSelectWorkOrder}
+            selectedWorkOrderId={selectedWorkOrder}
+          />
+        </div>
+      ) : (
+        <>
+          {/* Desktop Layout */}
+          <div className="hidden lg:block h-full">
+            <WorkOrdersDesktopLayout
+              filteredWorkOrders={filteredWorkOrders}
+              selectedWorkOrder={selectedWorkOrder}
+              viewMode={viewMode}
+              selectedWorkOrderData={selectedWorkOrderData}
+              editingWorkOrder={editingWorkOrder}
+              onSelectWorkOrder={handleSelectWorkOrder}
+              onEditWorkOrder={handleEditWorkOrder}
+              onFormSubmit={handleFormSubmit}
+              onFormCancel={handleFormCancel}
+            />
+          </div>
 
-      {/* Mobile Layout */}
-      <div className="lg:hidden h-full">
-        <WorkOrdersMobileLayout
-          filteredWorkOrders={filteredWorkOrders}
-          selectedWorkOrder={selectedWorkOrder}
-          viewMode={viewMode}
-          selectedWorkOrderData={selectedWorkOrderData}
-          editingWorkOrder={editingWorkOrder}
-          onSelectWorkOrder={handleSelectWorkOrder}
-          onEditWorkOrder={handleEditWorkOrder}
-          onFormSubmit={handleFormSubmit}
-          onFormCancel={handleFormCancel}
-          onSetViewModeToList={handleSetViewModeToList}
-        />
-      </div>
+          {/* Mobile Layout */}
+          <div className="lg:hidden h-full">
+            <WorkOrdersMobileLayout
+              filteredWorkOrders={filteredWorkOrders}
+              selectedWorkOrder={selectedWorkOrder}
+              viewMode={viewMode}
+              selectedWorkOrderData={selectedWorkOrderData}
+              editingWorkOrder={editingWorkOrder}
+              onSelectWorkOrder={handleSelectWorkOrder}
+              onEditWorkOrder={handleEditWorkOrder}
+              onFormSubmit={handleFormSubmit}
+              onFormCancel={handleFormCancel}
+              onSetViewModeToList={handleSetViewModeToList}
+            />
+          </div>
+        </>
+      )}
     </StandardPageLayout>
   );
 };
