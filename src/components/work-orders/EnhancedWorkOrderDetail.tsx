@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -25,7 +24,7 @@ import { TimeEntries } from "./TimeEntries";
 import { CostEntries } from "./CostEntries";
 import { WorkOrderChat } from "./WorkOrderChat";
 import { getAssetName, getLocationName } from "@/utils/assetUtils";
-import { useWorkOrderStatusUpdate } from "@/hooks/useWorkOrdersIntegration";
+import { useWorkOrderStatusUpdate } from "@/features/workOrders/hooks/useWorkOrdersIntegration";
 
 interface EnhancedWorkOrderDetailProps {
   workOrder: WorkOrder;

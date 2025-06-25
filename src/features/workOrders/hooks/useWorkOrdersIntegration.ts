@@ -1,7 +1,8 @@
 
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { WorkOrder } from "@/types/workOrder";
+import { toast } from "sonner";
 
 export const useWorkOrdersIntegration = () => {
   return useQuery({
@@ -33,6 +34,7 @@ export const useWorkOrdersIntegration = () => {
       const transformedWorkOrders: WorkOrder[] = workOrdersData.map((wo) => {
         const transformed = {
           id: wo.id,
+          tenant_id: wo.tenant_id, // Add missing tenant_id
           title: wo.title,
           description: wo.description || "",
           status: wo.status,
@@ -59,5 +61,31 @@ export const useWorkOrdersIntegration = () => {
       console.log("Final transformed work orders:", transformedWorkOrders);
       return transformedWorkOrders;
     },
+  });
+};
+
+export const useWorkOrderStatusUpdate = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: async ({ id, status, notes }: { id: string; status: string; notes?: string }) => {
+      const { data, error } = await supabase
+        .from("work_orders")
+        .update({ status, updated_at: new Date().toISOString() })
+        .eq("id", id)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["work-orders-integration"] });
+      toast.success("Work order status updated successfully");
+    },
+    onError: (error) => {
+      console.error("Status update error:", error);
+      toast.error("Failed to update work order status");
+    }
   });
 };
