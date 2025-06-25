@@ -60,7 +60,10 @@ export const WorkOrdersTopHeader = ({
               </div>
             )}
             
-            <Button onClick={onCreateWorkOrder} className="bg-blue-600 hover:bg-blue-700">
+            <Button 
+              onClick={onCreateWorkOrder} 
+              className="bg-blue-600 hover:bg-blue-700 text-white"
+            >
               <Plus className="w-4 h-4 mr-2" />
               New Work Order
             </Button>
