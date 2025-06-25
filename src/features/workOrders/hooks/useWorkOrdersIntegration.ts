@@ -1,7 +1,7 @@
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { WorkOrder } from "@/types/workOrder";
+import { WorkOrder, WorkOrderStatus, WorkOrderCategory } from "@/types/workOrder";
 import { toast } from "sonner";
 
 export const useWorkOrdersIntegration = () => {
@@ -34,7 +34,7 @@ export const useWorkOrdersIntegration = () => {
       const transformedWorkOrders: WorkOrder[] = workOrdersData.map((wo) => {
         const transformed = {
           id: wo.id,
-          tenant_id: wo.tenant_id, // Add missing tenant_id
+          tenant_id: wo.tenant_id,
           title: wo.title,
           description: wo.description || "",
           status: wo.status,
@@ -44,7 +44,7 @@ export const useWorkOrdersIntegration = () => {
           location: wo.locations?.name || wo.location_id || "",
           dueDate: wo.due_date || "",
           due_date: wo.due_date || "",
-          category: wo.category || "maintenance",
+          category: (wo.category || "maintenance") as WorkOrderCategory,
           timeSpent: wo.time_spent || 0,
           totalCost: wo.total_cost || 0,
           tags: wo.tags || [],
@@ -68,7 +68,7 @@ export const useWorkOrderStatusUpdate = () => {
   const queryClient = useQueryClient();
   
   return useMutation({
-    mutationFn: async ({ id, status, notes }: { id: string; status: string; notes?: string }) => {
+    mutationFn: async ({ id, status, notes }: { id: string; status: WorkOrderStatus; notes?: string }) => {
       const { data, error } = await supabase
         .from("work_orders")
         .update({ status, updated_at: new Date().toISOString() })
