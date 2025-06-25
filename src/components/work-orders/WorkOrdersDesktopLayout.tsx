@@ -34,53 +34,49 @@ export const WorkOrdersDesktopLayout = ({
   return (
     <div className="hidden lg:flex h-full w-full">
       {/* Left Panel - Work Orders List Card */}
-      <div className="w-[30%]">
-        <Card className="h-full overflow-hidden shadow-sm border-gray-200 rounded-none border-r-0">
-          <EnhancedWorkOrdersList 
-            workOrders={filteredWorkOrders}
-            selectedWorkOrderId={selectedWorkOrder}
-            onSelectWorkOrder={onSelectWorkOrder}
-          />
-        </Card>
+      <div className="w-[30%] border-r border-gray-200 bg-white">
+        <EnhancedWorkOrdersList 
+          workOrders={filteredWorkOrders}
+          selectedWorkOrderId={selectedWorkOrder}
+          onSelectWorkOrder={onSelectWorkOrder}
+        />
       </div>
       
       {/* Main Content Area - 70% */}
-      <div className="w-[70%] flex flex-col overflow-hidden">
-        <Card className="h-full overflow-hidden shadow-sm border-gray-200 rounded-none">
-          {viewMode === 'detail' && selectedWorkOrderData && (
-            <EnhancedWorkOrderDetail 
-              workOrder={selectedWorkOrderData}
-              onEdit={onEditWorkOrder}
-            />
-          )}
-          
-          {viewMode === 'form' && (
-            <div className="h-full overflow-auto">
-              <div className="p-6">
-                <div className="mb-6">
-                  <Button 
-                    variant="ghost" 
-                    onClick={onFormCancel}
-                    className="mb-4"
-                  >
-                    <ChevronLeft className="w-4 h-4 mr-2" />
-                    Back
-                  </Button>
-                </div>
-                <EnhancedWorkOrderForm
-                  workOrder={editingWorkOrder || undefined}
-                  onSubmit={onFormSubmit}
-                  onCancel={onFormCancel}
-                />
+      <div className="w-[70%] flex flex-col overflow-hidden bg-white">
+        {viewMode === 'detail' && selectedWorkOrderData && (
+          <EnhancedWorkOrderDetail 
+            workOrder={selectedWorkOrderData}
+            onEdit={onEditWorkOrder}
+          />
+        )}
+        
+        {viewMode === 'form' && (
+          <div className="h-full overflow-auto">
+            <div className="p-6">
+              <div className="mb-6">
+                <Button 
+                  variant="ghost" 
+                  onClick={onFormCancel}
+                  className="mb-4"
+                >
+                  <ChevronLeft className="w-4 h-4 mr-2" />
+                  Back
+                </Button>
               </div>
+              <EnhancedWorkOrderForm
+                workOrder={editingWorkOrder || undefined}
+                onSubmit={onFormSubmit}
+                onCancel={onFormCancel}
+              />
             </div>
-          )}
-          
-          {/* Only show empty state if no work orders exist */}
-          {viewMode === 'list' && filteredWorkOrders.length === 0 && (
-            <WorkOrdersEmptyState />
-          )}
-        </Card>
+          </div>
+        )}
+        
+        {/* Only show empty state if no work orders exist */}
+        {viewMode === 'list' && filteredWorkOrders.length === 0 && (
+          <WorkOrdersEmptyState />
+        )}
       </div>
     </div>
   );
