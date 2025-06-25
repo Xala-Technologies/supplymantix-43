@@ -2,14 +2,17 @@
 import { useWorkOrdersIntegration } from "@/hooks/useWorkOrdersIntegration";
 import { WorkOrdersTopHeader } from "./WorkOrdersTopHeader";
 import { WorkOrdersContent } from "./WorkOrdersContent";
+import { WorkOrderCalendarView } from "./WorkOrderCalendarView";
 import { useWorkOrdersPage } from "@/hooks/useWorkOrdersPage";
+import { useState } from "react";
 
 export const WorkOrdersPage = () => {
   const { data: workOrders, isLoading, refetch, error } = useWorkOrdersIntegration();
+  const [viewMode, setViewMode] = useState<'list' | 'calendar'>('list');
   
   const {
     selectedWorkOrder,
-    viewMode,
+    viewMode: pageViewMode,
     editingWorkOrder,
     filters,
     setFilters,
@@ -60,21 +63,36 @@ export const WorkOrdersPage = () => {
         filters={filters}
         onFiltersChange={setFilters}
         onCreateWorkOrder={handleCreateWorkOrder}
+        viewMode={viewMode}
+        onViewModeChange={setViewMode}
       />
 
-      {/* Main Content - Single Card */}
-      <WorkOrdersContent
-        filteredWorkOrders={filteredWorkOrders}
-        selectedWorkOrder={selectedWorkOrder}
-        viewMode={viewMode}
-        selectedWorkOrderData={selectedWorkOrderData}
-        editingWorkOrder={editingWorkOrder}
-        onSelectWorkOrder={handleSelectWorkOrder}
-        onEditWorkOrder={handleEditWorkOrder}
-        onFormSubmit={handleFormSubmitWithRefresh}
-        onFormCancel={handleFormCancel}
-        onSetViewModeToList={setViewModeToList}
-      />
+      {/* Main Content */}
+      {viewMode === 'calendar' ? (
+        <div className="flex-1 p-6">
+          <div className="h-full bg-white rounded-lg shadow-sm border">
+            <WorkOrderCalendarView
+              workOrders={filteredWorkOrders}
+              onSelectWorkOrder={handleSelectWorkOrder}
+              selectedWorkOrderId={selectedWorkOrder}
+              onRefetch={refetch}
+            />
+          </div>
+        </div>
+      ) : (
+        <WorkOrdersContent
+          filteredWorkOrders={filteredWorkOrders}
+          selectedWorkOrder={selectedWorkOrder}
+          viewMode={pageViewMode}
+          selectedWorkOrderData={selectedWorkOrderData}
+          editingWorkOrder={editingWorkOrder}
+          onSelectWorkOrder={handleSelectWorkOrder}
+          onEditWorkOrder={handleEditWorkOrder}
+          onFormSubmit={handleFormSubmitWithRefresh}
+          onFormCancel={handleFormCancel}
+          onSetViewModeToList={setViewModeToList}
+        />
+      )}
     </div>
   );
 };
