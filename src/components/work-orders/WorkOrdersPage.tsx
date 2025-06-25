@@ -19,7 +19,10 @@ export const WorkOrdersPage = () => {
     category: 'all',
     assignedTo: 'all',
     location: 'all',
-    dateRange: 'all'
+    dateRange: {
+      from: new Date(),
+      to: new Date()
+    }
   });
 
   // Filter work orders based on current filters
