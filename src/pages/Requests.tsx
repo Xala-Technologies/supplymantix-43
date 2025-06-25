@@ -92,7 +92,7 @@ export default function Requests() {
       <DashboardLayout>
         <PageContainer>
           <PageLayout>
-            <div className="fixed top-16 left-0 right-0 md:left-[var(--sidebar-width)] md:peer-data-[state=collapsed]:left-[var(--sidebar-width-icon)] z-30 bg-white border-b border-gray-200 transition-[left] duration-300 ease-linear">
+            <div className="fixed top-16 left-0 right-0 z-30 bg-white border-b border-gray-200 transition-[left] duration-300 ease-linear peer-data-[state=expanded]:left-0 peer-data-[state=collapsed]:left-0 md:peer-data-[state=expanded]:left-[var(--sidebar-width)] md:peer-data-[state=collapsed]:left-[var(--sidebar-width-icon)]">
               <div className="px-6 py-4">
                 <div className="flex items-center gap-4">
                   <Button
@@ -132,7 +132,7 @@ export default function Requests() {
       <DashboardLayout>
         <PageContainer>
           <PageLayout>
-            <div className="fixed top-16 left-0 right-0 md:left-[var(--sidebar-width)] md:peer-data-[state=collapsed]:left-[var(--sidebar-width-icon)] z-30 bg-white border-b border-gray-200 transition-[left] duration-300 ease-linear">
+            <div className="fixed top-16 left-0 right-0 z-30 bg-white border-b border-gray-200 transition-[left] duration-300 ease-linear peer-data-[state=expanded]:left-0 peer-data-[state=collapsed]:left-0 md:peer-data-[state=expanded]:left-[var(--sidebar-width)] md:peer-data-[state=collapsed]:left-[var(--sidebar-width-icon)]">
               <div className="px-6 py-4">
                 <div className="flex items-center gap-4">
                   <Button
