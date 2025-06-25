@@ -5,9 +5,10 @@ import { WorkOrdersTopHeader } from "./WorkOrdersTopHeader";
 import { WorkOrdersDesktopLayout } from "./WorkOrdersDesktopLayout";
 import { WorkOrdersMobileLayout } from "./WorkOrdersMobileLayout";
 import { useWorkOrders, useCreateWorkOrder, useUpdateWorkOrder } from "@/hooks/useWorkOrders";
-import { WorkOrder } from "@/types/workOrder";
+import { WorkOrder, WorkOrderFilters } from "@/types/workOrder";
 import { supabase } from "@/integrations/supabase/client";
 import { StandardPageLayout } from "@/components/Layout/StandardPageLayout";
+import { normalizeWorkOrderData } from "@/features/workOrders/utils";
 
 export const WorkOrdersPage = () => {
   const [selectedWorkOrder, setSelectedWorkOrder] = useState<string | null>(null);
@@ -15,17 +16,32 @@ export const WorkOrdersPage = () => {
   const [editingWorkOrder, setEditingWorkOrder] = useState<WorkOrder | null>(null);
   const [isCreating, setIsCreating] = useState(false);
 
-  const { data: workOrders = [], refetch } = useWorkOrders();
+  // Add filters state
+  const [filters, setFilters] = useState<WorkOrderFilters>({
+    search: '',
+    status: 'all',
+    priority: 'all',
+    assignedTo: 'all',
+    category: 'all'
+  });
+
+  const { data: rawWorkOrders = [], refetch } = useWorkOrders();
   const createWorkOrderMutation = useCreateWorkOrder();
   const updateWorkOrderMutation = useUpdateWorkOrder();
+
+  // Transform raw work orders to proper WorkOrder type
+  const workOrders: WorkOrder[] = rawWorkOrders.map(normalizeWorkOrderData);
 
   const selectedWorkOrderData = workOrders.find(wo => wo.id === selectedWorkOrder);
 
   const handleSelectWorkOrder = (id: string) => {
-    setSelectedWorkOrder(id);
-    setViewMode('detail');
-    setEditingWorkOrder(null);
-    setIsCreating(false);
+    const workOrder = workOrders.find(wo => wo.id === id);
+    if (workOrder) {
+      setSelectedWorkOrder(id);
+      setViewMode('detail');
+      setEditingWorkOrder(null);
+      setIsCreating(false);
+    }
   };
 
   const handleCreateWorkOrder = () => {
@@ -123,12 +139,32 @@ export const WorkOrdersPage = () => {
     setIsCreating(false);
   };
 
-  // Filter work orders (you can add filters here later)
-  const filteredWorkOrders = workOrders;
+  // Apply filters to work orders
+  const filteredWorkOrders = workOrders.filter(wo => {
+    if (filters.search && !wo.title.toLowerCase().includes(filters.search.toLowerCase())) {
+      return false;
+    }
+    if (filters.status !== 'all' && wo.status !== filters.status) {
+      return false;
+    }
+    if (filters.priority !== 'all' && wo.priority !== filters.priority) {
+      return false;
+    }
+    if (filters.category !== 'all' && wo.category !== filters.category) {
+      return false;
+    }
+    return true;
+  });
 
   return (
     <StandardPageLayout>
-      <WorkOrdersTopHeader onCreateWorkOrder={handleCreateWorkOrder} />
+      <WorkOrdersTopHeader 
+        workOrdersCount={filteredWorkOrders.length}
+        totalCount={workOrders.length}
+        filters={filters}
+        onFiltersChange={setFilters}
+        onCreateWorkOrder={handleCreateWorkOrder}
+      />
       
       {/* Desktop Layout */}
       <div className="hidden lg:block h-full">
