@@ -5,6 +5,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
 import { ProcedureField } from '@/lib/database/procedures-enhanced';
 import { FieldTypeSelector } from '../FieldTypeSelector';
@@ -18,6 +20,9 @@ interface FieldsListProps {
   onFieldDuplicate?: (index: number) => void;
   onFieldDelete?: (index: number) => void;
   onFieldReorder?: (fromIndex: number, toIndex: number) => void;
+  isExecutionMode?: boolean;
+  fieldValues?: Record<string, any>;
+  onFieldValueChange?: (fieldId: string, value: any) => void;
 }
 
 export const FieldsList: React.FC<FieldsListProps> = ({
@@ -28,7 +33,10 @@ export const FieldsList: React.FC<FieldsListProps> = ({
   onFieldUpdate,
   onFieldDuplicate,
   onFieldDelete,
-  onFieldReorder
+  onFieldReorder,
+  isExecutionMode = false,
+  fieldValues = {},
+  onFieldValueChange
 }) => {
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
@@ -181,6 +189,131 @@ export const FieldsList: React.FC<FieldsListProps> = ({
     }
   };
 
+  const handleFieldValueChange = (field: ProcedureField, value: any) => {
+    if (onFieldValueChange) {
+      onFieldValueChange(field.id, value);
+    }
+  };
+
+  const renderFieldInput = (field: ProcedureField, index: number) => {
+    if (!isExecutionMode) return null;
+
+    const currentValue = fieldValues[field.id];
+
+    switch (field.field_type) {
+      case 'checkbox':
+        return (
+          <div className="flex items-center space-x-2 p-3 bg-white border rounded">
+            <Checkbox
+              id={`field-${field.id}`}
+              checked={currentValue || false}
+              onCheckedChange={(checked) => handleFieldValueChange(field, checked)}
+            />
+            <Label htmlFor={`field-${field.id}`} className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+              {field.label}
+            </Label>
+          </div>
+        );
+
+      case 'text':
+        return (
+          <div className="space-y-2">
+            <Label className="text-sm font-medium">{field.label}</Label>
+            <Input
+              value={currentValue || ''}
+              onChange={(e) => handleFieldValueChange(field, e.target.value)}
+              placeholder={field.options?.placeholder || ''}
+              className="w-full"
+            />
+            {field.options?.helpText && (
+              <p className="text-xs text-gray-500">{field.options.helpText}</p>
+            )}
+          </div>
+        );
+
+      case 'number':
+        return (
+          <div className="space-y-2">
+            <Label className="text-sm font-medium">{field.label}</Label>
+            <Input
+              type="number"
+              value={currentValue || ''}
+              onChange={(e) => handleFieldValueChange(field, e.target.value)}
+              placeholder={field.options?.placeholder || ''}
+              className="w-full"
+            />
+            {field.options?.helpText && (
+              <p className="text-xs text-gray-500">{field.options.helpText}</p>
+            )}
+          </div>
+        );
+
+      case 'select':
+        return (
+          <div className="space-y-2">
+            <Label className="text-sm font-medium">{field.label}</Label>
+            <Select value={currentValue || ''} onValueChange={(value) => handleFieldValueChange(field, value)}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select an option" />
+              </SelectTrigger>
+              <SelectContent>
+                {field.options?.choices?.map((choice, choiceIndex) => (
+                  <SelectItem key={choiceIndex} value={choice}>
+                    {choice}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {field.options?.helpText && (
+              <p className="text-xs text-gray-500">{field.options.helpText}</p>
+            )}
+          </div>
+        );
+
+      case 'multiselect':
+        return (
+          <div className="space-y-2">
+            <Label className="text-sm font-medium">{field.label}</Label>
+            <div className="space-y-2">
+              {field.options?.choices?.map((choice, choiceIndex) => (
+                <div key={choiceIndex} className="flex items-center space-x-2">
+                  <Checkbox
+                    id={`field-${field.id}-${choiceIndex}`}
+                    checked={(currentValue || []).includes(choice)}
+                    onCheckedChange={(checked) => {
+                      const currentValues = currentValue || [];
+                      const newValues = checked
+                        ? [...currentValues, choice]
+                        : currentValues.filter((v: string) => v !== choice);
+                      handleFieldValueChange(field, newValues);
+                    }}
+                  />
+                  <Label htmlFor={`field-${field.id}-${choiceIndex}`} className="text-sm">
+                    {choice}
+                  </Label>
+                </div>
+              ))}
+            </div>
+            {field.options?.helpText && (
+              <p className="text-xs text-gray-500">{field.options.helpText}</p>
+            )}
+          </div>
+        );
+
+      case 'section':
+        return (
+          <div className="py-4">
+            <h3 className="text-lg font-semibold text-gray-900 border-b border-gray-200 pb-2">
+              {field.label}
+            </h3>
+          </div>
+        );
+
+      default:
+        return null;
+    }
+  };
+
   if (fields.length === 0) {
     return (
       <div className="flex-1 flex items-center justify-center p-8">
@@ -200,12 +333,12 @@ export const FieldsList: React.FC<FieldsListProps> = ({
           {fields.map((field, index) => (
             <div
               key={field.id}
-              draggable
-              onDragStart={(e) => handleDragStart(e, index)}
-              onDragOver={(e) => handleDragOver(e, index)}
-              onDragLeave={handleDragLeave}
-              onDrop={(e) => handleDrop(e, index)}
-              onDragEnd={handleDragEnd}
+              draggable={!isExecutionMode}
+              onDragStart={(e) => !isExecutionMode && handleDragStart(e, index)}
+              onDragOver={(e) => !isExecutionMode && handleDragOver(e, index)}
+              onDragLeave={!isExecutionMode ? handleDragLeave : undefined}
+              onDrop={(e) => !isExecutionMode && handleDrop(e, index)}
+              onDragEnd={!isExecutionMode ? handleDragEnd : undefined}
               className={`bg-white rounded-lg border transition-all duration-200 ${
                 selectedFieldIndex === index 
                   ? 'border-blue-300 ring-2 ring-blue-100 shadow-lg' 
@@ -216,370 +349,381 @@ export const FieldsList: React.FC<FieldsListProps> = ({
                 dragOverIndex === index && draggedIndex !== index ? 'border-blue-400 bg-blue-50' : ''
               }`}
             >
-              {/* Main Field Row */}
-              <div className="flex items-center gap-3 p-4">
-                {/* Drag Handle */}
-                <div className="flex items-center">
-                  <GripVertical className="h-4 w-4 text-gray-400 cursor-grab active:cursor-grabbing" />
-                </div>
-
-                {/* Field Type Icon */}
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${getFieldTypeColor(field.field_type)}`}>
-                  {getFieldTypeIcon(field.field_type)}
-                </div>
-
-                {/* Field Content */}
-                <div 
-                  className="flex-1 cursor-pointer"
-                  onClick={() => {
-                    onFieldSelect(index);
-                    toggleFieldExpansion(index);
-                  }}
-                >
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <div className="font-medium text-gray-900">
-                        {field.label || 'Untitled Field'}
-                      </div>
-                      <div className="text-sm text-gray-500 capitalize">
-                        {field.field_type.replace('_', ' ')}
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      {field.is_required && (
-                        <span className="text-xs bg-red-100 text-red-600 px-2 py-1 rounded">
-                          Required
-                        </span>
-                      )}
-                      {field.options?.attachedFile && (
-                        <span className="text-xs bg-blue-100 text-blue-600 px-2 py-1 rounded flex items-center gap-1">
-                          <Paperclip className="h-3 w-3" />
-                          Attached
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Field Controls */}
-                <div className="flex items-center gap-1">
-                  {/* Move Controls */}
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => onFieldMove && onFieldMove(index, 'up')}
-                    disabled={index === 0}
-                    className="h-8 w-8 p-0 text-gray-400 hover:text-gray-600"
-                  >
-                    <ChevronUp className="h-4 w-4" />
-                  </Button>
-                  
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => onFieldMove && onFieldMove(index, 'down')}
-                    disabled={index === fields.length - 1}
-                    className="h-8 w-8 p-0 text-gray-400 hover:text-gray-600"
-                  >
-                    <ChevronDown className="h-4 w-4" />
-                  </Button>
-
-                  {/* Link Button */}
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-8 w-8 p-0 text-blue-500 hover:text-blue-600 hover:bg-blue-50"
-                  >
-                    <Link className="h-4 w-4" />
-                  </Button>
-                  
-                  {/* Attachment Button */}
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleAttachmentClick(index)}
-                    className="h-8 w-8 p-0 text-gray-500 hover:text-gray-600 hover:bg-gray-50"
-                  >
-                    <Paperclip className="h-4 w-4" />
-                  </Button>
-                  
-                  {/* Hidden file input for attachment */}
-                  <input
-                    ref={(el) => fileInputRefs.current[index] = el}
-                    type="file"
-                    accept="image/*,application/pdf,.doc,.docx,.txt"
-                    onChange={(e) => handleFileUpload(index, e)}
-                    className="hidden"
-                  />
-                  
-                  {/* Delete Button */}
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => onFieldDelete && onFieldDelete(index)}
-                    className="h-8 w-8 p-0 text-gray-500 hover:text-red-600 hover:bg-red-50"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-
-                  {/* Required Toggle */}
-                  <div className="flex items-center gap-2 px-2 border-l border-gray-200">
-                    <Label htmlFor={`required-${field.id}`} className="text-sm text-gray-600">
-                      Required
-                    </Label>
-                    <Switch
-                      id={`required-${field.id}`}
-                      checked={field.is_required}
-                      onCheckedChange={(checked) => onFieldUpdate && onFieldUpdate(index, { is_required: checked })}
-                    />
-                  </div>
-
-                  {/* More Options Menu */}
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-8 w-8 p-0 text-gray-500 hover:text-gray-600 hover:bg-gray-50"
-                      >
-                        <MoreHorizontal className="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="w-48 bg-white border border-gray-200 shadow-lg z-50">
-                      <DropdownMenuItem onClick={() => {
-                        onFieldSelect(index);
-                        toggleFieldExpansion(index);
-                      }}>
-                        Edit Field
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => onFieldDuplicate && onFieldDuplicate(index)}>
-                        <Copy className="h-4 w-4 mr-2" />
-                        Duplicate
-                      </DropdownMenuItem>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem 
-                        onClick={() => onFieldDelete && onFieldDelete(index)}
-                        className="text-red-600 focus:text-red-600"
-                      >
-                        <Trash2 className="h-4 w-4 mr-2" />
-                        Delete Field
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </div>
-              </div>
-
-              {/* Attached File Preview (when collapsed) */}
-              {!expandedFields.has(index) && field.options?.attachedFile && (
-                <div className="px-4 pb-4 pt-0">
-                  <div className="bg-gray-50 rounded p-3">
-                    <div className="flex items-center gap-3">
-                      <Paperclip className="h-4 w-4 text-gray-500" />
-                      <div className="flex-1">
-                        <div className="text-sm text-gray-700">{field.options.attachedFile.name}</div>
-                        <div className="text-xs text-gray-500">
-                          ({(field.options.attachedFile.size / 1024).toFixed(1)} KB)
-                        </div>
-                      </div>
-                      {field.options.attachedFile.type.startsWith('image/') && (
-                        <img 
-                          src={field.options.attachedFile.url} 
-                          alt="Preview" 
-                          className="w-12 h-12 object-cover rounded border"
-                        />
-                      )}
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => {
-                          if (onFieldUpdate) {
-                            const newOptions = { ...field.options };
-                            delete newOptions.attachedFile;
-                            onFieldUpdate(index, { options: newOptions });
-                          }
-                        }}
-                        className="h-6 w-6 p-0 text-gray-400 hover:text-red-600"
-                      >
-                        <X className="h-3 w-3" />
-                      </Button>
-                    </div>
-                  </div>
+              {/* Interactive Field Input (Execution Mode) */}
+              {isExecutionMode && (
+                <div className="p-4">
+                  {renderFieldInput(field, index)}
                 </div>
               )}
 
-              {/* Expanded Field Editor */}
-              {expandedFields.has(index) && (
-                <div className="border-t border-gray-100 p-4 bg-gray-50">
-                  {/* Field Label Input */}
-                  <div className="mb-4">
-                    <Label className="text-sm font-medium mb-2 block">Field Label</Label>
-                    <Input
-                      value={field.label}
-                      onChange={(e) => onFieldUpdate && onFieldUpdate(index, { label: e.target.value })}
-                      className="border-0 border-b border-blue-500 rounded-none bg-transparent text-base font-medium focus-visible:ring-0 px-0 pb-1"
-                      placeholder="Field label"
-                    />
-                  </div>
+              {/* Main Field Row (Builder Mode) */}
+              {!isExecutionMode && (
+                <>
+                  <div className="flex items-center gap-3 p-4">
+                    {/* Drag Handle */}
+                    <div className="flex items-center">
+                      <GripVertical className="h-4 w-4 text-gray-400 cursor-grab active:cursor-grabbing" />
+                    </div>
 
-                  {/* Field Type Selector */}
-                  <div className="mb-4">
-                    <Label className="text-sm font-medium mb-2 block">Field Type</Label>
-                    <FieldTypeSelector
-                      value={field.field_type}
-                      onChange={(value) => onFieldUpdate && onFieldUpdate(index, { field_type: value as ProcedureField['field_type'] })}
-                    />
-                  </div>
+                    {/* Field Type Icon */}
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${getFieldTypeColor(field.field_type)}`}>
+                      {getFieldTypeIcon(field.field_type)}
+                    </div>
 
-                  {/* Attached File Section */}
-                  {field.options?.attachedFile && (
-                    <div className="mb-4 p-4 bg-white rounded-lg border">
-                      <div className="flex items-center justify-between mb-2">
-                        <Label className="text-sm font-medium">Attached File</Label>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => {
-                            if (onFieldUpdate) {
-                              const newOptions = { ...field.options };
-                              delete newOptions.attachedFile;
-                              onFieldUpdate(index, { options: newOptions });
-                            }
-                          }}
-                          className="h-6 w-6 p-0"
-                        >
-                          <X className="h-3 w-3" />
-                        </Button>
-                      </div>
-                      
-                      <div className="flex items-center gap-3 p-3 bg-gray-50 rounded border">
-                        <Paperclip className="h-5 w-5 text-gray-500" />
-                        <div className="flex-1">
-                          <div className="font-medium text-sm">{field.options.attachedFile.name}</div>
-                          <div className="text-xs text-gray-500">
-                            {field.options.attachedFile.type} • {(field.options.attachedFile.size / 1024).toFixed(1)} KB
+                    {/* Field Content */}
+                    <div 
+                      className="flex-1 cursor-pointer"
+                      onClick={() => {
+                        onFieldSelect(index);
+                        toggleFieldExpansion(index);
+                      }}
+                    >
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <div className="font-medium text-gray-900">
+                            {field.label || 'Untitled Field'}
+                          </div>
+                          <div className="text-sm text-gray-500 capitalize">
+                            {field.field_type.replace('_', ' ')}
                           </div>
                         </div>
-                        {field.options.attachedFile.type.startsWith('image/') && (
-                          <img 
-                            src={field.options.attachedFile.url} 
-                            alt="Preview" 
-                            className="w-16 h-16 object-cover rounded border"
-                          />
-                        )}
+                        <div className="flex items-center gap-2">
+                          {field.is_required && (
+                            <span className="text-xs bg-red-100 text-red-600 px-2 py-1 rounded">
+                              Required
+                            </span>
+                          )}
+                          {field.options?.attachedFile && (
+                            <span className="text-xs bg-blue-100 text-blue-600 px-2 py-1 rounded flex items-center gap-1">
+                              <Paperclip className="h-3 w-3" />
+                              Attached
+                            </span>
+                          )}
+                        </div>
                       </div>
                     </div>
-                  )}
 
-                  {/* Image Upload Section */}
-                  {showImageUpload.has(index) && (
-                    <div className="mb-4 p-4 bg-white rounded-lg border">
-                      <div className="flex items-center justify-between mb-2">
-                        <Label className="text-sm font-medium">Field Image</Label>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => toggleImageUpload(index)}
-                          className="h-6 w-6 p-0"
-                        >
-                          <X className="h-3 w-3" />
-                        </Button>
-                      </div>
+                    {/* Field Controls */}
+                    <div className="flex items-center gap-1">
+                      {/* Move Controls */}
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => onFieldMove && onFieldMove(index, 'up')}
+                        disabled={index === 0}
+                        className="h-8 w-8 p-0 text-gray-400 hover:text-gray-600"
+                      >
+                        <ChevronUp className="h-4 w-4" />
+                      </Button>
                       
-                      {field.options?.image ? (
-                        <div className="relative">
-                          <img 
-                            src={field.options.image} 
-                            alt="Field" 
-                            className="w-full h-32 object-cover rounded border"
-                          />
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => onFieldMove && onFieldMove(index, 'down')}
+                        disabled={index === fields.length - 1}
+                        className="h-8 w-8 p-0 text-gray-400 hover:text-gray-600"
+                      >
+                        <ChevronDown className="h-4 w-4" />
+                      </Button>
+
+                      {/* Link Button */}
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-8 w-8 p-0 text-blue-500 hover:text-blue-600 hover:bg-blue-50"
+                      >
+                        <Link className="h-4 w-4" />
+                      </Button>
+                      
+                      {/* Attachment Button */}
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleAttachmentClick(index)}
+                        className="h-8 w-8 p-0 text-gray-500 hover:text-gray-600 hover:bg-gray-50"
+                      >
+                        <Paperclip className="h-4 w-4" />
+                      </Button>
+                      
+                      {/* Hidden file input for attachment */}
+                      <input
+                        ref={(el) => fileInputRefs.current[index] = el}
+                        type="file"
+                        accept="image/*,application/pdf,.doc,.docx,.txt"
+                        onChange={(e) => handleFileUpload(index, e)}
+                        className="hidden"
+                      />
+                      
+                      {/* Delete Button */}
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => onFieldDelete && onFieldDelete(index)}
+                        className="h-8 w-8 p-0 text-gray-500 hover:text-red-600 hover:bg-red-50"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+
+                      {/* Required Toggle */}
+                      <div className="flex items-center gap-2 px-2 border-l border-gray-200">
+                        <Label htmlFor={`required-${field.id}`} className="text-sm text-gray-600">
+                          Required
+                        </Label>
+                        <Switch
+                          id={`required-${field.id}`}
+                          checked={field.is_required}
+                          onCheckedChange={(checked) => onFieldUpdate && onFieldUpdate(index, { is_required: checked })}
+                        />
+                      </div>
+
+                      {/* More Options Menu */}
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
                           <Button
-                            variant="destructive"
+                            variant="ghost"
+                            size="sm"
+                            className="h-8 w-8 p-0 text-gray-500 hover:text-gray-600 hover:bg-gray-50"
+                          >
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-48 bg-white border border-gray-200 shadow-lg z-50">
+                          <DropdownMenuItem onClick={() => {
+                            onFieldSelect(index);
+                            toggleFieldExpansion(index);
+                          }}>
+                            Edit Field
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => onFieldDuplicate && onFieldDuplicate(index)}>
+                            <Copy className="h-4 w-4 mr-2" />
+                            Duplicate
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem 
+                            onClick={() => onFieldDelete && onFieldDelete(index)}
+                            className="text-red-600 focus:text-red-600"
+                          >
+                            <Trash2 className="h-4 w-4 mr-2" />
+                            Delete Field
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
+                  </div>
+
+                  {/* Attached File Preview (when collapsed) */}
+                  {!expandedFields.has(index) && field.options?.attachedFile && (
+                    <div className="px-4 pb-4 pt-0">
+                      <div className="bg-gray-50 rounded p-3">
+                        <div className="flex items-center gap-3">
+                          <Paperclip className="h-4 w-4 text-gray-500" />
+                          <div className="flex-1">
+                            <div className="text-sm text-gray-700">{field.options.attachedFile.name}</div>
+                            <div className="text-xs text-gray-500">
+                              ({(field.options.attachedFile.size / 1024).toFixed(1)} KB)
+                            </div>
+                          </div>
+                          {field.options.attachedFile.type.startsWith('image/') && (
+                            <img 
+                              src={field.options.attachedFile.url} 
+                              alt="Preview" 
+                              className="w-12 h-12 object-cover rounded border"
+                            />
+                          )}
+                          <Button
+                            variant="ghost"
                             size="sm"
                             onClick={() => {
                               if (onFieldUpdate) {
                                 const newOptions = { ...field.options };
-                                delete newOptions.image;
+                                delete newOptions.attachedFile;
                                 onFieldUpdate(index, { options: newOptions });
                               }
                             }}
-                            className="absolute top-2 right-2 h-6 w-6 p-0"
+                            className="h-6 w-6 p-0 text-gray-400 hover:text-red-600"
                           >
                             <X className="h-3 w-3" />
                           </Button>
                         </div>
-                      ) : (
-                        <div>
-                          <input
-                            type="file"
-                            accept="image/*"
-                            onChange={(e) => handleImageUpload(index, e)}
-                            className="w-full text-sm"
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Expanded Field Editor */}
+                  {expandedFields.has(index) && (
+                    <div className="border-t border-gray-100 p-4 bg-gray-50">
+                      {/* Field Label Input */}
+                      <div className="mb-4">
+                        <Label className="text-sm font-medium mb-2 block">Field Label</Label>
+                        <Input
+                          value={field.label}
+                          onChange={(e) => onFieldUpdate && onFieldUpdate(index, { label: e.target.value })}
+                          className="border-0 border-b border-blue-500 rounded-none bg-transparent text-base font-medium focus-visible:ring-0 px-0 pb-1"
+                          placeholder="Field label"
+                        />
+                      </div>
+
+                      {/* Field Type Selector */}
+                      <div className="mb-4">
+                        <Label className="text-sm font-medium mb-2 block">Field Type</Label>
+                        <FieldTypeSelector
+                          value={field.field_type}
+                          onChange={(value) => onFieldUpdate && onFieldUpdate(index, { field_type: value as ProcedureField['field_type'] })}
+                        />
+                      </div>
+
+                      {/* Attached File Section */}
+                      {field.options?.attachedFile && (
+                        <div className="mb-4 p-4 bg-white rounded-lg border">
+                          <div className="flex items-center justify-between mb-2">
+                            <Label className="text-sm font-medium">Attached File</Label>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => {
+                                if (onFieldUpdate) {
+                                  const newOptions = { ...field.options };
+                                  delete newOptions.attachedFile;
+                                  onFieldUpdate(index, { options: newOptions });
+                                }
+                              }}
+                              className="h-6 w-6 p-0"
+                            >
+                              <X className="h-3 w-3" />
+                            </Button>
+                          </div>
+                          
+                          <div className="flex items-center gap-3 p-3 bg-gray-50 rounded border">
+                            <Paperclip className="h-5 w-5 text-gray-500" />
+                            <div className="flex-1">
+                              <div className="font-medium text-sm">{field.options.attachedFile.name}</div>
+                              <div className="text-xs text-gray-500">
+                                {field.options.attachedFile.type} • {(field.options.attachedFile.size / 1024).toFixed(1)} KB
+                              </div>
+                            </div>
+                            {field.options.attachedFile.type.startsWith('image/') && (
+                              <img 
+                                src={field.options.attachedFile.url} 
+                                alt="Preview" 
+                                className="w-16 h-16 object-cover rounded border"
+                              />
+                            )}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Image Upload Section */}
+                      {showImageUpload.has(index) && (
+                        <div className="mb-4 p-4 bg-white rounded-lg border">
+                          <div className="flex items-center justify-between mb-2">
+                            <Label className="text-sm font-medium">Field Image</Label>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => toggleImageUpload(index)}
+                              className="h-6 w-6 p-0"
+                            >
+                              <X className="h-3 w-3" />
+                            </Button>
+                          </div>
+                          
+                          {field.options?.image ? (
+                            <div className="relative">
+                              <img 
+                                src={field.options.image} 
+                                alt="Field" 
+                                className="w-full h-32 object-cover rounded border"
+                              />
+                              <Button
+                                variant="destructive"
+                                size="sm"
+                                onClick={() => {
+                                  if (onFieldUpdate) {
+                                    const newOptions = { ...field.options };
+                                    delete newOptions.image;
+                                    onFieldUpdate(index, { options: newOptions });
+                                  }
+                                }}
+                                className="absolute top-2 right-2 h-6 w-6 p-0"
+                              >
+                                <X className="h-3 w-3" />
+                              </Button>
+                            </div>
+                          ) : (
+                            <div>
+                              <input
+                                type="file"
+                                accept="image/*"
+                                onChange={(e) => handleImageUpload(index, e)}
+                                className="w-full text-sm"
+                              />
+                            </div>
+                          )}
+                        </div>
+                      )}
+
+                      {/* Multiple Choice Options */}
+                      {(field.field_type === 'select' || field.field_type === 'multiselect') && (
+                        <div className="mb-4">
+                          <Label className="text-sm font-medium mb-2 block">Options (one per line)</Label>
+                          <Textarea
+                            value={field.options?.choices?.join('\n') || ''}
+                            onChange={(e) => handleChoicesUpdate(index, e.target.value)}
+                            placeholder="Option 1&#10;Option 2&#10;Option 3"
+                            rows={3}
+                            className="resize-none text-sm"
                           />
                         </div>
                       )}
+
+                      {/* Help Text */}
+                      <div className="mb-4">
+                        <Label className="text-sm font-medium mb-2 block">Help Text</Label>
+                        <Input
+                          value={field.options?.helpText || ''}
+                          onChange={(e) => onFieldUpdate && onFieldUpdate(index, { 
+                            options: { 
+                              ...field.options, 
+                              helpText: e.target.value 
+                            } 
+                          })}
+                          placeholder="Optional help text for users"
+                          className="text-sm"
+                        />
+                      </div>
                     </div>
                   )}
 
-                  {/* Multiple Choice Options */}
-                  {(field.field_type === 'select' || field.field_type === 'multiselect') && (
-                    <div className="mb-4">
-                      <Label className="text-sm font-medium mb-2 block">Options (one per line)</Label>
-                      <Textarea
-                        value={field.options?.choices?.join('\n') || ''}
-                        onChange={(e) => handleChoicesUpdate(index, e.target.value)}
-                        placeholder="Option 1&#10;Option 2&#10;Option 3"
-                        rows={3}
-                        className="resize-none text-sm"
-                      />
+                  {/* Field Options Preview (when collapsed) */}
+                  {!expandedFields.has(index) && (field.field_type === 'select' || field.field_type === 'multiselect') && field.options?.choices && field.options.choices.length > 0 && (
+                    <div className="px-4 pb-4 pt-0">
+                      <div className="bg-gray-50 rounded p-3">
+                        <div className="text-xs font-medium text-gray-600 mb-2">Options:</div>
+                        <div className="flex flex-wrap gap-1">
+                          {field.options.choices.slice(0, 3).map((choice, choiceIndex) => (
+                            <span key={choiceIndex} className="text-xs bg-white px-2 py-1 rounded border">
+                              {choice}
+                            </span>
+                          ))}
+                          {field.options.choices.length > 3 && (
+                            <span className="text-xs text-gray-500 px-2 py-1">
+                              +{field.options.choices.length - 3} more
+                            </span>
+                          )}
+                        </div>
+                      </div>
                     </div>
                   )}
 
-                  {/* Help Text */}
-                  <div className="mb-4">
-                    <Label className="text-sm font-medium mb-2 block">Help Text</Label>
-                    <Input
-                      value={field.options?.helpText || ''}
-                      onChange={(e) => onFieldUpdate && onFieldUpdate(index, { 
-                        options: { 
-                          ...field.options, 
-                          helpText: e.target.value 
-                        } 
-                      })}
-                      placeholder="Optional help text for users"
-                      className="text-sm"
-                    />
-                  </div>
-                </div>
-              )}
-
-              {/* Field Options Preview (when collapsed) */}
-              {!expandedFields.has(index) && (field.field_type === 'select' || field.field_type === 'multiselect') && field.options?.choices && field.options.choices.length > 0 && (
-                <div className="px-4 pb-4 pt-0">
-                  <div className="bg-gray-50 rounded p-3">
-                    <div className="text-xs font-medium text-gray-600 mb-2">Options:</div>
-                    <div className="flex flex-wrap gap-1">
-                      {field.options.choices.slice(0, 3).map((choice, choiceIndex) => (
-                        <span key={choiceIndex} className="text-xs bg-white px-2 py-1 rounded border">
-                          {choice}
-                        </span>
-                      ))}
-                      {field.options.choices.length > 3 && (
-                        <span className="text-xs text-gray-500 px-2 py-1">
-                          +{field.options.choices.length - 3} more
-                        </span>
-                      )}
+                  {/* Help Text Preview (when collapsed) */}
+                  {!expandedFields.has(index) && field.options?.helpText && (
+                    <div className="px-4 pb-4 pt-0">
+                      <div className="text-xs text-gray-500 italic">
+                        Help: {field.options.helpText}
+                      </div>
                     </div>
-                  </div>
-                </div>
-              )}
-
-              {/* Help Text Preview (when collapsed) */}
-              {!expandedFields.has(index) && field.options?.helpText && (
-                <div className="px-4 pb-4 pt-0">
-                  <div className="text-xs text-gray-500 italic">
-                    Help: {field.options.helpText}
-                  </div>
-                </div>
+                  )}
+                </>
               )}
             </div>
           ))}
