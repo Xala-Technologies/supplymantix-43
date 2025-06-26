@@ -51,6 +51,8 @@ export interface ProcedureField {
     allowMultiple?: boolean;
     maxFileSize?: number;
     acceptedFileTypes?: string[];
+    image?: string;
+    showInSummary?: boolean;
   };
   created_at: string;
   updated_at: string;
