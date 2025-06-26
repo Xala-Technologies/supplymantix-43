@@ -1,11 +1,10 @@
-
 import React, { useState } from "react";
 import { DashboardLayout } from "@/components/Layout/DashboardLayout";
 import { StandardPageLayout, StandardPageHeader, StandardPageFilters, StandardPageContent } from "@/components/Layout/StandardPageLayout";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { Plus, Download } from "lucide-react";
+import { Plus, Download, Sparkles, FileText, Upload } from "lucide-react";
 import { 
   useProceduresEnhanced, 
   useDeleteProcedure, 
@@ -16,13 +15,14 @@ import {
   useUpdateProcedure 
 } from "@/hooks/useProceduresEnhanced";
 import { useProcedureUtils } from "@/hooks/useProcedureUtils";
-import { ProcedureFormBuilder } from "@/components/procedures/ProcedureFormBuilder";
+import { ProcedureTemplateBuilder } from "@/components/procedures/ProcedureTemplateBuilder";
 import { ExecutionDialog } from "@/components/procedures/ExecutionDialog";
 import { ProcedureCard } from "@/components/procedures/ProcedureCard";
 import { ProcedureFilters } from "@/components/procedures/ProcedureFilters";
 import { ProcedureTemplatesDialog } from "@/components/procedures/ProcedureTemplatesDialog";
 import { ProcedureResultsDialog } from "@/components/procedures/ProcedureResultsDialog";
 import { ProcedureEmptyState } from "@/components/procedures/ProcedureEmptyState";
+import { Card, CardContent } from "@/components/ui/card";
 import { toast } from "sonner";
 
 interface ExecutionResult {
@@ -40,6 +40,7 @@ const Procedures = () => {
   const [showExecutionDialog, setShowExecutionDialog] = useState(false);
   const [showResultsDialog, setShowResultsDialog] = useState(false);
   const [showTemplatesDialog, setShowTemplatesDialog] = useState(false);
+  const [showNewProcedureModal, setShowNewProcedureModal] = useState(false);
   const [selectedProcedure, setSelectedProcedure] = useState<any>(null);
   const [executionResult, setExecutionResult] = useState<ExecutionResult | null>(null);
   const [currentExecutionId, setCurrentExecutionId] = useState<string | null>(null);
@@ -203,9 +204,9 @@ const Procedures = () => {
             <Download className="h-4 w-4 mr-2" />
             Import Templates
           </Button>
-          <Button onClick={() => setShowCreateDialog(true)} className="bg-blue-600 hover:bg-blue-700">
+          <Button onClick={() => setShowNewProcedureModal(true)} className="bg-blue-600 hover:bg-blue-700">
             <Plus className="h-4 w-4 mr-2" />
-            Create Procedure
+            New Procedure Template
           </Button>
         </StandardPageHeader>
 
@@ -225,7 +226,7 @@ const Procedures = () => {
           <div className="space-y-6">
             <div className="flex items-center justify-between">
               <h2 className="text-lg font-semibold text-gray-900">
-                {showGlobalOnly ? 'Global Procedures' : 'My Procedures'} ({procedures.length})
+                {showGlobalOnly ? 'Global Procedures' : 'My Templates'} ({procedures.length})
               </h2>
             </div>
             
@@ -233,7 +234,7 @@ const Procedures = () => {
               <ProcedureEmptyState
                 searchTerm={searchTerm}
                 selectedCategory={selectedCategory}
-                onCreateProcedure={() => setShowCreateDialog(true)}
+                onCreateProcedure={() => setShowNewProcedureModal(true)}
               />
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -256,6 +257,65 @@ const Procedures = () => {
         </StandardPageContent>
       </StandardPageLayout>
 
+      {/* New Procedure Creation Modal */}
+      <Dialog open={showNewProcedureModal} onOpenChange={setShowNewProcedureModal}>
+        <DialogContent className="max-w-2xl">
+          <div className="text-center py-8">
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">
+              Create a New Procedure Template
+            </h2>
+            <p className="text-gray-600 mb-8">
+              Choose how you'd like to start building your procedure
+            </p>
+            
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <Card 
+                className="cursor-pointer hover:shadow-lg transition-all border-2 hover:border-blue-300"
+                onClick={() => {
+                  setShowNewProcedureModal(false);
+                  setShowCreateDialog(true);
+                }}
+              >
+                <CardContent className="p-6 text-center">
+                  <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Plus className="h-6 w-6 text-blue-600" />
+                  </div>
+                  <h3 className="font-medium text-gray-900 mb-2">Blank Procedure</h3>
+                  <p className="text-sm text-gray-600">Start Procedure From Scratch</p>
+                </CardContent>
+              </Card>
+              
+              <Card 
+                className="cursor-pointer hover:shadow-lg transition-all border-2 hover:border-purple-300"
+                onClick={() => {
+                  setShowNewProcedureModal(false);
+                  setShowTemplatesDialog(true);
+                }}
+              >
+                <CardContent className="p-6 text-center">
+                  <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Sparkles className="h-6 w-6 text-purple-600" />
+                  </div>
+                  <h3 className="font-medium text-gray-900 mb-2">Use a Template</h3>
+                  <p className="text-sm text-gray-600">Find one in Global Procedure Library</p>
+                </CardContent>
+              </Card>
+              
+              <Card className="cursor-pointer hover:shadow-lg transition-all border-2 hover:border-green-300 opacity-75">
+                <CardContent className="p-6 text-center">
+                  <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Upload className="h-6 w-6 text-green-600" />
+                  </div>
+                  <h3 className="font-medium text-gray-900 mb-2">Import Forms</h3>
+                  <p className="text-sm text-gray-600">Send us your Template to Digitize</p>
+                  <p className="text-xs text-gray-400 mt-2">Coming Soon</p>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
       {/* Templates Dialog */}
       <ProcedureTemplatesDialog
         open={showTemplatesDialog}
@@ -268,11 +328,8 @@ const Procedures = () => {
 
       {/* Create Dialog */}
       <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
-        <DialogContent className="max-w-5xl h-[85vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Create New Procedure</DialogTitle>
-          </DialogHeader>
-          <ProcedureFormBuilder
+        <DialogContent className="max-w-[100vw] max-h-[100vh] w-full h-full p-0 gap-0">
+          <ProcedureTemplateBuilder
             onSave={handleCreateProcedure}
             onCancel={() => setShowCreateDialog(false)}
             isLoading={createProcedure.isPending}
@@ -282,12 +339,9 @@ const Procedures = () => {
 
       {/* Edit Dialog */}
       <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
-        <DialogContent className="max-w-5xl h-[85vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Edit Procedure</DialogTitle>
-          </DialogHeader>
+        <DialogContent className="max-w-[100vw] max-h-[100vh] w-full h-full p-0 gap-0">
           {selectedProcedure && (
-            <ProcedureFormBuilder
+            <ProcedureTemplateBuilder
               initialData={selectedProcedure}
               onSave={handleUpdateProcedure}
               onCancel={() => {
