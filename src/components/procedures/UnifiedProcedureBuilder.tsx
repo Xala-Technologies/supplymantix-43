@@ -1,10 +1,8 @@
-
 import React, { useState } from 'react';
 import { ProcedureField } from '@/lib/database/procedures-enhanced';
 import { ProcedurePreview } from './ProcedurePreview';
 import { ProcedureBuilderHeader } from './builder/ProcedureBuilderHeader';
 import { FieldsList } from './builder/FieldsList';
-import { FieldEditor } from './builder/FieldEditor';
 import { AddItemSidebar } from './builder/AddItemSidebar';
 import { ProcedureSettings } from './builder/ProcedureSettings';
 
@@ -290,18 +288,6 @@ export const UnifiedProcedureBuilder: React.FC<UnifiedProcedureBuilderProps> = (
                 onFieldDelete={removeField}
                 onFieldReorder={reorderFields}
               />
-
-              {selectedFieldIndex !== null && formData.fields[selectedFieldIndex] && (
-                <FieldEditor
-                  field={formData.fields[selectedFieldIndex]}
-                  onUpdate={(field) => updateField(selectedFieldIndex, field)}
-                  onRemove={() => removeField(selectedFieldIndex)}
-                  onMoveUp={() => moveField(selectedFieldIndex, 'up')}
-                  onMoveDown={() => moveField(selectedFieldIndex, 'down')}
-                  canMoveUp={selectedFieldIndex > 0}
-                  canMoveDown={selectedFieldIndex < formData.fields.length - 1}
-                />
-              )}
             </div>
 
             <AddItemSidebar
