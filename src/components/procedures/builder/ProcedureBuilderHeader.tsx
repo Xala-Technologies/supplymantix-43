@@ -28,6 +28,14 @@ export const ProcedureBuilderHeader: React.FC<ProcedureBuilderHeaderProps> = ({
   isLoading,
   hasTitle
 }) => {
+  const handleContinue = () => {
+    if (activeTab === 'fields') {
+      setActiveTab('settings');
+    } else {
+      onSubmit(new Event('submit') as any);
+    }
+  };
+
   return (
     <div className="bg-white border-b border-gray-200">
       <div className="px-6 py-4">
@@ -84,11 +92,11 @@ export const ProcedureBuilderHeader: React.FC<ProcedureBuilderHeaderProps> = ({
               </Button>
               
               <Button 
-                onClick={onSubmit} 
+                onClick={handleContinue} 
                 disabled={isLoading || !hasTitle}
                 className="bg-blue-600 hover:bg-blue-700 gap-2"
               >
-                {isLoading ? 'Saving...' : 'Continue'}
+                {isLoading ? 'Saving...' : activeTab === 'settings' ? 'Save Template' : 'Continue'}
               </Button>
             </div>
           </div>

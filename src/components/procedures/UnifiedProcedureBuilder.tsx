@@ -4,7 +4,7 @@ import { ProcedurePreview } from './ProcedurePreview';
 import { ProcedureBuilderHeader } from './builder/ProcedureBuilderHeader';
 import { FieldsList } from './builder/FieldsList';
 import { AddItemSidebar } from './builder/AddItemSidebar';
-import { ProcedureSettings } from './builder/ProcedureSettings';
+import { ProcedureSettingsEnhanced } from './builder/ProcedureSettingsEnhanced';
 
 interface UnifiedProcedureBuilderProps {
   initialData?: {
@@ -38,7 +38,6 @@ export const UnifiedProcedureBuilder: React.FC<UnifiedProcedureBuilderProps> = (
 }) => {
   const [activeTab, setActiveTab] = useState('fields');
   const [isPreviewMode, setIsPreviewMode] = useState(false);
-  const [newTag, setNewTag] = useState('');
   const [scoringEnabled, setScoringEnabled] = useState(false);
   const [selectedFieldIndex, setSelectedFieldIndex] = useState<number | null>(null);
   
@@ -227,23 +226,6 @@ export const UnifiedProcedureBuilder: React.FC<UnifiedProcedureBuilderProps> = (
     }
   };
 
-  const addTag = () => {
-    if (newTag.trim() && !formData.tags.includes(newTag.trim())) {
-      setFormData(prev => ({
-        ...prev,
-        tags: [...prev.tags, newTag.trim()]
-      }));
-      setNewTag('');
-    }
-  };
-
-  const removeTag = (tag: string) => {
-    setFormData(prev => ({
-      ...prev,
-      tags: prev.tags.filter(t => t !== tag)
-    }));
-  };
-
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onSave(formData);
@@ -299,13 +281,9 @@ export const UnifiedProcedureBuilder: React.FC<UnifiedProcedureBuilderProps> = (
             />
           </>
         ) : (
-          <ProcedureSettings
+          <ProcedureSettingsEnhanced
             formData={formData}
             onUpdate={(updates) => setFormData(prev => ({ ...prev, ...updates }))}
-            newTag={newTag}
-            setNewTag={setNewTag}
-            onAddTag={addTag}
-            onRemoveTag={removeTag}
           />
         )}
       </div>
