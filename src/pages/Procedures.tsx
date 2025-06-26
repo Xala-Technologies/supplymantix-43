@@ -15,7 +15,8 @@ import {
   useUpdateProcedure 
 } from "@/hooks/useProceduresEnhanced";
 import { useProcedureUtils } from "@/hooks/useProcedureUtils";
-import { ProcedureTemplateBuilder } from "@/components/procedures/ProcedureTemplateBuilder";
+import { UnifiedProcedureBuilder } from "@/components/procedures/UnifiedProcedureBuilder";
+import { ProcedureCreationWizard } from "@/components/procedures/ProcedureCreationWizard";
 import { ExecutionDialog } from "@/components/procedures/ExecutionDialog";
 import { EnhancedProcedureCard } from "@/components/procedures/EnhancedProcedureCard";
 import { ProcedureFilters } from "@/components/procedures/ProcedureFilters";
@@ -35,7 +36,7 @@ const Procedures = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [showGlobalOnly, setShowGlobalOnly] = useState(false);
-  const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const [showCreateWizard, setShowCreateWizard] = useState(false);
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [showExecutionDialog, setShowExecutionDialog] = useState(false);
   const [showResultsDialog, setShowResultsDialog] = useState(false);
@@ -86,7 +87,7 @@ const Procedures = () => {
   const handleCreateProcedure = (data: any) => {
     createProcedure.mutate(data, {
       onSuccess: () => {
-        setShowCreateDialog(false);
+        setShowCreateWizard(false);
       }
     });
   };
@@ -538,7 +539,7 @@ const Procedures = () => {
                 className="cursor-pointer hover:shadow-lg transition-all border-2 hover:border-blue-300"
                 onClick={() => {
                   setShowNewProcedureModal(false);
-                  setShowCreateDialog(true);
+                  setShowCreateWizard(true);
                 }}
               >
                 <CardContent className="p-6 text-center">
@@ -591,22 +592,19 @@ const Procedures = () => {
         createProcedureLoading={createProcedure.isPending}
       />
 
-      {/* Create Dialog */}
-      <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
-        <DialogContent className="max-w-[100vw] max-h-[100vh] w-full h-full p-0 gap-0">
-          <ProcedureTemplateBuilder
-            onSave={handleCreateProcedure}
-            onCancel={() => setShowCreateDialog(false)}
-            isLoading={createProcedure.isPending}
-          />
-        </DialogContent>
-      </Dialog>
+      {/* Create Wizard */}
+      <ProcedureCreationWizard
+        open={showCreateWizard}
+        onOpenChange={setShowCreateWizard}
+        onSave={handleCreateProcedure}
+        isLoading={createProcedure.isPending}
+      />
 
       {/* Edit Dialog */}
       <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
         <DialogContent className="max-w-[100vw] max-h-[100vh] w-full h-full p-0 gap-0">
           {selectedProcedure && (
-            <ProcedureTemplateBuilder
+            <UnifiedProcedureBuilder
               initialData={selectedProcedure}
               onSave={handleUpdateProcedure}
               onCancel={() => {
@@ -614,6 +612,7 @@ const Procedures = () => {
                 setSelectedProcedure(null);
               }}
               isLoading={updateProcedure.isPending}
+              mode="edit"
             />
           )}
         </DialogContent>
