@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/integrations/supabase/types";
 import { getCurrentTenantId } from "@/hooks/useInventoryHelpers";
@@ -60,6 +61,7 @@ export interface ProcedureField {
       size: number;
     };
     image?: string;
+    infoText?: string;
   };
   created_at: string;
   updated_at: string;
