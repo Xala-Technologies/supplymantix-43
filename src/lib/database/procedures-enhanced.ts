@@ -458,7 +458,7 @@ export const proceduresEnhancedApi = {
     return { ...createdProcedure, fields: [] };
   },
 
-  // Update procedure
+  // Update procedure with enhanced field handling
   async updateProcedure(id: string, updates: {
     title?: string;
     description?: string;
@@ -736,6 +736,24 @@ export const proceduresEnhancedApi = {
 
     if (error) {
       console.error('Error deleting template:', error);
+      throw error;
+    }
+  },
+
+  // Save field values during execution
+  async saveFieldValues(executionId: string, fieldValues: Record<string, any>): Promise<void> {
+    console.log('Saving field values:', executionId, fieldValues);
+    
+    const { error } = await supabase
+      .from("procedure_executions")
+      .update({
+        answers: fieldValues,
+        updated_at: new Date().toISOString()
+      })
+      .eq("id", executionId);
+
+    if (error) {
+      console.error('Error saving field values:', error);
       throw error;
     }
   }

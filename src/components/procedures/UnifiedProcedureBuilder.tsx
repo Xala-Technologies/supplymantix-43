@@ -8,6 +8,7 @@ import { ProcedureSettings } from './builder/ProcedureSettings';
 
 interface UnifiedProcedureBuilderProps {
   initialData?: {
+    id?: string;
     title: string;
     description: string;
     category: string;
@@ -281,6 +282,7 @@ export const UnifiedProcedureBuilder: React.FC<UnifiedProcedureBuilderProps> = (
               <FieldsList
                 fields={formData.fields}
                 selectedFieldIndex={selectedFieldIndex}
+                procedureId={initialData?.id}
                 onFieldSelect={setSelectedFieldIndex}
                 onFieldMove={moveField}
                 onFieldUpdate={updateField}

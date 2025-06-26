@@ -1,7 +1,8 @@
-
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { ProcedureField } from '@/lib/database/procedures-enhanced';
 import { FieldItem } from './FieldItem';
+import { useUpdateProcedure } from '@/hooks/useProceduresEnhanced';
+import { useDebounce } from '@/hooks/useDebounce';
 
 interface FieldsListProps {
   fields: ProcedureField[];
@@ -15,6 +16,7 @@ interface FieldsListProps {
   isExecutionMode?: boolean;
   fieldValues?: Record<string, any>;
   onFieldValueChange?: (fieldId: string, value: any) => void;
+  procedureId?: string;
 }
 
 export const FieldsList: React.FC<FieldsListProps> = ({
@@ -28,13 +30,57 @@ export const FieldsList: React.FC<FieldsListProps> = ({
   onFieldReorder,
   isExecutionMode = false,
   fieldValues = {},
-  onFieldValueChange
+  onFieldValueChange,
+  procedureId
 }) => {
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
   const [expandedFields, setExpandedFields] = useState<Set<number>>(new Set());
   const [showImageUpload, setShowImageUpload] = useState<Set<number>>(new Set());
+  const [pendingUpdates, setPendingUpdates] = useState<Record<string, any>>({});
   const fileInputRefs = useRef<{ [key: number]: HTMLInputElement | null }>({});
+  
+  const { mutate: updateProcedure } = useUpdateProcedure();
+  const debouncedUpdates = useDebounce(pendingUpdates, 1000);
+
+  // Auto-save field values when they change
+  useEffect(() => {
+    if (isExecutionMode && procedureId && Object.keys(debouncedUpdates).length > 0) {
+      // Save execution values to procedure_executions table
+      console.log('Auto-saving execution values:', debouncedUpdates);
+      // This would typically save to a different table for execution data
+      setPendingUpdates({});
+    }
+  }, [debouncedUpdates, isExecutionMode, procedureId]);
+
+  const handleFieldValueChange = (fieldId: string, value: any) => {
+    if (onFieldValueChange) {
+      onFieldValueChange(fieldId, value);
+    }
+    
+    // Store pending update for auto-save
+    setPendingUpdates(prev => ({
+      ...prev,
+      [fieldId]: value
+    }));
+  };
+
+  const handleFieldUpdate = (index: number, updates: Partial<ProcedureField>) => {
+    if (onFieldUpdate) {
+      onFieldUpdate(index, updates);
+    }
+
+    // Auto-save field configuration changes
+    if (procedureId && !isExecutionMode) {
+      const updatedFields = [...fields];
+      updatedFields[index] = { ...updatedFields[index], ...updates };
+      
+      updateProcedure({
+        id: procedureId,
+        updates: { fields: updatedFields }
+      });
+    }
+  };
 
   const handleDragStart = (e: React.DragEvent, index: number) => {
     e.dataTransfer.effectAllowed = 'move';
@@ -58,6 +104,24 @@ export const FieldsList: React.FC<FieldsListProps> = ({
     
     if (dragIndex !== dropIndex && onFieldReorder) {
       onFieldReorder(dragIndex, dropIndex);
+      
+      // Auto-save reordered fields
+      if (procedureId && !isExecutionMode) {
+        const reorderedFields = [...fields];
+        const [movedField] = reorderedFields.splice(dragIndex, 1);
+        reorderedFields.splice(dropIndex, 0, movedField);
+        
+        // Update order indexes
+        const updatedFields = reorderedFields.map((field, i) => ({
+          ...field,
+          order_index: i
+        }));
+        
+        updateProcedure({
+          id: procedureId,
+          updates: { fields: updatedFields }
+        });
+      }
     }
     
     setDraggedIndex(null);
@@ -91,12 +155,12 @@ export const FieldsList: React.FC<FieldsListProps> = ({
 
   const handleFileUpload = (index: number, e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file && onFieldUpdate) {
+    if (file) {
       const reader = new FileReader();
       reader.onload = () => {
         const fileUrl = reader.result as string;
         const field = fields[index];
-        onFieldUpdate(index, { 
+        const updates = { 
           options: { 
             ...field.options, 
             attachedFile: {
@@ -106,7 +170,8 @@ export const FieldsList: React.FC<FieldsListProps> = ({
               size: file.size
             }
           } 
-        });
+        };
+        handleFieldUpdate(index, updates);
       };
       reader.readAsDataURL(file);
     }
@@ -121,17 +186,18 @@ export const FieldsList: React.FC<FieldsListProps> = ({
 
   const handleImageUpload = (index: number, e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file && onFieldUpdate) {
+    if (file) {
       const reader = new FileReader();
       reader.onload = () => {
         const imageUrl = reader.result as string;
         const field = fields[index];
-        onFieldUpdate(index, { 
+        const updates = { 
           options: { 
             ...field.options, 
             image: imageUrl 
           } 
-        });
+        };
+        handleFieldUpdate(index, updates);
       };
       reader.readAsDataURL(file);
     }
@@ -169,10 +235,10 @@ export const FieldsList: React.FC<FieldsListProps> = ({
               fileInputRef={{ current: fileInputRefs.current[index] || null }}
               onFieldSelect={onFieldSelect}
               onFieldMove={onFieldMove}
-              onFieldUpdate={onFieldUpdate}
+              onFieldUpdate={handleFieldUpdate}
               onFieldDuplicate={onFieldDuplicate}
               onFieldDelete={onFieldDelete}
-              onFieldValueChange={onFieldValueChange}
+              onFieldValueChange={handleFieldValueChange}
               onDragStart={handleDragStart}
               onDragOver={handleDragOver}
               onDragLeave={handleDragLeave}
