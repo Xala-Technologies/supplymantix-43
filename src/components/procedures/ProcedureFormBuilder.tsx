@@ -78,11 +78,14 @@ export const ProcedureFormBuilder: React.FC<ProcedureFormBuilderProps> = ({
   const addField = () => {
     const newField: ProcedureField = {
       id: crypto.randomUUID(),
+      procedure_id: '',
       label: 'New Field',
       field_type: 'text',
       is_required: false,
-      field_order: formData.fields.length,
-      options: null
+      order_index: formData.fields.length,
+      options: {},
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
     };
     setFormData(prev => ({
       ...prev,
@@ -102,7 +105,7 @@ export const ProcedureFormBuilder: React.FC<ProcedureFormBuilderProps> = ({
       ...prev,
       fields: prev.fields.filter((_, i) => i !== index).map((field, i) => ({
         ...field,
-        field_order: i
+        order_index: i
       }))
     }));
   };
@@ -115,9 +118,9 @@ export const ProcedureFormBuilder: React.FC<ProcedureFormBuilderProps> = ({
     const newIndex = direction === 'up' ? index - 1 : index + 1;
     [newFields[index], newFields[newIndex]] = [newFields[newIndex], newFields[index]];
     
-    // Update field_order
-    newFields[index].field_order = index;
-    newFields[newIndex].field_order = newIndex;
+    // Update order_index
+    newFields[index].order_index = index;
+    newFields[newIndex].order_index = newIndex;
     
     setFormData(prev => ({ ...prev, fields: newFields }));
   };

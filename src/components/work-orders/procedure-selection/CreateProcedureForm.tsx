@@ -50,11 +50,15 @@ export const CreateProcedureForm: React.FC<CreateProcedureFormProps> = ({
 
   const addField = () => {
     const newField: ProcedureField = {
+      id: crypto.randomUUID(),
+      procedure_id: '',
       label: 'New Field',
       field_type: 'text',
       is_required: false,
-      field_order: formData.fields.length,
-      options: {}
+      order_index: formData.fields.length,
+      options: {},
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
     };
     setFormData(prev => ({
       ...prev,

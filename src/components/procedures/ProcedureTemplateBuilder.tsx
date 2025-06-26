@@ -70,11 +70,14 @@ export const ProcedureTemplateBuilder: React.FC<ProcedureTemplateBuilderProps> =
   const addField = (type: ProcedureField['field_type'] = 'text') => {
     const newField: ProcedureField = {
       id: crypto.randomUUID(),
+      procedure_id: '',
       label: 'New Field',
       field_type: type,
       is_required: false,
-      field_order: formData.fields.length,
-      options: type === 'select' || type === 'multiselect' ? { choices: [] } : {}
+      order_index: formData.fields.length,
+      options: type === 'select' || type === 'multiselect' ? { choices: [] } : {},
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
     };
     
     setFormData(prev => ({
@@ -86,11 +89,14 @@ export const ProcedureTemplateBuilder: React.FC<ProcedureTemplateBuilderProps> =
   const addHeading = () => {
     const newField: ProcedureField = {
       id: crypto.randomUUID(),
+      procedure_id: '',
       label: 'Section Heading',
       field_type: 'section',
       is_required: false,
-      field_order: formData.fields.length,
-      options: {}
+      order_index: formData.fields.length,
+      options: {},
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
     };
     
     setFormData(prev => ({
@@ -111,7 +117,7 @@ export const ProcedureTemplateBuilder: React.FC<ProcedureTemplateBuilderProps> =
       ...prev,
       fields: prev.fields.filter((_, i) => i !== index).map((field, i) => ({
         ...field,
-        field_order: i
+        order_index: i
       }))
     }));
   };
@@ -124,8 +130,8 @@ export const ProcedureTemplateBuilder: React.FC<ProcedureTemplateBuilderProps> =
     const newIndex = direction === 'up' ? index - 1 : index + 1;
     [newFields[index], newFields[newIndex]] = [newFields[newIndex], newFields[index]];
     
-    newFields[index].field_order = index;
-    newFields[newIndex].field_order = newIndex;
+    newFields[index].order_index = index;
+    newFields[newIndex].order_index = newIndex;
     
     setFormData(prev => ({ ...prev, fields: newFields }));
   };
