@@ -9,7 +9,7 @@ import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Trash2, GripVertical, ChevronUp, ChevronDown, Link, Paperclip, Star, Copy, Eye, EyeOff, AlertCircle, Check, Plus, X } from "lucide-react";
-import { ProcedureField } from "@/lib/database/procedures-enhanced";
+import { ProcedureField, ProcedureFieldType } from "@/lib/database/procedures-enhanced";
 import { toast } from "sonner";
 
 interface EnhancedFieldEditorProps {
@@ -23,26 +23,26 @@ interface EnhancedFieldEditorProps {
 }
 
 const FIELD_TYPES = [
-  { value: 'text', label: 'Text Field', icon: '📝', description: 'Single line text input' },
-  { value: 'textarea', label: 'Long Text', icon: '📄', description: 'Multi-line text area' },
-  { value: 'number', label: 'Number Field', icon: '#️⃣', description: 'Numeric input with validation' },
-  { value: 'email', label: 'Email Field', icon: '📧', description: 'Email address input' },
-  { value: 'url', label: 'URL Field', icon: '🔗', description: 'Website URL input' },
-  { value: 'phone', label: 'Phone Field', icon: '📞', description: 'Phone number input' },
-  { value: 'checkbox', label: 'Checkbox', icon: '☑️', description: 'Single checkbox option' },
-  { value: 'select', label: 'Multiple Choice', icon: '🔘', description: 'Single selection dropdown' },
-  { value: 'multiselect', label: 'Checklist', icon: '✅', description: 'Multiple selection options' },
-  { value: 'radio', label: 'Radio Buttons', icon: '⚪', description: 'Single choice from options' },
-  { value: 'date', label: 'Date', icon: '📅', description: 'Date picker input' },
-  { value: 'time', label: 'Time', icon: '⏰', description: 'Time picker input' },
-  { value: 'datetime', label: 'Date & Time', icon: '📅⏰', description: 'Date and time picker' },
-  { value: 'file', label: 'File Upload', icon: '📁', description: 'File attachment field' },
-  { value: 'image', label: 'Image Upload', icon: '🖼️', description: 'Image attachment field' },
-  { value: 'rating', label: 'Rating Scale', icon: '⭐', description: 'Star rating or scale input' },
-  { value: 'slider', label: 'Slider', icon: '📊', description: 'Range slider input' },
-  { value: 'section', label: 'Section Heading', icon: '📋', description: 'Organize fields into sections' },
-  { value: 'divider', label: 'Divider Line', icon: '➖', description: 'Visual separator' },
-  { value: 'info', label: 'Information Text', icon: 'ℹ️', description: 'Display-only text block' }
+  { value: 'text' as ProcedureFieldType, label: 'Text Field', icon: '📝', description: 'Single line text input' },
+  { value: 'textarea' as ProcedureFieldType, label: 'Long Text', icon: '📄', description: 'Multi-line text area' },
+  { value: 'number' as ProcedureFieldType, label: 'Number Field', icon: '#️⃣', description: 'Numeric input with validation' },
+  { value: 'email' as ProcedureFieldType, label: 'Email Field', icon: '📧', description: 'Email address input' },
+  { value: 'url' as ProcedureFieldType, label: 'URL Field', icon: '🔗', description: 'Website URL input' },
+  { value: 'phone' as ProcedureFieldType, label: 'Phone Field', icon: '📞', description: 'Phone number input' },
+  { value: 'checkbox' as ProcedureFieldType, label: 'Checkbox', icon: '☑️', description: 'Single checkbox option' },
+  { value: 'select' as ProcedureFieldType, label: 'Multiple Choice', icon: '🔘', description: 'Single selection dropdown' },
+  { value: 'multiselect' as ProcedureFieldType, label: 'Checklist', icon: '✅', description: 'Multiple selection options' },
+  { value: 'radio' as ProcedureFieldType, label: 'Radio Buttons', icon: '⚪', description: 'Single choice from options' },
+  { value: 'date' as ProcedureFieldType, label: 'Date', icon: '📅', description: 'Date picker input' },
+  { value: 'time' as ProcedureFieldType, label: 'Time', icon: '⏰', description: 'Time picker input' },
+  { value: 'datetime' as ProcedureFieldType, label: 'Date & Time', icon: '📅⏰', description: 'Date and time picker' },
+  { value: 'file' as ProcedureFieldType, label: 'File Upload', icon: '📁', description: 'File attachment field' },
+  { value: 'image' as ProcedureFieldType, label: 'Image Upload', icon: '🖼️', description: 'Image attachment field' },
+  { value: 'rating' as ProcedureFieldType, label: 'Rating Scale', icon: '⭐', description: 'Star rating or scale input' },
+  { value: 'slider' as ProcedureFieldType, label: 'Slider', icon: '📊', description: 'Range slider input' },
+  { value: 'section' as ProcedureFieldType, label: 'Section Heading', icon: '📋', description: 'Organize fields into sections' },
+  { value: 'divider' as ProcedureFieldType, label: 'Divider Line', icon: '➖', description: 'Visual separator' },
+  { value: 'info' as ProcedureFieldType, label: 'Information Text', icon: 'ℹ️', description: 'Display-only text block' }
 ];
 
 export const EnhancedFieldEditor: React.FC<EnhancedFieldEditorProps> = ({
@@ -59,7 +59,7 @@ export const EnhancedFieldEditor: React.FC<EnhancedFieldEditorProps> = ({
   const [newChoice, setNewChoice] = useState('');
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
 
-  const getFieldTypeInfo = (type: string) => {
+  const getFieldTypeInfo = (type: ProcedureFieldType) => {
     return FIELD_TYPES.find(t => t.value === type) || FIELD_TYPES[0];
   };
 
@@ -365,7 +365,7 @@ export const EnhancedFieldEditor: React.FC<EnhancedFieldEditorProps> = ({
                     <Select
                       value={field.field_type}
                       onValueChange={(value) => handleFieldUpdate({ 
-                        field_type: value as ProcedureField['field_type'],
+                        field_type: value as ProcedureFieldType,
                         options: ['select', 'multiselect', 'radio'].includes(value) ? { choices: [] } : 
                                 value === 'rating' ? { maxRating: 5, minRating: 1 } :
                                 value === 'slider' ? { minValue: 0, maxValue: 100, step: 1 } : {}

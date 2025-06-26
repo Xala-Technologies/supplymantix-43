@@ -7,16 +7,53 @@ type Procedure = Tables["procedures"]["Row"];
 type ProcedureInsert = Tables["procedures"]["Insert"];
 type ProcedureUpdate = Tables["procedures"]["Update"];
 
+export type ProcedureFieldType = 
+  | 'text'
+  | 'textarea' 
+  | 'number'
+  | 'email'
+  | 'url'
+  | 'phone'
+  | 'checkbox'
+  | 'select'
+  | 'multiselect'
+  | 'radio'
+  | 'date'
+  | 'time'
+  | 'datetime'
+  | 'file'
+  | 'image'
+  | 'rating'
+  | 'slider'
+  | 'section'
+  | 'divider'
+  | 'info';
+
 export interface ProcedureField {
-  id?: string;
-  procedure_id?: string;
+  id: string;
+  procedure_id: string;
+  field_type: ProcedureFieldType;
   label: string;
-  field_type: 'text' | 'number' | 'date' | 'checkbox' | 'select' | 'multiselect' | 'file' | 'section';
   is_required: boolean;
-  field_order: number;
-  options?: any;
-  created_at?: string;
-  updated_at?: string;
+  order_index: number;
+  options?: {
+    choices?: string[];
+    placeholder?: string;
+    helpText?: string;
+    defaultValue?: string | number;
+    minValue?: number;
+    maxValue?: number;
+    step?: number;
+    minRating?: number;
+    maxRating?: number;
+    points?: number;
+    infoText?: string;
+    allowMultiple?: boolean;
+    maxFileSize?: number;
+    acceptedFileTypes?: string[];
+  };
+  created_at: string;
+  updated_at: string;
 }
 
 export interface ProcedureExecution {
@@ -64,28 +101,28 @@ const getSampleTemplates = (): Omit<ProcedureTemplate, 'id' | 'tenant_id' | 'cre
           label: "Equipment ID",
           field_type: "text",
           is_required: true,
-          field_order: 0,
+          order_index: 0,
           options: {}
         },
         {
           label: "Inspector Name",
           field_type: "text",
           is_required: true,
-          field_order: 1,
+          order_index: 1,
           options: {}
         },
         {
           label: "Visual Inspection Complete",
           field_type: "checkbox",
           is_required: true,
-          field_order: 2,
+          order_index: 2,
           options: {}
         },
         {
           label: "Safety Guards in Place",
           field_type: "select",
           is_required: true,
-          field_order: 3,
+          order_index: 3,
           options: {
             choices: ["Yes - All Present", "Partial - Some Missing", "No - None Present"]
           }
@@ -94,7 +131,7 @@ const getSampleTemplates = (): Omit<ProcedureTemplate, 'id' | 'tenant_id' | 'cre
           label: "Issues Found",
           field_type: "multiselect",
           is_required: false,
-          field_order: 4,
+          order_index: 4,
           options: {
             choices: ["Loose bolts", "Worn belts", "Oil leaks", "Unusual noises", "Vibration", "Other"]
           }
@@ -103,7 +140,7 @@ const getSampleTemplates = (): Omit<ProcedureTemplate, 'id' | 'tenant_id' | 'cre
           label: "Additional Notes",
           field_type: "text",
           is_required: false,
-          field_order: 5,
+          order_index: 5,
           options: {}
         }
       ]
@@ -123,14 +160,14 @@ const getSampleTemplates = (): Omit<ProcedureTemplate, 'id' | 'tenant_id' | 'cre
           label: "System Location",
           field_type: "text",
           is_required: true,
-          field_order: 0,
+          order_index: 0,
           options: {}
         },
         {
           label: "Filter Condition",
           field_type: "select",
           is_required: true,
-          field_order: 1,
+          order_index: 1,
           options: {
             choices: ["Clean", "Dirty - Cleaned", "Replaced", "Needs Replacement"]
           }
@@ -139,28 +176,28 @@ const getSampleTemplates = (): Omit<ProcedureTemplate, 'id' | 'tenant_id' | 'cre
           label: "Temperature Reading (°F)",
           field_type: "number",
           is_required: true,
-          field_order: 2,
+          order_index: 2,
           options: {}
         },
         {
           label: "Belt Tension Check",
           field_type: "checkbox",
           is_required: true,
-          field_order: 3,
+          order_index: 3,
           options: {}
         },
         {
           label: "Lubrication Points Serviced",
           field_type: "checkbox",
           is_required: true,
-          field_order: 4,
+          order_index: 4,
           options: {}
         },
         {
           label: "System Performance",
           field_type: "select",
           is_required: true,
-          field_order: 5,
+          order_index: 5,
           options: {
             choices: ["Excellent", "Good", "Fair", "Poor - Needs Attention"]
           }
@@ -182,35 +219,35 @@ const getSampleTemplates = (): Omit<ProcedureTemplate, 'id' | 'tenant_id' | 'cre
           label: "Product/Batch Number",
           field_type: "text",
           is_required: true,
-          field_order: 0,
+          order_index: 0,
           options: {}
         },
         {
           label: "Inspector Badge Number",
           field_type: "text",
           is_required: true,
-          field_order: 1,
+          order_index: 1,
           options: {}
         },
         {
           label: "Inspection Date",
           field_type: "date",
           is_required: true,
-          field_order: 2,
+          order_index: 2,
           options: {}
         },
         {
           label: "Dimensional Check Pass",
           field_type: "checkbox",
           is_required: true,
-          field_order: 3,
+          order_index: 3,
           options: {}
         },
         {
           label: "Surface Finish Quality",
           field_type: "select",
           is_required: true,
-          field_order: 4,
+          order_index: 4,
           options: {
             choices: ["Excellent", "Good", "Acceptable", "Reject"]
           }
@@ -219,7 +256,7 @@ const getSampleTemplates = (): Omit<ProcedureTemplate, 'id' | 'tenant_id' | 'cre
           label: "Defects Found",
           field_type: "multiselect",
           is_required: false,
-          field_order: 5,
+          order_index: 5,
           options: {
             choices: ["Scratches", "Dents", "Color variation", "Incomplete assembly", "Missing parts"]
           }
@@ -228,7 +265,7 @@ const getSampleTemplates = (): Omit<ProcedureTemplate, 'id' | 'tenant_id' | 'cre
           label: "Overall Result",
           field_type: "select",
           is_required: true,
-          field_order: 6,
+          order_index: 6,
           options: {
             choices: ["Pass", "Pass with Notes", "Conditional Pass", "Reject"]
           }
@@ -389,7 +426,7 @@ export const proceduresEnhancedApi = {
         label: field.label,
         field_type: field.field_type,
         is_required: field.is_required,
-        field_order: field.field_order || index,
+        order_index: field.order_index || index,
         options: field.options || {}
       }));
 
@@ -454,7 +491,7 @@ export const proceduresEnhancedApi = {
           label: field.label,
           field_type: field.field_type,
           is_required: field.is_required,
-          field_order: field.field_order || index,
+          order_index: field.order_index || index,
           options: field.options || {}
         }));
 
@@ -698,7 +735,7 @@ const mapFieldFromDB = (dbField: any): ProcedureField => ({
   label: dbField.label,
   field_type: dbField.field_type as ProcedureField['field_type'],
   is_required: dbField.is_required || false,
-  field_order: dbField.field_order || 0,
+  order_index: dbField.field_order || 0,
   options: dbField.options || {},
   created_at: dbField.created_at,
   updated_at: dbField.updated_at
