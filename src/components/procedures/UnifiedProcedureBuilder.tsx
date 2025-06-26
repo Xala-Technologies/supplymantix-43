@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -26,7 +25,8 @@ import {
   List,
   CheckSquare,
   Search,
-  GripVertical
+  GripVertical,
+  ChevronDown
 } from 'lucide-react';
 import { ProcedureField } from '@/lib/database/procedures-enhanced';
 import { EnhancedFieldEditor } from './EnhancedFieldEditor';
@@ -66,12 +66,12 @@ const CATEGORIES = [
 ];
 
 const FIELD_TYPES = [
-  { type: 'text', label: 'Text Field', icon: Type, color: 'text-green-600' },
-  { type: 'checkbox', label: 'Checkbox', icon: CheckSquare, color: 'text-blue-600' },
-  { type: 'number', label: 'Number Field', icon: Hash, color: 'text-orange-600' },
-  { type: 'select', label: 'Multiple Choice', icon: List, color: 'text-red-600' },
-  { type: 'multiselect', label: 'Checklist', icon: CheckSquare, color: 'text-purple-600' },
-  { type: 'date', label: 'Inspection Check', icon: Search, color: 'text-cyan-600' }
+  { type: 'text', label: 'Text Field', icon: '🟢', color: 'text-green-600' },
+  { type: 'checkbox', label: 'Checkbox', icon: '☑️', color: 'text-blue-600' },
+  { type: 'number', label: 'Number Field', icon: '🟠', color: 'text-orange-600' },
+  { type: 'select', label: 'Multiple Choice', icon: '🔴', color: 'text-red-600' },
+  { type: 'multiselect', label: 'Checklist', icon: '🟣', color: 'text-purple-600' },
+  { type: 'date', label: 'Inspection Check', icon: '🔵', color: 'text-cyan-600' }
 ];
 
 export const UnifiedProcedureBuilder: React.FC<UnifiedProcedureBuilderProps> = ({
@@ -86,6 +86,7 @@ export const UnifiedProcedureBuilder: React.FC<UnifiedProcedureBuilderProps> = (
   const [newTag, setNewTag] = useState('');
   const [scoringEnabled, setScoringEnabled] = useState(false);
   const [selectedFieldIndex, setSelectedFieldIndex] = useState<number | null>(null);
+  const [showFieldTypeDropdown, setShowFieldTypeDropdown] = useState(false);
   
   const [formData, setFormData] = useState({
     title: initialData?.title || '',
@@ -114,6 +115,7 @@ export const UnifiedProcedureBuilder: React.FC<UnifiedProcedureBuilderProps> = (
       fields: [...prev.fields, newField]
     }));
     setSelectedFieldIndex(formData.fields.length);
+    setShowFieldTypeDropdown(false);
   };
 
   const addHeading = () => {
@@ -211,66 +213,64 @@ export const UnifiedProcedureBuilder: React.FC<UnifiedProcedureBuilderProps> = (
             <div className="flex items-center gap-4">
               <Button variant="ghost" size="sm" onClick={onCancel} className="gap-2">
                 <ArrowLeft className="h-4 w-4" />
-                {formData.title || 'Untitled Procedure'}
+                {formData.title || 'Fire Extinguisher Inspection'}
               </Button>
             </div>
             
-            <div className="flex items-center gap-3">
-              <div className="flex items-center gap-2">
-                <Label className="text-sm">Scoring</Label>
-                <Switch
-                  checked={scoringEnabled}
-                  onCheckedChange={setScoringEnabled}
-                />
+            <div className="flex items-center gap-6">
+              {/* Tabs Navigation */}
+              <nav className="flex space-x-8">
+                <button
+                  onClick={() => setActiveTab('fields')}
+                  className={`py-2 px-1 border-b-2 font-medium text-sm transition-colors ${
+                    activeTab === 'fields'
+                      ? 'border-blue-500 text-blue-600'
+                      : 'border-transparent text-gray-500 hover:text-gray-700'
+                  }`}
+                >
+                  Procedure Fields
+                </button>
+                <button
+                  onClick={() => setActiveTab('settings')}
+                  className={`py-2 px-1 border-b-2 font-medium text-sm transition-colors ${
+                    activeTab === 'settings'
+                      ? 'border-blue-500 text-blue-600'
+                      : 'border-transparent text-gray-500 hover:text-gray-700'
+                  }`}
+                >
+                  Settings
+                </button>
+              </nav>
+              
+              <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2">
+                  <Label className="text-sm">Scoring</Label>
+                  <Switch
+                    checked={scoringEnabled}
+                    onCheckedChange={setScoringEnabled}
+                  />
+                </div>
+                
+                <Button 
+                  variant="outline" 
+                  onClick={() => setIsPreviewMode(true)}
+                  className="gap-2"
+                  disabled={!formData.title}
+                >
+                  <Eye className="h-4 w-4" />
+                  Preview
+                </Button>
+                
+                <Button 
+                  onClick={handleSubmit} 
+                  disabled={isLoading || !formData.title.trim()}
+                  className="bg-blue-600 hover:bg-blue-700 gap-2"
+                >
+                  {isLoading ? 'Saving...' : 'Continue'}
+                </Button>
               </div>
-              
-              <Button 
-                variant="outline" 
-                onClick={() => setIsPreviewMode(true)}
-                className="gap-2"
-                disabled={!formData.title}
-              >
-                <Eye className="h-4 w-4" />
-                Preview
-              </Button>
-              
-              <Button 
-                onClick={handleSubmit} 
-                disabled={isLoading || !formData.title.trim()}
-                className="bg-blue-600 hover:bg-blue-700 gap-2"
-              >
-                {isLoading ? 'Saving...' : 'Continue'}
-              </Button>
             </div>
           </div>
-        </div>
-      </div>
-
-      {/* Tabs Navigation */}
-      <div className="bg-white border-b">
-        <div className="px-6">
-          <nav className="flex space-x-8">
-            <button
-              onClick={() => setActiveTab('fields')}
-              className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
-                activeTab === 'fields'
-                  ? 'border-blue-500 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700'
-              }`}
-            >
-              Procedure Fields
-            </button>
-            <button
-              onClick={() => setActiveTab('settings')}
-              className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
-                activeTab === 'settings'
-                  ? 'border-blue-500 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700'
-              }`}
-            >
-              Settings
-            </button>
-          </nav>
         </div>
       </div>
 
@@ -278,167 +278,147 @@ export const UnifiedProcedureBuilder: React.FC<UnifiedProcedureBuilderProps> = (
       <div className="flex-1 flex overflow-hidden">
         {activeTab === 'fields' ? (
           <>
-            {/* Main Content Area */}
-            <div className="flex-1 overflow-y-auto bg-white">
-              <div className="p-8">
-                <div className="max-w-4xl">
-                  <div className="mb-6">
-                    <h1 className="text-2xl font-bold text-gray-900 mb-2">
-                      {formData.title || 'Fire Extinguisher Inspection'}
-                    </h1>
-                    <p className="text-gray-600">
-                      {formData.description || 'Routine fire extinguisher inspection form to ensure operability.'}
-                    </p>
-                  </div>
+            {/* Main Content */}
+            <div className="flex-1 bg-white p-8">
+              <div className="max-w-4xl">
+                <div className="mb-8">
+                  <h1 className="text-2xl font-bold text-gray-900 mb-2">
+                    {formData.title || 'Fire Extinguisher Inspection'}
+                  </h1>
+                  <p className="text-gray-600">
+                    {formData.description || 'Routine fire extinguisher inspection form to ensure operability.'}
+                  </p>
+                </div>
 
-                  {/* Field Editor Area */}
-                  <div className="border-2 border-dashed border-gray-200 rounded-lg p-6 min-h-[400px] bg-gray-50">
-                    {selectedFieldIndex !== null && formData.fields[selectedFieldIndex] ? (
-                      <div className="bg-white rounded-lg p-6 border">
-                        <div className="flex items-center gap-2 mb-4">
-                          <GripVertical className="h-4 w-4 text-gray-400" />
-                          <span className="text-sm text-gray-500">Field {selectedFieldIndex + 1}</span>
-                        </div>
-                        
-                        <EnhancedFieldEditor
-                          field={formData.fields[selectedFieldIndex]}
-                          index={selectedFieldIndex}
-                          totalFields={formData.fields.length}
-                          scoringEnabled={scoringEnabled}
-                          onUpdate={(updates) => updateField(selectedFieldIndex, updates)}
-                          onDelete={() => removeField(selectedFieldIndex)}
-                          onMove={(direction) => moveField(selectedFieldIndex, direction)}
+                {/* Field Editor */}
+                <div className="border-2 border-blue-200 rounded-lg p-6 bg-blue-50/30 min-h-[400px]">
+                  {selectedFieldIndex !== null && formData.fields[selectedFieldIndex] ? (
+                    <div className="bg-white rounded-lg border border-gray-200">
+                      <div className="p-4 border-b border-gray-200 flex items-center gap-3">
+                        <GripVertical className="h-4 w-4 text-gray-400" />
+                        <Input
+                          value={formData.fields[selectedFieldIndex].label}
+                          onChange={(e) => updateField(selectedFieldIndex, { label: e.target.value })}
+                          placeholder="Field Name"
+                          className="border-0 bg-transparent text-base font-medium focus-visible:ring-0 px-0"
                         />
                       </div>
-                    ) : (
-                      <div className="text-center py-16">
-                        <p className="text-gray-500 mb-4">
-                          {formData.fields.length === 0 
-                            ? 'No fields added yet. Use the toolbar on the right to add your first field.'
-                            : 'Select a field to edit its properties.'}
-                        </p>
+                      
+                      <div className="p-4">
+                        <div className="text-sm text-gray-500 mb-2">Text will be entered here</div>
+                        
+                        {/* Field Preview */}
+                        <div className="bg-gray-50 p-3 rounded border">
+                          {formData.fields[selectedFieldIndex].field_type === 'text' && (
+                            <input 
+                              type="text" 
+                              placeholder="Text input preview"
+                              className="w-full px-3 py-2 border border-gray-300 rounded-md bg-white"
+                              disabled
+                            />
+                          )}
+                          {formData.fields[selectedFieldIndex].field_type === 'checkbox' && (
+                            <label className="flex items-center">
+                              <input type="checkbox" className="rounded border-gray-300 mr-2" disabled />
+                              <span className="text-sm">Checkbox option</span>
+                            </label>
+                          )}
+                          {formData.fields[selectedFieldIndex].field_type === 'number' && (
+                            <input 
+                              type="number" 
+                              placeholder="0"
+                              className="w-full px-3 py-2 border border-gray-300 rounded-md bg-white"
+                              disabled
+                            />
+                          )}
+                        </div>
                       </div>
-                    )}
-                  </div>
-
-                  {/* Fields List */}
-                  {formData.fields.length > 0 && (
-                    <div className="mt-6">
-                      <h3 className="text-lg font-medium mb-4">Fields ({formData.fields.length})</h3>
-                      <div className="space-y-2">
-                        {formData.fields.map((field, index) => (
-                          <div
-                            key={field.id || index}
-                            onClick={() => setSelectedFieldIndex(index)}
-                            className={`p-3 border rounded-lg cursor-pointer transition-colors ${
-                              selectedFieldIndex === index
-                                ? 'border-blue-500 bg-blue-50'
-                                : 'border-gray-200 hover:border-gray-300'
-                            }`}
-                          >
-                            <div className="flex items-center justify-between">
-                              <div className="flex items-center gap-3">
-                                <span className="text-sm text-gray-500">#{index + 1}</span>
-                                <span className="font-medium">{field.label}</span>
-                                <Badge variant="outline" className="text-xs">
-                                  {field.field_type}
-                                </Badge>
-                              </div>
-                              <div className="flex items-center gap-2">
-                                {field.is_required && (
-                                  <Badge variant="secondary" className="text-xs">Required</Badge>
-                                )}
-                                <GripVertical className="h-4 w-4 text-gray-400" />
-                              </div>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
+                    </div>
+                  ) : (
+                    <div className="text-center py-16">
+                      <p className="text-gray-500 mb-4">
+                        No field selected. Add a field from the sidebar to get started.
+                      </p>
                     </div>
                   )}
                 </div>
               </div>
             </div>
 
-            {/* Right Sidebar - Field Toolbar */}
-            <div className="w-80 bg-white border-l border-gray-200 overflow-y-auto">
-              <div className="p-6">
-                <div className="mb-6">
-                  <div className="flex items-center gap-2 mb-4">
-                    <Plus className="h-5 w-5 text-blue-600" />
-                    <h3 className="font-medium">New Item</h3>
-                  </div>
-                  <Button
-                    onClick={() => addField()}
-                    className="w-full mb-3 justify-start gap-2"
-                    variant="outline"
-                  >
-                    <Plus className="h-4 w-4" />
-                    Field
-                  </Button>
-                </div>
-
-                <div className="mb-6">
-                  <div className="flex items-center gap-2 mb-4">
-                    <Type className="h-5 w-5 text-blue-600" />
-                    <h3 className="font-medium">Heading</h3>
-                  </div>
-                  <Button
-                    onClick={addHeading}
-                    className="w-full mb-3 justify-start gap-2"
-                    variant="outline"
-                  >
-                    <Type className="h-4 w-4" />
-                    Heading
-                  </Button>
-                </div>
-
-                <div className="mb-6">
-                  <div className="flex items-center gap-2 mb-4">
-                    <FileText className="h-5 w-5 text-blue-600" />
-                    <h3 className="font-medium">Section</h3>
-                  </div>
-                  <Button
-                    onClick={() => addField('section')}
-                    className="w-full mb-3 justify-start gap-2"
-                    variant="outline"
-                  >
-                    <FileText className="h-4 w-4" />
-                    Section
-                  </Button>
-                </div>
-
+            {/* Right Sidebar */}
+            <div className="w-80 bg-white border-l border-gray-200 p-6">
+              <div className="space-y-6">
+                {/* New Item Section */}
                 <div>
-                  <div className="flex items-center gap-2 mb-4">
-                    <FileText className="h-5 w-5 text-blue-600" />
-                    <h3 className="font-medium">Procedure</h3>
+                  <h3 className="text-sm font-medium text-gray-700 mb-4">New Item</h3>
+                  
+                  {/* Field Button with Dropdown */}
+                  <div className="relative mb-3">
+                    <Button
+                      onClick={() => setShowFieldTypeDropdown(!showFieldTypeDropdown)}
+                      className="w-full justify-between bg-green-100 text-green-700 hover:bg-green-200 border border-green-300"
+                      variant="outline"
+                    >
+                      <div className="flex items-center gap-2">
+                        <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
+                          <Plus className="h-3 w-3 text-white" />
+                        </div>
+                        Field
+                      </div>
+                      <ChevronDown className="h-4 w-4" />
+                    </Button>
+                    
+                    {showFieldTypeDropdown && (
+                      <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
+                        {FIELD_TYPES.map((fieldType) => (
+                          <button
+                            key={fieldType.type}
+                            onClick={() => addField(fieldType.type as ProcedureField['field_type'])}
+                            className="w-full p-3 text-left hover:bg-gray-50 flex items-center gap-3 first:rounded-t-lg last:rounded-b-lg"
+                          >
+                            <span className="text-sm">{fieldType.icon}</span>
+                            <span className="text-sm">{fieldType.label}</span>
+                          </button>
+                        ))}
+                      </div>
+                    )}
                   </div>
-                  <Button
-                    className="w-full mb-3 justify-start gap-2"
-                    variant="outline"
-                    disabled
-                  >
-                    <FileText className="h-4 w-4" />
-                    Procedure
-                  </Button>
                 </div>
 
-                {/* Field Types Dropdown */}
-                <div className="border-t pt-6 mt-6">
-                  <h4 className="text-sm font-medium text-gray-700 mb-3">Field Types</h4>
-                  <div className="space-y-2">
-                    {FIELD_TYPES.map((fieldType) => (
-                      <button
-                        key={fieldType.type}
-                        onClick={() => addField(fieldType.type as ProcedureField['field_type'])}
-                        className="w-full p-3 text-left border rounded-lg hover:bg-gray-50 transition-colors"
-                      >
-                        <div className="flex items-center gap-3">
-                          <fieldType.icon className={`h-4 w-4 ${fieldType.color}`} />
-                          <span className="text-sm">{fieldType.label}</span>
-                        </div>
-                      </button>
-                    ))}
+                {/* Other Items */}
+                <div>
+                  <div className="space-y-3">
+                    <Button
+                      onClick={addHeading}
+                      className="w-full justify-start bg-blue-100 text-blue-700 hover:bg-blue-200 border border-blue-300"
+                      variant="outline"
+                    >
+                      <div className="flex items-center gap-2">
+                        <Type className="h-4 w-4" />
+                        Heading
+                      </div>
+                    </Button>
+
+                    <Button
+                      className="w-full justify-start bg-purple-100 text-purple-700 hover:bg-purple-200 border border-purple-300"
+                      variant="outline"
+                    >
+                      <div className="flex items-center gap-2">
+                        <div className="w-4 h-4 bg-purple-500 rounded"></div>
+                        Section
+                      </div>
+                    </Button>
+
+                    <Button
+                      className="w-full justify-start bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-300"
+                      variant="outline"
+                      disabled
+                    >
+                      <div className="flex items-center gap-2">
+                        <FileText className="h-4 w-4" />
+                        Procedure
+                      </div>
+                    </Button>
                   </div>
                 </div>
               </div>
