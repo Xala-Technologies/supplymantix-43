@@ -10,7 +10,7 @@ import { Slider } from '@/components/ui/slider';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { CalendarIcon, Star, Upload, FileText } from 'lucide-react';
+import { CalendarIcon, Star, Upload, FileText, Search } from 'lucide-react';
 import { format } from 'date-fns';
 import { ProcedureField } from '@/lib/database/procedures-enhanced';
 
@@ -46,13 +46,11 @@ export const FieldInput: React.FC<FieldInputProps> = ({ field, value, onChange }
     const maxFileSize = field.options?.maxFileSize || 10 * 1024 * 1024; // 10MB default
 
     const processedFiles = Array.from(files).filter(file => {
-      // Check file type if restrictions exist
       if (acceptedTypes.length > 0 && !acceptedTypes.some(type => file.type.includes(type))) {
         console.warn(`File type ${file.type} not accepted`);
         return false;
       }
       
-      // Check file size
       if (file.size > maxFileSize) {
         console.warn(`File size ${file.size} exceeds maximum ${maxFileSize}`);
         return false;
@@ -72,7 +70,7 @@ export const FieldInput: React.FC<FieldInputProps> = ({ field, value, onChange }
   switch (field.field_type) {
     case 'checkbox':
       return (
-        <div className="flex items-center space-x-2 p-3 bg-white border rounded">
+        <div className="flex items-center space-x-2 p-3 bg-white border rounded-lg">
           <Checkbox
             id={`field-${field.id}`}
             checked={value || false}
@@ -91,7 +89,7 @@ export const FieldInput: React.FC<FieldInputProps> = ({ field, value, onChange }
           <Input
             value={value || ''}
             onChange={(e) => onChange(e.target.value)}
-            placeholder={field.options?.placeholder || ''}
+            placeholder={field.options?.placeholder || 'Enter text...'}
             className="w-full"
           />
           {field.options?.helpText && (
@@ -107,7 +105,7 @@ export const FieldInput: React.FC<FieldInputProps> = ({ field, value, onChange }
           <Textarea
             value={value || ''}
             onChange={(e) => onChange(e.target.value)}
-            placeholder={field.options?.placeholder || ''}
+            placeholder={field.options?.placeholder || 'Enter text...'}
             className="w-full min-h-[100px]"
           />
           {field.options?.helpText && (
@@ -124,12 +122,36 @@ export const FieldInput: React.FC<FieldInputProps> = ({ field, value, onChange }
             type="number"
             value={value || ''}
             onChange={(e) => onChange(parseFloat(e.target.value) || 0)}
-            placeholder={field.options?.placeholder || ''}
+            placeholder={field.options?.placeholder || 'Enter number...'}
             min={field.options?.minValue}
             max={field.options?.maxValue}
             step={field.options?.step || 1}
             className="w-full"
           />
+          {field.options?.helpText && (
+            <p className="text-xs text-gray-500">{field.options.helpText}</p>
+          )}
+        </div>
+      );
+
+    case 'amount':
+      return (
+        <div className="space-y-2">
+          <Label className="text-sm font-medium">{field.label}</Label>
+          <div className="relative">
+            <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">
+              $
+            </div>
+            <Input
+              type="number"
+              value={value || ''}
+              onChange={(e) => onChange(parseFloat(e.target.value) || 0)}
+              placeholder="0.00"
+              min="0"
+              step="0.01"
+              className="w-full pl-8"
+            />
+          </div>
           {field.options?.helpText && (
             <p className="text-xs text-gray-500">{field.options.helpText}</p>
           )}
@@ -274,7 +296,7 @@ export const FieldInput: React.FC<FieldInputProps> = ({ field, value, onChange }
       return (
         <div className="space-y-2">
           <Label className="text-sm font-medium">{field.label}</Label>
-          <div className="space-y-2">
+          <div className="space-y-2 p-3 border rounded-lg bg-gray-50">
             {field.options?.choices?.map((choice, choiceIndex) => (
               <div key={choiceIndex} className="flex items-center space-x-2">
                 <Checkbox
@@ -304,7 +326,7 @@ export const FieldInput: React.FC<FieldInputProps> = ({ field, value, onChange }
       return (
         <div className="space-y-2">
           <Label className="text-sm font-medium">{field.label}</Label>
-          <RadioGroup value={value || ''} onValueChange={onChange}>
+          <RadioGroup value={value || ''} onValueChange={onChange} className="p-3 border rounded-lg bg-gray-50">
             {field.options?.choices?.map((choice, choiceIndex) => (
               <div key={choiceIndex} className="flex items-center space-x-2">
                 <RadioGroupItem value={choice} id={`radio-${field.id}-${choiceIndex}`} />
@@ -322,13 +344,12 @@ export const FieldInput: React.FC<FieldInputProps> = ({ field, value, onChange }
 
     case 'rating':
       const maxRating = field.options?.maxRating || 5;
-      const minRating = field.options?.minRating || 1;
       return (
         <div className="space-y-2">
           <Label className="text-sm font-medium">{field.label}</Label>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 p-3 border rounded-lg bg-gray-50">
             {renderRatingStars(value || 0, maxRating, onChange)}
-            <span className="text-sm text-gray-500">
+            <span className="text-sm text-gray-500 ml-2">
               {value || 0} / {maxRating}
             </span>
           </div>
@@ -345,7 +366,7 @@ export const FieldInput: React.FC<FieldInputProps> = ({ field, value, onChange }
       return (
         <div className="space-y-2">
           <Label className="text-sm font-medium">{field.label}</Label>
-          <div className="px-3">
+          <div className="px-3 py-4 border rounded-lg bg-gray-50">
             <Slider
               value={[value || min]}
               onValueChange={(values) => onChange(values[0])}
@@ -354,7 +375,7 @@ export const FieldInput: React.FC<FieldInputProps> = ({ field, value, onChange }
               step={step}
               className="w-full"
             />
-            <div className="flex justify-between text-xs text-gray-500 mt-1">
+            <div className="flex justify-between text-xs text-gray-500 mt-2">
               <span>{min}</span>
               <span className="font-medium">{value || min}</span>
               <span>{max}</span>
@@ -370,12 +391,12 @@ export const FieldInput: React.FC<FieldInputProps> = ({ field, value, onChange }
       return (
         <div className="space-y-2">
           <Label className="text-sm font-medium">{field.label}</Label>
-          <div className="border-2 border-dashed border-gray-300 rounded-lg p-4">
+          <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 bg-gray-50">
             <div className="text-center">
-              <Upload className="mx-auto h-8 w-8 text-gray-400" />
-              <div className="mt-2">
+              <Upload className="mx-auto h-8 w-8 text-gray-400 mb-2" />
+              <div className="mb-2">
                 <label htmlFor={`file-${field.id}`} className="cursor-pointer">
-                  <span className="text-sm text-blue-600 hover:text-blue-500">
+                  <span className="text-sm text-blue-600 hover:text-blue-500 font-medium">
                     Click to upload
                   </span>
                   <input
@@ -393,12 +414,12 @@ export const FieldInput: React.FC<FieldInputProps> = ({ field, value, onChange }
               </p>
             </div>
             {value && (
-              <div className="mt-3 space-y-2">
+              <div className="mt-4 space-y-2">
                 {Array.isArray(value) ? (
                   value.map((file: File, index: number) => (
-                    <div key={index} className="flex items-center justify-between bg-gray-50 p-2 rounded">
+                    <div key={index} className="flex items-center justify-between bg-white p-3 rounded border">
                       <div className="flex items-center gap-2">
-                        <FileText className="h-4 w-4" />
+                        <FileText className="h-4 w-4 text-gray-500" />
                         <span className="text-sm">{file.name}</span>
                       </div>
                       <Button
@@ -414,9 +435,9 @@ export const FieldInput: React.FC<FieldInputProps> = ({ field, value, onChange }
                     </div>
                   ))
                 ) : (
-                  <div className="flex items-center justify-between bg-gray-50 p-2 rounded">
+                  <div className="flex items-center justify-between bg-white p-3 rounded border">
                     <div className="flex items-center gap-2">
-                      <FileText className="h-4 w-4" />
+                      <FileText className="h-4 w-4 text-gray-500" />
                       <span className="text-sm">{value.name}</span>
                     </div>
                     <Button variant="ghost" size="sm" onClick={() => onChange(null)}>
@@ -437,12 +458,12 @@ export const FieldInput: React.FC<FieldInputProps> = ({ field, value, onChange }
       return (
         <div className="space-y-2">
           <Label className="text-sm font-medium">{field.label}</Label>
-          <div className="border-2 border-dashed border-gray-300 rounded-lg p-4">
+          <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 bg-gray-50">
             <div className="text-center">
-              <Upload className="mx-auto h-8 w-8 text-gray-400" />
-              <div className="mt-2">
+              <Upload className="mx-auto h-8 w-8 text-gray-400 mb-2" />
+              <div className="mb-2">
                 <label htmlFor={`image-${field.id}`} className="cursor-pointer">
-                  <span className="text-sm text-blue-600 hover:text-blue-500">
+                  <span className="text-sm text-blue-600 hover:text-blue-500 font-medium">
                     Click to upload image
                   </span>
                   <input
@@ -456,7 +477,7 @@ export const FieldInput: React.FC<FieldInputProps> = ({ field, value, onChange }
               </div>
             </div>
             {value && (
-              <div className="mt-3">
+              <div className="mt-4">
                 <img
                   src={URL.createObjectURL(value)}
                   alt="Preview"
@@ -472,6 +493,44 @@ export const FieldInput: React.FC<FieldInputProps> = ({ field, value, onChange }
                 </Button>
               </div>
             )}
+          </div>
+          {field.options?.helpText && (
+            <p className="text-xs text-gray-500">{field.options.helpText}</p>
+          )}
+        </div>
+      );
+
+    case 'inspection':
+      return (
+        <div className="space-y-2">
+          <Label className="text-sm font-medium flex items-center gap-2">
+            <Search className="h-4 w-4" />
+            {field.label}
+          </Label>
+          <div className="p-4 border rounded-lg bg-blue-50">
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium">Pass</span>
+                <Checkbox
+                  checked={value === 'pass'}
+                  onCheckedChange={(checked) => onChange(checked ? 'pass' : null)}
+                />
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium">Fail</span>
+                <Checkbox
+                  checked={value === 'fail'}
+                  onCheckedChange={(checked) => onChange(checked ? 'fail' : null)}
+                />
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium">N/A</span>
+                <Checkbox
+                  checked={value === 'na'}
+                  onCheckedChange={(checked) => onChange(checked ? 'na' : null)}
+                />
+              </div>
+            </div>
           </div>
           {field.options?.helpText && (
             <p className="text-xs text-gray-500">{field.options.helpText}</p>
