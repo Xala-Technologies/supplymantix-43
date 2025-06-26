@@ -2,6 +2,15 @@
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { purchaseOrdersEnhancedApi } from "@/lib/database/purchase-orders-enhanced";
+
+export const usePurchaseOrderByIdEnhanced = (id: string) => {
+  return useQuery({
+    queryKey: ["purchase-order-enhanced", id],
+    queryFn: () => purchaseOrdersEnhancedApi.getPurchaseOrderById(id),
+    enabled: !!id,
+  });
+};
 
 export const useExportPOCsv = () => {
   return useMutation({

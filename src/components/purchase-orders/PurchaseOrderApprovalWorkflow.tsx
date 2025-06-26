@@ -45,7 +45,7 @@ export const PurchaseOrderApprovalWorkflow = ({ purchaseOrder }: PurchaseOrderAp
     }
   };
 
-  const handleApprovalDecision = async (approval: PurchaseOrderApproval, decision: 'approved' | 'rejected') => {
+  const handleApprovalDecision = async (approval: any, decision: 'approved' | 'rejected') => {
     if (!approval.rule?.id) return;
     
     try {
@@ -61,7 +61,7 @@ export const PurchaseOrderApprovalWorkflow = ({ purchaseOrder }: PurchaseOrderAp
     }
   };
 
-  const getStatusIcon = (approval: PurchaseOrderApproval) => {
+  const getStatusIcon = (approval: any) => {
     switch (approval.status) {
       case 'approved':
         return <CheckCircle className="h-5 w-5 text-green-600" />;
@@ -146,7 +146,7 @@ export const PurchaseOrderApprovalWorkflow = ({ purchaseOrder }: PurchaseOrderAp
         {approvals && approvals.length > 0 && (
           <div className="space-y-3">
             <h4 className="font-medium">Approval History</h4>
-            {approvals.map((approval) => (
+            {approvals.map((approval: any) => (
               <div key={approval.id} className="border rounded-lg p-4 space-y-3">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
@@ -155,14 +155,20 @@ export const PurchaseOrderApprovalWorkflow = ({ purchaseOrder }: PurchaseOrderAp
                       <div className="flex items-center gap-2">
                         <User className="h-4 w-4 text-gray-500" />
                         <span className="font-medium">
-                          {approval.approver?.first_name} {approval.approver?.last_name}
+                          {approval.approver && typeof approval.approver === 'object' 
+                            ? `${approval.approver.first_name || ''} ${approval.approver.last_name || ''}`.trim() || 'Unknown User'
+                            : 'Unknown User'
+                          }
                         </span>
                         <span className="text-sm text-gray-500">
-                          ({approval.approver?.email})
+                          ({approval.approver && typeof approval.approver === 'object' && approval.approver.email 
+                            ? approval.approver.email 
+                            : 'No email'
+                          })
                         </span>
                       </div>
                       <p className="text-sm text-gray-600">
-                        {approval.rule?.name} - ${approval.rule?.min_amount}
+                        {approval.rule?.name || 'Unknown Rule'} - ${approval.rule?.min_amount || 0}
                         {approval.rule?.max_amount ? ` - $${approval.rule.max_amount}` : '+'}
                       </p>
                     </div>

@@ -1,8 +1,8 @@
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { databaseApi } from "@/lib/database";
+import { toast } from "sonner";
 
-// Organization Subscriptions
 export const useOrganizationSubscription = (organizationId: string) => {
   return useQuery({
     queryKey: ["organization-subscription", organizationId],
@@ -22,10 +22,14 @@ export const useCreateOrganizationSubscription = () => {
   const queryClient = useQueryClient();
   
   return useMutation({
-    mutationFn: databaseApi.createOrganizationSubscription,
+    mutationFn: (data: any) => databaseApi.createOrganizationSubscription(data),
     onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ["organization-subscription", data.organization_id] });
-      queryClient.invalidateQueries({ queryKey: ["organizations"] });
+      const orgId = data?.organization_id || 'unknown';
+      queryClient.invalidateQueries({ queryKey: ["organization-subscription", orgId] });
+      toast.success("Subscription created successfully");
+    },
+    onError: (error: Error) => {
+      toast.error(`Failed to create subscription: ${error.message}`);
     },
   });
 };
@@ -37,8 +41,12 @@ export const useUpdateOrganizationSubscription = () => {
     mutationFn: ({ id, updates }: { id: string; updates: any }) => 
       databaseApi.updateOrganizationSubscription(id, updates),
     onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ["organization-subscription", data.organization_id] });
-      queryClient.invalidateQueries({ queryKey: ["organizations"] });
+      const orgId = data?.organization_id || 'unknown';
+      queryClient.invalidateQueries({ queryKey: ["organization-subscription", orgId] });
+      toast.success("Subscription updated successfully");
+    },
+    onError: (error: Error) => {
+      toast.error(`Failed to update subscription: ${error.message}`);
     },
   });
 };
@@ -47,17 +55,20 @@ export const useCancelOrganizationSubscription = () => {
   const queryClient = useQueryClient();
   
   return useMutation({
-    mutationFn: databaseApi.cancelOrganizationSubscription,
+    mutationFn: (id: string) => databaseApi.cancelOrganizationSubscription(id),
     onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ["organization-subscription", data.organization_id] });
-      queryClient.invalidateQueries({ queryKey: ["organizations"] });
+      const orgId = data?.organization_id || 'unknown';
+      queryClient.invalidateQueries({ queryKey: ["organization-subscription", orgId] });
+      toast.success("Subscription cancelled successfully");
+    },
+    onError: (error: Error) => {
+      toast.error(`Failed to cancel subscription: ${error.message}`);
     },
   });
 };
 
-// Billing Information
 export const useBillingInformation = (organizationId: string) => {
-  return useQuery({
+  return useQuery({  
     queryKey: ["billing-information", organizationId],
     queryFn: () => databaseApi.getBillingInformation(organizationId),
     enabled: !!organizationId,
@@ -68,14 +79,18 @@ export const useCreateBillingInformation = () => {
   const queryClient = useQueryClient();
   
   return useMutation({
-    mutationFn: databaseApi.createBillingInformation,
+    mutationFn: (data: any) => databaseApi.createBillingInformation(data),
     onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ["billing-information", data.organization_id] });
+      const orgId = data?.organization_id || 'unknown';
+      queryClient.invalidateQueries({ queryKey: ["billing-information", orgId] });
+      toast.success("Billing information created successfully");
+    },
+    onError: (error: Error) => {
+      toast.error(`Failed to create billing information: ${error.message}`);
     },
   });
 };
 
-// Invoices
 export const useInvoices = (organizationId: string) => {
   return useQuery({
     queryKey: ["invoices", organizationId],

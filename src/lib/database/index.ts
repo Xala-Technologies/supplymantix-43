@@ -1,5 +1,6 @@
 
 import { workOrdersApi } from "./work-orders";
+import { purchaseOrdersApi } from "./purchase-orders";
 
 // Mock implementations for missing API methods
 const mockApi = {
@@ -21,15 +22,29 @@ const mockApi = {
     return [];
   },
 
-  // Purchase Orders
+  // Purchase Orders - delegate to real implementation
   async getPurchaseOrders() {
-    console.log('getPurchaseOrders - Mock implementation');
-    return [];
+    return purchaseOrdersApi.getPurchaseOrders();
+  },
+
+  async getPurchaseOrderById(id: string) {
+    return purchaseOrdersApi.getPurchaseOrderById(id);
   },
 
   async createPurchaseOrder(data: any) {
-    console.log('createPurchaseOrder - Mock implementation', data);
-    return data;
+    return purchaseOrdersApi.createPurchaseOrder(data);
+  },
+
+  async updatePurchaseOrder(data: any) {
+    return purchaseOrdersApi.updatePurchaseOrder(data);
+  },
+
+  async deletePurchaseOrder(id: string) {
+    return purchaseOrdersApi.deletePurchaseOrder(id);
+  },
+
+  async getPurchaseOrderLineItems(purchaseOrderId: string) {
+    return purchaseOrdersApi.getPurchaseOrderLineItems(purchaseOrderId);
   },
 
   // Organizations
@@ -66,6 +81,17 @@ const mockApi = {
   async removeOrganizationMember(id: string) {
     console.log('removeOrganizationMember - Mock implementation', id);
     return { id };
+  },
+
+  // Invitations
+  async getInvitationByToken(token: string) {
+    console.log('getInvitationByToken - Mock implementation', token);
+    return null;
+  },
+
+  async acceptInvitation(token: string, userId: string) {
+    console.log('acceptInvitation - Mock implementation', token, userId);
+    return { success: true };
   },
 
   // Procedures
@@ -155,7 +181,11 @@ export const databaseApi = {
   
   // Purchase Orders
   getPurchaseOrders: mockApi.getPurchaseOrders,
+  getPurchaseOrderById: mockApi.getPurchaseOrderById,
   createPurchaseOrder: mockApi.createPurchaseOrder,
+  updatePurchaseOrder: mockApi.updatePurchaseOrder,
+  deletePurchaseOrder: mockApi.deletePurchaseOrder,
+  getPurchaseOrderLineItems: mockApi.getPurchaseOrderLineItems,
   
   // Organizations
   getOrganizations: mockApi.getOrganizations,
@@ -165,6 +195,10 @@ export const databaseApi = {
   inviteOrganizationMember: mockApi.inviteOrganizationMember,
   updateOrganizationMember: mockApi.updateOrganizationMember,
   removeOrganizationMember: mockApi.removeOrganizationMember,
+  
+  // Invitations
+  getInvitationByToken: mockApi.getInvitationByToken,
+  acceptInvitation: mockApi.acceptInvitation,
   
   // Procedures
   getProcedures: mockApi.getProcedures,
@@ -185,3 +219,4 @@ export const databaseApi = {
 };
 
 export * from "./work-orders";
+export * from "./purchase-orders";
