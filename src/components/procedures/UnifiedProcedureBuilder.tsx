@@ -19,11 +19,17 @@ import {
   Users, 
   Tag,
   Globe,
-  Building
+  Building,
+  Type,
+  Hash,
+  DollarSign,
+  List,
+  CheckSquare,
+  Search,
+  GripVertical
 } from 'lucide-react';
 import { ProcedureField } from '@/lib/database/procedures-enhanced';
 import { EnhancedFieldEditor } from './EnhancedFieldEditor';
-import { FieldToolbar } from './FieldToolbar';
 import { ProcedurePreview } from './ProcedurePreview';
 
 interface UnifiedProcedureBuilderProps {
@@ -59,6 +65,15 @@ const CATEGORIES = [
   { value: 'Other', label: 'Other', color: 'bg-gray-500' }
 ];
 
+const FIELD_TYPES = [
+  { type: 'text', label: 'Text Field', icon: Type, color: 'text-green-600' },
+  { type: 'checkbox', label: 'Checkbox', icon: CheckSquare, color: 'text-blue-600' },
+  { type: 'number', label: 'Number Field', icon: Hash, color: 'text-orange-600' },
+  { type: 'select', label: 'Multiple Choice', icon: List, color: 'text-red-600' },
+  { type: 'multiselect', label: 'Checklist', icon: CheckSquare, color: 'text-purple-600' },
+  { type: 'date', label: 'Inspection Check', icon: Search, color: 'text-cyan-600' }
+];
+
 export const UnifiedProcedureBuilder: React.FC<UnifiedProcedureBuilderProps> = ({
   initialData,
   onSave,
@@ -66,10 +81,11 @@ export const UnifiedProcedureBuilder: React.FC<UnifiedProcedureBuilderProps> = (
   isLoading = false,
   mode = 'create'
 }) => {
-  const [activeTab, setActiveTab] = useState('builder');
+  const [activeTab, setActiveTab] = useState('fields');
   const [isPreviewMode, setIsPreviewMode] = useState(false);
   const [newTag, setNewTag] = useState('');
   const [scoringEnabled, setScoringEnabled] = useState(false);
+  const [selectedFieldIndex, setSelectedFieldIndex] = useState<number | null>(null);
   
   const [formData, setFormData] = useState({
     title: initialData?.title || '',
@@ -84,7 +100,7 @@ export const UnifiedProcedureBuilder: React.FC<UnifiedProcedureBuilderProps> = (
     const newField: ProcedureField = {
       id: crypto.randomUUID(),
       procedure_id: '',
-      label: 'New Field',
+      label: 'Field Name',
       field_type: type,
       is_required: false,
       order_index: formData.fields.length,
@@ -97,6 +113,7 @@ export const UnifiedProcedureBuilder: React.FC<UnifiedProcedureBuilderProps> = (
       ...prev,
       fields: [...prev.fields, newField]
     }));
+    setSelectedFieldIndex(formData.fields.length);
   };
 
   const addHeading = () => {
@@ -116,6 +133,7 @@ export const UnifiedProcedureBuilder: React.FC<UnifiedProcedureBuilderProps> = (
       ...prev,
       fields: [...prev.fields, newField]
     }));
+    setSelectedFieldIndex(formData.fields.length);
   };
 
   const updateField = (index: number, field: Partial<ProcedureField>) => {
@@ -133,6 +151,7 @@ export const UnifiedProcedureBuilder: React.FC<UnifiedProcedureBuilderProps> = (
         order_index: i
       }))
     }));
+    setSelectedFieldIndex(null);
   };
 
   const moveField = (index: number, direction: 'up' | 'down') => {
@@ -183,8 +202,6 @@ export const UnifiedProcedureBuilder: React.FC<UnifiedProcedureBuilderProps> = (
     );
   }
 
-  const selectedCategory = CATEGORIES.find(cat => cat.value === formData.category);
-
   return (
     <div className="h-screen flex flex-col bg-gray-50">
       {/* Header */}
@@ -194,35 +211,19 @@ export const UnifiedProcedureBuilder: React.FC<UnifiedProcedureBuilderProps> = (
             <div className="flex items-center gap-4">
               <Button variant="ghost" size="sm" onClick={onCancel} className="gap-2">
                 <ArrowLeft className="h-4 w-4" />
-                Back
+                {formData.title || 'Untitled Procedure'}
               </Button>
-              <div className="h-6 w-px bg-gray-300" />
-              <div>
-                <h1 className="text-2xl font-bold text-gray-900">
-                  {mode === 'edit' ? 'Edit Procedure' : 'Create New Procedure'}
-                </h1>
-                <div className="flex items-center gap-2 mt-1">
-                  {formData.title ? (
-                    <span className="text-sm text-gray-600">{formData.title}</span>
-                  ) : (
-                    <span className="text-sm text-gray-400">Untitled Procedure</span>
-                  )}
-                  {selectedCategory && (
-                    <Badge variant="outline" className="gap-1">
-                      <div className={`w-2 h-2 rounded-full ${selectedCategory.color}`} />
-                      {selectedCategory.label}
-                    </Badge>
-                  )}
-                  {formData.fields.length > 0 && (
-                    <Badge variant="secondary">
-                      {formData.fields.length} field{formData.fields.length !== 1 ? 's' : ''}
-                    </Badge>
-                  )}
-                </div>
-              </div>
             </div>
             
             <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2">
+                <Label className="text-sm">Scoring</Label>
+                <Switch
+                  checked={scoringEnabled}
+                  onCheckedChange={setScoringEnabled}
+                />
+              </div>
+              
               <Button 
                 variant="outline" 
                 onClick={() => setIsPreviewMode(true)}
@@ -238,158 +239,267 @@ export const UnifiedProcedureBuilder: React.FC<UnifiedProcedureBuilderProps> = (
                 disabled={isLoading || !formData.title.trim()}
                 className="bg-blue-600 hover:bg-blue-700 gap-2"
               >
-                <Save className="h-4 w-4" />
-                {isLoading ? 'Saving...' : mode === 'edit' ? 'Update Procedure' : 'Create Procedure'}
+                {isLoading ? 'Saving...' : 'Continue'}
               </Button>
             </div>
           </div>
         </div>
       </div>
 
+      {/* Tabs Navigation */}
+      <div className="bg-white border-b">
+        <div className="px-6">
+          <nav className="flex space-x-8">
+            <button
+              onClick={() => setActiveTab('fields')}
+              className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
+                activeTab === 'fields'
+                  ? 'border-blue-500 text-blue-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              Procedure Fields
+            </button>
+            <button
+              onClick={() => setActiveTab('settings')}
+              className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
+                activeTab === 'settings'
+                  ? 'border-blue-500 text-blue-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              Settings
+            </button>
+          </nav>
+        </div>
+      </div>
+
       {/* Content */}
-      <div className="flex-1 overflow-hidden">
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full flex flex-col">
-          <div className="bg-white border-b px-6">
-            <TabsList className="grid w-fit grid-cols-2 bg-gray-100">
-              <TabsTrigger value="builder" className="gap-2">
-                <FileText className="h-4 w-4" />
-                Builder
-              </TabsTrigger>
-              <TabsTrigger value="settings" className="gap-2">
-                <Settings className="h-4 w-4" />
-                Settings
-              </TabsTrigger>
-            </TabsList>
-          </div>
+      <div className="flex-1 flex overflow-hidden">
+        {activeTab === 'fields' ? (
+          <>
+            {/* Main Content Area */}
+            <div className="flex-1 overflow-y-auto bg-white">
+              <div className="p-8">
+                <div className="max-w-4xl">
+                  <div className="mb-6">
+                    <h1 className="text-2xl font-bold text-gray-900 mb-2">
+                      {formData.title || 'Fire Extinguisher Inspection'}
+                    </h1>
+                    <p className="text-gray-600">
+                      {formData.description || 'Routine fire extinguisher inspection form to ensure operability.'}
+                    </p>
+                  </div>
 
-          <TabsContent value="builder" className="flex-1 overflow-hidden mt-0">
-            <div className="h-full flex">
-              {/* Main Content */}
-              <div className="flex-1 overflow-y-auto">
-                <div className="max-w-4xl mx-auto p-6 space-y-6">
-                  {/* Basic Information Card */}
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="flex items-center gap-2">
-                        <FileText className="h-5 w-5 text-blue-600" />
-                        Basic Information
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="md:col-span-2">
-                          <Label htmlFor="title">Procedure Title *</Label>
-                          <Input
-                            id="title"
-                            value={formData.title}
-                            onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
-                            placeholder="Enter a clear, descriptive title"
-                            className="text-lg font-medium"
-                          />
+                  {/* Field Editor Area */}
+                  <div className="border-2 border-dashed border-gray-200 rounded-lg p-6 min-h-[400px] bg-gray-50">
+                    {selectedFieldIndex !== null && formData.fields[selectedFieldIndex] ? (
+                      <div className="bg-white rounded-lg p-6 border">
+                        <div className="flex items-center gap-2 mb-4">
+                          <GripVertical className="h-4 w-4 text-gray-400" />
+                          <span className="text-sm text-gray-500">Field {selectedFieldIndex + 1}</span>
                         </div>
-                        <div className="md:col-span-2">
-                          <Label htmlFor="description">Description</Label>
-                          <Textarea
-                            id="description"
-                            value={formData.description}
-                            onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                            placeholder="Describe what this procedure accomplishes and when it should be used"
-                            rows={3}
-                          />
-                        </div>
-                        <div>
-                          <Label htmlFor="category">Category</Label>
-                          <Select
-                            value={formData.category}
-                            onValueChange={(value) => setFormData(prev => ({ ...prev, category: value }))}
+                        
+                        <EnhancedFieldEditor
+                          field={formData.fields[selectedFieldIndex]}
+                          index={selectedFieldIndex}
+                          totalFields={formData.fields.length}
+                          scoringEnabled={scoringEnabled}
+                          onUpdate={(updates) => updateField(selectedFieldIndex, updates)}
+                          onDelete={() => removeField(selectedFieldIndex)}
+                          onMove={(direction) => moveField(selectedFieldIndex, direction)}
+                        />
+                      </div>
+                    ) : (
+                      <div className="text-center py-16">
+                        <p className="text-gray-500 mb-4">
+                          {formData.fields.length === 0 
+                            ? 'No fields added yet. Use the toolbar on the right to add your first field.'
+                            : 'Select a field to edit its properties.'}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Fields List */}
+                  {formData.fields.length > 0 && (
+                    <div className="mt-6">
+                      <h3 className="text-lg font-medium mb-4">Fields ({formData.fields.length})</h3>
+                      <div className="space-y-2">
+                        {formData.fields.map((field, index) => (
+                          <div
+                            key={field.id || index}
+                            onClick={() => setSelectedFieldIndex(index)}
+                            className={`p-3 border rounded-lg cursor-pointer transition-colors ${
+                              selectedFieldIndex === index
+                                ? 'border-blue-500 bg-blue-50'
+                                : 'border-gray-200 hover:border-gray-300'
+                            }`}
                           >
-                            <SelectTrigger>
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {CATEGORIES.map(category => (
-                                <SelectItem key={category.value} value={category.value}>
-                                  <div className="flex items-center gap-2">
-                                    <div className={`w-3 h-3 rounded-full ${category.color}`} />
-                                    {category.label}
-                                  </div>
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-
-                  {/* Fields Section */}
-                  <Card>
-                    <CardHeader>
-                      <div className="flex items-center justify-between">
-                        <CardTitle className="flex items-center gap-2">
-                          <Plus className="h-5 w-5 text-green-600" />
-                          Procedure Fields
-                          {formData.fields.length > 0 && (
-                            <Badge variant="secondary">{formData.fields.length}</Badge>
-                          )}
-                        </CardTitle>
-                        <div className="flex items-center gap-2">
-                          <Label className="text-sm">Enable Scoring</Label>
-                          <Switch
-                            checked={scoringEnabled}
-                            onCheckedChange={setScoringEnabled}
-                          />
-                        </div>
-                      </div>
-                    </CardHeader>
-                    <CardContent>
-                      {formData.fields.length === 0 ? (
-                        <div className="text-center py-12 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
-                          <div className="w-16 h-16 mx-auto bg-blue-100 rounded-full flex items-center justify-center mb-4">
-                            <Plus className="h-8 w-8 text-blue-600" />
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-3">
+                                <span className="text-sm text-gray-500">#{index + 1}</span>
+                                <span className="font-medium">{field.label}</span>
+                                <Badge variant="outline" className="text-xs">
+                                  {field.field_type}
+                                </Badge>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                {field.is_required && (
+                                  <Badge variant="secondary" className="text-xs">Required</Badge>
+                                )}
+                                <GripVertical className="h-4 w-4 text-gray-400" />
+                              </div>
+                            </div>
                           </div>
-                          <h3 className="text-lg font-medium text-gray-900 mb-2">
-                            Start building your procedure
-                          </h3>
-                          <p className="text-gray-600 mb-6 max-w-md mx-auto">
-                            Add fields to collect information, create checklists, or guide users through steps
-                          </p>
-                          <Button onClick={() => addField()} className="gap-2">
-                            <Plus className="h-4 w-4" />
-                            Add Your First Field
-                          </Button>
-                        </div>
-                      ) : (
-                        <div className="space-y-4">
-                          {formData.fields.map((field, index) => (
-                            <EnhancedFieldEditor
-                              key={field.id || index}
-                              field={field}
-                              index={index}
-                              totalFields={formData.fields.length}
-                              scoringEnabled={scoringEnabled}
-                              onUpdate={(updates) => updateField(index, updates)}
-                              onDelete={() => removeField(index)}
-                              onMove={(direction) => moveField(index, direction)}
-                            />
-                          ))}
-                        </div>
-                      )}
-                    </CardContent>
-                  </Card>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
-
-              {/* Field Toolbar */}
-              <FieldToolbar
-                onAddField={addField}
-                onAddHeading={addHeading}
-              />
             </div>
-          </TabsContent>
 
-          <TabsContent value="settings" className="flex-1 overflow-y-auto mt-0 p-6">
+            {/* Right Sidebar - Field Toolbar */}
+            <div className="w-80 bg-white border-l border-gray-200 overflow-y-auto">
+              <div className="p-6">
+                <div className="mb-6">
+                  <div className="flex items-center gap-2 mb-4">
+                    <Plus className="h-5 w-5 text-blue-600" />
+                    <h3 className="font-medium">New Item</h3>
+                  </div>
+                  <Button
+                    onClick={() => addField()}
+                    className="w-full mb-3 justify-start gap-2"
+                    variant="outline"
+                  >
+                    <Plus className="h-4 w-4" />
+                    Field
+                  </Button>
+                </div>
+
+                <div className="mb-6">
+                  <div className="flex items-center gap-2 mb-4">
+                    <Type className="h-5 w-5 text-blue-600" />
+                    <h3 className="font-medium">Heading</h3>
+                  </div>
+                  <Button
+                    onClick={addHeading}
+                    className="w-full mb-3 justify-start gap-2"
+                    variant="outline"
+                  >
+                    <Type className="h-4 w-4" />
+                    Heading
+                  </Button>
+                </div>
+
+                <div className="mb-6">
+                  <div className="flex items-center gap-2 mb-4">
+                    <FileText className="h-5 w-5 text-blue-600" />
+                    <h3 className="font-medium">Section</h3>
+                  </div>
+                  <Button
+                    onClick={() => addField('section')}
+                    className="w-full mb-3 justify-start gap-2"
+                    variant="outline"
+                  >
+                    <FileText className="h-4 w-4" />
+                    Section
+                  </Button>
+                </div>
+
+                <div>
+                  <div className="flex items-center gap-2 mb-4">
+                    <FileText className="h-5 w-5 text-blue-600" />
+                    <h3 className="font-medium">Procedure</h3>
+                  </div>
+                  <Button
+                    className="w-full mb-3 justify-start gap-2"
+                    variant="outline"
+                    disabled
+                  >
+                    <FileText className="h-4 w-4" />
+                    Procedure
+                  </Button>
+                </div>
+
+                {/* Field Types Dropdown */}
+                <div className="border-t pt-6 mt-6">
+                  <h4 className="text-sm font-medium text-gray-700 mb-3">Field Types</h4>
+                  <div className="space-y-2">
+                    {FIELD_TYPES.map((fieldType) => (
+                      <button
+                        key={fieldType.type}
+                        onClick={() => addField(fieldType.type as ProcedureField['field_type'])}
+                        className="w-full p-3 text-left border rounded-lg hover:bg-gray-50 transition-colors"
+                      >
+                        <div className="flex items-center gap-3">
+                          <fieldType.icon className={`h-4 w-4 ${fieldType.color}`} />
+                          <span className="text-sm">{fieldType.label}</span>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </>
+        ) : (
+          // Settings Tab Content
+          <div className="flex-1 overflow-y-auto p-6">
             <div className="max-w-2xl mx-auto space-y-6">
+              {/* Basic Information */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <FileText className="h-5 w-5 text-blue-600" />
+                    Basic Information
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div>
+                    <Label htmlFor="title">Procedure Title *</Label>
+                    <Input
+                      id="title"
+                      value={formData.title}
+                      onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
+                      placeholder="Enter a clear, descriptive title"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="description">Description</Label>
+                    <Textarea
+                      id="description"
+                      value={formData.description}
+                      onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+                      placeholder="Describe what this procedure accomplishes"
+                      rows={3}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="category">Category</Label>
+                    <Select
+                      value={formData.category}
+                      onValueChange={(value) => setFormData(prev => ({ ...prev, category: value }))}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {CATEGORIES.map(category => (
+                          <SelectItem key={category.value} value={category.value}>
+                            <div className="flex items-center gap-2">
+                              <div className={`w-3 h-3 rounded-full ${category.color}`} />
+                              {category.label}
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </CardContent>
+              </Card>
+
               {/* Tags */}
               <Card>
                 <CardHeader>
@@ -418,7 +528,7 @@ export const UnifiedProcedureBuilder: React.FC<UnifiedProcedureBuilderProps> = (
                     <Input
                       value={newTag}
                       onChange={(e) => setNewTag(e.target.value)}
-                      placeholder="Add a tag (e.g., monthly, critical, equipment)"
+                      placeholder="Add a tag"
                       onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addTag())}
                     />
                     <Button onClick={addTag} variant="outline">
@@ -467,8 +577,8 @@ export const UnifiedProcedureBuilder: React.FC<UnifiedProcedureBuilderProps> = (
                 </CardContent>
               </Card>
             </div>
-          </TabsContent>
-        </Tabs>
+          </div>
+        )}
       </div>
     </div>
   );
