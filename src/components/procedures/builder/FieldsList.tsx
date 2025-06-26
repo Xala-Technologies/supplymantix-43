@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { GripVertical, MoreHorizontal, Link, Paperclip, Trash2, Copy, ChevronUp, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -66,11 +67,11 @@ export const FieldsList: React.FC<FieldsListProps> = ({
   const getFieldTypeIcon = (type: string) => {
     const icons: Record<string, string> = {
       'checkbox': '☑',
-      'text': 'T',
+      'text': '✓T',
       'number': '#',
       'amount': '$',
       'date': '📅',
-      'select': '▼',
+      'select': '◉',
       'multiselect': '☰',
       'file': '📎',
       'section': '━',
@@ -176,7 +177,7 @@ export const FieldsList: React.FC<FieldsListProps> = ({
                         {field.label || 'Untitled Field'}
                       </div>
                       <div className="text-sm text-gray-500 capitalize">
-                        {field.field_type}
+                        {field.field_type.replace('_', ' ')}
                       </div>
                     </div>
                     <div className="flex items-center gap-2">

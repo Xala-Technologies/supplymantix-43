@@ -165,6 +165,30 @@ export const UnifiedProcedureBuilder: React.FC<UnifiedProcedureBuilderProps> = (
     setSelectedFieldIndex(null);
   };
 
+  const duplicateField = (index: number) => {
+    const fieldToDuplicate = formData.fields[index];
+    const duplicatedField: ProcedureField = {
+      ...fieldToDuplicate,
+      id: crypto.randomUUID(),
+      label: `${fieldToDuplicate.label} (Copy)`,
+      order_index: index + 1,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    };
+
+    setFormData(prev => ({
+      ...prev,
+      fields: [
+        ...prev.fields.slice(0, index + 1),
+        duplicatedField,
+        ...prev.fields.slice(index + 1).map(field => ({
+          ...field,
+          order_index: field.order_index + 1
+        }))
+      ]
+    }));
+  };
+
   const moveField = (index: number, direction: 'up' | 'down') => {
     const fields = [...formData.fields];
     const targetIndex = direction === 'up' ? index - 1 : index + 1;
@@ -183,6 +207,24 @@ export const UnifiedProcedureBuilder: React.FC<UnifiedProcedureBuilderProps> = (
       if (selectedFieldIndex === index) {
         setSelectedFieldIndex(targetIndex);
       }
+    }
+  };
+
+  const reorderFields = (fromIndex: number, toIndex: number) => {
+    const fields = [...formData.fields];
+    const [movedField] = fields.splice(fromIndex, 1);
+    fields.splice(toIndex, 0, movedField);
+    
+    // Update order indexes
+    fields.forEach((field, i) => {
+      field.order_index = i;
+    });
+    
+    setFormData(prev => ({ ...prev, fields }));
+    
+    // Update selected index if needed
+    if (selectedFieldIndex === fromIndex) {
+      setSelectedFieldIndex(toIndex);
     }
   };
 
@@ -243,6 +285,10 @@ export const UnifiedProcedureBuilder: React.FC<UnifiedProcedureBuilderProps> = (
                 selectedFieldIndex={selectedFieldIndex}
                 onFieldSelect={setSelectedFieldIndex}
                 onFieldMove={moveField}
+                onFieldUpdate={updateField}
+                onFieldDuplicate={duplicateField}
+                onFieldDelete={removeField}
+                onFieldReorder={reorderFields}
               />
 
               {selectedFieldIndex !== null && formData.fields[selectedFieldIndex] && (
