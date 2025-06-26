@@ -39,14 +39,29 @@ const mockConversations = [
     participants: [
       { id: "1", name: "John Smith", avatar: null },
       { id: "2", name: "Sarah Johnson", avatar: null },
-      { id: "3", name: "Mike Wilson", avatar: null }
+      { id: "3", name: "Mike Wilson", avatar: null },
+      { id: "5", name: "Emma Davis", avatar: null }
     ],
     lastMessage: {
-      text: "Weekly team meeting scheduled for Friday",
+      text: "Weekly team meeting scheduled for Friday at 2 PM",
       timestamp: "2024-06-04T16:20:00Z",
       sender: "John Smith"
     },
     unread: 1
+  },
+  {
+    id: "4",
+    title: "Equipment Upgrade Project",
+    participants: [
+      { id: "2", name: "Sarah Johnson", avatar: null },
+      { id: "6", name: "Robert Kim", avatar: null }
+    ],
+    lastMessage: {
+      text: "Budget approval received. Let's proceed with the installation next week.",
+      timestamp: "2024-06-03T11:45:00Z",
+      sender: "Robert Kim"
+    },
+    unread: 0
   }
 ];
 
@@ -68,11 +83,30 @@ export const useCreateConversation = () => {
   return useMutation({
     mutationFn: async (conversationData: any) => {
       // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 500));
-      return { ...conversationData, id: Date.now().toString() };
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      const newConversation = {
+        id: Date.now().toString(),
+        title: conversationData.title,
+        participants: conversationData.participantIds.slice(0, 3).map((id: string, index: number) => ({
+          id,
+          name: `User ${id}`,
+          avatar: null
+        })),
+        lastMessage: {
+          text: "Conversation started",
+          timestamp: new Date().toISOString(),
+          sender: "System"
+        },
+        unread: 0
+      };
+      
+      return newConversation;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["messages"] });
+    onSuccess: (newConversation) => {
+      queryClient.setQueryData(["messages"], (old: any) => {
+        return old ? [newConversation, ...old] : [newConversation];
+      });
       toast.success('Conversation created successfully');
     },
     onError: () => {
@@ -85,13 +119,31 @@ export const useSendMessage = () => {
   const queryClient = useQueryClient();
   
   return useMutation({
-    mutationFn: async (messageData: any) => {
+    mutationFn: async (messageData: { conversationId: string; content: string }) => {
       // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 300));
-      return { ...messageData, id: Date.now().toString(), timestamp: new Date().toISOString() };
+      await new Promise(resolve => setTimeout(resolve, 500));
+      return { 
+        id: Date.now().toString(), 
+        timestamp: new Date().toISOString(),
+        ...messageData 
+      };
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["messages"] });
+    onSuccess: (data) => {
+      // Update the conversation's last message
+      queryClient.setQueryData(["messages"], (conversations: any) => {
+        return conversations?.map((conv: any) => 
+          conv.id === data.conversationId 
+            ? {
+                ...conv,
+                lastMessage: {
+                  text: data.content,
+                  timestamp: data.timestamp,
+                  sender: "You"
+                }
+              }
+            : conv
+        );
+      });
     },
     onError: () => {
       toast.error('Failed to send message');
