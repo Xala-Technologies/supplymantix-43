@@ -41,6 +41,8 @@ const queryClient = new QueryClient({
 });
 
 function App() {
+  console.log('App component rendering');
+  
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
@@ -138,7 +140,7 @@ function App() {
                 </ProtectedRoute>
               } />
 
-              {/* Catch all route */}
+              {/* Catch all route - redirect to dashboard if authenticated, otherwise to login */}
               <Route path="*" element={<NotFound />} />
             </Routes>
             <Toaster />

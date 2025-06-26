@@ -2,16 +2,15 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Link, useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ArrowRight, Zap, AlertCircle, Loader2, Mail, Lock } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
 const Login = () => {
   const navigate = useNavigate();
-  const { signIn, user } = useAuth();
+  const { signIn, user, loading: authLoading } = useAuth();
   const [formData, setFormData] = useState({
     email: "",
     password: ""
@@ -20,20 +19,25 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
 
   // Redirect if already logged in
-  if (user) {
-    navigate("/dashboard");
-    return null;
-  }
+  useEffect(() => {
+    if (!authLoading && user) {
+      console.log('User already logged in, redirecting to dashboard');
+      navigate("/dashboard", { replace: true });
+    }
+  }, [user, authLoading, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     setLoading(true);
 
+    console.log('Login form submitted');
+
     try {
-      const { error } = await signIn(formData.email, formData.password);
+      const { data, error } = await signIn(formData.email, formData.password);
       
       if (error) {
+        console.error('Login error:', error);
         if (error.message.includes("Invalid login credentials")) {
           setError("Invalid email or password. Please try again.");
         } else if (error.message.includes("Email not confirmed")) {
@@ -41,15 +45,34 @@ const Login = () => {
         } else {
           setError(error.message);
         }
-      } else {
-        navigate("/dashboard");
+      } else if (data?.user) {
+        console.log('Login successful, redirecting to dashboard');
+        navigate("/dashboard", { replace: true });
       }
     } catch (err) {
+      console.error('Unexpected login error:', err);
       setError("An unexpected error occurred. Please try again.");
     } finally {
       setLoading(false);
     }
   };
+
+  // Show loading while checking auth state
+  if (authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="flex items-center space-x-2">
+          <Loader2 className="h-6 w-6 animate-spin" />
+          <span>Loading...</span>
+        </div>
+      </div>
+    );
+  }
+
+  // Don't render if user is already logged in
+  if (user) {
+    return null;
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-cyan-50 flex relative overflow-hidden">
@@ -162,7 +185,6 @@ const Login = () => {
 
       {/* Right side - Enhanced Illustration */}
       <div className="hidden lg:flex flex-1 bg-gradient-to-br from-blue-600 via-purple-600 to-cyan-700 items-center justify-center p-12 relative overflow-hidden">
-        {/* Animated pattern background */}
         <div className="absolute inset-0 opacity-20">
           <div className="absolute top-0 left-0 w-full h-full" style={{
             backgroundImage: `radial-gradient(circle at 25% 25%, rgba(255,255,255,0.2) 1px, transparent 1px),

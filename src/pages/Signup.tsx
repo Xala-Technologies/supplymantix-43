@@ -9,7 +9,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 
 const Signup = () => {
   const navigate = useNavigate();
-  const { signUp, user } = useAuth();
+  const { signUp, user, loading: authLoading } = useAuth();
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -24,16 +24,19 @@ const Signup = () => {
 
   // Handle redirect after user is authenticated
   useEffect(() => {
-    if (user) {
-      navigate("/dashboard");
+    if (!authLoading && user) {
+      console.log('User already logged in, redirecting to dashboard');
+      navigate("/dashboard", { replace: true });
     }
-  }, [user, navigate]);
+  }, [user, authLoading, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     setSuccess("");
     setLoading(true);
+
+    console.log('Signup form submitted');
 
     // Validate passwords match
     if (formData.password !== formData.confirmPassword) {
@@ -50,7 +53,7 @@ const Signup = () => {
     }
 
     try {
-      const { error } = await signUp(
+      const { data, error } = await signUp(
         formData.email, 
         formData.password, 
         formData.firstName, 
@@ -59,6 +62,7 @@ const Signup = () => {
       );
       
       if (error) {
+        console.error('Signup error:', error);
         if (error.message.includes("already registered")) {
           setError("An account with this email already exists. Please sign in instead.");
         } else if (error.message.includes("Password")) {
@@ -66,17 +70,37 @@ const Signup = () => {
         } else {
           setError(error.message);
         }
-      } else {
-        setSuccess("Account created successfully! Please check your email for a confirmation link.");
+      } else if (data?.user) {
+        console.log('Signup successful');
+        if (data.user.email_confirmed_at) {
+          // Email already confirmed, redirect to dashboard
+          navigate("/dashboard", { replace: true });
+        } else {
+          // Show success message for email confirmation
+          setSuccess("Account created successfully! Please check your email for a confirmation link.");
+        }
       }
     } catch (err) {
+      console.error('Unexpected signup error:', err);
       setError("An unexpected error occurred. Please try again.");
     } finally {
       setLoading(false);
     }
   };
 
-  // Don't render anything if user is already logged in to prevent flash
+  // Show loading while checking auth state
+  if (authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="flex items-center space-x-2">
+          <Loader2 className="h-6 w-6 animate-spin" />
+          <span>Loading...</span>
+        </div>
+      </div>
+    );
+  }
+
+  // Don't render if user is already logged in
   if (user) {
     return null;
   }
