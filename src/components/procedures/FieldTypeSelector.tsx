@@ -4,12 +4,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { 
   Type, 
   Hash, 
-  Calendar, 
+  DollarSign, 
   CheckSquare, 
-  ChevronDown, 
-  List, 
-  Upload, 
-  Heading 
+  CircleDot, 
+  List,
+  Search
 } from "lucide-react";
 
 interface FieldTypeSelectorProps {
@@ -20,59 +19,52 @@ interface FieldTypeSelectorProps {
 const FIELD_TYPES = [
   { 
     value: 'text', 
-    label: 'Text', 
+    label: 'Text Field', 
     icon: Type, 
-    description: 'Single line text',
-    color: 'text-blue-600'
-  },
-  { 
-    value: 'number', 
-    label: 'Number', 
-    icon: Hash, 
-    description: 'Numeric values',
-    color: 'text-green-600'
-  },
-  { 
-    value: 'date', 
-    label: 'Date', 
-    icon: Calendar, 
-    description: 'Date picker',
-    color: 'text-purple-600'
+    color: 'text-green-600',
+    bgColor: 'bg-green-100'
   },
   { 
     value: 'checkbox', 
     label: 'Checkbox', 
     icon: CheckSquare, 
-    description: 'Yes/no',
-    color: 'text-orange-600'
+    color: 'text-blue-600',
+    bgColor: 'bg-blue-100'
+  },
+  { 
+    value: 'number', 
+    label: 'Number Field', 
+    icon: Hash, 
+    color: 'text-orange-600',
+    bgColor: 'bg-orange-100'
+  },
+  { 
+    value: 'amount', 
+    label: 'Amount ($)', 
+    icon: DollarSign, 
+    color: 'text-pink-600',
+    bgColor: 'bg-pink-100'
   },
   { 
     value: 'select', 
-    label: 'Dropdown', 
-    icon: ChevronDown, 
-    description: 'Single choice',
-    color: 'text-pink-600'
+    label: 'Multiple Choice', 
+    icon: CircleDot, 
+    color: 'text-red-600',
+    bgColor: 'bg-red-100'
   },
   { 
     value: 'multiselect', 
-    label: 'Multi-Select', 
+    label: 'Checklist', 
     icon: List, 
-    description: 'Multiple choices',
-    color: 'text-indigo-600'
+    color: 'text-purple-600',
+    bgColor: 'bg-purple-100'
   },
   { 
-    value: 'file', 
-    label: 'File Upload', 
-    icon: Upload, 
-    description: 'Upload files',
-    color: 'text-red-600'
-  },
-  { 
-    value: 'section', 
-    label: 'Section', 
-    icon: Heading, 
-    description: 'Organize fields',
-    color: 'text-gray-600'
+    value: 'inspection', 
+    label: 'Inspection Check', 
+    icon: Search, 
+    color: 'text-cyan-600',
+    bgColor: 'bg-cyan-100'
   }
 ];
 
@@ -81,25 +73,30 @@ export const FieldTypeSelector: React.FC<FieldTypeSelectorProps> = ({ value, onC
 
   return (
     <Select value={value} onValueChange={onChange}>
-      <SelectTrigger className="h-8">
+      <SelectTrigger className="h-10 bg-white border border-gray-200">
         <SelectValue>
           {selectedType && (
-            <div className="flex items-center gap-2">
-              <selectedType.icon className="h-3 w-3" />
-              <span className="text-sm font-medium">{selectedType.label}</span>
+            <div className="flex items-center gap-3">
+              <div className={`w-6 h-6 rounded flex items-center justify-center ${selectedType.bgColor}`}>
+                <selectedType.icon className={`h-4 w-4 ${selectedType.color}`} />
+              </div>
+              <span className="text-sm font-medium text-gray-700">{selectedType.label}</span>
             </div>
           )}
         </SelectValue>
       </SelectTrigger>
-      <SelectContent className="max-h-64">
+      <SelectContent className="bg-white border border-gray-200 shadow-lg z-50">
         {FIELD_TYPES.map(type => (
-          <SelectItem key={type.value} value={type.value} className="py-2">
-            <div className="flex items-center gap-2 w-full">
-              <type.icon className={`h-4 w-4 ${type.color}`} />
-              <div className="flex-1">
-                <div className="font-medium text-sm">{type.label}</div>
-                <div className="text-xs text-gray-500">{type.description}</div>
+          <SelectItem 
+            key={type.value} 
+            value={type.value} 
+            className="py-3 px-3 hover:bg-gray-50 cursor-pointer"
+          >
+            <div className="flex items-center gap-3 w-full">
+              <div className={`w-6 h-6 rounded flex items-center justify-center ${type.bgColor}`}>
+                <type.icon className={`h-4 w-4 ${type.color}`} />
               </div>
+              <span className="text-sm font-medium text-gray-700">{type.label}</span>
             </div>
           </SelectItem>
         ))}
