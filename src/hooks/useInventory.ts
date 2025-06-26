@@ -1,22 +1,18 @@
 
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { databaseApi } from "@/lib/database";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
-// Inventory Items
 export const useInventoryItems = () => {
   return useQuery({
     queryKey: ["inventory-items"],
-    queryFn: databaseApi.getInventoryItems,
-  });
-};
-
-export const useCreateInventoryItem = () => {
-  const queryClient = useQueryClient();
-  
-  return useMutation({
-    mutationFn: databaseApi.createInventoryItem,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["inventory-items"] });
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("inventory_items")
+        .select("*")
+        .order("created_at", { ascending: false });
+      
+      if (error) throw error;
+      return data || [];
     },
   });
 };

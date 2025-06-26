@@ -1,10 +1,18 @@
 
 import { useQuery } from "@tanstack/react-query";
-import { usersApi } from "@/lib/database/users";
+import { supabase } from "@/integrations/supabase/client";
 
 export const useUsers = () => {
   return useQuery({
     queryKey: ["users"],
-    queryFn: usersApi.getUsersByTenant,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("users")
+        .select("*")
+        .order("created_at", { ascending: false });
+      
+      if (error) throw error;
+      return data || [];
+    },
   });
 };
