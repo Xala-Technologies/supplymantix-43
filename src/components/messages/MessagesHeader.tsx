@@ -6,11 +6,13 @@ import { Search, MessageSquare, Users, Plus } from "lucide-react";
 interface MessagesHeaderProps {
   searchQuery: string;
   onSearchChange: (value: string) => void;
+  onNewConversation: () => void;
 }
 
 export const MessagesHeader = ({
   searchQuery,
   onSearchChange,
+  onNewConversation,
 }: MessagesHeaderProps) => {
   return (
     <div className="space-y-4">
@@ -31,7 +33,10 @@ export const MessagesHeader = ({
             <Users className="h-4 w-4" />
             Team Members
           </Button>
-          <Button className="bg-green-600 hover:bg-green-700 gap-2">
+          <Button 
+            onClick={onNewConversation}
+            className="bg-green-600 hover:bg-green-700 gap-2"
+          >
             <Plus className="h-4 w-4" />
             New Chat
           </Button>

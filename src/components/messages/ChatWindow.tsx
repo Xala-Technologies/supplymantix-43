@@ -1,10 +1,11 @@
 
+import React, { useState, useRef, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { Send, Paperclip, Wrench, Calendar } from "lucide-react";
+import { Send, Paperclip, Wrench, Calendar, X } from "lucide-react";
 
 const mockMessages = [
   {
@@ -32,9 +33,44 @@ const mockMessages = [
 
 interface ChatWindowProps {
   conversation: any;
+  onClose?: () => void;
 }
 
-export const ChatWindow = ({ conversation }: ChatWindowProps) => {
+export const ChatWindow = ({ conversation, onClose }: ChatWindowProps) => {
+  const [newMessage, setNewMessage] = useState("");
+  const [messages, setMessages] = useState(mockMessages);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
+
+  const handleSendMessage = () => {
+    if (!newMessage.trim()) return;
+
+    const message = {
+      id: Date.now().toString(),
+      sender: "You",
+      text: newMessage,
+      timestamp: new Date().toISOString(),
+      isOwn: true
+    };
+
+    setMessages(prev => [...prev, message]);
+    setNewMessage("");
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSendMessage();
+    }
+  };
+
   return (
     <Card className="h-full flex flex-col">
       <CardHeader className="border-b">
@@ -68,13 +104,18 @@ export const ChatWindow = ({ conversation }: ChatWindowProps) => {
               <Calendar className="h-3 w-3" />
               Schedule
             </Button>
+            {onClose && (
+              <Button variant="ghost" size="sm" onClick={onClose} className="lg:hidden">
+                <X className="h-4 w-4" />
+              </Button>
+            )}
           </div>
         </div>
       </CardHeader>
 
       <CardContent className="flex-1 flex flex-col p-0">
         <div className="flex-1 overflow-y-auto p-4 space-y-4">
-          {mockMessages.map((message) => (
+          {messages.map((message) => (
             <div
               key={message.id}
               className={`flex ${message.isOwn ? 'justify-end' : 'justify-start'}`}
@@ -107,6 +148,7 @@ export const ChatWindow = ({ conversation }: ChatWindowProps) => {
               )}
             </div>
           ))}
+          <div ref={messagesEndRef} />
         </div>
 
         <div className="border-t p-4">
@@ -116,9 +158,17 @@ export const ChatWindow = ({ conversation }: ChatWindowProps) => {
             </Button>
             <Input
               placeholder="Type your message..."
+              value={newMessage}
+              onChange={(e) => setNewMessage(e.target.value)}
+              onKeyPress={handleKeyPress}
               className="flex-1"
             />
-            <Button size="icon" className="bg-green-600 hover:bg-green-700">
+            <Button 
+              size="icon" 
+              className="bg-green-600 hover:bg-green-700"
+              onClick={handleSendMessage}
+              disabled={!newMessage.trim()}
+            >
               <Send className="h-4 w-4" />
             </Button>
           </div>
