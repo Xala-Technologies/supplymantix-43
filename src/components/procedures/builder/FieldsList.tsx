@@ -372,28 +372,37 @@ export const FieldsList: React.FC<FieldsListProps> = ({
               {/* Attached File Preview (when collapsed) */}
               {!expandedFields.has(index) && field.options?.attachedFile && (
                 <div className="px-4 pb-4 pt-0">
-                  <div className="bg-gray-50 rounded p-3 flex items-center justify-between">
-                    <div className="flex items-center gap-2">
+                  <div className="bg-gray-50 rounded p-3">
+                    <div className="flex items-center gap-3">
                       <Paperclip className="h-4 w-4 text-gray-500" />
-                      <span className="text-sm text-gray-700">{field.options.attachedFile.name}</span>
-                      <span className="text-xs text-gray-500">
-                        ({(field.options.attachedFile.size / 1024).toFixed(1)} KB)
-                      </span>
+                      <div className="flex-1">
+                        <div className="text-sm text-gray-700">{field.options.attachedFile.name}</div>
+                        <div className="text-xs text-gray-500">
+                          ({(field.options.attachedFile.size / 1024).toFixed(1)} KB)
+                        </div>
+                      </div>
+                      {field.options.attachedFile.type.startsWith('image/') && (
+                        <img 
+                          src={field.options.attachedFile.url} 
+                          alt="Preview" 
+                          className="w-12 h-12 object-cover rounded border"
+                        />
+                      )}
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          if (onFieldUpdate) {
+                            const newOptions = { ...field.options };
+                            delete newOptions.attachedFile;
+                            onFieldUpdate(index, { options: newOptions });
+                          }
+                        }}
+                        className="h-6 w-6 p-0 text-gray-400 hover:text-red-600"
+                      >
+                        <X className="h-3 w-3" />
+                      </Button>
                     </div>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => {
-                        if (onFieldUpdate) {
-                          const newOptions = { ...field.options };
-                          delete newOptions.attachedFile;
-                          onFieldUpdate(index, { options: newOptions });
-                        }
-                      }}
-                      className="h-6 w-6 p-0 text-gray-400 hover:text-red-600"
-                    >
-                      <X className="h-3 w-3" />
-                    </Button>
                   </div>
                 </div>
               )}
@@ -454,7 +463,7 @@ export const FieldsList: React.FC<FieldsListProps> = ({
                           <img 
                             src={field.options.attachedFile.url} 
                             alt="Preview" 
-                            className="w-12 h-12 object-cover rounded border"
+                            className="w-16 h-16 object-cover rounded border"
                           />
                         )}
                       </div>
