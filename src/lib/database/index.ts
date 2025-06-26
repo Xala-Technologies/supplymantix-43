@@ -1,4 +1,3 @@
-
 import { workOrdersApi } from "./work-orders";
 import { purchaseOrdersApi } from "./purchase-orders";
 
@@ -133,17 +132,17 @@ const mockApi = {
 
   async createOrganizationSubscription(data: any) {
     console.log('createOrganizationSubscription - Mock implementation', data);
-    return data;
+    return { ...data, id: 'mock-subscription-id' };
   },
 
   async updateOrganizationSubscription(id: string, updates: any) {
     console.log('updateOrganizationSubscription - Mock implementation', id, updates);
-    return { id, ...updates };
+    return { id, organization_id: updates.organization_id || 'mock-org-id', ...updates };
   },
 
   async cancelOrganizationSubscription(id: string) {
     console.log('cancelOrganizationSubscription - Mock implementation', id);
-    return { id };
+    return { id, organization_id: 'mock-org-id' };
   },
 
   async getBillingInformation(organizationId: string) {
@@ -153,7 +152,7 @@ const mockApi = {
 
   async createBillingInformation(data: any) {
     console.log('createBillingInformation - Mock implementation', data);
-    return data;
+    return { ...data, id: 'mock-billing-id' };
   },
 
   async getInvoices(organizationId: string) {
