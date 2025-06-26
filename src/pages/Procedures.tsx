@@ -303,12 +303,10 @@ const Procedures = () => {
                       procedure={procedure}
                       isSelected={selectedProcedure?.id === procedure.id}
                       onClick={() => setSelectedProcedure(procedure)}
-                      onExecute={handleExecuteProcedure}
                       onEdit={handleEditProcedure}
                       onDuplicate={handleDuplicateProcedure}
                       onDelete={setDeleteConfirm}
                       getCategoryColor={getCategoryColor}
-                      executingProcedures={executingProcedures}
                     />
                   ))}
                 </div>
@@ -366,14 +364,6 @@ const Procedures = () => {
                       </div>
                       
                       <div className="flex items-center gap-3">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleExecuteProcedure(selectedProcedure)}
-                          className="bg-white/10 border-white/30 text-white hover:bg-white/20 backdrop-blur-sm"
-                        >
-                          Execute
-                        </Button>
                         <Button
                           variant="outline"
                           size="sm"

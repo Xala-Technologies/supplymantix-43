@@ -6,7 +6,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { 
   MoreVertical, 
-  Play, 
   Edit, 
   Copy, 
   Trash2, 
@@ -19,26 +18,21 @@ interface EnhancedProcedureCardProps {
   procedure: any;
   isSelected: boolean;
   onClick: () => void;
-  onExecute: (procedure: any) => void;
   onEdit: (procedure: any) => void;
   onDuplicate: (id: string) => void;
   onDelete: (id: string) => void;
   getCategoryColor: (category: string) => string;
-  executingProcedures: Set<string>;
 }
 
 export const EnhancedProcedureCard: React.FC<EnhancedProcedureCardProps> = ({
   procedure,
   isSelected,
   onClick,
-  onExecute,
   onEdit,
   onDuplicate,
   onDelete,
-  getCategoryColor,
-  executingProcedures
+  getCategoryColor
 }) => {
-  const isExecuting = executingProcedures.has(procedure.id);
   const fieldCount = procedure.fields?.length || 0;
   
   return (
@@ -114,16 +108,6 @@ export const EnhancedProcedureCard: React.FC<EnhancedProcedureCardProps> = ({
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-48">
-                  <DropdownMenuItem 
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onExecute(procedure);
-                    }}
-                    disabled={isExecuting}
-                  >
-                    <Play className="h-4 w-4 mr-2" />
-                    {isExecuting ? 'Starting...' : 'Execute'}
-                  </DropdownMenuItem>
                   <DropdownMenuItem 
                     onClick={(e) => {
                       e.stopPropagation();
