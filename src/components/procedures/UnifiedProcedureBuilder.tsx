@@ -145,7 +145,7 @@ export const UnifiedProcedureBuilder: React.FC<UnifiedProcedureBuilderProps> = (
       field_type: 'section',
       is_required: false,
       order_index: formData.fields.length,
-      options: { section_type: 'group' },
+      options: {},
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString()
     };
