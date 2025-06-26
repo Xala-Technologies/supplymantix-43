@@ -27,7 +27,11 @@ import {
   Search,
   GripVertical,
   ChevronUp,
-  ChevronDown
+  ChevronDown,
+  Link,
+  Edit3,
+  Trash2,
+  MoreHorizontal
 } from 'lucide-react';
 import { ProcedureField } from '@/lib/database/procedures-enhanced';
 import { EnhancedFieldEditor } from './EnhancedFieldEditor';
@@ -66,15 +70,6 @@ const CATEGORIES = [
   { value: 'Other', label: 'Other', color: 'bg-gray-500' }
 ];
 
-const FIELD_TYPES = [
-  { type: 'text', label: 'Text Field', icon: '—', color: 'text-green-600', bgColor: 'bg-green-100' },
-  { type: 'checkbox', label: 'Checkbox', icon: '☑', color: 'text-blue-600', bgColor: 'bg-blue-100' },
-  { type: 'number', label: 'Number Field', icon: '#', color: 'text-orange-600', bgColor: 'bg-orange-100' },
-  { type: 'select', label: 'Multiple Choice', icon: '◉', color: 'text-red-600', bgColor: 'bg-red-100' },
-  { type: 'multiselect', label: 'Checklist', icon: '☰', color: 'text-purple-600', bgColor: 'bg-purple-100' },
-  { type: 'date', label: 'Inspection Check', icon: '🔍', color: 'text-cyan-600', bgColor: 'bg-cyan-100' }
-];
-
 export const UnifiedProcedureBuilder: React.FC<UnifiedProcedureBuilderProps> = ({
   initialData,
   onSave,
@@ -94,14 +89,81 @@ export const UnifiedProcedureBuilder: React.FC<UnifiedProcedureBuilderProps> = (
     category: initialData?.category || 'Inspection',
     tags: initialData?.tags || [],
     is_global: initialData?.is_global || false,
-    fields: initialData?.fields || []
+    fields: initialData?.fields || [
+      {
+        id: '1',
+        procedure_id: '',
+        label: 'Confirm the extinguisher is visible, unobstructed, and in its designated location.',
+        field_type: 'checkbox' as const,
+        is_required: false,
+        order_index: 0,
+        options: {},
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      },
+      {
+        id: '2',
+        procedure_id: '',
+        label: 'Examine the extinguisher for obvious physical damage, corrosion, leakage, or clogged nozzle.',
+        field_type: 'checkbox' as const,
+        is_required: false,
+        order_index: 1,
+        options: {},
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      },
+      {
+        id: '3',
+        procedure_id: '',
+        label: 'Make sure the operating instructions on the nameplate are legible and facing outward.',
+        field_type: 'checkbox' as const,
+        is_required: false,
+        order_index: 2,
+        options: {},
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      },
+      {
+        id: '4',
+        procedure_id: '',
+        label: 'Confirm the pressure gauge is in the operable range.',
+        field_type: 'checkbox' as const,
+        is_required: false,
+        order_index: 3,
+        options: {},
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      },
+      {
+        id: '5',
+        procedure_id: '',
+        label: 'Lift the fire extinguisher to ensure that it is full.',
+        field_type: 'checkbox' as const,
+        is_required: false,
+        order_index: 4,
+        options: {},
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      },
+      {
+        id: '6',
+        procedure_id: '',
+        label: 'Verify the locking pin is intact and the tamper seal is unbroken.',
+        field_type: 'checkbox' as const,
+        is_required: false,
+        order_index: 5,
+        options: {},
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      }
+    ]
   });
 
   const addField = (type: ProcedureField['field_type'] = 'text') => {
     const newField: ProcedureField = {
       id: crypto.randomUUID(),
       procedure_id: '',
-      label: 'Field Name',
+      label: 'New Field',
       field_type: type,
       is_required: false,
       order_index: formData.fields.length,
@@ -226,13 +288,13 @@ export const UnifiedProcedureBuilder: React.FC<UnifiedProcedureBuilderProps> = (
   return (
     <div className="h-screen flex flex-col bg-gray-50">
       {/* Header */}
-      <div className="bg-white border-b shadow-sm">
+      <div className="bg-white border-b border-gray-200">
         <div className="px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <Button variant="ghost" size="sm" onClick={onCancel} className="gap-2">
                 <ArrowLeft className="h-4 w-4" />
-                {formData.title}
+                Back
               </Button>
             </div>
             
@@ -263,7 +325,7 @@ export const UnifiedProcedureBuilder: React.FC<UnifiedProcedureBuilderProps> = (
               
               <div className="flex items-center gap-3">
                 <div className="flex items-center gap-2">
-                  <Label className="text-sm">Scoring</Label>
+                  <Label className="text-sm text-gray-500">Scoring</Label>
                   <Switch
                     checked={scoringEnabled}
                     onCheckedChange={setScoringEnabled}
@@ -297,188 +359,157 @@ export const UnifiedProcedureBuilder: React.FC<UnifiedProcedureBuilderProps> = (
       <div className="flex-1 flex overflow-hidden">
         {activeTab === 'fields' ? (
           <>
-            {/* Main Content - Center Field List */}
-            <div className="flex-1 bg-gray-50 p-8">
-              <div className="max-w-4xl mx-auto">
-                <div className="mb-6">
-                  <h1 className="text-2xl font-bold text-gray-900 mb-2">
-                    {formData.title}
-                  </h1>
-                  <p className="text-gray-600">
-                    {formData.description}
-                  </p>
-                </div>
-
-                {/* Field List */}
-                <div className="bg-white rounded-lg border border-gray-300 min-h-[500px]">
-                  {selectedFieldIndex !== null && formData.fields[selectedFieldIndex] ? (
-                    <div className="p-6">
-                      <div className="flex items-center gap-3 mb-4">
-                        <GripVertical className="h-4 w-4 text-gray-400" />
-                        <Input
-                          value={formData.fields[selectedFieldIndex].label}
-                          onChange={(e) => updateField(selectedFieldIndex, { label: e.target.value })}
-                          placeholder="Field Name"
-                          className="text-lg font-medium border-0 bg-transparent focus-visible:ring-0 px-0"
-                        />
-                      </div>
-                      
-                      <div className="text-sm text-gray-500 mb-4">
-                        Text will be entered here
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="p-8">
-                      {/* Field List Display */}
-                      <div className="space-y-2">
-                        {formData.fields.map((field, index) => {
-                          const fieldType = FIELD_TYPES.find(t => t.type === field.field_type);
-                          return (
-                            <div
-                              key={field.id}
-                              onClick={() => setSelectedFieldIndex(index)}
-                              className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-colors ${
-                                selectedFieldIndex === index 
-                                  ? 'border-blue-300 bg-blue-50' 
-                                  : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
-                              }`}
-                            >
-                              <div className={`w-8 h-8 rounded flex items-center justify-center ${fieldType?.bgColor || 'bg-gray-100'}`}>
-                                <span className="text-sm">{fieldType?.icon || '?'}</span>
-                              </div>
-                              <div className="flex-1">
-                                <div className="font-medium text-gray-900">{field.label}</div>
-                                <div className="text-sm text-gray-500">{fieldType?.label}</div>
-                              </div>
-                              <div className="flex items-center gap-1">
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    moveField(index, 'up');
-                                  }}
-                                  disabled={index === 0}
-                                >
-                                  <ChevronUp className="h-4 w-4" />
-                                </Button>
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    moveField(index, 'down');
-                                  }}
-                                  disabled={index === formData.fields.length - 1}
-                                >
-                                  <ChevronDown className="h-4 w-4" />
-                                </Button>
-                              </div>
+            {/* Main Content */}
+            <div className="flex-1 flex flex-col bg-gray-50">
+              {/* Field List */}
+              <div className="flex-1 p-6">
+                <div className="max-w-4xl mx-auto">
+                  <div className="space-y-4">
+                    {formData.fields.map((field, index) => (
+                      <div
+                        key={field.id}
+                        onClick={() => setSelectedFieldIndex(index)}
+                        className={`bg-white rounded-lg border p-4 cursor-pointer transition-colors ${
+                          selectedFieldIndex === index 
+                            ? 'border-blue-300 ring-2 ring-blue-100' 
+                            : 'border-gray-200 hover:border-gray-300'
+                        }`}
+                      >
+                        <div className="flex items-start gap-3">
+                          <div className="flex items-center gap-2 mt-1">
+                            <GripVertical className="h-4 w-4 text-gray-400" />
+                          </div>
+                          <div className="flex-1">
+                            <div className="text-gray-900 font-medium">
+                              {field.label}
                             </div>
-                          );
-                        })}
-                      </div>
-                      
-                      {formData.fields.length === 0 && (
-                        <div className="text-center py-16 text-gray-500">
-                          <p>No fields added yet. Use the sidebar to add fields to your procedure.</p>
+                          </div>
                         </div>
-                      )}
-                    </div>
-                  )}
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
+
+              {/* Field Editor at Bottom */}
+              {selectedFieldIndex !== null && formData.fields[selectedFieldIndex] && (
+                <div className="border-t bg-white p-6">
+                  <div className="max-w-4xl mx-auto">
+                    <div className="flex items-center gap-2 mb-4">
+                      <GripVertical className="h-4 w-4 text-gray-400" />
+                      <Input
+                        value={formData.fields[selectedFieldIndex].label}
+                        onChange={(e) => updateField(selectedFieldIndex, { label: e.target.value })}
+                        className="flex-1 border-0 bg-transparent text-lg font-medium focus-visible:ring-0 px-0"
+                        placeholder="Field label"
+                      />
+                    </div>
+                    
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-4">
+                        <Select
+                          value={formData.fields[selectedFieldIndex].field_type}
+                          onValueChange={(value) => updateField(selectedFieldIndex, { field_type: value as ProcedureField['field_type'] })}
+                        >
+                          <SelectTrigger className="w-40">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="text">Text Field</SelectItem>
+                            <SelectItem value="checkbox">Checkbox</SelectItem>
+                            <SelectItem value="number">Number</SelectItem>
+                            <SelectItem value="select">Multiple Choice</SelectItem>
+                            <SelectItem value="multiselect">Checklist</SelectItem>
+                            <SelectItem value="date">Date</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        
+                        <Button variant="ghost" size="sm">
+                          <Link className="h-4 w-4" />
+                        </Button>
+                        <Button variant="ghost" size="sm">
+                          <Edit3 className="h-4 w-4" />
+                        </Button>
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          onClick={() => removeField(selectedFieldIndex)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                      
+                      <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-2">
+                          <Label className="text-sm">Required</Label>
+                          <Switch
+                            checked={formData.fields[selectedFieldIndex].is_required}
+                            onCheckedChange={(checked) => updateField(selectedFieldIndex, { is_required: checked })}
+                          />
+                        </div>
+                        <Button variant="ghost" size="sm">
+                          <MoreHorizontal className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Right Sidebar */}
-            <div className="w-80 bg-white border-l border-gray-200 p-6">
+            <div className="w-64 bg-white border-l border-gray-200 p-6">
               <div className="space-y-6">
-                {/* New Item Section */}
                 <div>
-                  <h3 className="text-lg font-medium text-gray-900 mb-4">New Item</h3>
+                  <h3 className="text-sm font-medium text-gray-900 mb-4">New Item</h3>
                   
-                  {/* Field Button */}
-                  <div className="mb-4">
+                  <div className="space-y-3">
+                    {/* Field Button */}
                     <Button
                       onClick={() => addField()}
-                      className="w-full justify-start h-16 bg-green-50 border-2 border-green-200 hover:bg-green-100 text-green-700"
+                      className="w-full justify-start gap-3 h-auto p-3 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700"
                       variant="outline"
                     >
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center">
-                          <Plus className="h-5 w-5 text-white" />
-                        </div>
-                        <div className="text-left">
-                          <div className="font-medium">Field</div>
-                        </div>
+                      <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                        <Plus className="h-4 w-4 text-green-600" />
                       </div>
+                      <span className="font-medium">Field</span>
                     </Button>
-                  </div>
 
-                  {/* Field Type Options */}
-                  <div className="space-y-2 mb-6">
-                    {FIELD_TYPES.map((fieldType) => (
-                      <Button
-                        key={fieldType.type}
-                        onClick={() => addField(fieldType.type as ProcedureField['field_type'])}
-                        className="w-full justify-start p-3 h-auto border border-gray-200 bg-white hover:bg-gray-50"
-                        variant="outline"
-                      >
-                        <div className="flex items-center gap-3">
-                          <div className={`w-6 h-6 rounded flex items-center justify-center ${fieldType.bgColor}`}>
-                            <span className="text-xs">{fieldType.icon}</span>
-                          </div>
-                          <span className="text-sm font-medium text-gray-700">{fieldType.label}</span>
-                        </div>
-                      </Button>
-                    ))}
-                  </div>
-
-                  {/* Other Items */}
-                  <div className="space-y-3">
+                    {/* Heading Button */}
                     <Button
                       onClick={addHeading}
-                      className="w-full justify-start h-16 bg-blue-50 border-2 border-blue-200 hover:bg-blue-100 text-blue-700"
+                      className="w-full justify-start gap-3 h-auto p-3 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700"
                       variant="outline"
                     >
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-blue-500 rounded flex items-center justify-center">
-                          <Type className="h-5 w-5 text-white" />
-                        </div>
-                        <div className="text-left">
-                          <div className="font-medium">Heading</div>
-                        </div>
+                      <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                        <Type className="h-4 w-4 text-blue-600" />
                       </div>
+                      <span className="font-medium">Heading</span>
                     </Button>
 
+                    {/* Section Button */}
                     <Button
                       onClick={addSection}
-                      className="w-full justify-start h-16 bg-purple-50 border-2 border-purple-200 hover:bg-purple-100 text-purple-700"
+                      className="w-full justify-start gap-3 h-auto p-3 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700"
                       variant="outline"
                     >
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-purple-500 rounded flex items-center justify-center">
-                          <div className="w-6 h-3 bg-white rounded"></div>
-                        </div>
-                        <div className="text-left">
-                          <div className="font-medium">Section</div>
-                        </div>
+                      <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                        <div className="w-4 h-2 bg-blue-600 rounded"></div>
                       </div>
+                      <span className="font-medium">Section</span>
                     </Button>
 
+                    {/* Procedure Button */}
                     <Button
-                      className="w-full justify-start h-16 bg-gray-50 border-2 border-gray-200 hover:bg-gray-100 text-gray-700"
+                      className="w-full justify-start gap-3 h-auto p-3 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700"
                       variant="outline"
                       disabled
                     >
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-gray-500 rounded flex items-center justify-center">
-                          <FileText className="h-5 w-5 text-white" />
-                        </div>
-                        <div className="text-left">
-                          <div className="font-medium">Procedure</div>
-                        </div>
+                      <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                        <FileText className="h-4 w-4 text-blue-600" />
                       </div>
+                      <span className="font-medium">Procedure</span>
                     </Button>
                   </div>
                 </div>
