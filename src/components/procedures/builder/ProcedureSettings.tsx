@@ -18,7 +18,7 @@ interface ProcedureSettingsProps {
     tags: string[];
     is_global: boolean;
   };
-  onUpdate: (updates: Partial<typeof formData>) => void;
+  onUpdate: (updates: Partial<ProcedureSettingsProps['formData']>) => void;
   newTag: string;
   setNewTag: (tag: string) => void;
   onAddTag: () => void;

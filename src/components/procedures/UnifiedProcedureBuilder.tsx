@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { ProcedureField } from '@/lib/database/procedures-enhanced';
 import { ProcedurePreview } from './ProcedurePreview';
@@ -122,7 +123,7 @@ export const UnifiedProcedureBuilder: React.FC<UnifiedProcedureBuilderProps> = (
     const newField: ProcedureField = {
       id: crypto.randomUUID(),
       procedure_id: '',
-      label: 'New Field',
+      label: type === 'section' ? 'New Section' : 'New Field',
       field_type: type,
       is_required: false,
       order_index: formData.fields.length,
@@ -139,43 +140,11 @@ export const UnifiedProcedureBuilder: React.FC<UnifiedProcedureBuilderProps> = (
   };
 
   const addHeading = () => {
-    const newField: ProcedureField = {
-      id: crypto.randomUUID(),
-      procedure_id: '',
-      label: 'Section Heading',
-      field_type: 'section',
-      is_required: false,
-      order_index: formData.fields.length,
-      options: {},
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString()
-    };
-    
-    setFormData(prev => ({
-      ...prev,
-      fields: [...prev.fields, newField]
-    }));
-    setSelectedFieldIndex(formData.fields.length);
+    addField('section');
   };
 
   const addSection = () => {
-    const newField: ProcedureField = {
-      id: crypto.randomUUID(),
-      procedure_id: '',
-      label: 'New Section',
-      field_type: 'section',
-      is_required: false,
-      order_index: formData.fields.length,
-      options: {},
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString()
-    };
-    
-    setFormData(prev => ({
-      ...prev,
-      fields: [...prev.fields, newField]
-    }));
-    setSelectedFieldIndex(formData.fields.length);
+    addField('section');
   };
 
   const updateField = (index: number, field: Partial<ProcedureField>) => {
@@ -194,6 +163,27 @@ export const UnifiedProcedureBuilder: React.FC<UnifiedProcedureBuilderProps> = (
       }))
     }));
     setSelectedFieldIndex(null);
+  };
+
+  const moveField = (index: number, direction: 'up' | 'down') => {
+    const fields = [...formData.fields];
+    const targetIndex = direction === 'up' ? index - 1 : index + 1;
+    
+    if (targetIndex >= 0 && targetIndex < fields.length) {
+      [fields[index], fields[targetIndex]] = [fields[targetIndex], fields[index]];
+      
+      // Update order indexes
+      fields.forEach((field, i) => {
+        field.order_index = i;
+      });
+      
+      setFormData(prev => ({ ...prev, fields }));
+      
+      // Update selected index
+      if (selectedFieldIndex === index) {
+        setSelectedFieldIndex(targetIndex);
+      }
+    }
   };
 
   const addTag = () => {
@@ -252,6 +242,7 @@ export const UnifiedProcedureBuilder: React.FC<UnifiedProcedureBuilderProps> = (
                 fields={formData.fields}
                 selectedFieldIndex={selectedFieldIndex}
                 onFieldSelect={setSelectedFieldIndex}
+                onFieldMove={moveField}
               />
 
               {selectedFieldIndex !== null && formData.fields[selectedFieldIndex] && (
@@ -259,6 +250,10 @@ export const UnifiedProcedureBuilder: React.FC<UnifiedProcedureBuilderProps> = (
                   field={formData.fields[selectedFieldIndex]}
                   onUpdate={(field) => updateField(selectedFieldIndex, field)}
                   onRemove={() => removeField(selectedFieldIndex)}
+                  onMoveUp={() => moveField(selectedFieldIndex, 'up')}
+                  onMoveDown={() => moveField(selectedFieldIndex, 'down')}
+                  canMoveUp={selectedFieldIndex > 0}
+                  canMoveDown={selectedFieldIndex < formData.fields.length - 1}
                 />
               )}
             </div>
