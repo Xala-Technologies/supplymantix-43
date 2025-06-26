@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { ProcedureField } from '@/lib/database/procedures-enhanced';
 import { ProcedurePreview } from './ProcedurePreview';
