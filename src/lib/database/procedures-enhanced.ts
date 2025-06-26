@@ -47,12 +47,19 @@ export interface ProcedureField {
     minRating?: number;
     maxRating?: number;
     points?: number;
-    infoText?: string;
-    allowMultiple?: boolean;
-    maxFileSize?: number;
+    passFailCriteria?: 'pass' | 'fail';
+    requiresSignature?: boolean;
+    allowMultipleFiles?: boolean;
     acceptedFileTypes?: string[];
-    image?: string;
+    maxFileSize?: number;
     showInSummary?: boolean;
+    attachedFile?: {
+      name: string;
+      url: string;
+      type: string;
+      size: number;
+    };
+    image?: string;
   };
   created_at: string;
   updated_at: string;
