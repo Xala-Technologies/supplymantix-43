@@ -1,39 +1,13 @@
-import { inventoryApi } from "./inventory";
+
 import { workOrdersApi } from "./work-orders";
-import { workOrdersEnhancedApi } from "./work-orders-enhanced";
-import { assetsApi } from "./assets";
-import { assetDocumentsApi } from "./asset-documents";
-import { proceduresApi } from "./procedures";
-import { proceduresEnhancedApi } from "./procedures-enhanced";
-import { procurementApi } from "./procurement";
-import { purchaseOrdersApi } from "./purchase-orders";
-import { purchaseOrdersEnhancedApi } from "./purchase-orders-enhanced";
-import { requestsApi } from "./requests";
-import { usersApi } from "./users";
-import { organizationsApi } from "./organizations";
-import { locationsApi } from "./locations";
-import { billingApi } from "./billing";
-import { integrationsApi } from "./integrations";
-import { inventoryEnhancedApi } from "./inventory-enhanced";
-import { metersApi } from "./meters";
 
 export const databaseApi = {
-  ...workOrdersApi,
-  ...workOrdersEnhancedApi,
-  ...assetsApi,
-  ...assetDocumentsApi,
-  ...inventoryApi,
-  ...inventoryEnhancedApi,
-  ...proceduresApi,
-  ...proceduresEnhancedApi,
-  ...procurementApi,
-  ...purchaseOrdersApi,
-  ...purchaseOrdersEnhancedApi,
-  ...requestsApi,
-  ...usersApi,
-  ...organizationsApi,
-  ...locationsApi,
-  ...billingApi,
-  ...integrationsApi,
-  ...metersApi,
+  // Work Orders
+  getWorkOrders: workOrdersApi.getWorkOrders,
+  createWorkOrder: workOrdersApi.createWorkOrder,
+  updateWorkOrder: workOrdersApi.updateWorkOrder,
+  getChatMessages: workOrdersApi.getChatMessages,
+  createChatMessage: workOrdersApi.createChatMessage,
 };
+
+export * from "./work-orders";
