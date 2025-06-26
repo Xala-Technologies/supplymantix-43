@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { GripVertical, MoreHorizontal, Link, Paperclip, Trash2, Copy, ChevronUp, ChevronDown, X, Upload } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -35,6 +34,7 @@ export const FieldsList: React.FC<FieldsListProps> = ({
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
   const [expandedFields, setExpandedFields] = useState<Set<number>>(new Set());
   const [showImageUpload, setShowImageUpload] = useState<Set<number>>(new Set());
+  const fileInputRefs = useRef<{ [key: number]: HTMLInputElement | null }>({});
 
   const handleDragStart = (e: React.DragEvent, index: number) => {
     e.dataTransfer.effectAllowed = 'move';
@@ -118,6 +118,36 @@ export const FieldsList: React.FC<FieldsListProps> = ({
       newSet.add(index);
     }
     setShowImageUpload(newSet);
+  };
+
+  const handleFileUpload = (index: number, e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file && onFieldUpdate) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const fileUrl = reader.result as string;
+        const field = fields[index];
+        onFieldUpdate(index, { 
+          options: { 
+            ...field.options, 
+            attachedFile: {
+              name: file.name,
+              url: fileUrl,
+              type: file.type,
+              size: file.size
+            }
+          } 
+        });
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleAttachmentClick = (index: number) => {
+    const input = fileInputRefs.current[index];
+    if (input) {
+      input.click();
+    }
   };
 
   const handleImageUpload = (index: number, e: React.ChangeEvent<HTMLInputElement>) => {
@@ -221,6 +251,12 @@ export const FieldsList: React.FC<FieldsListProps> = ({
                           Required
                         </span>
                       )}
+                      {field.options?.attachedFile && (
+                        <span className="text-xs bg-blue-100 text-blue-600 px-2 py-1 rounded flex items-center gap-1">
+                          <Paperclip className="h-3 w-3" />
+                          Attached
+                        </span>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -261,11 +297,20 @@ export const FieldsList: React.FC<FieldsListProps> = ({
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={() => toggleImageUpload(index)}
+                    onClick={() => handleAttachmentClick(index)}
                     className="h-8 w-8 p-0 text-gray-500 hover:text-gray-600 hover:bg-gray-50"
                   >
                     <Paperclip className="h-4 w-4" />
                   </Button>
+                  
+                  {/* Hidden file input for attachment */}
+                  <input
+                    ref={(el) => fileInputRefs.current[index] = el}
+                    type="file"
+                    accept="image/*,application/pdf,.doc,.docx,.txt"
+                    onChange={(e) => handleFileUpload(index, e)}
+                    className="hidden"
+                  />
                   
                   {/* Delete Button */}
                   <Button
@@ -324,6 +369,35 @@ export const FieldsList: React.FC<FieldsListProps> = ({
                 </div>
               </div>
 
+              {/* Attached File Preview (when collapsed) */}
+              {!expandedFields.has(index) && field.options?.attachedFile && (
+                <div className="px-4 pb-4 pt-0">
+                  <div className="bg-gray-50 rounded p-3 flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Paperclip className="h-4 w-4 text-gray-500" />
+                      <span className="text-sm text-gray-700">{field.options.attachedFile.name}</span>
+                      <span className="text-xs text-gray-500">
+                        ({(field.options.attachedFile.size / 1024).toFixed(1)} KB)
+                      </span>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => {
+                        if (onFieldUpdate) {
+                          const newOptions = { ...field.options };
+                          delete newOptions.attachedFile;
+                          onFieldUpdate(index, { options: newOptions });
+                        }
+                      }}
+                      className="h-6 w-6 p-0 text-gray-400 hover:text-red-600"
+                    >
+                      <X className="h-3 w-3" />
+                    </Button>
+                  </div>
+                </div>
+              )}
+
               {/* Expanded Field Editor */}
               {expandedFields.has(index) && (
                 <div className="border-t border-gray-100 p-4 bg-gray-50">
@@ -346,6 +420,46 @@ export const FieldsList: React.FC<FieldsListProps> = ({
                       onChange={(value) => onFieldUpdate && onFieldUpdate(index, { field_type: value as ProcedureField['field_type'] })}
                     />
                   </div>
+
+                  {/* Attached File Section */}
+                  {field.options?.attachedFile && (
+                    <div className="mb-4 p-4 bg-white rounded-lg border">
+                      <div className="flex items-center justify-between mb-2">
+                        <Label className="text-sm font-medium">Attached File</Label>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => {
+                            if (onFieldUpdate) {
+                              const newOptions = { ...field.options };
+                              delete newOptions.attachedFile;
+                              onFieldUpdate(index, { options: newOptions });
+                            }
+                          }}
+                          className="h-6 w-6 p-0"
+                        >
+                          <X className="h-3 w-3" />
+                        </Button>
+                      </div>
+                      
+                      <div className="flex items-center gap-3 p-3 bg-gray-50 rounded border">
+                        <Paperclip className="h-5 w-5 text-gray-500" />
+                        <div className="flex-1">
+                          <div className="font-medium text-sm">{field.options.attachedFile.name}</div>
+                          <div className="text-xs text-gray-500">
+                            {field.options.attachedFile.type} • {(field.options.attachedFile.size / 1024).toFixed(1)} KB
+                          </div>
+                        </div>
+                        {field.options.attachedFile.type.startsWith('image/') && (
+                          <img 
+                            src={field.options.attachedFile.url} 
+                            alt="Preview" 
+                            className="w-12 h-12 object-cover rounded border"
+                          />
+                        )}
+                      </div>
+                    </div>
+                  )}
 
                   {/* Image Upload Section */}
                   {showImageUpload.has(index) && (
