@@ -69,6 +69,7 @@ export const UnifiedProcedureBuilder: React.FC<UnifiedProcedureBuilderProps> = (
   const [activeTab, setActiveTab] = useState('builder');
   const [isPreviewMode, setIsPreviewMode] = useState(false);
   const [newTag, setNewTag] = useState('');
+  const [scoringEnabled, setScoringEnabled] = useState(false);
   
   const [formData, setFormData] = useState({
     title: initialData?.title || '',
@@ -175,6 +176,7 @@ export const UnifiedProcedureBuilder: React.FC<UnifiedProcedureBuilderProps> = (
       <div className="h-screen bg-gray-50">
         <ProcedurePreview 
           procedure={formData} 
+          scoringEnabled={scoringEnabled}
           onClose={() => setIsPreviewMode(false)}
         />
       </div>
@@ -331,6 +333,13 @@ export const UnifiedProcedureBuilder: React.FC<UnifiedProcedureBuilderProps> = (
                             <Badge variant="secondary">{formData.fields.length}</Badge>
                           )}
                         </CardTitle>
+                        <div className="flex items-center gap-2">
+                          <Label className="text-sm">Enable Scoring</Label>
+                          <Switch
+                            checked={scoringEnabled}
+                            onCheckedChange={setScoringEnabled}
+                          />
+                        </div>
                       </div>
                     </CardHeader>
                     <CardContent>
@@ -358,6 +367,7 @@ export const UnifiedProcedureBuilder: React.FC<UnifiedProcedureBuilderProps> = (
                               field={field}
                               index={index}
                               totalFields={formData.fields.length}
+                              scoringEnabled={scoringEnabled}
                               onUpdate={(updates) => updateField(index, updates)}
                               onDelete={() => removeField(index)}
                               onMove={(direction) => moveField(index, direction)}
