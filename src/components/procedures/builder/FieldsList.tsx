@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { GripVertical, MoreHorizontal, Link, Paperclip, Trash2, Copy, ChevronUp, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -250,7 +249,6 @@ export const FieldsList: React.FC<FieldsListProps> = ({
                       id={`required-${field.id}`}
                       checked={field.is_required}
                       onCheckedChange={(checked) => handleRequiredToggle(index, checked)}
-                      size="sm"
                     />
                   </div>
 
