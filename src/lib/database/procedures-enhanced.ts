@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/integrations/supabase/types";
 import { getCurrentTenantId } from "@/hooks/useInventoryHelpers";
@@ -12,6 +11,7 @@ export type ProcedureFieldType =
   | 'text'
   | 'textarea' 
   | 'number'
+  | 'amount'
   | 'email'
   | 'url'
   | 'phone'
@@ -28,7 +28,8 @@ export type ProcedureFieldType =
   | 'slider'
   | 'section'
   | 'divider'
-  | 'info';
+  | 'info'
+  | 'inspection';
 
 export interface ProcedureField {
   id: string;
