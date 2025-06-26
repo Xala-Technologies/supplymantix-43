@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { GripVertical, MoreHorizontal, Link, Paperclip, Trash2, Copy, ChevronUp, ChevronDown, X, Upload } from 'lucide-react';
+import { GripVertical, MoreHorizontal, Trash2, Copy, ChevronUp, ChevronDown, X, Upload, Calendar } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -34,7 +34,6 @@ export const FieldsList: React.FC<FieldsListProps> = ({
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
   const [expandedFields, setExpandedFields] = useState<Set<number>>(new Set());
-  const [showImageUpload, setShowImageUpload] = useState<Set<number>>(new Set());
 
   const handleDragStart = (e: React.DragEvent, index: number) => {
     e.dataTransfer.effectAllowed = 'move';
@@ -71,8 +70,8 @@ export const FieldsList: React.FC<FieldsListProps> = ({
 
   const getFieldTypeIcon = (type: string) => {
     const icons: Record<string, string> = {
-      'checkbox': '☑',
       'text': '✓T',
+      'checkbox': '☑',
       'number': '#',
       'amount': '$',
       'date': '📅',
@@ -80,7 +79,7 @@ export const FieldsList: React.FC<FieldsListProps> = ({
       'multiselect': '☰',
       'file': '📎',
       'section': '━',
-      'inspection': '🔍'
+      'divider': '─'
     };
     return icons[type] || '•';
   };
@@ -91,11 +90,12 @@ export const FieldsList: React.FC<FieldsListProps> = ({
       'checkbox': 'bg-blue-100 text-blue-600',
       'number': 'bg-orange-100 text-orange-600',
       'amount': 'bg-pink-100 text-pink-600',
+      'date': 'bg-purple-100 text-purple-600',
       'select': 'bg-red-100 text-red-600',
-      'multiselect': 'bg-purple-100 text-purple-600',
-      'inspection': 'bg-cyan-100 text-cyan-600',
+      'multiselect': 'bg-indigo-100 text-indigo-600',
       'file': 'bg-gray-100 text-gray-600',
-      'section': 'bg-gray-100 text-gray-600'
+      'section': 'bg-gray-100 text-gray-600',
+      'divider': 'bg-gray-100 text-gray-600'
     };
     return colors[type] || 'bg-gray-100 text-gray-600';
   };
@@ -108,16 +108,6 @@ export const FieldsList: React.FC<FieldsListProps> = ({
       newExpanded.add(index);
     }
     setExpandedFields(newExpanded);
-  };
-
-  const toggleImageUpload = (index: number) => {
-    const newSet = new Set(showImageUpload);
-    if (newSet.has(index)) {
-      newSet.delete(index);
-    } else {
-      newSet.add(index);
-    }
-    setShowImageUpload(newSet);
   };
 
   const handleImageUpload = (index: number, e: React.ChangeEvent<HTMLInputElement>) => {
@@ -148,6 +138,89 @@ export const FieldsList: React.FC<FieldsListProps> = ({
           choices
         }
       });
+    }
+  };
+
+  const renderFieldSpecificOptions = (field: ProcedureField, index: number) => {
+    switch (field.field_type) {
+      case 'select':
+      case 'multiselect':
+        return (
+          <div className="mb-4">
+            <Label className="text-sm font-medium mb-2 block">Options (one per line)</Label>
+            <Textarea
+              value={field.options?.choices?.join('\n') || ''}
+              onChange={(e) => handleChoicesUpdate(index, e.target.value)}
+              placeholder="Option 1&#10;Option 2&#10;Option 3"
+              rows={4}
+              className="resize-none text-sm"
+            />
+          </div>
+        );
+
+      case 'number':
+      case 'amount':
+        return (
+          <div className="grid grid-cols-2 gap-4 mb-4">
+            <div>
+              <Label className="text-sm font-medium mb-2 block">Min Value</Label>
+              <Input
+                type="number"
+                value={field.options?.minValue || ''}
+                onChange={(e) => onFieldUpdate && onFieldUpdate(index, {
+                  options: { ...field.options, minValue: Number(e.target.value) }
+                })}
+                placeholder="0"
+                className="text-sm"
+              />
+            </div>
+            <div>
+              <Label className="text-sm font-medium mb-2 block">Max Value</Label>
+              <Input
+                type="number"
+                value={field.options?.maxValue || ''}
+                onChange={(e) => onFieldUpdate && onFieldUpdate(index, {
+                  options: { ...field.options, maxValue: Number(e.target.value) }
+                })}
+                placeholder="100"
+                className="text-sm"
+              />
+            </div>
+          </div>
+        );
+
+      case 'file':
+        return (
+          <div className="mb-4">
+            <Label className="text-sm font-medium mb-2 block">Accepted File Types</Label>
+            <Input
+              value={field.options?.acceptedFileTypes?.join(', ') || ''}
+              onChange={(e) => onFieldUpdate && onFieldUpdate(index, {
+                options: { 
+                  ...field.options, 
+                  acceptedFileTypes: e.target.value.split(',').map(t => t.trim()).filter(Boolean)
+                }
+              })}
+              placeholder="pdf, jpg, png, doc"
+              className="text-sm"
+            />
+            <div className="mt-2">
+              <Label className="text-sm font-medium mb-2 block">Max File Size (MB)</Label>
+              <Input
+                type="number"
+                value={field.options?.maxFileSize || ''}
+                onChange={(e) => onFieldUpdate && onFieldUpdate(index, {
+                  options: { ...field.options, maxFileSize: Number(e.target.value) }
+                })}
+                placeholder="10"
+                className="text-sm"
+              />
+            </div>
+          </div>
+        );
+
+      default:
+        return null;
     }
   };
 
@@ -247,25 +320,6 @@ export const FieldsList: React.FC<FieldsListProps> = ({
                   >
                     <ChevronDown className="h-4 w-4" />
                   </Button>
-
-                  {/* Link Button */}
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-8 w-8 p-0 text-blue-500 hover:text-blue-600 hover:bg-blue-50"
-                  >
-                    <Link className="h-4 w-4" />
-                  </Button>
-                  
-                  {/* Attachment Button */}
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => toggleImageUpload(index)}
-                    className="h-8 w-8 p-0 text-gray-500 hover:text-gray-600 hover:bg-gray-50"
-                  >
-                    <Paperclip className="h-4 w-4" />
-                  </Button>
                   
                   {/* Delete Button */}
                   <Button
@@ -347,66 +401,35 @@ export const FieldsList: React.FC<FieldsListProps> = ({
                     />
                   </div>
 
-                  {/* Image Upload Section */}
-                  {showImageUpload.has(index) && (
-                    <div className="mb-4 p-4 bg-white rounded-lg border">
-                      <div className="flex items-center justify-between mb-2">
-                        <Label className="text-sm font-medium">Field Image</Label>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => toggleImageUpload(index)}
-                          className="h-6 w-6 p-0"
-                        >
-                          <X className="h-3 w-3" />
-                        </Button>
-                      </div>
-                      
-                      {field.options?.image ? (
-                        <div className="relative">
-                          <img 
-                            src={field.options.image} 
-                            alt="Field" 
-                            className="w-full h-32 object-cover rounded border"
-                          />
-                          <Button
-                            variant="destructive"
-                            size="sm"
-                            onClick={() => {
-                              if (onFieldUpdate) {
-                                const newOptions = { ...field.options };
-                                delete newOptions.image;
-                                onFieldUpdate(index, { options: newOptions });
-                              }
-                            }}
-                            className="absolute top-2 right-2 h-6 w-6 p-0"
-                          >
-                            <X className="h-3 w-3" />
-                          </Button>
-                        </div>
-                      ) : (
-                        <div>
-                          <input
-                            type="file"
-                            accept="image/*"
-                            onChange={(e) => handleImageUpload(index, e)}
-                            className="w-full text-sm"
-                          />
-                        </div>
-                      )}
+                  {/* Field-specific options */}
+                  {renderFieldSpecificOptions(field, index)}
+
+                  {/* Default Value */}
+                  {(field.field_type === 'text' || field.field_type === 'number' || field.field_type === 'amount') && (
+                    <div className="mb-4">
+                      <Label className="text-sm font-medium mb-2 block">Default Value</Label>
+                      <Input
+                        value={field.options?.defaultValue || ''}
+                        onChange={(e) => onFieldUpdate && onFieldUpdate(index, {
+                          options: { ...field.options, defaultValue: e.target.value }
+                        })}
+                        placeholder="Default value"
+                        className="text-sm"
+                      />
                     </div>
                   )}
 
-                  {/* Multiple Choice Options */}
-                  {(field.field_type === 'select' || field.field_type === 'multiselect') && (
+                  {/* Placeholder Text */}
+                  {(field.field_type === 'text' || field.field_type === 'number' || field.field_type === 'amount') && (
                     <div className="mb-4">
-                      <Label className="text-sm font-medium mb-2 block">Options (one per line)</Label>
-                      <Textarea
-                        value={field.options?.choices?.join('\n') || ''}
-                        onChange={(e) => handleChoicesUpdate(index, e.target.value)}
-                        placeholder="Option 1&#10;Option 2&#10;Option 3"
-                        rows={3}
-                        className="resize-none text-sm"
+                      <Label className="text-sm font-medium mb-2 block">Placeholder Text</Label>
+                      <Input
+                        value={field.options?.placeholder || ''}
+                        onChange={(e) => onFieldUpdate && onFieldUpdate(index, {
+                          options: { ...field.options, placeholder: e.target.value }
+                        })}
+                        placeholder="Placeholder text"
+                        className="text-sm"
                       />
                     </div>
                   )}
@@ -426,10 +449,48 @@ export const FieldsList: React.FC<FieldsListProps> = ({
                       className="text-sm"
                     />
                   </div>
+
+                  {/* Image Upload */}
+                  <div className="mb-4">
+                    <Label className="text-sm font-medium mb-2 block">Field Image (Optional)</Label>
+                    {field.options?.image ? (
+                      <div className="relative">
+                        <img 
+                          src={field.options.image} 
+                          alt="Field" 
+                          className="w-full h-32 object-cover rounded border"
+                        />
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          onClick={() => {
+                            if (onFieldUpdate) {
+                              const newOptions = { ...field.options };
+                              delete newOptions.image;
+                              onFieldUpdate(index, { options: newOptions });
+                            }
+                          }}
+                          className="absolute top-2 right-2 h-6 w-6 p-0"
+                        >
+                          <X className="h-3 w-3" />
+                        </Button>
+                      </div>
+                    ) : (
+                      <div className="border-2 border-dashed border-gray-300 rounded-lg p-4">
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) => handleImageUpload(index, e)}
+                          className="w-full text-sm"
+                        />
+                        <p className="text-xs text-gray-500 mt-1">Upload an image to help explain this field</p>
+                      </div>
+                    )}
+                  </div>
                 </div>
               )}
 
-              {/* Field Options Preview (when collapsed) */}
+              {/* Field Preview when collapsed */}
               {!expandedFields.has(index) && (field.field_type === 'select' || field.field_type === 'multiselect') && field.options?.choices && field.options.choices.length > 0 && (
                 <div className="px-4 pb-4 pt-0">
                   <div className="bg-gray-50 rounded p-3">
@@ -450,7 +511,7 @@ export const FieldsList: React.FC<FieldsListProps> = ({
                 </div>
               )}
 
-              {/* Help Text Preview (when collapsed) */}
+              {/* Help Text Preview when collapsed */}
               {!expandedFields.has(index) && field.options?.helpText && (
                 <div className="px-4 pb-4 pt-0">
                   <div className="text-xs text-gray-500 italic">

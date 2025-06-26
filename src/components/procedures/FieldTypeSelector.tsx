@@ -8,7 +8,10 @@ import {
   CheckSquare, 
   CircleDot, 
   List,
-  Search
+  Calendar,
+  Upload,
+  FileText,
+  Minus
 } from "lucide-react";
 
 interface FieldTypeSelectorProps {
@@ -46,25 +49,46 @@ const FIELD_TYPES = [
     bgColor: 'bg-pink-100'
   },
   { 
+    value: 'date', 
+    label: 'Date Picker', 
+    icon: Calendar, 
+    color: 'text-purple-600',
+    bgColor: 'bg-purple-100'
+  },
+  { 
     value: 'select', 
-    label: 'Multiple Choice', 
+    label: 'Single Select', 
     icon: CircleDot, 
     color: 'text-red-600',
     bgColor: 'bg-red-100'
   },
   { 
     value: 'multiselect', 
-    label: 'Checklist', 
+    label: 'Multi Select', 
     icon: List, 
-    color: 'text-purple-600',
-    bgColor: 'bg-purple-100'
+    color: 'text-indigo-600',
+    bgColor: 'bg-indigo-100'
   },
   { 
-    value: 'inspection', 
-    label: 'Inspection Check', 
-    icon: Search, 
-    color: 'text-cyan-600',
-    bgColor: 'bg-cyan-100'
+    value: 'file', 
+    label: 'File Upload', 
+    icon: Upload, 
+    color: 'text-gray-600',
+    bgColor: 'bg-gray-100'
+  },
+  { 
+    value: 'section', 
+    label: 'Section Header', 
+    icon: FileText, 
+    color: 'text-teal-600',
+    bgColor: 'bg-teal-100'
+  },
+  { 
+    value: 'divider', 
+    label: 'Divider', 
+    icon: Minus, 
+    color: 'text-gray-600',
+    bgColor: 'bg-gray-100'
   }
 ];
 

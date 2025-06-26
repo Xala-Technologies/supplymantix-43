@@ -42,92 +42,77 @@ export const UnifiedProcedureBuilder: React.FC<UnifiedProcedureBuilderProps> = (
   const [selectedFieldIndex, setSelectedFieldIndex] = useState<number | null>(null);
   
   const [formData, setFormData] = useState({
-    title: initialData?.title || 'Fire Extinguisher Inspection',
-    description: initialData?.description || 'Routine fire extinguisher inspection form to ensure operability.',
+    title: initialData?.title || 'New Procedure',
+    description: initialData?.description || 'Procedure description',
     category: initialData?.category || 'Inspection',
     tags: initialData?.tags || [],
     is_global: initialData?.is_global || false,
-    fields: initialData?.fields || [
-      {
-        id: '1',
-        procedure_id: '',
-        label: 'Confirm the extinguisher is visible, unobstructed, and in its designated location.',
-        field_type: 'checkbox' as const,
-        is_required: false,
-        order_index: 0,
-        options: {},
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      },
-      {
-        id: '2',
-        procedure_id: '',
-        label: 'Examine the extinguisher for obvious physical damage, corrosion, leakage, or clogged nozzle.',
-        field_type: 'checkbox' as const,
-        is_required: false,
-        order_index: 1,
-        options: {},
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      },
-      {
-        id: '3',
-        procedure_id: '',
-        label: 'Make sure the operating instructions on the nameplate are legible and facing outward.',
-        field_type: 'checkbox' as const,
-        is_required: false,
-        order_index: 2,
-        options: {},
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      },
-      {
-        id: '4',
-        procedure_id: '',
-        label: 'Confirm the pressure gauge is in the operable range.',
-        field_type: 'checkbox' as const,
-        is_required: false,
-        order_index: 3,
-        options: {},
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      },
-      {
-        id: '5',
-        procedure_id: '',
-        label: 'Lift the fire extinguisher to ensure that it is full.',
-        field_type: 'checkbox' as const,
-        is_required: false,
-        order_index: 4,
-        options: {},
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      },
-      {
-        id: '6',
-        procedure_id: '',
-        label: 'Verify the locking pin is intact and the tamper seal is unbroken.',
-        field_type: 'checkbox' as const,
-        is_required: false,
-        order_index: 5,
-        options: {},
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      }
-    ]
+    fields: initialData?.fields || []
   });
 
   const addField = (type: ProcedureField['field_type'] = 'text') => {
+    const getFieldDefaults = (fieldType: ProcedureField['field_type']) => {
+      const baseDefaults = {
+        label: `New ${fieldType.charAt(0).toUpperCase() + fieldType.slice(1)} Field`,
+        is_required: false,
+        options: {}
+      };
+
+      switch (fieldType) {
+        case 'select':
+        case 'multiselect':
+          return {
+            ...baseDefaults,
+            label: `New ${fieldType === 'select' ? 'Select' : 'Multi-Select'} Field`,
+            options: { choices: ['Option 1', 'Option 2', 'Option 3'] }
+          };
+        case 'number':
+        case 'amount':
+          return {
+            ...baseDefaults,
+            options: { minValue: 0, maxValue: 100 }
+          };
+        case 'file':
+          return {
+            ...baseDefaults,
+            options: { acceptedFileTypes: ['pdf', 'jpg', 'png'], maxFileSize: 10 }
+          };
+        case 'checkbox':
+          return {
+            ...baseDefaults,
+            label: 'New Checkbox'
+          };
+        case 'date':
+          return {
+            ...baseDefaults,
+            label: 'New Date Field'
+          };
+        case 'section':
+          return {
+            ...baseDefaults,
+            label: 'Section Header',
+            is_required: false
+          };
+        case 'divider':
+          return {
+            ...baseDefaults,
+            label: 'Divider',
+            is_required: false
+          };
+        default:
+          return baseDefaults;
+      }
+    };
+
+    const fieldDefaults = getFieldDefaults(type);
     const newField: ProcedureField = {
       id: crypto.randomUUID(),
       procedure_id: '',
-      label: type === 'section' ? 'New Section' : 'New Field',
       field_type: type,
-      is_required: false,
       order_index: formData.fields.length,
-      options: type === 'select' || type === 'multiselect' ? { choices: [] } : {},
       created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString()
+      updated_at: new Date().toISOString(),
+      ...fieldDefaults
     };
     
     setFormData(prev => ({
@@ -142,7 +127,7 @@ export const UnifiedProcedureBuilder: React.FC<UnifiedProcedureBuilderProps> = (
   };
 
   const addSection = () => {
-    addField('section');
+    addField('divider');
   };
 
   const updateField = (index: number, field: Partial<ProcedureField>) => {
