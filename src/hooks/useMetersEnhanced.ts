@@ -19,6 +19,28 @@ export const useMeters = () => {
   });
 };
 
+export const useMeterDetail = (meterId: string) => {
+  return useQuery({
+    queryKey: ["meter-detail", meterId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("meters")
+        .select(`
+          *,
+          assets(name),
+          meter_readings(value, recorded_at, comment),
+          meter_triggers(*)
+        `)
+        .eq("id", meterId)
+        .single();
+      
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!meterId,
+  });
+};
+
 export const useCreateMeter = () => {
   const queryClient = useQueryClient();
   
@@ -92,6 +114,23 @@ export const useDeleteMeter = () => {
 };
 
 // Meter Readings
+export const useMeterReadings = (meterId: string) => {
+  return useQuery({
+    queryKey: ["meter-readings", meterId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("meter_readings")
+        .select("*")
+        .eq("meter_id", meterId)
+        .order("recorded_at", { ascending: false });
+      
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!meterId,
+  });
+};
+
 export const useCreateMeterReading = () => {
   const queryClient = useQueryClient();
   

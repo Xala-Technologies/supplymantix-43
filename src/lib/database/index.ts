@@ -15,10 +15,83 @@ const mockApi = {
     return [];
   },
 
+  // Meters
+  async getMeters() {
+    console.log('getMeters - Mock implementation');
+    return [];
+  },
+
   // Purchase Orders
   async getPurchaseOrders() {
     console.log('getPurchaseOrders - Mock implementation');
     return [];
+  },
+
+  async createPurchaseOrder(data: any) {
+    console.log('createPurchaseOrder - Mock implementation', data);
+    return data;
+  },
+
+  // Organizations
+  async getOrganizations() {
+    console.log('getOrganizations - Mock implementation');
+    return [];
+  },
+
+  async createOrganization(data: any) {
+    console.log('createOrganization - Mock implementation', data);
+    return data;
+  },
+
+  async updateOrganization(id: string, updates: any) {
+    console.log('updateOrganization - Mock implementation', id, updates);
+    return { id, ...updates };
+  },
+
+  async getOrganizationMembers(organizationId: string) {
+    console.log('getOrganizationMembers - Mock implementation', organizationId);
+    return [];
+  },
+
+  async inviteOrganizationMember(data: any) {
+    console.log('inviteOrganizationMember - Mock implementation', data);
+    return data;
+  },
+
+  async updateOrganizationMember(id: string, updates: any) {
+    console.log('updateOrganizationMember - Mock implementation', id, updates);
+    return { id, ...updates };
+  },
+
+  async removeOrganizationMember(id: string) {
+    console.log('removeOrganizationMember - Mock implementation', id);
+    return { id };
+  },
+
+  // Procedures
+  async getProcedures() {
+    console.log('getProcedures - Mock implementation');
+    return [];
+  },
+
+  async getProcedure(id: string) {
+    console.log('getProcedure - Mock implementation', id);
+    return null;
+  },
+
+  async createProcedure(data: any) {
+    console.log('createProcedure - Mock implementation', data);
+    return data;
+  },
+
+  async updateProcedure(id: string, updates: any) {
+    console.log('updateProcedure - Mock implementation', id, updates);
+    return { id, ...updates };
+  },
+
+  async deleteProcedure(id: string) {
+    console.log('deleteProcedure - Mock implementation', id);
+    return { id };
   },
 
   // Billing
@@ -77,8 +150,28 @@ export const databaseApi = {
   // Inventory
   getInventoryItems: mockApi.getInventoryItems,
   
+  // Meters
+  getMeters: mockApi.getMeters,
+  
   // Purchase Orders
   getPurchaseOrders: mockApi.getPurchaseOrders,
+  createPurchaseOrder: mockApi.createPurchaseOrder,
+  
+  // Organizations
+  getOrganizations: mockApi.getOrganizations,
+  createOrganization: mockApi.createOrganization,
+  updateOrganization: mockApi.updateOrganization,
+  getOrganizationMembers: mockApi.getOrganizationMembers,
+  inviteOrganizationMember: mockApi.inviteOrganizationMember,
+  updateOrganizationMember: mockApi.updateOrganizationMember,
+  removeOrganizationMember: mockApi.removeOrganizationMember,
+  
+  // Procedures
+  getProcedures: mockApi.getProcedures,
+  getProcedure: mockApi.getProcedure,
+  createProcedure: mockApi.createProcedure,
+  updateProcedure: mockApi.updateProcedure,
+  deleteProcedure: mockApi.deleteProcedure,
   
   // Billing
   getOrganizationSubscription: mockApi.getOrganizationSubscription,
