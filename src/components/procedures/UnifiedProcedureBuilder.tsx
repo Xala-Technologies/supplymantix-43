@@ -118,55 +118,14 @@ export const UnifiedProcedureBuilder: React.FC<UnifiedProcedureBuilderProps> = (
   });
 
   const addField = (type: ProcedureField['field_type'] = 'text') => {
-    let fieldLabel = 'New Field';
-    let fieldOptions = {};
-
-    // Set appropriate default labels and options based on field type
-    switch (type) {
-      case 'text':
-        fieldLabel = 'Enter text';
-        break;
-      case 'checkbox':
-        fieldLabel = 'Check if applicable';
-        break;
-      case 'number':
-        fieldLabel = 'Enter number';
-        break;
-      case 'amount':
-        fieldLabel = 'Enter amount';
-        break;
-      case 'select':
-        fieldLabel = 'Choose one option';
-        fieldOptions = { choices: ['Option 1', 'Option 2', 'Option 3'] };
-        break;
-      case 'multiselect':
-        fieldLabel = 'Select all that apply';
-        fieldOptions = { choices: ['Option 1', 'Option 2', 'Option 3'] };
-        break;
-      case 'inspection':
-        fieldLabel = 'Inspection check';
-        break;
-      case 'section':
-        fieldLabel = 'New Section';
-        break;
-      case 'file':
-        fieldLabel = 'Upload file';
-        break;
-      case 'date':
-        fieldLabel = 'Select date';
-        break;
-      default:
-        fieldLabel = 'New Field';
-    }
-
     const newField: ProcedureField = {
       id: crypto.randomUUID(),
       procedure_id: '',
-      label: fieldLabel,
+      label: type === 'section' ? 'New Section' : 'New Field',
       field_type: type,
       is_required: false,
       order_index: formData.fields.length,
-      options: fieldOptions,
+      options: type === 'select' || type === 'multiselect' ? { choices: [] } : {},
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString()
     };
@@ -175,8 +134,6 @@ export const UnifiedProcedureBuilder: React.FC<UnifiedProcedureBuilderProps> = (
       ...prev,
       fields: [...prev.fields, newField]
     }));
-    
-    // Auto-select the new field for immediate editing if needed
     setSelectedFieldIndex(formData.fields.length);
   };
 
