@@ -191,26 +191,48 @@ const Procedures = () => {
 
   return (
     <DashboardLayout>
-      <div className="flex-1 flex flex-col h-full bg-white">
-        {/* Enhanced Header */}
-        <div className="border-b border-gray-200 bg-white px-8 py-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-semibold text-gray-900">Procedure Library</h1>
-              <p className="text-sm text-gray-600 mt-1">Create and manage standardized procedures</p>
+      <div className="flex-1 flex flex-col h-full bg-gradient-to-br from-slate-50 to-white">
+        {/* Modern Enhanced Header */}
+        <div className="relative border-b border-slate-200 bg-white shadow-sm">
+          <div className="absolute inset-0 bg-gradient-to-r from-blue-600/5 to-purple-600/5"></div>
+          <div className="relative px-8 py-8">
+            <div className="flex items-center justify-between">
+              <div className="space-y-1">
+                <h1 className="text-3xl font-bold text-slate-900 tracking-tight">Procedure Library</h1>
+                <p className="text-slate-600 text-base">Create and manage standardized procedures for your team</p>
+                <div className="flex items-center gap-4 mt-3 text-sm text-slate-500">
+                  <div className="flex items-center gap-1">
+                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                    <span>{procedures.length} active procedures</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                    <span>Ready to execute</span>
+                  </div>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <Button 
+                  variant="outline" 
+                  className="border-slate-300 text-slate-700 hover:bg-slate-50 transition-all duration-200"
+                >
+                  <Download className="h-4 w-4 mr-2" />
+                  Export
+                </Button>
+                <Button 
+                  onClick={() => setShowNewProcedureModal(true)} 
+                  className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 shadow-lg hover:shadow-xl transition-all duration-200 px-6 py-2.5 font-semibold"
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  New Procedure Template
+                </Button>
+              </div>
             </div>
-            <Button 
-              onClick={() => setShowNewProcedureModal(true)} 
-              className="bg-blue-600 hover:bg-blue-700 px-6 py-2.5 font-medium"
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              New Procedure Template
-            </Button>
           </div>
         </div>
 
         {/* Enhanced Filters */}
-        <div className="border-b border-gray-200 bg-gray-50 px-8 py-4">
+        <div className="border-b border-slate-200 bg-white/80 backdrop-blur-sm px-8 py-5">
           <ProcedureFilters
             searchTerm={searchTerm}
             setSearchTerm={setSearchTerm}
@@ -222,14 +244,20 @@ const Procedures = () => {
           />
         </div>
 
-        {/* Main Content */}
+        {/* Main Content with Enhanced Design */}
         <div className="flex-1 flex overflow-hidden">
-          {/* Sidebar */}
-          <div className="w-80 bg-white border-r border-gray-200 flex flex-col">
-            <div className="p-6 border-b border-gray-200">
-              <h2 className="text-lg font-medium text-gray-900 mb-4">My Templates</h2>
-              <div className="text-sm text-gray-600 mb-2">
-                {procedures.length} {procedures.length === 1 ? 'template' : 'templates'}
+          {/* Modern Sidebar */}
+          <div className="w-80 bg-white border-r border-slate-200 flex flex-col shadow-sm">
+            <div className="p-6 border-b border-slate-100 bg-gradient-to-r from-slate-50 to-white">
+              <h2 className="text-lg font-semibold text-slate-900 mb-2">My Templates</h2>
+              <div className="flex items-center justify-between">
+                <div className="text-sm text-slate-600">
+                  {procedures.length} {procedures.length === 1 ? 'template' : 'templates'}
+                </div>
+                <div className="flex items-center gap-1">
+                  <div className="w-1.5 h-1.5 bg-blue-500 rounded-full"></div>
+                  <span className="text-xs text-slate-500">Active</span>
+                </div>
               </div>
             </div>
             
@@ -240,10 +268,10 @@ const Procedures = () => {
                     {[...Array(5)].map((_, i) => (
                       <div key={i} className="animate-pulse">
                         <div className="flex items-center space-x-3">
-                          <div className="w-10 h-10 bg-gray-200 rounded-full"></div>
+                          <div className="w-10 h-10 bg-slate-200 rounded-lg"></div>
                           <div className="flex-1">
-                            <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
-                            <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+                            <div className="h-4 bg-slate-200 rounded-md w-3/4 mb-2"></div>
+                            <div className="h-3 bg-slate-200 rounded-md w-1/2"></div>
                           </div>
                         </div>
                       </div>
@@ -251,18 +279,20 @@ const Procedures = () => {
                   </div>
                 </div>
               ) : procedures.length === 0 ? (
-                <div className="p-6 text-center">
-                  <div className="text-gray-400 mb-2">
-                    <FileText className="h-12 w-12 mx-auto" />
+                <div className="p-8 text-center">
+                  <div className="text-slate-400 mb-4">
+                    <FileText className="h-16 w-16 mx-auto" />
                   </div>
-                  <p className="text-gray-600 text-sm">No procedures found</p>
+                  <h3 className="text-slate-900 font-medium mb-2">No procedures found</h3>
+                  <p className="text-slate-600 text-sm mb-4">Get started by creating your first procedure</p>
                   <Button 
                     variant="outline" 
                     size="sm" 
-                    className="mt-3"
+                    className="border-dashed border-slate-300 text-slate-600 hover:bg-slate-50"
                     onClick={() => setShowNewProcedureModal(true)}
                   >
-                    Create your first procedure
+                    <Plus className="h-4 w-4 mr-2" />
+                    Create procedure
                   </Button>
                 </div>
               ) : (
@@ -286,139 +316,190 @@ const Procedures = () => {
             </div>
           </div>
 
-          {/* Detail Panel */}
-          <div className="flex-1 bg-gray-50">
+          {/* Enhanced Detail Panel */}
+          <div className="flex-1 bg-gradient-to-br from-slate-50 to-white">
             {selectedProcedure ? (
               <div className="h-full flex flex-col">
-                {/* Procedure Header */}
-                <div className="bg-blue-600 text-white p-8">
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <h1 className="text-2xl font-bold mb-2">{selectedProcedure.title}</h1>
-                      {selectedProcedure.description && (
-                        <p className="text-blue-100 mb-4">{selectedProcedure.description}</p>
-                      )}
-                      <div className="flex items-center space-x-6 text-sm">
-                        <div className="flex items-center">
-                          <FileText className="h-4 w-4 mr-1" />
-                          {selectedProcedure.fields?.length || 0} fields
+                {/* Enhanced Procedure Header */}
+                <div className="relative bg-gradient-to-r from-blue-600 via-blue-700 to-indigo-700 text-white overflow-hidden">
+                  <div className="absolute inset-0 bg-black/10"></div>
+                  <div className="absolute top-0 right-0 w-96 h-96 bg-white/5 rounded-full transform translate-x-32 -translate-y-32"></div>
+                  <div className="absolute bottom-0 left-0 w-64 h-64 bg-white/5 rounded-full transform -translate-x-16 translate-y-16"></div>
+                  
+                  <div className="relative p-8">
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1 max-w-4xl">
+                        <div className="flex items-center gap-3 mb-3">
+                          <div className="w-3 h-3 bg-green-400 rounded-full shadow-lg"></div>
+                          <span className="text-blue-100 text-sm font-medium">Active Procedure</span>
                         </div>
-                        <div className="flex items-center">
-                          <span className="bg-blue-500 text-white px-2 py-1 rounded text-xs">
-                            {selectedProcedure.category}
-                          </span>
+                        
+                        <h1 className="text-3xl font-bold mb-3 leading-tight">{selectedProcedure.title}</h1>
+                        
+                        {selectedProcedure.description && (
+                          <p className="text-blue-100 text-lg mb-6 leading-relaxed max-w-3xl">
+                            {selectedProcedure.description}
+                          </p>
+                        )}
+                        
+                        <div className="flex items-center gap-8 text-sm">
+                          <div className="flex items-center gap-2">
+                            <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
+                              <FileText className="h-4 w-4" />
+                            </div>
+                            <div>
+                              <div className="text-white font-medium">{selectedProcedure.fields?.length || 0}</div>
+                              <div className="text-blue-200 text-xs">Fields</div>
+                            </div>
+                          </div>
+                          
+                          <div className="flex items-center gap-2">
+                            <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
+                              <span className="text-xs font-semibold">{selectedProcedure.category?.charAt(0) || 'P'}</span>
+                            </div>
+                            <div>
+                              <div className="text-white font-medium">{selectedProcedure.category}</div>
+                              <div className="text-blue-200 text-xs">Category</div>
+                            </div>
+                          </div>
                         </div>
                       </div>
+                      
+                      <div className="flex items-center gap-3">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleExecuteProcedure(selectedProcedure)}
+                          className="bg-white/10 border-white/30 text-white hover:bg-white/20 backdrop-blur-sm"
+                        >
+                          Execute
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleEditProcedure(selectedProcedure)}
+                          className="bg-white/10 border-white/30 text-white hover:bg-white/20 backdrop-blur-sm"
+                        >
+                          Edit
+                        </Button>
+                      </div>
                     </div>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleEditProcedure(selectedProcedure)}
-                      className="text-white border-white hover:bg-blue-700"
-                    >
-                      Edit
-                    </Button>
                   </div>
                 </div>
 
-                {/* Tabs */}
-                <div className="border-b border-gray-200 bg-white">
+                {/* Enhanced Tabs */}
+                <div className="border-b border-slate-200 bg-white shadow-sm">
                   <div className="px-8">
                     <nav className="-mb-px flex space-x-8">
-                      <button className="border-b-2 border-blue-600 py-4 px-1 text-sm font-medium text-blue-600">
-                        Fields
+                      <button className="border-b-2 border-blue-600 py-4 px-1 text-sm font-semibold text-blue-600 transition-colors">
+                        Fields & Structure
                       </button>
-                      <button className="border-b-2 border-transparent py-4 px-1 text-sm font-medium text-gray-500 hover:text-gray-700">
-                        Details
+                      <button className="border-b-2 border-transparent py-4 px-1 text-sm font-medium text-slate-500 hover:text-slate-700 hover:border-slate-300 transition-colors">
+                        Settings & Details
                       </button>
-                      <button className="border-b-2 border-transparent py-4 px-1 text-sm font-medium text-gray-500 hover:text-gray-700">
-                        History
+                      <button className="border-b-2 border-transparent py-4 px-1 text-sm font-medium text-slate-500 hover:text-slate-700 hover:border-slate-300 transition-colors">
+                        Execution History
                       </button>
                     </nav>
                   </div>
                 </div>
 
-                {/* Fields Content */}
-                <div className="flex-1 overflow-y-auto p-8">
-                  <div className="space-y-6 max-w-4xl">
+                {/* Enhanced Fields Content */}
+                <div className="flex-1 overflow-y-auto p-8 bg-gradient-to-b from-white to-slate-50/50">
+                  <div className="space-y-6 max-w-5xl">
                     {selectedProcedure.fields?.map((field, index) => (
-                      <div key={field.id || index} className="bg-white rounded-lg border border-gray-200 p-6">
-                        <div className="flex items-start justify-between mb-4">
-                          <div>
-                            <h3 className="text-base font-medium text-gray-900 mb-1">
-                              {field.label}
-                              {field.is_required && <span className="text-red-500 ml-1">*</span>}
-                            </h3>
-                            {field.options?.helpText && (
-                              <p className="text-sm text-gray-600">{field.options.helpText}</p>
+                      <div key={field.id || index} className="bg-white rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden">
+                        <div className="p-6">
+                          <div className="flex items-start justify-between mb-4">
+                            <div className="flex-1">
+                              <div className="flex items-center gap-3 mb-2">
+                                <span className="text-xs font-semibold text-slate-500 bg-slate-100 px-2 py-1 rounded-md">
+                                  #{index + 1}
+                                </span>
+                                <h3 className="text-lg font-semibold text-slate-900">
+                                  {field.label}
+                                  {field.is_required && <span className="text-red-500 ml-2">*</span>}
+                                </h3>
+                              </div>
+                              {field.options?.helpText && (
+                                <p className="text-slate-600 text-sm leading-relaxed">{field.options.helpText}</p>
+                              )}
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <span className="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-semibold bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-700 border border-blue-200">
+                                {field.field_type}
+                              </span>
+                            </div>
+                          </div>
+
+                          {/* Enhanced Field Preview */}
+                          <div className="bg-gradient-to-br from-slate-50 to-slate-100/50 rounded-lg p-4 border border-slate-200">
+                            {field.field_type === 'text' && (
+                              <input 
+                                type="text" 
+                                placeholder="Text input preview"
+                                className="w-full px-3 py-2 border border-gray-300 rounded-md bg-white"
+                                disabled
+                              />
+                            )}
+                            {field.field_type === 'checkbox' && (
+                              <label className="flex items-center">
+                                <input type="checkbox" className="rounded border-gray-300 mr-2" disabled />
+                                <span className="text-sm text-gray-700">Checkbox option</span>
+                              </label>
+                            )}
+                            {field.field_type === 'select' && (
+                              <select className="w-full px-3 py-2 border border-gray-300 rounded-md bg-white" disabled>
+                                <option>Select an option...</option>
+                                {field.options?.choices?.map((choice, i) => (
+                                  <option key={i}>{choice}</option>
+                                ))}
+                              </select>
+                            )}
+                            {field.field_type === 'multiselect' && (
+                              <div className="space-y-2">
+                                {(field.options?.choices || ['Option 1', 'Option 2']).slice(0, 3).map((choice, i) => (
+                                  <label key={i} className="flex items-center">
+                                    <input type="checkbox" className="rounded border-gray-300 mr-2" disabled />
+                                    <span className="text-sm text-gray-700">{choice}</span>
+                                  </label>
+                                ))}
+                              </div>
+                            )}
+                            {field.field_type === 'number' && (
+                              <input 
+                                type="number" 
+                                placeholder="0"
+                                className="w-full px-3 py-2 border border-gray-300 rounded-md bg-white"
+                                disabled
+                              />
+                            )}
+                            {field.field_type === 'date' && (
+                              <input 
+                                type="date"
+                                className="w-full px-3 py-2 border border-gray-300 rounded-md bg-white"
+                                disabled
+                              />
                             )}
                           </div>
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                            {field.field_type}
-                          </span>
-                        </div>
-
-                        {/* Field Preview */}
-                        <div className="bg-gray-50 rounded-md p-4">
-                          {field.field_type === 'text' && (
-                            <input 
-                              type="text" 
-                              placeholder="Text input preview"
-                              className="w-full px-3 py-2 border border-gray-300 rounded-md bg-white"
-                              disabled
-                            />
-                          )}
-                          {field.field_type === 'checkbox' && (
-                            <label className="flex items-center">
-                              <input type="checkbox" className="rounded border-gray-300 mr-2" disabled />
-                              <span className="text-sm text-gray-700">Checkbox option</span>
-                            </label>
-                          )}
-                          {field.field_type === 'select' && (
-                            <select className="w-full px-3 py-2 border border-gray-300 rounded-md bg-white" disabled>
-                              <option>Select an option...</option>
-                              {field.options?.choices?.map((choice, i) => (
-                                <option key={i}>{choice}</option>
-                              ))}
-                            </select>
-                          )}
-                          {field.field_type === 'multiselect' && (
-                            <div className="space-y-2">
-                              {(field.options?.choices || ['Option 1', 'Option 2']).slice(0, 3).map((choice, i) => (
-                                <label key={i} className="flex items-center">
-                                  <input type="checkbox" className="rounded border-gray-300 mr-2" disabled />
-                                  <span className="text-sm text-gray-700">{choice}</span>
-                                </label>
-                              ))}
-                            </div>
-                          )}
-                          {field.field_type === 'number' && (
-                            <input 
-                              type="number" 
-                              placeholder="0"
-                              className="w-full px-3 py-2 border border-gray-300 rounded-md bg-white"
-                              disabled
-                            />
-                          )}
-                          {field.field_type === 'date' && (
-                            <input 
-                              type="date"
-                              className="w-full px-3 py-2 border border-gray-300 rounded-md bg-white"
-                              disabled
-                            />
-                          )}
                         </div>
                       </div>
                     ))}
 
                     {(!selectedProcedure.fields || selectedProcedure.fields.length === 0) && (
-                      <div className="text-center py-12">
-                        <div className="text-gray-400 mb-4">
-                          <FileText className="h-16 w-16 mx-auto" />
+                      <div className="text-center py-16 bg-white rounded-xl border-2 border-dashed border-slate-300">
+                        <div className="text-slate-400 mb-6">
+                          <FileText className="h-20 w-20 mx-auto" />
                         </div>
-                        <h3 className="text-lg font-medium text-gray-900 mb-2">No fields yet</h3>
-                        <p className="text-gray-600 mb-6">Add fields to this procedure to get started</p>
-                        <Button onClick={() => handleEditProcedure(selectedProcedure)}>
+                        <h3 className="text-xl font-semibold text-slate-900 mb-2">No fields configured</h3>
+                        <p className="text-slate-600 mb-8 max-w-md mx-auto">
+                          This procedure doesn't have any fields yet. Add fields to create an interactive checklist.
+                        </p>
+                        <Button 
+                          onClick={() => handleEditProcedure(selectedProcedure)}
+                          className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800"
+                        >
+                          <Plus className="h-4 w-4 mr-2" />
                           Add Fields
                         </Button>
                       </div>
@@ -428,12 +509,22 @@ const Procedures = () => {
               </div>
             ) : (
               <div className="h-full flex items-center justify-center">
-                <div className="text-center">
-                  <div className="text-gray-400 mb-4">
-                    <FileText className="h-16 w-16 mx-auto" />
+                <div className="text-center max-w-md">
+                  <div className="text-slate-400 mb-6">
+                    <FileText className="h-20 w-20 mx-auto" />
                   </div>
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">Select a procedure</h3>
-                  <p className="text-gray-600">Choose a procedure from the list to view its details</p>
+                  <h3 className="text-xl font-semibold text-slate-900 mb-3">Select a procedure</h3>
+                  <p className="text-slate-600 mb-6">
+                    Choose a procedure from the sidebar to view its details and manage its configuration
+                  </p>
+                  <Button 
+                    variant="outline" 
+                    onClick={() => setShowNewProcedureModal(true)}
+                    className="border-dashed border-slate-300"
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Create new procedure
+                  </Button>
                 </div>
               </div>
             )}
