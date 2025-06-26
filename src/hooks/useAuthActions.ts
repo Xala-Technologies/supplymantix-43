@@ -15,7 +15,7 @@ export const useAuthActions = () => {
       return { data, error };
     } catch (error) {
       console.error('Sign in error:', error);
-      return { error };
+      return { data: null, error };
     }
   };
 
@@ -40,7 +40,7 @@ export const useAuthActions = () => {
       return { data, error };
     } catch (error) {
       console.error('Sign up error:', error);
-      return { error };
+      return { data: null, error };
     }
   };
 
@@ -51,13 +51,13 @@ export const useAuthActions = () => {
       const { error } = await supabase.auth.signOut();
       if (error) {
         console.error('Sign out error:', error);
+        throw error;
       } else {
         console.log('Successfully signed out');
       }
-      return { error };
     } catch (error) {
       console.error('Sign out error:', error);
-      return { error };
+      throw error;
     }
   };
 
