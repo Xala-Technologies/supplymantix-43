@@ -46,12 +46,14 @@ export const MemberInviteForm = ({ organizationId }: MemberInviteFormProps) => {
     }
 
     try {
-      await inviteMutation.mutateAsync({
+      const inviteData = {
         organization_id: organizationId,
         invited_email: email.trim(),
         role,
         invited_by: "current-user-id", // This should come from auth context
-      });
+      };
+
+      await inviteMutation.mutateAsync(inviteData);
 
       setIsSuccess(true);
       toast({

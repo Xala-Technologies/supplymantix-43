@@ -9,6 +9,7 @@ export interface WorkOrderAsset {
   id: string;
   name: string;
   status?: string;
+  location?: string;
 }
 
 export interface WorkOrderLocation {
@@ -37,8 +38,8 @@ export interface WorkOrder extends BaseEntity {
   // Asset and Location
   asset_id?: string;
   location_id?: string;
-  asset?: WorkOrderAsset | string;
-  location?: WorkOrderLocation | string;
+  asset?: WorkOrderAsset | string | null;
+  location?: WorkOrderLocation | string | null;
   
   // Scheduling
   start_date?: string;

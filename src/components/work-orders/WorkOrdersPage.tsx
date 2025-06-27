@@ -5,10 +5,9 @@ import { WorkOrdersDesktopLayout } from "./WorkOrdersDesktopLayout";
 import { WorkOrdersMobileLayout } from "./WorkOrdersMobileLayout";
 import { WorkOrderCalendarView } from "./WorkOrderCalendarView";
 import { useWorkOrders, useCreateWorkOrder, useUpdateWorkOrder } from "@/hooks/useWorkOrders";
-import { WorkOrder, WorkOrderFilters } from "@/types/workOrder";
+import { WorkOrder, WorkOrderFilters } from "@/features/workOrders/types";
 import { supabase } from "@/integrations/supabase/client";
 import { StandardPageLayout } from "@/components/Layout/StandardPageLayout";
-import { normalizeWorkOrderData } from "@/features/workOrders/utils";
 import { useQueryClient } from "@tanstack/react-query";
 
 export const WorkOrdersPage = () => {
@@ -40,7 +39,13 @@ export const WorkOrdersPage = () => {
   const workOrders: WorkOrder[] = Array.isArray(rawWorkOrders) 
     ? rawWorkOrders.filter(wo => wo && wo.id).map(wo => {
         try {
-          return typeof wo.id === 'string' ? wo : normalizeWorkOrderData(wo);
+          // If it's already normalized, return as is
+          if (wo.assignedTo && Array.isArray(wo.assignedTo)) {
+            return wo as WorkOrder;
+          }
+          // Otherwise, it needs normalization (shouldn't happen with current setup)
+          console.warn('Work order may need normalization:', wo);
+          return wo as WorkOrder;
         } catch (error) {
           console.error('Error processing work order:', error, wo);
           return null;

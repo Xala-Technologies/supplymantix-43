@@ -1,5 +1,6 @@
 
 import type { Database } from "@/integrations/supabase/types";
+import type { WorkOrder, WorkOrderAsset, WorkOrderLocation } from "../types";
 
 type WorkOrderRow = Database["public"]["Tables"]["work_orders"]["Row"] & {
   assets?: { name: string; location: string } | null;
@@ -7,11 +8,44 @@ type WorkOrderRow = Database["public"]["Tables"]["work_orders"]["Row"] & {
   locations?: { name: string } | null;
 };
 
-export const normalizeWorkOrderData = (rawWorkOrder: WorkOrderRow) => {
+export const normalizeWorkOrderData = (rawWorkOrder: WorkOrderRow): WorkOrder => {
   console.log('Normalizing work order:', rawWorkOrder.id, rawWorkOrder);
   
   try {
-    const normalized = {
+    // Handle parts_used conversion
+    let partsUsed: any[] = [];
+    if (rawWorkOrder.parts_used) {
+      if (Array.isArray(rawWorkOrder.parts_used)) {
+        partsUsed = rawWorkOrder.parts_used as any[];
+      } else if (typeof rawWorkOrder.parts_used === 'string') {
+        try {
+          partsUsed = JSON.parse(rawWorkOrder.parts_used);
+        } catch {
+          partsUsed = [];
+        }
+      }
+    }
+
+    // Handle asset conversion
+    let asset: WorkOrderAsset | null = null;
+    if (rawWorkOrder.assets) {
+      asset = {
+        id: rawWorkOrder.asset_id || '',
+        name: rawWorkOrder.assets.name,
+        location: rawWorkOrder.assets.location
+      };
+    }
+
+    // Handle location conversion
+    let location: WorkOrderLocation | null = null;
+    if (rawWorkOrder.locations) {
+      location = {
+        id: rawWorkOrder.location_id || '',
+        name: rawWorkOrder.locations.name
+      };
+    }
+
+    const normalized: WorkOrder = {
       id: rawWorkOrder.id,
       title: rawWorkOrder.title || 'Untitled Work Order',
       description: rawWorkOrder.description || '',
@@ -30,20 +64,18 @@ export const normalizeWorkOrderData = (rawWorkOrder: WorkOrderRow) => {
       time_spent: rawWorkOrder.time_spent || 0,
       totalCost: rawWorkOrder.total_cost || 0,
       total_cost: rawWorkOrder.total_cost || 0,
-      partsUsed: rawWorkOrder.parts_used || [],
-      parts_used: rawWorkOrder.parts_used || [],
+      partsUsed: partsUsed,
+      parts_used: partsUsed,
       tags: rawWorkOrder.tags || [],
-      asset: rawWorkOrder.assets ? {
-        name: rawWorkOrder.assets.name,
-        location: rawWorkOrder.assets.location
-      } : null,
-      location: rawWorkOrder.locations ? {
-        name: rawWorkOrder.locations.name
-      } : null,
+      asset: asset,
+      location: location,
       requester_id: rawWorkOrder.requester_id,
       tenant_id: rawWorkOrder.tenant_id,
       asset_id: rawWorkOrder.asset_id,
-      location_id: rawWorkOrder.location_id
+      location_id: rawWorkOrder.location_id,
+      start_date: rawWorkOrder.start_date,
+      template_id: rawWorkOrder.template_id,
+      recurrence_rules: rawWorkOrder.recurrence_rules as any
     };
     
     console.log('Normalized work order:', normalized);
@@ -78,7 +110,10 @@ export const normalizeWorkOrderData = (rawWorkOrder: WorkOrderRow) => {
       requester_id: rawWorkOrder.requester_id,
       tenant_id: rawWorkOrder.tenant_id,
       asset_id: rawWorkOrder.asset_id,
-      location_id: rawWorkOrder.location_id
+      location_id: rawWorkOrder.location_id,
+      start_date: rawWorkOrder.start_date,
+      template_id: rawWorkOrder.template_id,
+      recurrence_rules: rawWorkOrder.recurrence_rules as any
     };
   }
 };
@@ -113,14 +148,28 @@ export const getPriorityColor = (priority: string) => {
   }
 };
 
-export const extractAssetInfo = (asset: any) => {
+export const extractAssetInfo = (asset: any): WorkOrderAsset | null => {
   if (!asset) return null;
-  if (typeof asset === 'string') return { name: asset };
-  return asset;
+  if (typeof asset === 'string') return { id: '', name: asset };
+  if (typeof asset === 'object' && asset.name) {
+    return {
+      id: asset.id || '',
+      name: asset.name,
+      status: asset.status,
+      location: asset.location
+    };
+  }
+  return null;
 };
 
-export const extractLocationInfo = (location: any) => {
+export const extractLocationInfo = (location: any): WorkOrderLocation | null => {
   if (!location) return null;
-  if (typeof location === 'string') return { name: location };
-  return location;
+  if (typeof location === 'string') return { id: '', name: location };
+  if (typeof location === 'object' && location.name) {
+    return {
+      id: location.id || '',
+      name: location.name
+    };
+  }
+  return null;
 };
