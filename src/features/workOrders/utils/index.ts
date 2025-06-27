@@ -111,7 +111,6 @@ export const normalizeWorkOrderData = (rawWorkOrder: WorkOrderRow): WorkOrder =>
       tenant_id: rawWorkOrder.tenant_id,
       asset_id: rawWorkOrder.asset_id,
       location_id: rawWorkOrder.location_id,
-      start_date: rawWorkOrder.start_date,
       template_id: rawWorkOrder.template_id,
       recurrence_rules: rawWorkOrder.recurrence_rules as any
     };
@@ -128,6 +127,8 @@ export const getStatusColor = (status: string) => {
       return 'bg-yellow-100 text-yellow-800 border-yellow-300';
     case 'cancelled':
       return 'bg-red-100 text-red-800 border-red-300';
+    case 'draft':
+      return 'bg-gray-100 text-gray-800 border-gray-300';
     default:
       return 'bg-gray-100 text-gray-800 border-gray-300';
   }

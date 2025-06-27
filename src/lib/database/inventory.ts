@@ -1,28 +1,68 @@
 
 import { supabase } from "@/integrations/supabase/client";
-import type { Database } from "@/integrations/supabase/types";
-
-type Tables = Database["public"]["Tables"];
 
 export const inventoryApi = {
-  async getInventoryItems() {
+  getInventoryItems: async () => {
+    const { data: userData } = await supabase.auth.getUser();
+    if (!userData.user) throw new Error("User not authenticated");
+
+    const { data: userRecord } = await supabase
+      .from("users")
+      .select("tenant_id")
+      .eq("id", userData.user.id)
+      .single();
+
+    if (!userRecord) throw new Error("User record not found");
+
     const { data, error } = await supabase
       .from("inventory_items")
       .select("*")
-      .order("created_at", { ascending: false });
-    
+      .eq("tenant_id", userRecord.tenant_id);
+
+    if (error) throw error;
+    return data || [];
+  },
+
+  createInventoryItem: async (item: any) => {
+    const { data: userData } = await supabase.auth.getUser();
+    if (!userData.user) throw new Error("User not authenticated");
+
+    const { data: userRecord } = await supabase
+      .from("users")
+      .select("tenant_id")
+      .eq("id", userData.user.id)
+      .single();
+
+    if (!userRecord) throw new Error("User record not found");
+
+    const { data, error } = await supabase
+      .from("inventory_items")
+      .insert({ ...item, tenant_id: userRecord.tenant_id })
+      .select()
+      .single();
+
     if (error) throw error;
     return data;
   },
 
-  async createInventoryItem(item: Tables["inventory_items"]["Insert"]) {
+  updateInventoryItem: async (id: string, updates: any) => {
     const { data, error } = await supabase
       .from("inventory_items")
-      .insert(item)
+      .update(updates)
+      .eq("id", id)
       .select()
       .single();
-    
+
     if (error) throw error;
     return data;
   },
+
+  deleteInventoryItem: async (id: string) => {
+    const { error } = await supabase
+      .from("inventory_items")
+      .delete()
+      .eq("id", id);
+
+    if (error) throw error;
+  }
 };

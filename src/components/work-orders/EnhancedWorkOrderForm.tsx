@@ -63,7 +63,7 @@ export const EnhancedWorkOrderForm = ({
   const getAssetId = (asset: WorkOrder['asset']): string => {
     if (!asset) return "";
     if (typeof asset === "string") return asset;
-    if (typeof asset === "object" && asset.id) return asset.id;
+    if (typeof asset === "object" && 'id' in asset && asset.id) return asset.id;
     return "";
   };
 
@@ -71,7 +71,7 @@ export const EnhancedWorkOrderForm = ({
   const getLocationId = (location: WorkOrder['location']): string => {
     if (!location) return "";
     if (typeof location === "string") return location;
-    if (typeof location === "object" && location.id) return location.id;
+    if (typeof location === "object" && 'id' in location && location.id) return location.id;
     return "";
   };
 

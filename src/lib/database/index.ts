@@ -27,6 +27,8 @@ export const databaseApi = {
   inviteOrganizationMember: organizationsApi.inviteOrganizationMember,
   updateOrganizationMember: organizationsApi.updateOrganizationMember,
   removeOrganizationMember: organizationsApi.removeOrganizationMember,
+  getInvitationByToken: organizationsApi.getInvitationByToken,
+  acceptInvitation: organizationsApi.acceptInvitation,
 
   // Billing
   getOrganizationSubscription: billingApi.getOrganizationSubscription,
@@ -55,6 +57,8 @@ export const databaseApi = {
   createPurchaseOrder: purchaseOrdersApi.createPurchaseOrder,
   updatePurchaseOrder: purchaseOrdersApi.updatePurchaseOrder,
   deletePurchaseOrder: purchaseOrdersApi.deletePurchaseOrder,
+  getPurchaseOrderById: purchaseOrdersApi.getPurchaseOrderById,
+  getPurchaseOrderLineItems: purchaseOrdersApi.getPurchaseOrderLineItems,
 
   // Locations
   getLocations: locationsApi.getLocations,
@@ -64,6 +68,7 @@ export const databaseApi = {
 
   // Users
   getUsers: usersApi.getUsers,
+  getUsersByTenant: usersApi.getUsersByTenant,
   createUser: usersApi.createUser,
   updateUser: usersApi.updateUser,
 
@@ -78,6 +83,7 @@ export const databaseApi = {
   createProcedure: proceduresApi.createProcedure,
   updateProcedure: proceduresApi.updateProcedure,
   deleteProcedure: proceduresApi.deleteProcedure,
+  getProcedure: proceduresApi.getProcedures, // Alias for compatibility
 
   // Requests
   getRequests: requestsApi.getRequests,

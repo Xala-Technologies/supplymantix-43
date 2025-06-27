@@ -216,7 +216,7 @@ export const EnhancedWorkOrderDetail = ({ workOrder, onEdit }: EnhancedWorkOrder
                       <span className="font-medium">Asset Name:</span>
                       <span>{getAssetName(workOrder.asset)}</span>
                     </div>
-                    {typeof workOrder.asset === 'object' && workOrder.asset.status && (
+                    {typeof workOrder.asset === 'object' && 'status' in workOrder.asset && workOrder.asset.status && (
                       <div className="flex justify-between">
                         <span className="font-medium">Asset Status:</span>
                         <Badge variant="outline">{workOrder.asset.status}</Badge>
