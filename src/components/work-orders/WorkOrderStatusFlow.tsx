@@ -104,7 +104,7 @@ export const WorkOrderStatusFlow = ({ workOrder, onStatusUpdate }: WorkOrderStat
     const currentStatus = workOrder.status;
     
     // Handle special statuses
-    if (currentStatus === 'cancelled' || currentStatus === 'on_hold') {
+    if (!mainFlow.includes(currentStatus)) {
       return mainFlow.map((status) => ({
         status,
         isActive: false,
@@ -141,6 +141,7 @@ export const WorkOrderStatusFlow = ({ workOrder, onStatusUpdate }: WorkOrderStat
       </CardHeader>
       
       <CardContent className="space-y-6 p-6">
+        
         {/* Status Progress Timeline - Only show for main flow statuses */}
         {!['cancelled', 'on_hold'].includes(currentStatus) && (
           <div className="bg-gray-50/50 rounded-xl p-6 border border-gray-100">

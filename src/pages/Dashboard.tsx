@@ -1,3 +1,4 @@
+
 import { DashboardLayout } from "@/components/Layout/DashboardLayout";
 import { EnhancedDashboardMetrics } from "@/components/dashboard/EnhancedDashboardMetrics";
 import { useWorkOrdersIntegration } from "@/hooks/useWorkOrdersIntegration";
@@ -101,7 +102,7 @@ const sampleWorkOrders: WorkOrder[] = [
   {
     id: '6',
     title: 'Preventive Maintenance - Generator',
-    status: 'draft',
+    status: 'open',
     priority: 'low',
     assignedTo: ['Sarah Davis'],
     asset: {
@@ -125,7 +126,7 @@ export default function Dashboard() {
 
   // Transform and use real data if available, otherwise use sample data
   const transformedWorkOrders: WorkOrder[] = workOrders?.length > 0 
-    ? workOrders.map(transformWorkOrderData)
+    ? workOrders
     : sampleWorkOrders;
 
   const handleCreateWorkOrder = async () => {
