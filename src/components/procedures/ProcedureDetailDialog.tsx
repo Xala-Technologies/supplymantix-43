@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
@@ -252,8 +253,8 @@ export const ProcedureDetailDialog: React.FC<ProcedureDetailDialogProps> = ({
             <div className="flex items-center space-x-3">
               <Checkbox
                 id={field.id}
-                checked={fieldValue === true}
-                onCheckedChange={(checked) => handleFieldChange(field.id, checked)}
+                checked={Boolean(fieldValue)}
+                onCheckedChange={(checked) => handleFieldChange(field.id, Boolean(checked))}
               />
               <label htmlFor={field.id} className="text-sm font-medium text-gray-700">
                 {field.label || field.title}
@@ -463,8 +464,8 @@ export const ProcedureDetailDialog: React.FC<ProcedureDetailDialogProps> = ({
                   <div className="flex items-center space-x-2">
                     <Checkbox
                       id={`required-${index}`}
-                      checked={field.is_required}
-                      onCheckedChange={(checked) => updateField(index, { is_required: checked })}
+                      checked={Boolean(field.is_required)}
+                      onCheckedChange={(checked) => updateField(index, { is_required: Boolean(checked) })}
                     />
                     <Label htmlFor={`required-${index}`} className="text-sm">Required</Label>
                   </div>
@@ -777,8 +778,8 @@ export const ProcedureDetailDialog: React.FC<ProcedureDetailDialogProps> = ({
                             <p className="text-sm text-gray-600">Make this procedure available to all users across organizations</p>
                           </div>
                           <Switch
-                            checked={editData.is_global}
-                            onCheckedChange={(checked) => setEditData(prev => ({ ...prev, is_global: checked }))}
+                            checked={Boolean(editData.is_global)}
+                            onCheckedChange={(checked) => setEditData(prev => ({ ...prev, is_global: Boolean(checked) }))}
                           />
                         </div>
                       </CardContent>
