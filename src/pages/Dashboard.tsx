@@ -1,5 +1,6 @@
 
 import { DashboardLayout } from "@/components/Layout/DashboardLayout";
+import { StandardPageLayout, StandardPageHeader, StandardPageContent } from "@/components/Layout/StandardPageLayout";
 import { EnhancedDashboardMetrics } from "@/components/dashboard/EnhancedDashboardMetrics";
 import { useWorkOrdersIntegration } from "@/hooks/useWorkOrdersIntegration";
 import { WorkOrder } from "@/types/workOrder";
@@ -150,28 +151,34 @@ export default function Dashboard() {
   if (isLoading) {
     return (
       <DashboardLayout>
-        <div className="h-full flex items-center justify-center">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-            <p className="text-gray-600">Loading dashboard...</p>
+        <StandardPageLayout>
+          <div className="h-full flex items-center justify-center">
+            <div className="text-center">
+              <div className="loading-spinner h-8 w-8 mx-auto mb-4"></div>
+              <p className="text-slate-600">Loading dashboard...</p>
+            </div>
           </div>
-        </div>
+        </StandardPageLayout>
       </DashboardLayout>
     );
   }
 
   return (
     <DashboardLayout>
-      <div className="h-full overflow-auto">
-        <div className="container mx-auto p-6">
+      <StandardPageLayout>
+        <StandardPageHeader 
+          title="Dashboard"
+          description="Overview of your maintenance operations"
+        />
+        <StandardPageContent>
           <EnhancedDashboardMetrics
             onCreateWorkOrder={handleCreateWorkOrder}
             onScheduleProcedure={handleScheduleProcedure}
             onAddAsset={handleAddAsset}
             onInviteUser={handleInviteUser}
           />
-        </div>
-      </div>
+        </StandardPageContent>
+      </StandardPageLayout>
     </DashboardLayout>
   );
 }

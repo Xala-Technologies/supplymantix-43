@@ -16,7 +16,9 @@ export const DashboardLayout = ({ children }: DashboardLayoutProps) => {
         <div className="flex-1 flex flex-col overflow-hidden ml-0 md:ml-[var(--sidebar-width)] md:peer-data-[state=collapsed]:ml-[var(--sidebar-width-icon)] transition-[margin-left] duration-300 ease-linear">
           <TopBar />
           <main className="flex-1 overflow-hidden pt-16 transition-all duration-300 ease-linear">
-            {children}
+            <div className="h-full">
+              {children}
+            </div>
           </main>
         </div>
       </div>

@@ -1,7 +1,6 @@
 
 import React from "react";
 import { cn } from "@/lib/utils";
-import { Card } from "@/components/ui/card";
 
 interface StandardPageLayoutProps {
   children: React.ReactNode;
@@ -10,13 +9,8 @@ interface StandardPageLayoutProps {
 
 export const StandardPageLayout = ({ children, className }: StandardPageLayoutProps) => {
   return (
-    <div className={cn(
-      "h-full p-6 bg-gray-50/30 transition-all duration-300 ease-linear",
-      className
-    )}>
-      <Card className="h-full flex flex-col overflow-hidden shadow-lg">
-        {children}
-      </Card>
+    <div className={cn("h-full flex flex-col bg-gray-50/30", className)}>
+      {children}
     </div>
   );
 };
@@ -37,26 +31,24 @@ export const StandardPageHeader = ({
   className
 }: StandardPageHeaderProps) => {
   return (
-    <div className={cn("flex-shrink-0 border-b bg-white", className)}>
-      <div className="p-6">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            {leftContent}
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">{title}</h1>
-              {description && (
-                <p className="text-sm text-gray-600 mt-1">{description}</p>
-              )}
-            </div>
+    <header className={cn("bg-white border-b border-gray-200 px-4 sm:px-6 py-4 sm:py-6", className)}>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="flex items-center gap-4 min-w-0 flex-1">
+          {leftContent}
+          <div className="min-w-0 flex-1">
+            <h1 className="text-xl sm:text-2xl font-semibold text-slate-900 truncate">{title}</h1>
+            {description && (
+              <p className="text-sm text-slate-600 mt-1 line-clamp-2 sm:line-clamp-1">{description}</p>
+            )}
           </div>
-          {children && (
-            <div className="flex items-center gap-3">
-              {children}
-            </div>
-          )}
         </div>
+        {children && (
+          <div className="flex items-center gap-3 flex-shrink-0">
+            {children}
+          </div>
+        )}
       </div>
-    </div>
+    </header>
   );
 };
 
@@ -67,7 +59,7 @@ interface StandardPageFiltersProps {
 
 export const StandardPageFilters = ({ children, className }: StandardPageFiltersProps) => {
   return (
-    <div className={cn("flex-shrink-0 border-b border-gray-100 bg-white", className)}>
+    <div className={cn("bg-white border-b border-gray-100 px-4 sm:px-6 py-3", className)}>
       {children}
     </div>
   );
@@ -76,25 +68,21 @@ export const StandardPageFilters = ({ children, className }: StandardPageFilters
 interface StandardPageContentProps {
   children: React.ReactNode;
   className?: string;
-  padding?: boolean;
+  padded?: boolean;
 }
 
 export const StandardPageContent = ({ 
   children, 
   className, 
-  padding = true 
+  padded = true 
 }: StandardPageContentProps) => {
   return (
-    <div className={cn(
-      "flex-1 overflow-hidden transition-all duration-300 ease-linear",
+    <main className={cn(
+      "flex-1 overflow-hidden",
+      padded && "p-4 sm:p-6",
       className
     )}>
-      <div className={cn(
-        "h-full overflow-y-auto",
-        padding && "p-6"
-      )}>
-        {children}
-      </div>
-    </div>
+      {children}
+    </main>
   );
 };

@@ -1,3 +1,4 @@
+
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
 
 @tailwind base;
@@ -6,7 +7,7 @@
 
 @layer base {
   :root {
-    /* Modern neutral palette with better contrast */
+    /* Enhanced color system with better contrast */
     --background: 255 255 255;
     --foreground: 15 23 42;
     --card: 255 255 255;
@@ -49,14 +50,14 @@
     --sidebar-border: 226 232 240;
     --sidebar-ring: 37 99 235;
 
-    /* Typography - Simplified system */
+    /* Typography - Standardized system */
     --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
     --font-mono: 'JetBrains Mono', ui-monospace, monospace;
     
     /* Spacing and sizing */
     --radius: 8px;
     
-    /* Modern shadows with better depth */
+    /* Enhanced shadows with better depth */
     --shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0.05);
     --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
     --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
@@ -106,32 +107,27 @@
     font-size: 14px;
     line-height: 1.6;
     font-weight: 400;
-    color: rgb(51 65 85); /* Improved body text contrast */
+    color: rgb(51 65 85);
   }
   
-  /* Simplified Typography Hierarchy */
-  h1 {
-    @apply text-2xl font-semibold tracking-tight text-slate-900;
+  /* Standardized Typography Hierarchy (3 levels as per requirements) */
+  h1, .heading-1 {
+    @apply text-2xl sm:text-3xl font-semibold tracking-tight text-slate-900;
+    line-height: 1.2;
+  }
+  
+  h2, .heading-2 {
+    @apply text-lg sm:text-xl font-medium text-slate-900;
     line-height: 1.3;
   }
   
-  h2 {
-    @apply text-xl font-semibold tracking-tight text-slate-900;
+  h3, h4, h5, h6, .heading-3 {
+    @apply text-base sm:text-lg font-medium text-slate-900;
     line-height: 1.4;
   }
   
-  h3 {
-    @apply text-lg font-medium text-slate-900;
-    line-height: 1.4;
-  }
-  
-  h4 {
-    @apply text-base font-medium text-slate-900;
-    line-height: 1.5;
-  }
-  
-  /* Body text with better contrast */
-  p {
+  /* Body text with improved contrast */
+  p, .body-text {
     @apply text-sm text-slate-600 leading-relaxed;
   }
   
@@ -141,76 +137,113 @@
     line-height: 1.5;
   }
   
-  /* Smooth scrolling */
+  /* Smooth scrolling and focus improvements */
   html {
     scroll-behavior: smooth;
   }
   
-  /* Focus styles with better visibility */
   *:focus-visible {
-    @apply outline-none ring-2 ring-primary ring-offset-2 ring-offset-background;
+    @apply outline-none ring-2 ring-primary/20 ring-offset-2 ring-offset-background;
   }
 }
 
 @layer components {
-  /* Page Layout Components */
+  /* Standardized Layout Components */
   .page-container {
-    @apply h-full;
+    @apply h-full flex flex-col bg-gray-50/30;
   }
   
   .page-header {
-    @apply flex items-center gap-4 p-6 border-b bg-white;
+    @apply bg-white border-b border-gray-200 px-4 sm:px-6 py-4 sm:py-6;
   }
   
   .page-content {
-    @apply flex-1 overflow-y-auto;
+    @apply flex-1 overflow-hidden p-4 sm:p-6;
   }
   
-  .page-content-padded {
-    @apply flex-1 overflow-y-auto p-6;
+  .page-filters {
+    @apply bg-white border-b border-gray-100 px-4 sm:px-6 py-3;
   }
   
-  /* Modern card styles */
+  /* Enhanced card styles */
   .card-modern {
-    @apply bg-white border border-slate-200 rounded-xl shadow-sm;
+    @apply bg-white border border-slate-200 rounded-xl shadow-sm transition-all duration-200;
   }
   
   .card-hover {
-    @apply transition-all duration-200 hover:shadow-md hover:border-primary/20;
+    @apply hover:shadow-md hover:border-primary/20;
   }
   
-  /* Button improvements */
-  .btn-modern {
-    @apply inline-flex items-center justify-center rounded-lg text-sm font-medium transition-all duration-200;
-    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2;
+  /* Improved button styles */
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium rounded-lg;
+    @apply bg-primary text-white hover:bg-primary/90 shadow-sm;
+    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:ring-offset-2;
     @apply disabled:pointer-events-none disabled:opacity-50;
+    @apply transition-all duration-200;
   }
   
-  /* Input improvements */
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium rounded-lg;
+    @apply bg-white text-slate-700 border border-slate-300 hover:bg-slate-50 shadow-sm;
+    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500/20 focus-visible:ring-offset-2;
+    @apply disabled:pointer-events-none disabled:opacity-50;
+    @apply transition-all duration-200;
+  }
+  
+  /* Enhanced input styles */
   .input-modern {
     @apply flex h-10 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm;
-    @apply ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium;
     @apply placeholder:text-slate-500 focus-visible:outline-none focus-visible:ring-2;
-    @apply focus-visible:ring-primary focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50;
-    @apply transition-colors duration-200;
+    @apply focus-visible:ring-primary/20 focus-visible:ring-offset-2 focus-visible:border-primary;
+    @apply disabled:cursor-not-allowed disabled:opacity-50;
+    @apply transition-all duration-200;
   }
   
-  /* Modern shadows */
-  .shadow-modern {
-    box-shadow: var(--shadow-sm);
-  }
-  
-  .shadow-modern-md {
-    box-shadow: var(--shadow-md);
-  }
-  
-  .shadow-modern-lg {
-    box-shadow: var(--shadow-lg);
-  }
-  
-  /* Status badges with better contrast */
+  /* Status badges with better contrast and accessibility */
   .status-badge {
-    @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium;
+    @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium border;
+  }
+  
+  .status-draft {
+    @apply bg-slate-50 text-slate-700 border-slate-200;
+  }
+  
+  .status-open {
+    @apply bg-blue-50 text-blue-700 border-blue-200;
+  }
+  
+  .status-in-progress {
+    @apply bg-amber-50 text-amber-700 border-amber-200;
+  }
+  
+  .status-on-hold {
+    @apply bg-orange-50 text-orange-700 border-orange-200;
+  }
+  
+  .status-completed {
+    @apply bg-emerald-50 text-emerald-700 border-emerald-200;
+  }
+  
+  .status-cancelled {
+    @apply bg-red-50 text-red-700 border-red-200;
+  }
+  
+  /* Priority indicators */
+  .priority-low {
+    @apply bg-slate-50 text-slate-700 border-slate-200;
+  }
+  
+  .priority-medium {
+    @apply bg-blue-50 text-blue-700 border-blue-200;
+  }
+  
+  .priority-high {
+    @apply bg-orange-50 text-orange-700 border-orange-200;
+  }
+  
+  .priority-urgent {
+    @apply bg-red-50 text-red-700 border-red-200;
   }
   
   /* Navigation improvements */
@@ -223,11 +256,11 @@
     @apply bg-primary/10 text-primary;
   }
   
-  .nav-item.active::before {
-    @apply absolute left-0 top-1/2 h-5 w-1 -translate-y-1/2 rounded-r bg-primary content-[''];
+  /* Form elements */
+  .form-group {
+    @apply space-y-2;
   }
   
-  /* Form elements */
   .form-label {
     @apply text-sm font-medium text-slate-700;
   }
@@ -240,13 +273,17 @@
     @apply text-xs text-red-600;
   }
   
-  /* Data display */
+  /* Enhanced data tables */
+  .data-table {
+    @apply w-full border-collapse;
+  }
+  
   .data-table-header {
-    @apply text-xs font-medium text-slate-500 uppercase tracking-wider;
+    @apply text-xs font-medium text-slate-500 uppercase tracking-wider px-3 py-3 text-left;
   }
   
   .data-table-cell {
-    @apply text-sm text-slate-900;
+    @apply text-sm text-slate-900 px-3 py-4 border-t border-slate-200;
   }
   
   /* Metric cards */
@@ -266,39 +303,30 @@
     @apply text-xs font-medium mt-2;
   }
   
-  /* Action buttons */
-  .action-button {
-    @apply inline-flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg;
-    @apply transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2;
+  /* Loading states */
+  .loading-spinner {
+    @apply animate-spin rounded-full border-2 border-slate-300 border-t-primary;
   }
   
-  .action-button-primary {
-    @apply bg-primary text-white hover:bg-primary/90 focus-visible:ring-primary;
+  /* Empty states */
+  .empty-state {
+    @apply text-center py-12;
   }
   
-  .action-button-secondary {
-    @apply bg-white text-slate-700 border border-slate-300 hover:bg-slate-50 focus-visible:ring-slate-500;
+  .empty-state-icon {
+    @apply mx-auto h-12 w-12 text-slate-400 mb-4;
   }
   
-  /* Content sections */
-  .content-section {
-    @apply space-y-6;
+  .empty-state-title {
+    @apply text-lg font-medium text-slate-900 mb-2;
   }
   
-  .content-section-header {
-    @apply flex items-center justify-between;
-  }
-  
-  .content-section-title {
-    @apply text-lg font-semibold text-slate-900;
-  }
-  
-  .content-section-description {
-    @apply text-sm text-slate-600 mt-1;
+  .empty-state-description {
+    @apply text-sm text-slate-600 mb-6;
   }
 }
 
-/* Custom scrollbar */
+/* Enhanced scrollbar styling */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -348,6 +376,35 @@
   animation: scale-in 0.2s ease-out;
 }
 
+/* Mobile-first responsive adjustments */
+@media (max-width: 640px) {
+  .mobile-stack {
+    @apply flex-col space-y-3 space-x-0;
+  }
+  
+  .mobile-full-width {
+    @apply w-full;
+  }
+  
+  .mobile-hide {
+    @apply hidden;
+  }
+}
+
+/* Tablet adjustments */
+@media (min-width: 641px) and (max-width: 1024px) {
+  .tablet-two-col {
+    @apply grid-cols-2;
+  }
+}
+
+/* Desktop enhancements */
+@media (min-width: 1025px) {
+  .desktop-multi-col {
+    @apply grid-cols-3 lg:grid-cols-4;
+  }
+}
+
 /* Print styles */
 @media print {
   .no-print {
@@ -361,5 +418,22 @@
   
   h1, h2, h3, h4, h5, h6 {
     page-break-after: avoid;
+  }
+}
+
+/* Accessibility enhancements */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  :root {
+    --border: 0 0 0;
+    --ring: 0 0 0;
   }
 }

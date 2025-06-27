@@ -12,7 +12,7 @@ export function AppSidebar() {
 
   return (
     <Sidebar className={`
-      border-r-0 bg-white shadow-xl relative z-40 
+      border-r-0 bg-white shadow-lg relative z-40 
       transition-all duration-300 ease-in-out
       ${isCollapsed ? 'w-16' : 'w-72'}
     `}>
@@ -25,7 +25,7 @@ export function AppSidebar() {
       </ScrollArea>
       
       <SidebarFooter className={`
-        transition-all duration-300 ease-in-out border-t border-gray-100
+        transition-all duration-300 ease-in-out border-t border-gray-100 bg-white
         ${isCollapsed ? 'px-2' : 'px-4'}
       `}>
         <AppSidebarFooter />

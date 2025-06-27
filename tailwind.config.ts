@@ -13,8 +13,12 @@ export default {
   theme: {
     container: {
       center: true,
-      padding: "2rem",
+      padding: "1rem",
       screens: {
+        "sm": "640px",
+        "md": "768px",  
+        "lg": "1024px",
+        "xl": "1280px",
         "2xl": "1400px",
       },
     },
@@ -24,7 +28,7 @@ export default {
         mono: ["JetBrains Mono", "ui-monospace", "monospace"],
       },
       fontSize: {
-        // Simplified font size system
+        // Standardized font system (3 levels as per requirements)
         'xs': ['12px', { lineHeight: '1.5' }],
         'sm': ['14px', { lineHeight: '1.6' }],
         'base': ['16px', { lineHeight: '1.6' }],
@@ -77,7 +81,7 @@ export default {
           border: "rgb(var(--sidebar-border))",
           ring: "rgb(var(--sidebar-ring))",
         },
-        // Enhanced color palette for better design consistency
+        // Enhanced color palette for consistency
         slate: {
           50: '#f8fafc',
           100: '#f1f5f9',
@@ -107,6 +111,9 @@ export default {
         18: "4.5rem",
         88: "22rem",
         112: "28rem",
+      },
+      screens: {
+        'xs': '475px',
       },
       keyframes: {
         "accordion-down": {
