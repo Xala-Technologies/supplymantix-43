@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Plus, LayoutGrid, List, Calendar } from 'lucide-react';
+import { Plus, LayoutGrid, List, Calendar, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Layout } from '@/components/Layout/Layout';
 import { PageContainer } from '@/components/Layout/PageContainer';
@@ -50,14 +50,22 @@ export const WorkOrdersPageRefactored = () => {
     setShowNewDialog(false);
   };
 
+  const handleBackToList = () => {
+    setViewModeToList();
+  };
+
   const viewToggleActions = (
-    <div className="flex items-center gap-2">
-      <div className="flex items-center border border-gray-200 rounded-lg p-1">
+    <div className="flex items-center gap-3">
+      <div className="flex items-center bg-gray-50 border border-gray-200 rounded-xl p-1.5 shadow-sm">
         <Button
           variant={viewMode === 'card' ? 'default' : 'ghost'}
           size="sm"
           onClick={() => setViewMode('card')}
-          className="h-8 px-3"
+          className={`h-9 px-4 rounded-lg transition-all duration-200 ${
+            viewMode === 'card' 
+              ? 'bg-white shadow-sm border-0 text-gray-900' 
+              : 'hover:bg-white/60 border-0 text-gray-600'
+          }`}
         >
           <LayoutGrid className="w-4 h-4" />
         </Button>
@@ -65,7 +73,11 @@ export const WorkOrdersPageRefactored = () => {
           variant={viewMode === 'list' ? 'default' : 'ghost'}
           size="sm"
           onClick={() => setViewMode('list')}
-          className="h-8 px-3"
+          className={`h-9 px-4 rounded-lg transition-all duration-200 ${
+            viewMode === 'list' 
+              ? 'bg-white shadow-sm border-0 text-gray-900' 
+              : 'hover:bg-white/60 border-0 text-gray-600'
+          }`}
         >
           <List className="w-4 h-4" />
         </Button>
@@ -73,12 +85,19 @@ export const WorkOrdersPageRefactored = () => {
           variant={viewMode === 'calendar' ? 'default' : 'ghost'}
           size="sm"
           onClick={() => setViewMode('calendar')}
-          className="h-8 px-3"
+          className={`h-9 px-4 rounded-lg transition-all duration-200 ${
+            viewMode === 'calendar' 
+              ? 'bg-white shadow-sm border-0 text-gray-900' 
+              : 'hover:bg-white/60 border-0 text-gray-600'
+          }`}
         >
           <Calendar className="w-4 h-4" />
         </Button>
       </div>
-      <Button onClick={handleNewWorkOrder} className="gap-2">
+      <Button 
+        onClick={handleNewWorkOrder} 
+        className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-lg hover:shadow-xl transition-all duration-200 gap-2 px-6 py-2.5 rounded-xl font-medium"
+      >
         <Plus className="w-4 h-4" />
         New Work Order
       </Button>
@@ -96,10 +115,10 @@ export const WorkOrdersPageRefactored = () => {
             actions={viewToggleActions}
           />
           <PageContent>
-            <div className="flex items-center justify-center py-12">
+            <div className="flex items-center justify-center py-16">
               <div className="text-center">
-                <div className="w-8 h-8 border-2 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-                <p className="text-sm text-gray-600">Loading work orders...</p>
+                <div className="w-10 h-10 border-3 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-6"></div>
+                <p className="text-base text-gray-600 font-medium">Loading work orders...</p>
               </div>
             </div>
           </PageContent>
@@ -114,7 +133,7 @@ export const WorkOrdersPageRefactored = () => {
       <Layout>
         <PageContainer>
           <PageHeader
-            title="Work Orders"
+            title="Work Orders Calendar"
             description={`${filteredWorkOrders.length} ${filteredWorkOrders.length === 1 ? 'work order' : 'work orders'}`}
             icon={ClipboardList}
             actions={viewToggleActions}
@@ -158,17 +177,18 @@ export const WorkOrdersPageRefactored = () => {
             description={selectedWorkOrderData.title}
             icon={ClipboardList}
             actions={
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-3">
                 <Button
                   variant="outline"
-                  onClick={setViewModeToList}
-                  className="gap-2"
+                  onClick={handleBackToList}
+                  className="gap-2 bg-white hover:bg-gray-50 border-gray-300 text-gray-700 shadow-sm rounded-xl px-5 py-2.5 font-medium transition-all duration-200"
                 >
-                  ← Back to List
+                  <ArrowLeft className="w-4 h-4" />
+                  Back to List
                 </Button>
                 <Button
                   onClick={handleEditWorkOrder}
-                  className="gap-2"
+                  className="gap-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-lg hover:shadow-xl transition-all duration-200 rounded-xl px-6 py-2.5 font-medium"
                 >
                   Edit Work Order
                 </Button>
@@ -206,9 +226,10 @@ export const WorkOrdersPageRefactored = () => {
               <Button
                 variant="outline"
                 onClick={handleFormCancel}
-                className="gap-2"
+                className="gap-2 bg-white hover:bg-gray-50 border-gray-300 text-gray-700 shadow-sm rounded-xl px-5 py-2.5 font-medium transition-all duration-200"
               >
-                ← Cancel
+                <ArrowLeft className="w-4 h-4" />
+                Cancel
               </Button>
             }
           />
@@ -262,7 +283,7 @@ export const WorkOrdersPageRefactored = () => {
               }}
             />
           ) : (
-            <SectionCard padding="none">
+            <SectionCard padding="none" className="shadow-sm border-gray-200/60 bg-white/80 backdrop-blur-sm">
               {viewMode === 'card' ? (
                 <WorkOrdersCardView
                   workOrders={filteredWorkOrders}
