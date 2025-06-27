@@ -23,7 +23,7 @@ interface ProcedureCardViewProps {
   onDuplicate: (id: string) => void;
   onDelete: (id: string) => void;
   onOpenInNewWindow: (procedure: any) => void;
-  canExecuteProcedure: (procedure: any) => { canExecute: boolean; reason?: string };
+  canExecuteProcedure: (procedure: any, executingProcedures?: Set<string>) => { canExecute: boolean; reason?: string };
   getCategoryColor: (category: string) => string;
   executingProcedures: Set<string>;
 }
@@ -42,7 +42,7 @@ export const ProcedureCardView: React.FC<ProcedureCardViewProps> = ({
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       {procedures.map((procedure) => {
-        const { canExecute } = canExecuteProcedure(procedure);
+        const { canExecute } = canExecuteProcedure(procedure, executingProcedures);
         const isExecuting = executingProcedures.has(procedure.id);
 
         return (

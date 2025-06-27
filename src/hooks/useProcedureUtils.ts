@@ -25,11 +25,11 @@ export const useProcedureUtils = () => {
     return colors[category] || "bg-gray-100 text-gray-700";
   };
 
-  const canExecuteProcedure = (procedure: any, executingProcedures: Set<string>): { canExecute: boolean; reason?: string } => {
+  const canExecuteProcedure = (procedure: any, executingProcedures?: Set<string>): { canExecute: boolean; reason?: string } => {
     if (!procedure.fields || procedure.fields.length === 0) {
       return { canExecute: false, reason: "No fields configured" };
     }
-    if (executingProcedures.has(procedure.id)) {
+    if (executingProcedures && executingProcedures.has(procedure.id)) {
       return { canExecute: false, reason: "Currently executing" };
     }
     return { canExecute: true };

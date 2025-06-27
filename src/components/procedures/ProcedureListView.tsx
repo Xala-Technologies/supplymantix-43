@@ -22,7 +22,7 @@ interface ProcedureListViewProps {
   onDuplicate: (id: string) => void;
   onDelete: (id: string) => void;
   onOpenInNewWindow: (procedure: any) => void;
-  canExecuteProcedure: (procedure: any) => { canExecute: boolean; reason?: string };
+  canExecuteProcedure: (procedure: any, executingProcedures?: Set<string>) => { canExecute: boolean; reason?: string };
   getCategoryColor: (category: string) => string;
   executingProcedures: Set<string>;
 }
@@ -54,7 +54,7 @@ export const ProcedureListView: React.FC<ProcedureListViewProps> = ({
       {/* List Items */}
       <div className="divide-y divide-gray-100">
         {procedures.map((procedure) => {
-          const { canExecute } = canExecuteProcedure(procedure);
+          const { canExecute } = canExecuteProcedure(procedure, executingProcedures);
           const isExecuting = executingProcedures.has(procedure.id);
 
           return (
