@@ -20,6 +20,17 @@ export const WorkOrdersDetailPage = ({
   onBackToList,
   onEditWorkOrder
 }: WorkOrdersDetailPageProps) => {
+  const backButton = (
+    <Button
+      variant="ghost"
+      onClick={onBackToList}
+      className="gap-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100/80 rounded-xl px-3 py-2 font-medium transition-all duration-200 -ml-3"
+    >
+      <ArrowLeft className="w-4 h-4" />
+      Back to Work Orders
+    </Button>
+  );
+
   return (
     <Layout>
       <PageContainer>
@@ -27,23 +38,14 @@ export const WorkOrdersDetailPage = ({
           title="Work Order Details"
           description={selectedWorkOrderData.title}
           icon={ClipboardList}
+          backButton={backButton}
           actions={
-            <div className="flex items-center gap-3">
-              <Button
-                variant="outline"
-                onClick={onBackToList}
-                className="gap-2 bg-white hover:bg-gray-50 border-gray-300 text-gray-700 shadow-sm rounded-xl px-5 py-2.5 font-medium transition-all duration-200"
-              >
-                <ArrowLeft className="w-4 h-4" />
-                Back to List
-              </Button>
-              <Button
-                onClick={onEditWorkOrder}
-                className="gap-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-lg hover:shadow-xl transition-all duration-200 rounded-xl px-6 py-2.5 font-medium"
-              >
-                Edit Work Order
-              </Button>
-            </div>
+            <Button
+              onClick={onEditWorkOrder}
+              className="gap-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-lg hover:shadow-xl transition-all duration-200 rounded-xl px-6 py-2.5 font-medium"
+            >
+              Edit Work Order
+            </Button>
           }
         />
 

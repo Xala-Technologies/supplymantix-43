@@ -38,6 +38,12 @@ export const WorkOrdersPageRefactored = () => {
   };
 
   const handleBackToList = () => {
+    console.log('Back to list clicked, current contentViewMode:', contentViewMode);
+    setViewModeToList();
+  };
+
+  const handleFormCancelWithBack = () => {
+    console.log('Form cancel with back clicked');
     setViewModeToList();
   };
 
@@ -108,7 +114,7 @@ export const WorkOrdersPageRefactored = () => {
         <WorkOrdersFormPage
           editingWorkOrder={editingWorkOrder}
           onFormSubmit={handleFormSubmit}
-          onFormCancel={handleFormCancel}
+          onFormCancel={handleFormCancelWithBack}
         />
         <NewWorkOrderDialog
           open={showNewDialog}

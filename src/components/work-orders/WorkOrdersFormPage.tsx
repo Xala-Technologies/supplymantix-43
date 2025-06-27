@@ -20,6 +20,17 @@ export const WorkOrdersFormPage = ({
   onFormSubmit,
   onFormCancel
 }: WorkOrdersFormPageProps) => {
+  const backButton = (
+    <Button
+      variant="ghost"
+      onClick={onFormCancel}
+      className="gap-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100/80 rounded-xl px-3 py-2 font-medium transition-all duration-200 -ml-3"
+    >
+      <ArrowLeft className="w-4 h-4" />
+      Back to Work Orders
+    </Button>
+  );
+
   return (
     <Layout>
       <PageContainer>
@@ -27,16 +38,7 @@ export const WorkOrdersFormPage = ({
           title={editingWorkOrder ? 'Edit Work Order' : 'Create Work Order'}
           description={editingWorkOrder ? editingWorkOrder.title : 'Create a new work order'}
           icon={ClipboardList}
-          actions={
-            <Button
-              variant="outline"
-              onClick={onFormCancel}
-              className="gap-2 bg-white hover:bg-gray-50 border-gray-300 text-gray-700 shadow-sm rounded-xl px-5 py-2.5 font-medium transition-all duration-200"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              Cancel
-            </Button>
-          }
+          backButton={backButton}
         />
 
         <PageContent>

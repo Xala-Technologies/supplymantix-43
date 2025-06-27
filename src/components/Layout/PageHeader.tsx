@@ -9,6 +9,7 @@ interface PageHeaderProps {
   icon?: LucideIcon;
   actions?: React.ReactNode;
   className?: string;
+  backButton?: React.ReactNode;
 }
 
 export const PageHeader: React.FC<PageHeaderProps> = ({
@@ -16,20 +17,28 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
   description,
   icon: Icon,
   actions,
-  className
+  className,
+  backButton
 }) => {
   return (
     <header className={cn(
-      "bg-white/80 backdrop-blur-sm border-b border-gray-200/60",
-      "px-4 sm:px-6 lg:px-8 py-8",
+      "bg-white/90 backdrop-blur-xl border-b border-gray-200/40",
+      "px-4 sm:px-6 lg:px-8 py-6",
       "flex-shrink-0",
       "shadow-sm",
       className
     )}>
+      {/* Back button row */}
+      {backButton && (
+        <div className="mb-4">
+          {backButton}
+        </div>
+      )}
+      
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-5 min-w-0 flex-1">
           {Icon && (
-            <div className="flex items-center justify-center w-14 h-14 bg-gradient-to-br from-blue-50 to-blue-100/80 rounded-2xl border border-blue-200/50 shadow-sm">
+            <div className="flex items-center justify-center w-14 h-14 bg-gradient-to-br from-blue-50 to-indigo-100/80 rounded-2xl border border-blue-200/50 shadow-sm">
               <Icon className="w-7 h-7 text-blue-600" />
             </div>
           )}
