@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -61,6 +60,20 @@ export const ProcedureDetailDialog: React.FC<ProcedureDetailDialogProps> = ({
   const [editData, setEditData] = useState<any>({});
   const [formData, setFormData] = useState<Record<string, any>>({});
 
+  // Initialize edit data when procedure changes or dialog opens
+  useEffect(() => {
+    if (procedure && open) {
+      setEditData({
+        title: procedure.title || '',
+        description: procedure.description || '',
+        category: procedure.category || 'Inspection',
+        is_global: procedure.is_global || false,
+        fields: procedure.fields || []
+      });
+      setFormData({});
+    }
+  }, [procedure, open]);
+
   if (!procedure) return null;
 
   const formatDate = (dateString: string) => {
@@ -72,23 +85,27 @@ export const ProcedureDetailDialog: React.FC<ProcedureDetailDialogProps> = ({
   };
 
   const handleEditStart = () => {
+    setIsEditing(true);
+  };
+
+  const handleEditSave = () => {
+    try {
+      onEdit({ ...procedure, ...editData });
+      setIsEditing(false);
+    } catch (error) {
+      console.error('Error saving procedure:', error);
+    }
+  };
+
+  const handleEditCancel = () => {
+    // Reset to original procedure data
     setEditData({
-      title: procedure.title,
+      title: procedure.title || '',
       description: procedure.description || '',
       category: procedure.category || 'Inspection',
       is_global: procedure.is_global || false,
       fields: procedure.fields || []
     });
-    setIsEditing(true);
-  };
-
-  const handleEditSave = () => {
-    onEdit({ ...procedure, ...editData });
-    setIsEditing(false);
-  };
-
-  const handleEditCancel = () => {
-    setEditData({});
     setIsEditing(false);
   };
 
@@ -284,34 +301,35 @@ export const ProcedureDetailDialog: React.FC<ProcedureDetailDialogProps> = ({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-5xl max-h-[90vh] overflow-hidden flex flex-col bg-white">
-        <DialogHeader className="flex-shrink-0 bg-white border-b p-6 -m-6 mb-0">
+        <DialogHeader className="flex-shrink-0 bg-gradient-to-r from-white to-gray-50 border-b border-gray-100 p-8 -m-6 mb-0 rounded-t-lg">
           <div className="flex items-start justify-between">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center">
-                <PlayCircle className="h-6 w-6 text-gray-700" />
+            <div className="flex items-center gap-6">
+              <div className="w-16 h-16 bg-white rounded-xl shadow-sm border border-gray-200 flex items-center justify-center">
+                <PlayCircle className="h-8 w-8 text-gray-700" />
               </div>
-              <div>
+              <div className="flex-1">
                 {isEditing ? (
                   <Input
                     value={editData.title}
                     onChange={(e) => setEditData(prev => ({ ...prev, title: e.target.value }))}
-                    className="text-2xl font-semibold mb-2 border-0 p-0 focus:ring-0"
+                    className="text-2xl font-bold mb-3 border-2 border-gray-200 focus:border-gray-400 rounded-lg px-4 py-2 bg-white"
+                    placeholder="Procedure title"
                   />
                 ) : (
-                  <DialogTitle className="text-2xl font-semibold text-gray-900 mb-2">
+                  <DialogTitle className="text-2xl font-bold text-gray-900 mb-3 leading-tight">
                     {procedure.title}
                   </DialogTitle>
                 )}
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-3 flex-wrap">
                   {isEditing ? (
                     <Select
                       value={editData.category}
                       onValueChange={(value) => setEditData(prev => ({ ...prev, category: value }))}
                     >
-                      <SelectTrigger className="w-40">
+                      <SelectTrigger className="w-48 bg-white border-gray-200">
                         <SelectValue />
                       </SelectTrigger>
-                      <SelectContent>
+                      <SelectContent className="bg-white border shadow-lg z-50">
                         {CATEGORIES.map(category => (
                           <SelectItem key={category} value={category}>
                             {category}
@@ -320,35 +338,52 @@ export const ProcedureDetailDialog: React.FC<ProcedureDetailDialogProps> = ({
                       </SelectContent>
                     </Select>
                   ) : (
-                    <Badge className="bg-gray-100 text-gray-700 border-gray-200 hover:bg-gray-200">
+                    <Badge className="bg-white text-gray-700 border border-gray-200 hover:bg-gray-50 px-3 py-1 text-sm font-medium">
                       {procedure.category || 'Other'}
                     </Badge>
                   )}
                   {(isEditing ? editData.is_global : procedure.is_global) && (
-                    <Badge className="bg-gray-100 text-gray-700 border-gray-200 hover:bg-gray-200">
-                      <Globe className="h-3 w-3 mr-1" />
+                    <Badge className="bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 px-3 py-1 text-sm font-medium">
+                      <Globe className="h-4 w-4 mr-1" />
                       Global
                     </Badge>
                   )}
+                  <div className="text-sm text-gray-500 bg-gray-50 px-3 py-1 rounded-full">
+                    {procedure.fields?.length || 0} fields
+                  </div>
                 </div>
               </div>
             </div>
-            <div className="flex gap-2">
+            <div className="flex gap-3 ml-4">
               {isEditing ? (
                 <>
-                  <Button onClick={handleEditSave} size="sm" className="bg-green-600 hover:bg-green-700">
+                  <Button 
+                    onClick={handleEditSave} 
+                    size="sm" 
+                    className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg font-medium shadow-sm"
+                  >
                     <Save className="h-4 w-4 mr-2" />
-                    Save
+                    Save Changes
                   </Button>
-                  <Button onClick={handleEditCancel} variant="outline" size="sm">
+                  <Button 
+                    onClick={handleEditCancel} 
+                    variant="outline" 
+                    size="sm"
+                    className="border-gray-300 text-gray-700 hover:bg-gray-50 px-4 py-2 rounded-lg font-medium"
+                  >
                     <X className="h-4 w-4 mr-2" />
                     Cancel
                   </Button>
                 </>
               ) : (
-                <Button onClick={handleEditStart} variant="outline" size="sm">
+                <Button 
+                  onClick={handleEditStart} 
+                  variant="outline" 
+                  size="sm"
+                  className="border-gray-300 text-gray-700 hover:bg-gray-50 px-4 py-2 rounded-lg font-medium shadow-sm"
+                >
                   <Edit className="h-4 w-4 mr-2" />
-                  Edit
+                  Edit Procedure
                 </Button>
               )}
             </div>
@@ -357,24 +392,24 @@ export const ProcedureDetailDialog: React.FC<ProcedureDetailDialogProps> = ({
 
         <div className="flex-1 overflow-hidden">
           <Tabs defaultValue="fields" className="h-full flex flex-col">
-            <TabsList className="grid w-full grid-cols-3 bg-gray-50 p-1 m-6 mb-0 rounded-lg">
+            <TabsList className="grid w-full grid-cols-3 bg-gray-50/50 p-1 m-6 mb-0 rounded-xl border border-gray-100">
               <TabsTrigger 
                 value="fields" 
-                className="data-[state=active]:bg-white data-[state=active]:text-gray-900 data-[state=active]:shadow-sm"
+                className="data-[state=active]:bg-white data-[state=active]:text-gray-900 data-[state=active]:shadow-sm rounded-lg font-medium"
               >
-                Fields
+                Fields & Content
               </TabsTrigger>
               <TabsTrigger 
                 value="details" 
-                className="data-[state=active]:bg-white data-[state=active]:text-gray-900 data-[state=active]:shadow-sm"
+                className="data-[state=active]:bg-white data-[state=active]:text-gray-900 data-[state=active]:shadow-sm rounded-lg font-medium"
               >
-                Details
+                Details & Settings
               </TabsTrigger>
               <TabsTrigger 
                 value="history" 
-                className="data-[state=active]:bg-white data-[state=active]:text-gray-900 data-[state=active]:shadow-sm"
+                className="data-[state=active]:bg-white data-[state=active]:text-gray-900 data-[state=active]:shadow-sm rounded-lg font-medium"
               >
-                History
+                History & Analytics
               </TabsTrigger>
             </TabsList>
 
@@ -383,7 +418,7 @@ export const ProcedureDetailDialog: React.FC<ProcedureDetailDialogProps> = ({
                 {procedure.fields && procedure.fields.length > 0 ? (
                   <div className="space-y-6">
                     {procedure.fields.map((field: any, index: number) => (
-                      <Card key={field.id || index} className="border-gray-200 shadow-sm hover:shadow-md transition-shadow">
+                      <Card key={field.id || index} className="border border-gray-100 shadow-sm hover:shadow-md transition-shadow rounded-xl">
                         <CardContent className="p-6">
                           {renderField(field, index)}
                         </CardContent>
@@ -391,22 +426,24 @@ export const ProcedureDetailDialog: React.FC<ProcedureDetailDialogProps> = ({
                     ))}
                   </div>
                 ) : (
-                  <div className="text-center py-16">
-                    <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <FileText className="h-8 w-8 text-gray-400" />
+                  <div className="text-center py-20">
+                    <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-6 border border-gray-100">
+                      <FileText className="h-10 w-10 text-gray-400" />
                     </div>
-                    <h3 className="text-lg font-medium text-gray-900 mb-2">No Fields Configured</h3>
-                    <p className="text-gray-600">This procedure doesn't have any fields set up yet.</p>
+                    <h3 className="text-xl font-semibold text-gray-900 mb-3">No Fields Configured</h3>
+                    <p className="text-gray-600 max-w-md mx-auto">This procedure doesn't have any fields set up yet. Edit the procedure to add fields and content.</p>
                   </div>
                 )}
               </TabsContent>
 
               <TabsContent value="details" className="mt-6 space-y-6">
                 {/* Description */}
-                <Card className="border-gray-200 shadow-sm">
+                <Card className="border border-gray-100 shadow-sm rounded-xl">
                   <CardContent className="p-6">
-                    <h3 className="text-lg font-semibold flex items-center gap-2 mb-4 text-gray-900">
-                      <FileText className="h-5 w-5 text-gray-600" />
+                    <h3 className="text-lg font-semibold flex items-center gap-3 mb-4 text-gray-900">
+                      <div className="w-8 h-8 bg-gray-50 rounded-lg flex items-center justify-center">
+                        <FileText className="h-5 w-5 text-gray-600" />
+                      </div>
                       Description
                     </h3>
                     {isEditing ? (
@@ -414,10 +451,10 @@ export const ProcedureDetailDialog: React.FC<ProcedureDetailDialogProps> = ({
                         value={editData.description}
                         onChange={(e) => setEditData(prev => ({ ...prev, description: e.target.value }))}
                         placeholder="Enter procedure description"
-                        className="w-full min-h-[100px]"
+                        className="w-full min-h-[120px] border-gray-200 focus:border-gray-400"
                       />
                     ) : (
-                      <p className="text-gray-700 leading-relaxed">
+                      <p className="text-gray-700 leading-relaxed bg-gray-50 p-4 rounded-lg">
                         {procedure.description || 'No description provided'}
                       </p>
                     )}
@@ -426,14 +463,16 @@ export const ProcedureDetailDialog: React.FC<ProcedureDetailDialogProps> = ({
 
                 {/* Global Setting */}
                 {isEditing && (
-                  <Card className="border-gray-200 shadow-sm">
+                  <Card className="border border-gray-100 shadow-sm rounded-xl">
                     <CardContent className="p-6">
                       <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                          <Globe className="h-5 w-5 text-gray-600" />
+                        <div className="flex items-center gap-4">
+                          <div className="w-8 h-8 bg-emerald-50 rounded-lg flex items-center justify-center">
+                            <Globe className="h-5 w-5 text-emerald-600" />
+                          </div>
                           <div>
-                            <Label className="text-sm font-medium">Global Procedure</Label>
-                            <p className="text-xs text-gray-500">Available to all users</p>
+                            <Label className="text-base font-medium text-gray-900">Global Procedure</Label>
+                            <p className="text-sm text-gray-600">Available to all users across organizations</p>
                           </div>
                         </div>
                         <Switch
@@ -446,35 +485,35 @@ export const ProcedureDetailDialog: React.FC<ProcedureDetailDialogProps> = ({
                 )}
 
                 {/* Quick Stats */}
-                <div className="grid grid-cols-3 gap-4">
-                  <Card className="border-gray-200 shadow-sm">
+                <div className="grid grid-cols-3 gap-6">
+                  <Card className="border border-gray-100 shadow-sm rounded-xl">
                     <CardContent className="p-6 text-center">
-                      <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center mx-auto mb-3">
+                      <div className="w-12 h-12 bg-gray-50 rounded-xl flex items-center justify-center mx-auto mb-4">
                         <CheckCircle className="h-6 w-6 text-gray-600" />
                       </div>
-                      <div className="text-2xl font-semibold text-gray-900 mb-1">
+                      <div className="text-2xl font-bold text-gray-900 mb-1">
                         {procedure.fields?.length || 0}
                       </div>
-                      <div className="text-sm text-gray-600">Steps</div>
+                      <div className="text-sm text-gray-600">Fields</div>
                     </CardContent>
                   </Card>
-                  <Card className="border-gray-200 shadow-sm">
+                  <Card className="border border-gray-100 shadow-sm rounded-xl">
                     <CardContent className="p-6 text-center">
-                      <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center mx-auto mb-3">
+                      <div className="w-12 h-12 bg-gray-50 rounded-xl flex items-center justify-center mx-auto mb-4">
                         <Activity className="h-6 w-6 text-gray-600" />
                       </div>
-                      <div className="text-2xl font-semibold text-gray-900 mb-1">
+                      <div className="text-2xl font-bold text-gray-900 mb-1">
                         {procedure.executions_count || 0}
                       </div>
                       <div className="text-sm text-gray-600">Executions</div>
                     </CardContent>
                   </Card>
-                  <Card className="border-gray-200 shadow-sm">
+                  <Card className="border border-gray-100 shadow-sm rounded-xl">
                     <CardContent className="p-6 text-center">
-                      <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center mx-auto mb-3">
+                      <div className="w-12 h-12 bg-gray-50 rounded-xl flex items-center justify-center mx-auto mb-4">
                         <Clock className="h-6 w-6 text-gray-600" />
                       </div>
-                      <div className="text-2xl font-semibold text-gray-900 mb-1">
+                      <div className="text-2xl font-bold text-gray-900 mb-1">
                         {procedure.estimated_duration || 30}
                       </div>
                       <div className="text-sm text-gray-600">Minutes</div>
@@ -484,22 +523,22 @@ export const ProcedureDetailDialog: React.FC<ProcedureDetailDialogProps> = ({
 
                 {/* Procedure Information */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <Card className="border-gray-200 shadow-sm">
+                  <Card className="border border-gray-100 shadow-sm rounded-xl">
                     <CardContent className="p-6">
-                      <h3 className="text-lg font-semibold mb-4 text-gray-900">Procedure Information</h3>
-                      <div className="space-y-4">
-                        <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center">
-                            <User className="h-4 w-4 text-gray-600" />
+                      <h3 className="text-lg font-semibold mb-6 text-gray-900">Procedure Information</h3>
+                      <div className="space-y-6">
+                        <div className="flex items-center gap-4">
+                          <div className="w-10 h-10 bg-gray-50 rounded-xl flex items-center justify-center">
+                            <User className="h-5 w-5 text-gray-600" />
                           </div>
                           <div>
                             <span className="text-sm text-gray-500">Created by</span>
                             <p className="text-sm font-medium text-gray-900">{procedure.created_by || 'Unknown'}</p>
                           </div>
                         </div>
-                        <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center">
-                            <Calendar className="h-4 w-4 text-gray-600" />
+                        <div className="flex items-center gap-4">
+                          <div className="w-10 h-10 bg-gray-50 rounded-xl flex items-center justify-center">
+                            <Calendar className="h-5 w-5 text-gray-600" />
                           </div>
                           <div>
                             <span className="text-sm text-gray-500">Created</span>
@@ -508,9 +547,9 @@ export const ProcedureDetailDialog: React.FC<ProcedureDetailDialogProps> = ({
                             </p>
                           </div>
                         </div>
-                        <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center">
-                            <Calendar className="h-4 w-4 text-gray-600" />
+                        <div className="flex items-center gap-4">
+                          <div className="w-10 h-10 bg-gray-50 rounded-xl flex items-center justify-center">
+                            <Calendar className="h-5 w-5 text-gray-600" />
                           </div>
                           <div>
                             <span className="text-sm text-gray-500">Last updated</span>
@@ -523,26 +562,26 @@ export const ProcedureDetailDialog: React.FC<ProcedureDetailDialogProps> = ({
                     </CardContent>
                   </Card>
 
-                  <Card className="border-gray-200 shadow-sm">
+                  <Card className="border border-gray-100 shadow-sm rounded-xl">
                     <CardContent className="p-6">
-                      <h3 className="text-lg font-semibold mb-4 text-gray-900">Configuration</h3>
-                      <div className="space-y-4">
-                        <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center">
-                            <Tag className="h-4 w-4 text-gray-600" />
+                      <h3 className="text-lg font-semibold mb-6 text-gray-900">Configuration</h3>
+                      <div className="space-y-6">
+                        <div className="flex items-center gap-4">
+                          <div className="w-10 h-10 bg-gray-50 rounded-xl flex items-center justify-center">
+                            <Tag className="h-5 w-5 text-gray-600" />
                           </div>
                           <div>
                             <span className="text-sm text-gray-500">Category</span>
                             <div className="mt-1">
-                              <Badge className="bg-gray-100 text-gray-700 border-gray-200 text-xs">
+                              <Badge className="bg-white text-gray-700 border border-gray-200 text-sm">
                                 {procedure.category || 'Other'}
                               </Badge>
                             </div>
                           </div>
                         </div>
-                        <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center">
-                            <Globe className="h-4 w-4 text-gray-600" />
+                        <div className="flex items-center gap-4">
+                          <div className="w-10 h-10 bg-gray-50 rounded-xl flex items-center justify-center">
+                            <Globe className="h-5 w-5 text-gray-600" />
                           </div>
                           <div>
                             <span className="text-sm text-gray-500">Scope</span>
@@ -558,14 +597,14 @@ export const ProcedureDetailDialog: React.FC<ProcedureDetailDialogProps> = ({
               </TabsContent>
 
               <TabsContent value="history" className="mt-6">
-                <Card className="border-gray-200 shadow-sm">
+                <Card className="border border-gray-100 shadow-sm rounded-xl">
                   <CardContent className="p-6">
-                    <div className="text-center py-16">
-                      <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <Activity className="h-8 w-8 text-gray-400" />
+                    <div className="text-center py-20">
+                      <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-6 border border-gray-100">
+                        <Activity className="h-10 w-10 text-gray-400" />
                       </div>
-                      <h3 className="text-lg font-medium text-gray-900 mb-2">No Execution History</h3>
-                      <p className="text-gray-600">This procedure hasn't been executed yet.</p>
+                      <h3 className="text-xl font-semibold text-gray-900 mb-3">No Execution History</h3>
+                      <p className="text-gray-600 max-w-md mx-auto">This procedure hasn't been executed yet. Once it's used, execution history and analytics will appear here.</p>
                     </div>
                   </CardContent>
                 </Card>
