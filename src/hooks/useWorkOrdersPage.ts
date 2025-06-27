@@ -1,9 +1,9 @@
-
 import { useState, useMemo, useEffect } from "react";
 import { WorkOrder, WorkOrderFilters } from "@/types/workOrder";
 import { toast } from "sonner";
 import { workOrdersApi } from "@/lib/database/work-orders";
 import { supabase } from "@/integrations/supabase/client";
+import { useDataLoader } from "./useDataLoader";
 
 export const useWorkOrdersPage = (workOrders: WorkOrder[] = []) => {
   const [selectedWorkOrder, setSelectedWorkOrder] = useState<string | null>(null);
@@ -17,9 +17,27 @@ export const useWorkOrdersPage = (workOrders: WorkOrder[] = []) => {
     category: 'all'
   });
 
+  // Use robust data loader for work orders
+  const workOrdersLoader = useDataLoader(
+    async () => {
+      console.log('Loading work orders with robust loader...');
+      const orders = await workOrdersApi.getWorkOrders();
+      return Array.isArray(orders) ? orders : [];
+    },
+    [],
+    {
+      cacheKey: 'work-orders',
+      retryAttempts: 3,
+      showErrorToast: true
+    }
+  );
+
+  // Use the loaded work orders or fallback to provided ones
+  const activeWorkOrders = workOrdersLoader.data || workOrders || [];
+
   // Transform work orders to ensure consistent format
   const transformedWorkOrders = useMemo(() => {
-    return workOrders.map(wo => ({
+    return activeWorkOrders.map(wo => ({
       ...wo,
       assignedTo: wo.assignedTo || (wo.assigned_to ? [wo.assigned_to] : []),
       dueDate: wo.dueDate || wo.due_date,
@@ -28,7 +46,7 @@ export const useWorkOrdersPage = (workOrders: WorkOrder[] = []) => {
       totalCost: wo.totalCost || wo.total_cost || 0,
       partsUsed: wo.partsUsed || wo.parts_used || []
     }));
-  }, [workOrders]);
+  }, [activeWorkOrders]);
 
   // Filter work orders based on current filters
   const filteredWorkOrders = useMemo(() => {
@@ -44,13 +62,12 @@ export const useWorkOrdersPage = (workOrders: WorkOrder[] = []) => {
       
       const matchesAssignedTo = filters.assignedTo === 'all' || 
         (filters.assignedTo === 'unassigned' && (!wo.assignedTo || wo.assignedTo.length === 0)) ||
-        (filters.assignedTo === 'me' && wo.assignedTo?.includes('current-user')); // This would need proper user context
+        (filters.assignedTo === 'me' && wo.assignedTo?.includes('current-user'));
 
       return matchesSearch && matchesStatus && matchesPriority && matchesCategory && matchesAssignedTo;
     });
   }, [transformedWorkOrders, filters]);
 
-  // Remove automatic view mode changes - let user control the view
   const selectedWorkOrderData = useMemo(() => {
     return transformedWorkOrders.find(wo => wo.id === selectedWorkOrder);
   }, [transformedWorkOrders, selectedWorkOrder]);
@@ -153,6 +170,9 @@ export const useWorkOrdersPage = (workOrders: WorkOrder[] = []) => {
         toast.success("Work order created successfully");
       }
       
+      // Refresh data after successful submission
+      workOrdersLoader.refetch();
+      
       // Reset form state and go back to list
       setViewMode('list');
       setEditingWorkOrder(null);
@@ -177,6 +197,10 @@ export const useWorkOrdersPage = (workOrders: WorkOrder[] = []) => {
     setEditingWorkOrder(null);
   };
 
+  const refreshData = () => {
+    workOrdersLoader.refetch();
+  };
+
   return {
     selectedWorkOrder,
     viewMode,
@@ -191,6 +215,10 @@ export const useWorkOrdersPage = (workOrders: WorkOrder[] = []) => {
     handleSelectWorkOrder,
     handleFormSubmit,
     handleFormCancel,
-    setViewModeToList
+    setViewModeToList,
+    refreshData,
+    isLoading: workOrdersLoader.isLoading,
+    isRetrying: workOrdersLoader.isRetrying,
+    error: workOrdersLoader.error
   };
 };

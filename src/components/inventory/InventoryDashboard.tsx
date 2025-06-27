@@ -4,6 +4,7 @@ import { InventoryStats } from "./InventoryStats";
 import { InventoryGrid } from "./InventoryGrid";
 import { InventoryForm } from "./InventoryForm";
 import { InventoryDetailCard } from "./InventoryDetailCard";
+import { DataLoadingManager } from "@/components/ui/DataLoadingManager";
 import { useInventoryEnhanced } from "@/hooks/useInventoryEnhanced";
 import { useExportInventory } from "@/hooks/useInventoryExport";
 import { useDeleteInventoryItem, useCreateInventoryItem } from "@/hooks/useInventoryMutations";
@@ -22,7 +23,7 @@ const mapInventoryItem = (item: InventoryItemWithStats) => ({
   unitCost: item.unit_cost || 0,
   totalValue: item.total_value || 0,
   location: item.location || '',
-  category: item.location || 'General', // Use location as category fallback since category doesn't exist in DB
+  category: item.location || 'General',
   status: item.is_low_stock ? 'low_stock' : item.quantity === 0 ? 'out_of_stock' : 'in_stock'
 });
 
@@ -35,7 +36,7 @@ export const InventoryDashboard = () => {
   const [showEditForm, setShowEditForm] = useState(false);
   const [editingItem, setEditingItem] = useState<any>(null);
 
-  // Enhanced inventory query with real data
+  // Enhanced inventory query with robust loading
   const { data: inventoryData, isLoading, error, refetch } = useInventoryEnhanced({
     search: search || undefined,
     status: statusFilter !== "all" ? statusFilter as any : undefined,
@@ -49,6 +50,7 @@ export const InventoryDashboard = () => {
   const createMutation = useCreateInventoryItem();
   const { addUndoItem } = useUndoDelete();
 
+  // Safely access inventory data with fallbacks
   const rawItems = inventoryData?.items || [];
   const items = rawItems.map(mapInventoryItem);
   const totalItems = items.length;
@@ -79,7 +81,6 @@ export const InventoryDashboard = () => {
     console.log('Deleting item:', item);
     
     try {
-      // Store item data for potential undo
       const itemToRestore = {
         name: item.name,
         description: item.description,
@@ -90,15 +91,12 @@ export const InventoryDashboard = () => {
         unit_cost: item.unitCost,
       };
 
-      // Delete the item
       await deleteMutation.mutateAsync(item.id);
 
-      // Add undo functionality
       addUndoItem(
         item.id,
         itemToRestore,
         async () => {
-          // Recreate the item with the same data
           console.log('Restoring item:', itemToRestore);
           await createMutation.mutateAsync(itemToRestore);
           await refetch();
@@ -146,23 +144,6 @@ export const InventoryDashboard = () => {
     refetch();
   };
 
-  if (error) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <h2 className="text-xl font-semibold text-gray-900 mb-2">Error loading inventory</h2>
-          <p className="text-gray-600 mb-4">{error.message}</p>
-          <button
-            onClick={handleRefresh}
-            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-          >
-            Retry
-          </button>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="min-h-screen bg-gray-50">
       <InventoryHeader
@@ -189,22 +170,22 @@ export const InventoryDashboard = () => {
           categories={categories}
         />
         
-        {isLoading ? (
-          <div className="flex items-center justify-center py-12">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-            <span className="ml-2 text-gray-600">Loading inventory...</span>
-          </div>
-        ) : (
+        <DataLoadingManager
+          isLoading={isLoading}
+          error={error}
+          onRetry={refetch}
+          loadingText="Loading inventory items..."
+          errorText="Failed to load inventory data"
+        >
           <InventoryGrid
             items={items}
             onViewItem={handleViewItem}
             onEditItem={handleEditItem}
             onDeleteItem={handleDeleteItem}
           />
-        )}
+        </DataLoadingManager>
       </div>
 
-      {/* Create Form Dialog */}
       <InventoryForm
         mode="create"
         onSuccess={handleFormSuccess}
@@ -212,7 +193,6 @@ export const InventoryDashboard = () => {
         onOpenChange={setShowCreateForm}
       />
 
-      {/* Edit Form Dialog */}
       <InventoryForm
         mode="edit"
         item={editingItem}
@@ -221,7 +201,6 @@ export const InventoryDashboard = () => {
         onOpenChange={setShowEditForm}
       />
 
-      {/* Detail View Dialog */}
       {selectedItem && (
         <InventoryDetailCard
           item={{

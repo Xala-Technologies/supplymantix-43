@@ -1,8 +1,9 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { inventoryEnhancedApi } from "@/lib/database/inventory-enhanced";
+import { useDataLoader } from "./useDataLoader";
 
-// Enhanced inventory items query
+// Enhanced inventory items query with robust loading
 export const useInventoryEnhanced = (params?: {
   search?: string;
   location?: string;
@@ -21,20 +22,34 @@ export const useInventoryEnhanced = (params?: {
         // Always use searchInventory which handles all cases properly
         const result = await inventoryEnhancedApi.searchInventory(params || {});
         console.log('useInventoryEnhanced query success:', result);
-        return result;
+        
+        // Ensure we always return a valid structure
+        if (!result || typeof result !== 'object') {
+          console.warn('Invalid result from searchInventory, returning empty structure');
+          return { items: [], total: 0 };
+        }
+        
+        return {
+          items: Array.isArray(result.items) ? result.items : [],
+          total: typeof result.total === 'number' ? result.total : 0
+        };
       } catch (error) {
         console.error('useInventoryEnhanced query error:', error);
         throw error;
       }
     },
-    retry: 1,
+    retry: 3,
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
     staleTime: 1000 * 30, // 30 seconds
     refetchOnWindowFocus: false,
     refetchOnMount: true,
+    refetchInterval: 5 * 60 * 1000, // Refetch every 5 minutes
+    // Ensure we have a default value while loading
+    placeholderData: { items: [], total: 0 },
   });
 };
 
-// Low stock alerts
+// Low stock alerts with robust loading
 export const useLowStockAlerts = () => {
   return useQuery({
     queryKey: ["low-stock-alerts"],
@@ -43,13 +58,15 @@ export const useLowStockAlerts = () => {
       try {
         const result = await inventoryEnhancedApi.getLowStockAlerts();
         console.log('Low stock alerts result:', result);
-        return result;
+        return Array.isArray(result) ? result : [];
       } catch (error) {
         console.error('Low stock alerts error:', error);
         throw error;
       }
     },
     staleTime: 1000 * 60 * 2, // 2 minutes
-    retry: 1,
+    retry: 3,
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+    placeholderData: [],
   });
 };
