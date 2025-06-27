@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -176,14 +175,6 @@ export const NewWorkOrderDialog = ({
       {children && (
         <DialogTrigger asChild>
           {children}
-        </DialogTrigger>
-      )}
-      {!children && !controlledOpen && (
-        <DialogTrigger asChild>
-          <Button className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm">
-            <Plus className="h-4 w-4 mr-2" />
-            New Work Order
-          </Button>
         </DialogTrigger>
       )}
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
