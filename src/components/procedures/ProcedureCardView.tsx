@@ -48,7 +48,7 @@ export const ProcedureCardView: React.FC<ProcedureCardViewProps> = ({
             "cursor-pointer overflow-hidden h-fit"
           )}
         >
-          <CardContent className="p-4">
+          <CardContent className="p-6">
             {/* Header with Icon and Actions */}
             <div className="flex items-start justify-between mb-3">
               <div className="flex items-center gap-2 flex-1 min-w-0">
