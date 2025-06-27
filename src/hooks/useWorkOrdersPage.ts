@@ -91,6 +91,34 @@ export const useWorkOrdersPage = (workOrders: WorkOrder[] = []) => {
         return;
       }
 
+      // If assignedTo is provided, we need to find the user ID from the email
+      let assignedUserId = null;
+      if (data.assignedTo && data.assignedTo.trim() !== '') {
+        // First check if it's already a UUID (user ID)
+        const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+        
+        if (uuidRegex.test(data.assignedTo)) {
+          // It's already a UUID, use it directly
+          assignedUserId = data.assignedTo;
+        } else {
+          // It's an email, find the user ID
+          const { data: assignedUser, error: userLookupError } = await supabase
+            .from('users')
+            .select('id')
+            .eq('email', data.assignedTo)
+            .eq('tenant_id', userData.tenant_id)
+            .single();
+
+          if (userLookupError || !assignedUser) {
+            console.error('Error finding assigned user:', userLookupError);
+            toast.error("Could not find assigned user");
+            return;
+          }
+
+          assignedUserId = assignedUser.id;
+        }
+      }
+
       // Validate and clean the form data
       const cleanData = {
         title: data.title?.trim(),
@@ -98,7 +126,7 @@ export const useWorkOrdersPage = (workOrders: WorkOrder[] = []) => {
         status: data.status || 'open',
         priority: data.priority || 'medium',
         category: data.category || 'maintenance',
-        assigned_to: data.assignedTo && data.assignedTo.trim() !== '' ? data.assignedTo : null,
+        assigned_to: assignedUserId,
         asset_id: data.assetId && data.assetId.trim() !== '' ? data.assetId : null,
         due_date: data.dueDate && data.dueDate.trim() !== '' ? data.dueDate : null,
         tags: Array.isArray(data.tags) ? data.tags : [],
