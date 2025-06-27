@@ -21,7 +21,7 @@ export const WorkOrdersPageRefactored = () => {
   const [viewMode, setViewMode] = useState<'card' | 'list'>('card');
   const [showNewDialog, setShowNewDialog] = useState(false);
   
-  const { workOrders, isLoading, createWorkOrder } = useWorkOrdersIntegration();
+  const { data: workOrders = [], isLoading } = useWorkOrdersIntegration();
   const {
     filters,
     setFilters,
@@ -38,13 +38,8 @@ export const WorkOrdersPageRefactored = () => {
     setShowNewDialog(true);
   };
 
-  const handleCreateSubmit = async (data: any) => {
-    try {
-      await createWorkOrder(data);
-      setShowNewDialog(false);
-    } catch (error) {
-      console.error('Failed to create work order:', error);
-    }
+  const handleDialogSuccess = () => {
+    setShowNewDialog(false);
   };
 
   const viewToggleActions = (
@@ -148,7 +143,7 @@ export const WorkOrdersPageRefactored = () => {
         <NewWorkOrderDialog
           open={showNewDialog}
           onOpenChange={setShowNewDialog}
-          onSubmit={handleCreateSubmit}
+          onSuccess={handleDialogSuccess}
         />
       </PageContainer>
     </Layout>

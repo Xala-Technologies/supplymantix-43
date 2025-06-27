@@ -33,3 +33,15 @@ export const formatDueDate = (dateString: string) => {
   
   return date.toLocaleDateString();
 };
+
+export const transformWorkOrderData = (workOrder: any) => {
+  return {
+    ...workOrder,
+    assignedTo: workOrder.assignedTo || (workOrder.assigned_to ? [workOrder.assigned_to] : []),
+    dueDate: workOrder.dueDate || workOrder.due_date,
+    createdAt: workOrder.createdAt || workOrder.created_at,
+    timeSpent: workOrder.timeSpent || workOrder.time_spent || 0,
+    totalCost: workOrder.totalCost || workOrder.total_cost || 0,
+    partsUsed: workOrder.partsUsed || workOrder.parts_used || []
+  };
+};

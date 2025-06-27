@@ -1,10 +1,8 @@
-
 import { DashboardLayout } from "@/components/Layout/DashboardLayout";
 import { StandardPageLayout, StandardPageHeader, StandardPageContent } from "@/components/Layout/StandardPageLayout";
 import { EnhancedDashboardMetrics } from "@/components/dashboard/EnhancedDashboardMetrics";
 import { useWorkOrdersIntegration } from "@/hooks/useWorkOrdersIntegration";
 import { WorkOrder } from "@/types/workOrder";
-import { transformWorkOrderData } from "@/services/workOrderService";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
