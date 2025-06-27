@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { DashboardLayout } from "@/components/Layout/DashboardLayout";
 import { StandardPageLayout, StandardPageHeader, StandardPageFilters, StandardPageContent } from "@/components/Layout/StandardPageLayout";
@@ -92,15 +91,11 @@ const Procedures = () => {
   };
 
   const handleEditProcedure = (procedure: any) => {
-    // Open in new window/tab
-    const url = `/dashboard/procedures/${procedure.id}/edit`;
-    window.open(url, '_blank', 'width=1200,height=800,scrollbars=yes,resizable=yes');
+    console.log('Updating procedure:', procedure);
   };
 
   const handleOpenInNewWindow = (procedure: any) => {
-    // Open procedure details in new window/tab
-    const url = `/dashboard/procedures/${procedure.id}`;
-    window.open(url, '_blank', 'width=1000,height=700,scrollbars=yes,resizable=yes');
+    console.log('Opening procedure:', procedure);
   };
 
   const handleViewDetails = (procedure: any) => {

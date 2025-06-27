@@ -70,14 +70,6 @@ export const ProcedureCardView: React.FC<ProcedureCardViewProps> = ({
                     <Eye className="h-4 w-4 mr-2" />
                     View Details
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => onOpenInNewWindow(procedure)}>
-                    <ExternalLink className="h-4 w-4 mr-2" />
-                    Open in New Window
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => onEdit(procedure)}>
-                    <Edit className="h-4 w-4 mr-2" />
-                    Edit
-                  </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => onDuplicate(procedure.id)}>
                     <Copy className="h-4 w-4 mr-2" />
                     Duplicate
@@ -129,14 +121,6 @@ export const ProcedureCardView: React.FC<ProcedureCardViewProps> = ({
               >
                 <Eye className="h-4 w-4 mr-2" />
                 View Details
-              </Button>
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={() => onEdit(procedure)}
-                className="px-3"
-              >
-                <Edit className="h-4 w-4" />
               </Button>
             </div>
           </CardContent>

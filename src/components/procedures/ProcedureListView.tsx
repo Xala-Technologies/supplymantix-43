@@ -120,14 +120,6 @@ export const ProcedureListView: React.FC<ProcedureListViewProps> = ({
                       <Eye className="h-4 w-4 mr-2" />
                       View Details
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => onOpenInNewWindow(procedure)}>
-                      <ExternalLink className="h-4 w-4 mr-2" />
-                      Open in New Window
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => onEdit(procedure)}>
-                      <Edit className="h-4 w-4 mr-2" />
-                      Edit
-                    </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => onDuplicate(procedure.id)}>
                       <Copy className="h-4 w-4 mr-2" />
                       Duplicate
