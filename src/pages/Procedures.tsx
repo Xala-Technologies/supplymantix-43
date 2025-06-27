@@ -10,27 +10,19 @@ import {
   useProceduresEnhanced, 
   useDeleteProcedure, 
   useDuplicateProcedure,
-  useStartExecution,
   useProcedureTemplates,
   useCreateProcedure
 } from "@/hooks/useProceduresEnhanced";
 import { useProcedureUtils } from "@/hooks/useProcedureUtils";
 import { ProcedureCreationWizard } from "@/components/procedures/ProcedureCreationWizard";
-import { ExecutionDialog } from "@/components/procedures/ExecutionDialog";
 import { ProcedureFilters } from "@/components/procedures/ProcedureFilters";
 import { ProcedureTemplatesDialog } from "@/components/procedures/ProcedureTemplatesDialog";
-import { ProcedureResultsDialog } from "@/components/procedures/ProcedureResultsDialog";
 import { ProcedureViewToggle } from "@/components/procedures/ProcedureViewToggle";
 import { ProcedureCardView } from "@/components/procedures/ProcedureCardView";
 import { ProcedureListView } from "@/components/procedures/ProcedureListView";
+import { ProcedureDetailDialog } from "@/components/procedures/ProcedureDetailDialog";
 import { Card, CardContent } from "@/components/ui/card";
 import { toast } from "sonner";
-
-interface ExecutionResult {
-  answers: any[];
-  score: number;
-  procedure: any;
-}
 
 const Procedures = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -38,15 +30,11 @@ const Procedures = () => {
   const [showGlobalOnly, setShowGlobalOnly] = useState(false);
   const [viewMode, setViewMode] = useState<'card' | 'list'>('card');
   const [showCreateWizard, setShowCreateWizard] = useState(false);
-  const [showExecutionDialog, setShowExecutionDialog] = useState(false);
-  const [showResultsDialog, setShowResultsDialog] = useState(false);
   const [showTemplatesDialog, setShowTemplatesDialog] = useState(false);
   const [showNewProcedureModal, setShowNewProcedureModal] = useState(false);
+  const [showDetailDialog, setShowDetailDialog] = useState(false);
   const [selectedProcedure, setSelectedProcedure] = useState<any>(null);
-  const [executionResult, setExecutionResult] = useState<ExecutionResult | null>(null);
-  const [currentExecutionId, setCurrentExecutionId] = useState<string | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
-  const [executingProcedures, setExecutingProcedures] = useState<Set<string>>(new Set());
 
   const { data: proceduresData, isLoading } = useProceduresEnhanced({
     search: searchTerm || undefined,
@@ -59,9 +47,8 @@ const Procedures = () => {
   const createProcedure = useCreateProcedure();
   const deleteProcedure = useDeleteProcedure();
   const duplicateProcedure = useDuplicateProcedure();
-  const startExecution = useStartExecution();
 
-  const { categories, getCategoryColor, canExecuteProcedure, formatAnswerValue } = useProcedureUtils();
+  const { categories, getCategoryColor } = useProcedureUtils();
 
   const procedures = proceduresData?.procedures || [];
 
@@ -95,62 +82,13 @@ const Procedures = () => {
     deleteProcedure.mutate(id, {
       onSuccess: () => {
         setDeleteConfirm(null);
+        setShowDetailDialog(false);
       }
     });
   };
 
   const handleDuplicateProcedure = (id: string) => {
     duplicateProcedure.mutate({ id });
-  };
-
-  const handleExecuteProcedure = async (procedure: any) => {
-    const { canExecute, reason } = canExecuteProcedure(procedure, executingProcedures);
-    
-    if (!canExecute) {
-      toast.error(reason || "Cannot execute procedure");
-      return;
-    }
-
-    try {
-      setExecutingProcedures(prev => new Set(prev).add(procedure.id));
-      setSelectedProcedure(procedure);
-      
-      const execution = await startExecution.mutateAsync({ 
-        procedureId: procedure.id 
-      });
-      
-      setCurrentExecutionId(execution.id);
-      setShowExecutionDialog(true);
-    } catch (error) {
-      console.error('Failed to start execution:', error);
-      toast.error('Failed to start procedure execution');
-    } finally {
-      setExecutingProcedures(prev => {
-        const newSet = new Set(prev);
-        newSet.delete(procedure.id);
-        return newSet;
-      });
-    }
-  };
-
-  const handleExecutionComplete = (answers: any, score: number) => {
-    setExecutionResult({
-      answers,
-      score,
-      procedure: selectedProcedure
-    });
-    
-    setShowExecutionDialog(false);
-    setShowResultsDialog(true);
-    setCurrentExecutionId(null);
-    
-    toast.success(`Procedure completed with ${score}% score!`);
-  };
-
-  const handleExecutionCancel = () => {
-    setShowExecutionDialog(false);
-    setSelectedProcedure(null);
-    setCurrentExecutionId(null);
   };
 
   const handleEditProcedure = (procedure: any) => {
@@ -163,6 +101,11 @@ const Procedures = () => {
     // Open procedure details in new window/tab
     const url = `/dashboard/procedures/${procedure.id}`;
     window.open(url, '_blank', 'width=1000,height=700,scrollbars=yes,resizable=yes');
+  };
+
+  const handleViewDetails = (procedure: any) => {
+    setSelectedProcedure(procedure);
+    setShowDetailDialog(true);
   };
 
   if (isLoading) {
@@ -244,26 +187,22 @@ const Procedures = () => {
           ) : viewMode === 'card' ? (
             <ProcedureCardView
               procedures={procedures}
-              onExecute={handleExecuteProcedure}
               onEdit={handleEditProcedure}
               onDuplicate={handleDuplicateProcedure}
               onDelete={setDeleteConfirm}
               onOpenInNewWindow={handleOpenInNewWindow}
-              canExecuteProcedure={canExecuteProcedure}
+              onViewDetails={handleViewDetails}
               getCategoryColor={getCategoryColor}
-              executingProcedures={executingProcedures}
             />
           ) : (
             <ProcedureListView
               procedures={procedures}
-              onExecute={handleExecuteProcedure}
               onEdit={handleEditProcedure}
               onDuplicate={handleDuplicateProcedure}
               onDelete={setDeleteConfirm}
               onOpenInNewWindow={handleOpenInNewWindow}
-              canExecuteProcedure={canExecuteProcedure}
+              onViewDetails={handleViewDetails}
               getCategoryColor={getCategoryColor}
-              executingProcedures={executingProcedures}
             />
           )}
         </StandardPageContent>
@@ -345,22 +284,15 @@ const Procedures = () => {
         isLoading={createProcedure.isPending}
       />
 
-      {/* Execution Dialog */}
-      <ExecutionDialog
-        open={showExecutionDialog}
-        onOpenChange={setShowExecutionDialog}
+      {/* Procedure Details Dialog */}
+      <ProcedureDetailDialog
+        open={showDetailDialog}
+        onOpenChange={setShowDetailDialog}
         procedure={selectedProcedure}
-        executionId={currentExecutionId || undefined}
-        onComplete={handleExecutionComplete}
-        onCancel={handleExecutionCancel}
-      />
-
-      {/* Results Dialog */}
-      <ProcedureResultsDialog
-        open={showResultsDialog}
-        onOpenChange={setShowResultsDialog}
-        executionResult={executionResult}
-        formatAnswerValue={formatAnswerValue}
+        onEdit={handleEditProcedure}
+        onDuplicate={handleDuplicateProcedure}
+        onDelete={setDeleteConfirm}
+        getCategoryColor={getCategoryColor}
       />
 
       {/* Delete Confirmation */}
