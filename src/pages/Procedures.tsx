@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { DashboardLayout } from "@/components/Layout/DashboardLayout";
 import { StandardPageLayout, StandardPageHeader, StandardPageFilters, StandardPageContent } from "@/components/Layout/StandardPageLayout";
@@ -11,18 +12,17 @@ import {
   useDuplicateProcedure,
   useStartExecution,
   useProcedureTemplates,
-  useCreateProcedure, 
-  useUpdateProcedure 
+  useCreateProcedure
 } from "@/hooks/useProceduresEnhanced";
 import { useProcedureUtils } from "@/hooks/useProcedureUtils";
-import { UnifiedProcedureBuilder } from "@/components/procedures/UnifiedProcedureBuilder";
 import { ProcedureCreationWizard } from "@/components/procedures/ProcedureCreationWizard";
 import { ExecutionDialog } from "@/components/procedures/ExecutionDialog";
-import { EnhancedProcedureCard } from "@/components/procedures/EnhancedProcedureCard";
 import { ProcedureFilters } from "@/components/procedures/ProcedureFilters";
 import { ProcedureTemplatesDialog } from "@/components/procedures/ProcedureTemplatesDialog";
 import { ProcedureResultsDialog } from "@/components/procedures/ProcedureResultsDialog";
-import { ProcedureEmptyState } from "@/components/procedures/ProcedureEmptyState";
+import { ProcedureViewToggle } from "@/components/procedures/ProcedureViewToggle";
+import { ProcedureCardView } from "@/components/procedures/ProcedureCardView";
+import { ProcedureListView } from "@/components/procedures/ProcedureListView";
 import { Card, CardContent } from "@/components/ui/card";
 import { toast } from "sonner";
 
@@ -36,8 +36,8 @@ const Procedures = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [showGlobalOnly, setShowGlobalOnly] = useState(false);
+  const [viewMode, setViewMode] = useState<'card' | 'list'>('card');
   const [showCreateWizard, setShowCreateWizard] = useState(false);
-  const [showEditDialog, setShowEditDialog] = useState(false);
   const [showExecutionDialog, setShowExecutionDialog] = useState(false);
   const [showResultsDialog, setShowResultsDialog] = useState(false);
   const [showTemplatesDialog, setShowTemplatesDialog] = useState(false);
@@ -57,7 +57,6 @@ const Procedures = () => {
   const { data: templates, isLoading: templatesLoading } = useProcedureTemplates();
 
   const createProcedure = useCreateProcedure();
-  const updateProcedure = useUpdateProcedure();
   const deleteProcedure = useDeleteProcedure();
   const duplicateProcedure = useDuplicateProcedure();
   const startExecution = useStartExecution();
@@ -90,20 +89,6 @@ const Procedures = () => {
         setShowCreateWizard(false);
       }
     });
-  };
-
-  const handleUpdateProcedure = (data: any) => {
-    if (!selectedProcedure) return;
-    
-    updateProcedure.mutate(
-      { id: selectedProcedure.id, updates: data },
-      {
-        onSuccess: () => {
-          setShowEditDialog(false);
-          setSelectedProcedure(null);
-        }
-      }
-    );
   };
 
   const handleDeleteProcedure = (id: string) => {
@@ -169,8 +154,15 @@ const Procedures = () => {
   };
 
   const handleEditProcedure = (procedure: any) => {
-    setSelectedProcedure(procedure);
-    setShowEditDialog(true);
+    // Open in new window/tab
+    const url = `/dashboard/procedures/${procedure.id}/edit`;
+    window.open(url, '_blank', 'width=1200,height=800,scrollbars=yes,resizable=yes');
+  };
+
+  const handleOpenInNewWindow = (procedure: any) => {
+    // Open procedure details in new window/tab
+    const url = `/dashboard/procedures/${procedure.id}`;
+    window.open(url, '_blank', 'width=1000,height=700,scrollbars=yes,resizable=yes');
   };
 
   if (isLoading) {
@@ -192,343 +184,97 @@ const Procedures = () => {
 
   return (
     <DashboardLayout>
-      <div className="flex-1 flex flex-col h-full bg-gradient-to-br from-slate-50 to-white">
-        {/* Modern Enhanced Header */}
-        <div className="relative border-b border-slate-200 bg-white shadow-sm">
-          <div className="absolute inset-0 bg-gradient-to-r from-blue-600/5 to-purple-600/5"></div>
-          <div className="relative px-8 py-8">
-            <div className="flex items-center justify-between">
-              <div className="space-y-1">
-                <h1 className="text-3xl font-bold text-slate-900 tracking-tight">Procedure Library</h1>
-                <p className="text-slate-600 text-base">Create and manage standardized procedures for your team</p>
-                <div className="flex items-center gap-4 mt-3 text-sm text-slate-500">
-                  <div className="flex items-center gap-1">
-                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                    <span>{procedures.length} active procedures</span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                    <span>Ready to execute</span>
-                  </div>
-                </div>
-              </div>
-              <div className="flex items-center gap-3">
-                <Button 
-                  variant="outline" 
-                  className="border-slate-300 text-slate-700 hover:bg-slate-50 transition-all duration-200"
-                >
-                  <Download className="h-4 w-4 mr-2" />
-                  Export
-                </Button>
-                <Button 
-                  onClick={() => setShowNewProcedureModal(true)} 
-                  className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 shadow-lg hover:shadow-xl transition-all duration-200 px-6 py-2.5 font-semibold"
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  New Procedure Template
-                </Button>
-              </div>
-            </div>
+      <StandardPageLayout>
+        <StandardPageHeader 
+          title="Procedures"
+          description={`${procedures.length} ${procedures.length === 1 ? 'procedure' : 'procedures'} available`}
+        >
+          <div className="flex items-center gap-3">
+            <Button variant="outline">
+              <Download className="h-4 w-4 mr-2" />
+              Export
+            </Button>
+            <Button onClick={() => setShowNewProcedureModal(true)}>
+              <Plus className="h-4 w-4 mr-2" />
+              New Procedure
+            </Button>
           </div>
-        </div>
+        </StandardPageHeader>
 
-        {/* Enhanced Filters */}
-        <div className="border-b border-slate-200 bg-white/80 backdrop-blur-sm px-8 py-5">
-          <ProcedureFilters
-            searchTerm={searchTerm}
-            setSearchTerm={setSearchTerm}
-            selectedCategory={selectedCategory}
-            setSelectedCategory={setSelectedCategory}
-            showGlobalOnly={showGlobalOnly}
-            setShowGlobalOnly={setShowGlobalOnly}
-            categories={categories}
-          />
-        </div>
-
-        {/* Main Content with Enhanced Design */}
-        <div className="flex-1 flex overflow-hidden">
-          {/* Modern Sidebar */}
-          <div className="w-80 bg-white border-r border-slate-200 flex flex-col shadow-sm">
-            <div className="p-6 border-b border-slate-100 bg-gradient-to-r from-slate-50 to-white">
-              <h2 className="text-lg font-semibold text-slate-900 mb-2">My Templates</h2>
-              <div className="flex items-center justify-between">
-                <div className="text-sm text-slate-600">
-                  {procedures.length} {procedures.length === 1 ? 'template' : 'templates'}
-                </div>
-                <div className="flex items-center gap-1">
-                  <div className="w-1.5 h-1.5 bg-blue-500 rounded-full"></div>
-                  <span className="text-xs text-slate-500">Active</span>
-                </div>
-              </div>
+        <StandardPageFilters>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="flex-1">
+              <ProcedureFilters
+                searchTerm={searchTerm}
+                setSearchTerm={setSearchTerm}
+                selectedCategory={selectedCategory}
+                setSelectedCategory={setSelectedCategory}
+                showGlobalOnly={showGlobalOnly}
+                setShowGlobalOnly={setShowGlobalOnly}
+                categories={categories}
+              />
             </div>
-            
-            <div className="flex-1 overflow-y-auto">
-              {isLoading ? (
-                <div className="p-6">
-                  <div className="space-y-4">
-                    {[...Array(5)].map((_, i) => (
-                      <div key={i} className="animate-pulse">
-                        <div className="flex items-center space-x-3">
-                          <div className="w-10 h-10 bg-slate-200 rounded-lg"></div>
-                          <div className="flex-1">
-                            <div className="h-4 bg-slate-200 rounded-md w-3/4 mb-2"></div>
-                            <div className="h-3 bg-slate-200 rounded-md w-1/2"></div>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              ) : procedures.length === 0 ? (
-                <div className="p-8 text-center">
-                  <div className="text-slate-400 mb-4">
-                    <FileText className="h-16 w-16 mx-auto" />
-                  </div>
-                  <h3 className="text-slate-900 font-medium mb-2">No procedures found</h3>
-                  <p className="text-slate-600 text-sm mb-4">Get started by creating your first procedure</p>
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    className="border-dashed border-slate-300 text-slate-600 hover:bg-slate-50"
-                    onClick={() => setShowNewProcedureModal(true)}
-                  >
-                    <Plus className="h-4 w-4 mr-2" />
-                    Create procedure
-                  </Button>
-                </div>
-              ) : (
-                <div className="p-3">
-                  {procedures.map((procedure) => (
-                    <EnhancedProcedureCard
-                      key={procedure.id}
-                      procedure={procedure}
-                      isSelected={selectedProcedure?.id === procedure.id}
-                      onClick={() => setSelectedProcedure(procedure)}
-                      onEdit={handleEditProcedure}
-                      onDuplicate={handleDuplicateProcedure}
-                      onDelete={setDeleteConfirm}
-                      getCategoryColor={getCategoryColor}
-                    />
-                  ))}
-                </div>
+            <ProcedureViewToggle
+              view={viewMode}
+              onViewChange={setViewMode}
+            />
+          </div>
+        </StandardPageFilters>
+
+        <StandardPageContent>
+          {procedures.length === 0 ? (
+            <div className="text-center py-16">
+              <div className="text-gray-400 mb-6">
+                <FileText className="h-20 w-20 mx-auto" />
+              </div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-3">No procedures found</h3>
+              <p className="text-gray-600 mb-8 max-w-md mx-auto">
+                {searchTerm || selectedCategory !== 'all' || showGlobalOnly
+                  ? "No procedures match your current filters. Try adjusting your search criteria."
+                  : "Get started by creating your first procedure template."
+                }
+              </p>
+              {!searchTerm && selectedCategory === 'all' && !showGlobalOnly && (
+                <Button onClick={() => setShowNewProcedureModal(true)}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Create Your First Procedure
+                </Button>
               )}
             </div>
-          </div>
-
-          {/* Enhanced Detail Panel */}
-          <div className="flex-1 bg-gradient-to-br from-slate-50 to-white">
-            {selectedProcedure ? (
-              <div className="h-full flex flex-col">
-                {/* Enhanced Procedure Header */}
-                <div className="relative bg-gradient-to-r from-blue-600 via-blue-700 to-indigo-700 text-white overflow-hidden">
-                  <div className="absolute inset-0 bg-black/10"></div>
-                  <div className="absolute top-0 right-0 w-96 h-96 bg-white/5 rounded-full transform translate-x-32 -translate-y-32"></div>
-                  <div className="absolute bottom-0 left-0 w-64 h-64 bg-white/5 rounded-full transform -translate-x-16 translate-y-16"></div>
-                  
-                  <div className="relative p-8">
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1 max-w-4xl">
-                        <div className="flex items-center gap-3 mb-3">
-                          <div className="w-3 h-3 bg-green-400 rounded-full shadow-lg"></div>
-                          <span className="text-blue-100 text-sm font-medium">Active Procedure</span>
-                        </div>
-                        
-                        <h1 className="text-3xl font-bold mb-3 leading-tight">{selectedProcedure.title}</h1>
-                        
-                        {selectedProcedure.description && (
-                          <p className="text-blue-100 text-lg mb-6 leading-relaxed max-w-3xl">
-                            {selectedProcedure.description}
-                          </p>
-                        )}
-                        
-                        <div className="flex items-center gap-8 text-sm">
-                          <div className="flex items-center gap-2">
-                            <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
-                              <FileText className="h-4 w-4" />
-                            </div>
-                            <div>
-                              <div className="text-white font-medium">{selectedProcedure.fields?.length || 0}</div>
-                              <div className="text-blue-200 text-xs">Fields</div>
-                            </div>
-                          </div>
-                          
-                          <div className="flex items-center gap-2">
-                            <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
-                              <span className="text-xs font-semibold">{selectedProcedure.category?.charAt(0) || 'P'}</span>
-                            </div>
-                            <div>
-                              <div className="text-white font-medium">{selectedProcedure.category}</div>
-                              <div className="text-blue-200 text-xs">Category</div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                      
-                      <div className="flex items-center gap-3">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleEditProcedure(selectedProcedure)}
-                          className="bg-white/10 border-white/30 text-white hover:bg-white/20 backdrop-blur-sm"
-                        >
-                          Edit
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Enhanced Tabs */}
-                <div className="border-b border-slate-200 bg-white shadow-sm">
-                  <div className="px-8">
-                    <nav className="-mb-px flex space-x-8">
-                      <button className="border-b-2 border-blue-600 py-4 px-1 text-sm font-semibold text-blue-600 transition-colors">
-                        Fields & Structure
-                      </button>
-                      <button className="border-b-2 border-transparent py-4 px-1 text-sm font-medium text-slate-500 hover:text-slate-700 hover:border-slate-300 transition-colors">
-                        Settings & Details
-                      </button>
-                      <button className="border-b-2 border-transparent py-4 px-1 text-sm font-medium text-slate-500 hover:text-slate-700 hover:border-slate-300 transition-colors">
-                        Execution History
-                      </button>
-                    </nav>
-                  </div>
-                </div>
-
-                {/* Enhanced Fields Content */}
-                <div className="flex-1 overflow-y-auto p-8 bg-gradient-to-b from-white to-slate-50/50">
-                  <div className="space-y-6 max-w-5xl">
-                    {selectedProcedure.fields?.map((field, index) => (
-                      <div key={field.id || index} className="bg-white rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden">
-                        <div className="p-6">
-                          <div className="flex items-start justify-between mb-4">
-                            <div className="flex-1">
-                              <div className="flex items-center gap-3 mb-2">
-                                <span className="text-xs font-semibold text-slate-500 bg-slate-100 px-2 py-1 rounded-md">
-                                  #{index + 1}
-                                </span>
-                                <h3 className="text-lg font-semibold text-slate-900">
-                                  {field.label}
-                                  {field.is_required && <span className="text-red-500 ml-2">*</span>}
-                                </h3>
-                              </div>
-                              {field.options?.helpText && (
-                                <p className="text-slate-600 text-sm leading-relaxed">{field.options.helpText}</p>
-                              )}
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <span className="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-semibold bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-700 border border-blue-200">
-                                {field.field_type}
-                              </span>
-                            </div>
-                          </div>
-
-                          {/* Enhanced Field Preview */}
-                          <div className="bg-gradient-to-br from-slate-50 to-slate-100/50 rounded-lg p-4 border border-slate-200">
-                            {field.field_type === 'text' && (
-                              <input 
-                                type="text" 
-                                placeholder="Text input preview"
-                                className="w-full px-3 py-2 border border-gray-300 rounded-md bg-white"
-                                disabled
-                              />
-                            )}
-                            {field.field_type === 'checkbox' && (
-                              <label className="flex items-center">
-                                <input type="checkbox" className="rounded border-gray-300 mr-2" disabled />
-                                <span className="text-sm text-gray-700">Checkbox option</span>
-                              </label>
-                            )}
-                            {field.field_type === 'select' && (
-                              <select className="w-full px-3 py-2 border border-gray-300 rounded-md bg-white" disabled>
-                                <option>Select an option...</option>
-                                {field.options?.choices?.map((choice, i) => (
-                                  <option key={i}>{choice}</option>
-                                ))}
-                              </select>
-                            )}
-                            {field.field_type === 'multiselect' && (
-                              <div className="space-y-2">
-                                {(field.options?.choices || ['Option 1', 'Option 2']).slice(0, 3).map((choice, i) => (
-                                  <label key={i} className="flex items-center">
-                                    <input type="checkbox" className="rounded border-gray-300 mr-2" disabled />
-                                    <span className="text-sm text-gray-700">{choice}</span>
-                                  </label>
-                                ))}
-                              </div>
-                            )}
-                            {field.field_type === 'number' && (
-                              <input 
-                                type="number" 
-                                placeholder="0"
-                                className="w-full px-3 py-2 border border-gray-300 rounded-md bg-white"
-                                disabled
-                              />
-                            )}
-                            {field.field_type === 'date' && (
-                              <input 
-                                type="date"
-                                className="w-full px-3 py-2 border border-gray-300 rounded-md bg-white"
-                                disabled
-                              />
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-
-                    {(!selectedProcedure.fields || selectedProcedure.fields.length === 0) && (
-                      <div className="text-center py-16 bg-white rounded-xl border-2 border-dashed border-slate-300">
-                        <div className="text-slate-400 mb-6">
-                          <FileText className="h-20 w-20 mx-auto" />
-                        </div>
-                        <h3 className="text-xl font-semibold text-slate-900 mb-2">No fields configured</h3>
-                        <p className="text-slate-600 mb-8 max-w-md mx-auto">
-                          This procedure doesn't have any fields yet. Add fields to create an interactive checklist.
-                        </p>
-                        <Button 
-                          onClick={() => handleEditProcedure(selectedProcedure)}
-                          className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800"
-                        >
-                          <Plus className="h-4 w-4 mr-2" />
-                          Add Fields
-                        </Button>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-            ) : (
-              <div className="h-full flex items-center justify-center">
-                <div className="text-center max-w-md">
-                  <div className="text-slate-400 mb-6">
-                    <FileText className="h-20 w-20 mx-auto" />
-                  </div>
-                  <h3 className="text-xl font-semibold text-slate-900 mb-3">Select a procedure</h3>
-                  <p className="text-slate-600 mb-6">
-                    Choose a procedure from the sidebar to view its details and manage its configuration
-                  </p>
-                  <Button 
-                    variant="outline" 
-                    onClick={() => setShowNewProcedureModal(true)}
-                    className="border-dashed border-slate-300"
-                  >
-                    <Plus className="h-4 w-4 mr-2" />
-                    Create new procedure
-                  </Button>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
+          ) : viewMode === 'card' ? (
+            <ProcedureCardView
+              procedures={procedures}
+              onExecute={handleExecuteProcedure}
+              onEdit={handleEditProcedure}
+              onDuplicate={handleDuplicateProcedure}
+              onDelete={setDeleteConfirm}
+              onOpenInNewWindow={handleOpenInNewWindow}
+              canExecuteProcedure={canExecuteProcedure}
+              getCategoryColor={getCategoryColor}
+              executingProcedures={executingProcedures}
+            />
+          ) : (
+            <ProcedureListView
+              procedures={procedures}
+              onExecute={handleExecuteProcedure}
+              onEdit={handleEditProcedure}
+              onDuplicate={handleDuplicateProcedure}
+              onDelete={setDeleteConfirm}
+              onOpenInNewWindow={handleOpenInNewWindow}
+              canExecuteProcedure={canExecuteProcedure}
+              getCategoryColor={getCategoryColor}
+              executingProcedures={executingProcedures}
+            />
+          )}
+        </StandardPageContent>
+      </StandardPageLayout>
 
       {/* New Procedure Creation Modal */}
       <Dialog open={showNewProcedureModal} onOpenChange={setShowNewProcedureModal}>
         <DialogContent className="max-w-2xl">
           <div className="text-center py-8">
             <h2 className="text-2xl font-bold text-gray-900 mb-2">
-              Create a New Procedure Template
+              Create a New Procedure
             </h2>
             <p className="text-gray-600 mb-8">
               Choose how you'd like to start building your procedure
@@ -547,7 +293,7 @@ const Procedures = () => {
                     <Plus className="h-6 w-6 text-blue-600" />
                   </div>
                   <h3 className="font-medium text-gray-900 mb-2">Blank Procedure</h3>
-                  <p className="text-sm text-gray-600">Start Procedure From Scratch</p>
+                  <p className="text-sm text-gray-600">Start from scratch</p>
                 </CardContent>
               </Card>
               
@@ -562,19 +308,18 @@ const Procedures = () => {
                   <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
                     <Sparkles className="h-6 w-6 text-purple-600" />
                   </div>
-                  <h3 className="font-medium text-gray-900 mb-2">Use a Template</h3>
-                  <p className="text-sm text-gray-600">Find one in Global Procedure Library</p>
+                  <h3 className="font-medium text-gray-900 mb-2">Use Template</h3>
+                  <p className="text-sm text-gray-600">Choose from library</p>
                 </CardContent>
               </Card>
               
-              <Card className="cursor-pointer hover:shadow-lg transition-all border-2 hover:border-green-300 opacity-75">
+              <Card className="cursor-not-allowed opacity-50 border-2 border-gray-200">
                 <CardContent className="p-6 text-center">
-                  <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Upload className="h-6 w-6 text-green-600" />
+                  <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Upload className="h-6 w-6 text-gray-400" />
                   </div>
-                  <h3 className="font-medium text-gray-900 mb-2">Import Forms</h3>
-                  <p className="text-sm text-gray-600">Send us your Template to Digitize</p>
-                  <p className="text-xs text-gray-400 mt-2">Coming Soon</p>
+                  <h3 className="font-medium text-gray-500 mb-2">Import</h3>
+                  <p className="text-sm text-gray-400">Coming soon</p>
                 </CardContent>
               </Card>
             </div>
@@ -600,25 +345,7 @@ const Procedures = () => {
         isLoading={createProcedure.isPending}
       />
 
-      {/* Edit Dialog */}
-      <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
-        <DialogContent className="max-w-[100vw] max-h-[100vh] w-full h-full p-0 gap-0">
-          {selectedProcedure && (
-            <UnifiedProcedureBuilder
-              initialData={selectedProcedure}
-              onSave={handleUpdateProcedure}
-              onCancel={() => {
-                setShowEditDialog(false);
-                setSelectedProcedure(null);
-              }}
-              isLoading={updateProcedure.isPending}
-              mode="edit"
-            />
-          )}
-        </DialogContent>
-      </Dialog>
-
-      {/* Enhanced Execution Dialog */}
+      {/* Execution Dialog */}
       <ExecutionDialog
         open={showExecutionDialog}
         onOpenChange={setShowExecutionDialog}
