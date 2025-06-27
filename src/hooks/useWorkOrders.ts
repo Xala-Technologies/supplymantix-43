@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { databaseApi } from "@/lib/database";
 import type { Database } from "@/integrations/supabase/types";
 import { toast } from "sonner";
+import { normalizeWorkOrderData } from "@/features/workOrders/utils";
 
 type Tables = Database["public"]["Tables"];
 
@@ -13,16 +14,27 @@ export const useWorkOrders = () => {
       try {
         console.log('useWorkOrders - Starting query...');
         const result = await databaseApi.getWorkOrders();
-        console.log('useWorkOrders - Query successful, got', result?.length || 0, 'work orders');
-        return result;
+        console.log('useWorkOrders - Raw result:', result);
+        
+        if (!result || !Array.isArray(result)) {
+          console.warn('useWorkOrders - Invalid result format:', result);
+          return [];
+        }
+        
+        const normalizedResult = result.map(normalizeWorkOrderData);
+        console.log('useWorkOrders - Normalized result:', normalizedResult);
+        
+        return normalizedResult;
       } catch (error) {
         console.error('useWorkOrders - Query failed:', error);
         toast.error('Failed to fetch work orders: ' + (error instanceof Error ? error.message : 'Unknown error'));
-        throw error;
+        return []; // Return empty array instead of throwing
       }
     },
     retry: 1,
     staleTime: 30000, // 30 seconds
+    refetchOnWindowFocus: true,
+    refetchOnMount: true,
   });
 };
 

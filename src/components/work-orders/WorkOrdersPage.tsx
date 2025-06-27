@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { WorkOrdersTopHeader } from "./WorkOrdersTopHeader";
@@ -28,17 +27,34 @@ export const WorkOrdersPage = () => {
     category: 'all'
   });
 
-  const { data: rawWorkOrders = [], refetch } = useWorkOrders();
+  const { data: rawWorkOrders = [], refetch, isLoading, error } = useWorkOrders();
   const createWorkOrderMutation = useCreateWorkOrder();
   const updateWorkOrderMutation = useUpdateWorkOrder();
   const queryClient = useQueryClient();
 
-  // Transform raw work orders to proper WorkOrder type
-  const workOrders: WorkOrder[] = rawWorkOrders.map(normalizeWorkOrderData);
+  console.log('WorkOrdersPage - Raw data:', rawWorkOrders);
+  console.log('WorkOrdersPage - Loading:', isLoading);
+  console.log('WorkOrdersPage - Error:', error);
+
+  // Transform raw work orders to proper WorkOrder type - with safety checks
+  const workOrders: WorkOrder[] = Array.isArray(rawWorkOrders) 
+    ? rawWorkOrders.filter(wo => wo && wo.id).map(wo => {
+        try {
+          return typeof wo.id === 'string' ? wo : normalizeWorkOrderData(wo);
+        } catch (error) {
+          console.error('Error processing work order:', error, wo);
+          return null;
+        }
+      }).filter(Boolean) as WorkOrder[]
+    : [];
+
+  console.log('WorkOrdersPage - Processed work orders:', workOrders);
 
   // Apply filters to work orders
   const filteredWorkOrders = workOrders.filter(wo => {
-    if (filters.search && !wo.title.toLowerCase().includes(filters.search.toLowerCase())) {
+    if (!wo) return false;
+    
+    if (filters.search && !wo.title?.toLowerCase().includes(filters.search.toLowerCase())) {
       return false;
     }
     if (filters.status !== 'all' && wo.status !== filters.status) {
@@ -53,21 +69,27 @@ export const WorkOrdersPage = () => {
     return true;
   });
 
+  console.log('WorkOrdersPage - Filtered work orders:', filteredWorkOrders);
+
   // Auto-select first work order when filtered list changes (only for list view)
   useEffect(() => {
     if (calendarViewMode === 'list' && filteredWorkOrders.length > 0) {
-      const firstWorkOrderId = filteredWorkOrders[0].id;
-      if (!selectedWorkOrder || !filteredWorkOrders.find(wo => wo.id === selectedWorkOrder)) {
+      const firstWorkOrderId = filteredWorkOrders[0]?.id;
+      if (firstWorkOrderId && (!selectedWorkOrder || !filteredWorkOrders.find(wo => wo.id === selectedWorkOrder))) {
         setSelectedWorkOrder(firstWorkOrderId);
-        setViewMode('detail');
+        if (viewMode === 'list') {
+          setViewMode('detail');
+        }
       }
     } else if (filteredWorkOrders.length === 0) {
       setSelectedWorkOrder(null);
-      setViewMode('list');
+      if (viewMode === 'detail') {
+        setViewMode('list');
+      }
     }
-  }, [filteredWorkOrders, selectedWorkOrder, calendarViewMode]);
+  }, [filteredWorkOrders, selectedWorkOrder, calendarViewMode, viewMode]);
 
-  const selectedWorkOrderData = workOrders.find(wo => wo.id === selectedWorkOrder);
+  const selectedWorkOrderData = workOrders.find(wo => wo?.id === selectedWorkOrder);
 
   const handleSelectWorkOrder = (id: string) => {
     const workOrder = workOrders.find(wo => wo.id === id);
@@ -193,6 +215,43 @@ export const WorkOrdersPage = () => {
     setEditingWorkOrder(null);
     setIsCreating(false);
   };
+
+  // Show loading state
+  if (isLoading) {
+    return (
+      <StandardPageLayout>
+        <div className="flex items-center justify-center h-64">
+          <div className="text-center">
+            <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+            <p className="text-gray-600">Loading work orders...</p>
+          </div>
+        </div>
+      </StandardPageLayout>
+    );
+  }
+
+  // Show error state
+  if (error) {
+    return (
+      <StandardPageLayout>
+        <div className="flex items-center justify-center h-64">
+          <div className="text-center">
+            <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <span className="text-red-600 text-2xl">⚠️</span>
+            </div>
+            <h3 className="text-lg font-medium text-gray-900 mb-2">Failed to load work orders</h3>
+            <p className="text-gray-600 mb-4">There was an error loading your work orders.</p>
+            <button 
+              onClick={() => refetch()}
+              className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+            >
+              Try Again
+            </button>
+          </div>
+        </div>
+      </StandardPageLayout>
+    );
+  }
 
   return (
     <StandardPageLayout>

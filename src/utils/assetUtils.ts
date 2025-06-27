@@ -1,12 +1,14 @@
 
-export const getAssetName = (asset: string | { id: string; name: string; status?: string } | undefined): string => {
-  if (!asset) return 'No asset assigned';
+export const getAssetName = (asset: any): string => {
+  if (!asset) return 'No Asset';
   if (typeof asset === 'string') return asset;
-  return asset.name;
+  if (typeof asset === 'object' && asset.name) return asset.name;
+  return 'Unknown Asset';
 };
 
-export const getLocationName = (location: string | { id: string; name: string } | undefined): string => {
-  if (!location) return 'No location';
+export const getLocationName = (location: any): string => {
+  if (!location) return 'No Location';
   if (typeof location === 'string') return location;
-  return location.name;
+  if (typeof location === 'object' && location.name) return location.name;
+  return 'Unknown Location';
 };
