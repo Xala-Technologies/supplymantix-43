@@ -3,7 +3,7 @@ export interface WorkOrder {
   id: string;
   title: string;
   description?: string;
-  status: 'open' | 'in_progress' | 'on_hold' | 'completed' | 'cancelled';
+  status: 'draft' | 'open' | 'in_progress' | 'on_hold' | 'completed' | 'cancelled';
   priority: 'low' | 'medium' | 'high' | 'urgent';
   category: string;
   assignedTo: string[];
@@ -22,19 +22,25 @@ export interface WorkOrder {
   parts_used?: any[];
   tags?: string[];
   asset?: {
+    id: string;
     name: string;
     location?: string;
+    status?: string;
   } | null;
   location?: {
+    id: string;
     name: string;
   } | null;
   requester_id?: string | null;
   tenant_id?: string;
   asset_id?: string | null;
   location_id?: string | null;
+  start_date?: string | null;
+  template_id?: string | null;
+  recurrence_rules?: any;
 }
 
-export type WorkOrderStatus = 'open' | 'in_progress' | 'on_hold' | 'completed' | 'cancelled';
+export type WorkOrderStatus = 'draft' | 'open' | 'in_progress' | 'on_hold' | 'completed' | 'cancelled';
 
 export interface WorkOrderFilters {
   search: string;
