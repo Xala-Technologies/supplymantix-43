@@ -1,12 +1,23 @@
 
 import { Button } from "@/components/ui/button";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { LanguageSelector } from "@/components/LanguageSelector";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Header = () => {
   const { t } = useLanguage();
+  const { user } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLoginClick = () => {
+    navigate("/login");
+  };
+
+  const handleGetStartedClick = () => {
+    navigate("/signup");
+  };
 
   return (
     <motion.header 
@@ -47,20 +58,35 @@ const Header = () => {
             transition={{ duration: 0.6, delay: 0.2 }}
           >
             <LanguageSelector />
-            <Link to="/login">
-              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                <Button variant="ghost" className="text-slate-600 hover:text-slate-900 font-medium">
-                  {t('auth.login')}
-                </Button>
-              </motion.div>
-            </Link>
-            <Link to="/signup">
-              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                <Button className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg hover:shadow-xl transition-all duration-200">
-                  {t('auth.getStarted')}
-                </Button>
-              </motion.div>
-            </Link>
+            {user ? (
+              <Link to="/dashboard">
+                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                  <Button className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg hover:shadow-xl transition-all duration-200">
+                    Dashboard
+                  </Button>
+                </motion.div>
+              </Link>
+            ) : (
+              <>
+                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                  <Button 
+                    variant="ghost" 
+                    className="text-slate-600 hover:text-slate-900 font-medium"
+                    onClick={handleLoginClick}
+                  >
+                    {t('auth.login')}
+                  </Button>
+                </motion.div>
+                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                  <Button 
+                    className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg hover:shadow-xl transition-all duration-200"
+                    onClick={handleGetStartedClick}
+                  >
+                    {t('auth.getStarted')}
+                  </Button>
+                </motion.div>
+              </>
+            )}
           </motion.div>
         </div>
       </div>
