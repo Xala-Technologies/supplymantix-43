@@ -1,11 +1,11 @@
 
 import { DashboardLayout } from "@/components/Layout/DashboardLayout";
-import { WorkOrdersPage } from "@/components/work-orders/WorkOrdersPage";
+import { WorkOrdersPageRefactored } from "@/components/work-orders/WorkOrdersPageRefactored";
 
 export default function WorkOrders() {
   return (
     <DashboardLayout>
-      <WorkOrdersPage />
+      <WorkOrdersPageRefactored />
     </DashboardLayout>
   );
 }
