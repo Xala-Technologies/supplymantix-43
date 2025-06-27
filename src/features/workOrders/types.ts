@@ -41,11 +41,25 @@ export interface WorkOrder {
 }
 
 export type WorkOrderStatus = 'draft' | 'open' | 'in_progress' | 'on_hold' | 'completed' | 'cancelled';
+export type PriorityLevel = 'low' | 'medium' | 'high' | 'urgent';
+export type WorkOrderCategory = 'maintenance' | 'repair' | 'inspection' | 'installation' | 'emergency' | 'calibration';
+
+export interface WorkOrderAsset {
+  id: string;
+  name: string;
+  location?: string;
+  status?: string;
+}
+
+export interface WorkOrderLocation {
+  id: string;
+  name: string;
+}
 
 export interface WorkOrderFilters {
   search: string;
   status: 'all' | WorkOrderStatus;
-  priority: 'all' | 'low' | 'medium' | 'high' | 'urgent';
+  priority: 'all' | PriorityLevel;
   assignedTo: 'all' | 'me' | 'unassigned';
   category: 'all' | string;
 }
