@@ -14,6 +14,8 @@ import { WorkOrdersCardView } from './WorkOrdersCardView';
 import { WorkOrdersListView } from './WorkOrdersListView';
 import { WorkOrderCalendarView } from './WorkOrderCalendarView';
 import { WorkOrdersContent } from './WorkOrdersContent';
+import { EnhancedWorkOrderDetail } from './EnhancedWorkOrderDetail';
+import { EnhancedWorkOrderForm } from './EnhancedWorkOrderForm';
 import { NewWorkOrderDialog } from './NewWorkOrderDialog';
 import { useWorkOrdersPage } from '@/hooks/useWorkOrdersPage';
 import { useWorkOrdersIntegration } from '@/hooks/useWorkOrdersIntegration';
@@ -146,39 +148,38 @@ export const WorkOrdersPageRefactored = () => {
     );
   }
 
-  // If list/detail/form view is selected, show the original content layout
-  if (contentViewMode === 'detail' || contentViewMode === 'form') {
+  // If detail view is selected, show the work order detail with procedures
+  if (contentViewMode === 'detail' && selectedWorkOrderData) {
     return (
       <Layout>
         <PageContainer>
           <PageHeader
-            title="Work Orders"
-            description={`${filteredWorkOrders.length} ${filteredWorkOrders.length === 1 ? 'work order' : 'work orders'}`}
+            title="Work Order Details"
+            description={selectedWorkOrderData.title}
             icon={ClipboardList}
-            actions={viewToggleActions}
+            actions={
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  onClick={setViewModeToList}
+                  className="gap-2"
+                >
+                  ← Back to List
+                </Button>
+                <Button
+                  onClick={handleEditWorkOrder}
+                  className="gap-2"
+                >
+                  Edit Work Order
+                </Button>
+              </div>
+            }
           />
-          
-          <FilterBar>
-            <WorkOrdersFilters
-              filters={filters}
-              onFiltersChange={setFilters}
-              workOrders={workOrders}
-            />
-          </FilterBar>
 
           <PageContent>
-            <WorkOrdersContent
-              filteredWorkOrders={filteredWorkOrders}
-              selectedWorkOrder={selectedWorkOrder}
-              viewMode={contentViewMode}
-              selectedWorkOrderData={selectedWorkOrderData}
-              editingWorkOrder={editingWorkOrder}
-              displayMode={viewMode} // Pass the display mode
-              onSelectWorkOrder={handleSelectWorkOrder}
-              onEditWorkOrder={handleEditWorkOrder}
-              onFormSubmit={handleFormSubmit}
-              onFormCancel={handleFormCancel}
-              onSetViewModeToList={setViewModeToList}
+            <EnhancedWorkOrderDetail
+              workOrder={selectedWorkOrderData}
+              onEdit={handleEditWorkOrder}
             />
           </PageContent>
 
@@ -192,7 +193,45 @@ export const WorkOrdersPageRefactored = () => {
     );
   }
 
-  // Card/List view (default) - Now properly shows card or list view
+  // If form view is selected, show the enhanced work order form
+  if (contentViewMode === 'form') {
+    return (
+      <Layout>
+        <PageContainer>
+          <PageHeader
+            title={editingWorkOrder ? 'Edit Work Order' : 'Create Work Order'}
+            description={editingWorkOrder ? editingWorkOrder.title : 'Create a new work order'}
+            icon={ClipboardList}
+            actions={
+              <Button
+                variant="outline"
+                onClick={handleFormCancel}
+                className="gap-2"
+              >
+                ← Cancel
+              </Button>
+            }
+          />
+
+          <PageContent>
+            <EnhancedWorkOrderForm
+              workOrder={editingWorkOrder}
+              onSubmit={handleFormSubmit}
+              onCancel={handleFormCancel}
+            />
+          </PageContent>
+
+          <NewWorkOrderDialog
+            open={showNewDialog}
+            onOpenChange={setShowNewDialog}
+            onSuccess={handleDialogSuccess}
+          />
+        </PageContainer>
+      </Layout>
+    );
+  }
+
+  // Card/List view (default) - Show work orders in card or list format
   return (
     <Layout>
       <PageContainer>
