@@ -191,7 +191,7 @@ export const WorkOrdersPageRefactored = () => {
     );
   }
 
-  // Card/List view (default)
+  // Card/List view (default) - This is the main fix
   return (
     <Layout>
       <PageContainer>

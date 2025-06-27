@@ -19,9 +19,9 @@ interface WorkOrdersContentProps {
 
 export const WorkOrdersContent = (props: WorkOrdersContentProps) => {
   return (
-    <div className="h-full">
+    <Card className="h-full flex flex-col overflow-hidden">
       <WorkOrdersDesktopLayout {...props} />
       <WorkOrdersMobileLayout {...props} />
-    </div>
+    </Card>
   );
 };
