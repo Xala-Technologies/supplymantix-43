@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
@@ -18,9 +17,6 @@ import {
   User,
   Tag,
   FileText,
-  Edit,
-  Copy,
-  Trash2,
   Clock,
   PlayCircle
 } from 'lucide-react';
@@ -78,7 +74,7 @@ export const ProcedureDetailDialog: React.FC<ProcedureDetailDialogProps> = ({
               value={fieldValue}
               onChange={(e) => handleFieldChange(field.id, e.target.value)}
               placeholder={field.options?.placeholder || ''}
-              className="w-full border-slate-200 focus:border-primary focus:ring-primary/20"
+              className="w-full border-slate-200 focus:border-slate-400 focus:ring-slate-200"
             />
             {field.options?.helpText && (
               <p className="text-xs text-slate-500">{field.options.helpText}</p>
@@ -97,7 +93,7 @@ export const ProcedureDetailDialog: React.FC<ProcedureDetailDialogProps> = ({
               value={fieldValue}
               onChange={(e) => handleFieldChange(field.id, e.target.value)}
               placeholder={field.options?.placeholder || ''}
-              className="w-full min-h-[100px] border-slate-200 focus:border-primary focus:ring-primary/20"
+              className="w-full min-h-[100px] border-slate-200 focus:border-slate-400 focus:ring-slate-200"
             />
           </div>
         );
@@ -110,7 +106,7 @@ export const ProcedureDetailDialog: React.FC<ProcedureDetailDialogProps> = ({
                 id={field.id}
                 checked={fieldValue === true}
                 onCheckedChange={(checked) => handleFieldChange(field.id, checked)}
-                className="border-slate-300 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
+                className="border-slate-300 data-[state=checked]:bg-slate-800 data-[state=checked]:border-slate-800"
               />
               <label htmlFor={field.id} className="text-sm font-medium text-slate-700">
                 {field.label || field.title}
@@ -142,7 +138,7 @@ export const ProcedureDetailDialog: React.FC<ProcedureDetailDialogProps> = ({
                       value={choice}
                       checked={fieldValue === choice}
                       onChange={(e) => handleFieldChange(field.id, e.target.value)}
-                      className="w-4 h-4 text-primary border-slate-300 focus:ring-primary/20"
+                      className="w-4 h-4 text-slate-800 border-slate-300 focus:ring-slate-200"
                     />
                     <label htmlFor={`${field.id}-${choiceIndex}`} className="text-sm text-slate-700">
                       {choice}
@@ -152,7 +148,7 @@ export const ProcedureDetailDialog: React.FC<ProcedureDetailDialogProps> = ({
               </div>
             ) : (
               <Select value={fieldValue} onValueChange={(value) => handleFieldChange(field.id, value)}>
-                <SelectTrigger className="border-slate-200 focus:border-primary focus:ring-primary/20">
+                <SelectTrigger className="border-slate-200 focus:border-slate-400 focus:ring-slate-200">
                   <SelectValue placeholder="Select an option" />
                 </SelectTrigger>
                 <SelectContent>
@@ -181,7 +177,7 @@ export const ProcedureDetailDialog: React.FC<ProcedureDetailDialogProps> = ({
               min={field.options?.minValue}
               max={field.options?.maxValue}
               step={field.options?.step || 1}
-              className="w-full border-slate-200 focus:border-primary focus:ring-primary/20"
+              className="w-full border-slate-200 focus:border-slate-400 focus:ring-slate-200"
             />
           </div>
         );
@@ -197,7 +193,7 @@ export const ProcedureDetailDialog: React.FC<ProcedureDetailDialogProps> = ({
               type="date"
               value={fieldValue}
               onChange={(e) => handleFieldChange(field.id, e.target.value)}
-              className="w-full border-slate-200 focus:border-primary focus:ring-primary/20"
+              className="w-full border-slate-200 focus:border-slate-400 focus:ring-slate-200"
             />
           </div>
         );
@@ -239,7 +235,7 @@ export const ProcedureDetailDialog: React.FC<ProcedureDetailDialogProps> = ({
             <Input
               value={fieldValue}
               onChange={(e) => handleFieldChange(field.id, e.target.value)}
-              className="w-full border-slate-200 focus:border-primary focus:ring-primary/20"
+              className="w-full border-slate-200 focus:border-slate-400 focus:ring-slate-200"
             />
           </div>
         );
@@ -249,22 +245,22 @@ export const ProcedureDetailDialog: React.FC<ProcedureDetailDialogProps> = ({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-5xl max-h-[90vh] overflow-hidden flex flex-col bg-white">
-        <DialogHeader className="flex-shrink-0 bg-primary text-white p-6 -m-6 mb-0 rounded-t-xl">
+        <DialogHeader className="flex-shrink-0 bg-white border-b border-slate-200 p-6 -m-6 mb-0">
           <div className="flex items-start justify-between">
             <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center">
-                <PlayCircle className="h-6 w-6 text-white" />
+              <div className="w-12 h-12 bg-slate-100 rounded-lg flex items-center justify-center">
+                <PlayCircle className="h-6 w-6 text-slate-700" />
               </div>
               <div>
-                <DialogTitle className="text-2xl font-semibold text-white mb-2">
+                <DialogTitle className="text-2xl font-semibold text-slate-900 mb-2">
                   {procedure.title}
                 </DialogTitle>
                 <div className="flex items-center gap-3">
-                  <Badge className="bg-white/20 text-white border-white/30 hover:bg-white/30">
+                  <Badge className="bg-slate-100 text-slate-700 border-slate-200 hover:bg-slate-200">
                     {procedure.category || 'Other'}
                   </Badge>
                   {procedure.is_global && (
-                    <Badge className="bg-white/20 text-white border-white/30 hover:bg-white/30">
+                    <Badge className="bg-slate-100 text-slate-700 border-slate-200 hover:bg-slate-200">
                       <Globe className="h-3 w-3 mr-1" />
                       Global
                     </Badge>
@@ -273,37 +269,28 @@ export const ProcedureDetailDialog: React.FC<ProcedureDetailDialogProps> = ({
               </div>
             </div>
             <div className="flex gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => onEdit(procedure)}
-                className="bg-white/10 border-white/30 text-white hover:bg-white/20 hover:text-white"
-              >
-                <Edit className="h-4 w-4 mr-2" />
-                Edit
-              </Button>
             </div>
           </div>
         </DialogHeader>
 
         <div className="flex-1 overflow-hidden">
           <Tabs defaultValue="fields" className="h-full flex flex-col">
-            <TabsList className="grid w-full grid-cols-3 bg-slate-100 p-1 m-6 mb-0 rounded-lg">
+            <TabsList className="grid w-full grid-cols-3 bg-slate-50 p-1 m-6 mb-0 rounded-lg">
               <TabsTrigger 
                 value="fields" 
-                className="data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm"
+                className="data-[state=active]:bg-white data-[state=active]:text-slate-900 data-[state=active]:shadow-sm"
               >
                 Fields
               </TabsTrigger>
               <TabsTrigger 
                 value="details" 
-                className="data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm"
+                className="data-[state=active]:bg-white data-[state=active]:text-slate-900 data-[state=active]:shadow-sm"
               >
                 Details
               </TabsTrigger>
               <TabsTrigger 
                 value="history" 
-                className="data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm"
+                className="data-[state=active]:bg-white data-[state=active]:text-slate-900 data-[state=active]:shadow-sm"
               >
                 History
               </TabsTrigger>
@@ -314,16 +301,18 @@ export const ProcedureDetailDialog: React.FC<ProcedureDetailDialogProps> = ({
                 {procedure.fields && procedure.fields.length > 0 ? (
                   <div className="space-y-6">
                     {procedure.fields.map((field: any, index: number) => (
-                      <Card key={field.id || index} className="border-slate-200 shadow-sm">
-                        <CardContent className="p-4">
+                      <Card key={field.id || index} className="border-slate-200 shadow-sm hover:shadow-md transition-shadow">
+                        <CardContent className="p-6">
                           {renderField(field, index)}
                         </CardContent>
                       </Card>
                     ))}
                   </div>
                 ) : (
-                  <div className="text-center py-12">
-                    <FileText className="h-12 w-12 text-slate-400 mx-auto mb-4" />
+                  <div className="text-center py-16">
+                    <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <FileText className="h-8 w-8 text-slate-400" />
+                    </div>
                     <h3 className="text-lg font-medium text-slate-900 mb-2">No Fields Configured</h3>
                     <p className="text-slate-600">This procedure doesn't have any fields set up yet.</p>
                   </div>
@@ -349,27 +338,33 @@ export const ProcedureDetailDialog: React.FC<ProcedureDetailDialogProps> = ({
                 {/* Quick Stats */}
                 <div className="grid grid-cols-3 gap-4">
                   <Card className="border-slate-200 shadow-sm">
-                    <CardContent className="p-4 text-center">
-                      <CheckCircle className="h-8 w-8 text-primary mx-auto mb-2" />
-                      <div className="text-2xl font-semibold text-slate-900">
+                    <CardContent className="p-6 text-center">
+                      <div className="w-12 h-12 bg-slate-100 rounded-lg flex items-center justify-center mx-auto mb-3">
+                        <CheckCircle className="h-6 w-6 text-slate-600" />
+                      </div>
+                      <div className="text-2xl font-semibold text-slate-900 mb-1">
                         {procedure.fields?.length || 0}
                       </div>
                       <div className="text-sm text-slate-600">Steps</div>
                     </CardContent>
                   </Card>
                   <Card className="border-slate-200 shadow-sm">
-                    <CardContent className="p-4 text-center">
-                      <Activity className="h-8 w-8 text-emerald-600 mx-auto mb-2" />
-                      <div className="text-2xl font-semibold text-slate-900">
+                    <CardContent className="p-6 text-center">
+                      <div className="w-12 h-12 bg-slate-100 rounded-lg flex items-center justify-center mx-auto mb-3">
+                        <Activity className="h-6 w-6 text-slate-600" />
+                      </div>
+                      <div className="text-2xl font-semibold text-slate-900 mb-1">
                         {procedure.executions_count || 0}
                       </div>
                       <div className="text-sm text-slate-600">Executions</div>
                     </CardContent>
                   </Card>
                   <Card className="border-slate-200 shadow-sm">
-                    <CardContent className="p-4 text-center">
-                      <Clock className="h-8 w-8 text-amber-600 mx-auto mb-2" />
-                      <div className="text-2xl font-semibold text-slate-900">
+                    <CardContent className="p-6 text-center">
+                      <div className="w-12 h-12 bg-slate-100 rounded-lg flex items-center justify-center mx-auto mb-3">
+                        <Clock className="h-6 w-6 text-slate-600" />
+                      </div>
+                      <div className="text-2xl font-semibold text-slate-900 mb-1">
                         {procedure.estimated_duration || 30}
                       </div>
                       <div className="text-sm text-slate-600">Minutes</div>
@@ -382,25 +377,37 @@ export const ProcedureDetailDialog: React.FC<ProcedureDetailDialogProps> = ({
                   <Card className="border-slate-200 shadow-sm">
                     <CardContent className="p-6">
                       <h3 className="text-lg font-semibold mb-4 text-slate-900">Procedure Information</h3>
-                      <div className="space-y-3">
+                      <div className="space-y-4">
                         <div className="flex items-center gap-3">
-                          <User className="h-4 w-4 text-slate-500" />
-                          <span className="text-sm text-slate-600">Created by:</span>
-                          <span className="text-sm font-medium text-slate-900">{procedure.created_by || 'Unknown'}</span>
+                          <div className="w-8 h-8 bg-slate-100 rounded-lg flex items-center justify-center">
+                            <User className="h-4 w-4 text-slate-600" />
+                          </div>
+                          <div>
+                            <span className="text-sm text-slate-500">Created by</span>
+                            <p className="text-sm font-medium text-slate-900">{procedure.created_by || 'Unknown'}</p>
+                          </div>
                         </div>
                         <div className="flex items-center gap-3">
-                          <Calendar className="h-4 w-4 text-slate-500" />
-                          <span className="text-sm text-slate-600">Created:</span>
-                          <span className="text-sm font-medium text-slate-900">
-                            {procedure.created_at ? formatDate(procedure.created_at) : 'Unknown'}
-                          </span>
+                          <div className="w-8 h-8 bg-slate-100 rounded-lg flex items-center justify-center">
+                            <Calendar className="h-4 w-4 text-slate-600" />
+                          </div>
+                          <div>
+                            <span className="text-sm text-slate-500">Created</span>
+                            <p className="text-sm font-medium text-slate-900">
+                              {procedure.created_at ? formatDate(procedure.created_at) : 'Unknown'}
+                            </p>
+                          </div>
                         </div>
                         <div className="flex items-center gap-3">
-                          <Calendar className="h-4 w-4 text-slate-500" />
-                          <span className="text-sm text-slate-600">Last updated:</span>
-                          <span className="text-sm font-medium text-slate-900">
-                            {procedure.updated_at ? formatDate(procedure.updated_at) : 'Unknown'}
-                          </span>
+                          <div className="w-8 h-8 bg-slate-100 rounded-lg flex items-center justify-center">
+                            <Calendar className="h-4 w-4 text-slate-600" />
+                          </div>
+                          <div>
+                            <span className="text-sm text-slate-500">Last updated</span>
+                            <p className="text-sm font-medium text-slate-900">
+                              {procedure.updated_at ? formatDate(procedure.updated_at) : 'Unknown'}
+                            </p>
+                          </div>
                         </div>
                       </div>
                     </CardContent>
@@ -409,20 +416,30 @@ export const ProcedureDetailDialog: React.FC<ProcedureDetailDialogProps> = ({
                   <Card className="border-slate-200 shadow-sm">
                     <CardContent className="p-6">
                       <h3 className="text-lg font-semibold mb-4 text-slate-900">Configuration</h3>
-                      <div className="space-y-3">
+                      <div className="space-y-4">
                         <div className="flex items-center gap-3">
-                          <Tag className="h-4 w-4 text-slate-500" />
-                          <span className="text-sm text-slate-600">Category:</span>
-                          <Badge className={`${getCategoryColor(procedure.category || 'Other')} text-xs border`}>
-                            {procedure.category || 'Other'}
-                          </Badge>
+                          <div className="w-8 h-8 bg-slate-100 rounded-lg flex items-center justify-center">
+                            <Tag className="h-4 w-4 text-slate-600" />
+                          </div>
+                          <div>
+                            <span className="text-sm text-slate-500">Category</span>
+                            <div className="mt-1">
+                              <Badge className="bg-slate-100 text-slate-700 border-slate-200 text-xs">
+                                {procedure.category || 'Other'}
+                              </Badge>
+                            </div>
+                          </div>
                         </div>
                         <div className="flex items-center gap-3">
-                          <Globe className="h-4 w-4 text-slate-500" />
-                          <span className="text-sm text-slate-600">Scope:</span>
-                          <span className="text-sm font-medium text-slate-900">
-                            {procedure.is_global ? 'Global' : 'Local'}
-                          </span>
+                          <div className="w-8 h-8 bg-slate-100 rounded-lg flex items-center justify-center">
+                            <Globe className="h-4 w-4 text-slate-600" />
+                          </div>
+                          <div>
+                            <span className="text-sm text-slate-500">Scope</span>
+                            <p className="text-sm font-medium text-slate-900">
+                              {procedure.is_global ? 'Global' : 'Local'}
+                            </p>
+                          </div>
                         </div>
                       </div>
                     </CardContent>
@@ -433,8 +450,10 @@ export const ProcedureDetailDialog: React.FC<ProcedureDetailDialogProps> = ({
               <TabsContent value="history" className="mt-6">
                 <Card className="border-slate-200 shadow-sm">
                   <CardContent className="p-6">
-                    <div className="text-center py-12">
-                      <Activity className="h-12 w-12 text-slate-400 mx-auto mb-4" />
+                    <div className="text-center py-16">
+                      <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <Activity className="h-8 w-8 text-slate-400" />
+                      </div>
                       <h3 className="text-lg font-medium text-slate-900 mb-2">No Execution History</h3>
                       <p className="text-slate-600">This procedure hasn't been executed yet.</p>
                     </div>
