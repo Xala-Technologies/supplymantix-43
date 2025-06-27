@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Plus, LayoutGrid, List } from 'lucide-react';
+import { Plus, LayoutGrid, List, Calendar } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Layout } from '@/components/Layout/Layout';
 import { PageContainer } from '@/components/Layout/PageContainer';
@@ -12,13 +12,15 @@ import { EmptyState } from '@/components/Layout/EmptyState';
 import { WorkOrdersFilters } from './WorkOrdersFilters';
 import { WorkOrdersCardView } from './WorkOrdersCardView';
 import { WorkOrdersListView } from './WorkOrdersListView';
+import { WorkOrderCalendarView } from './WorkOrderCalendarView';
+import { WorkOrdersContent } from './WorkOrdersContent';
 import { NewWorkOrderDialog } from './NewWorkOrderDialog';
 import { useWorkOrdersPage } from '@/hooks/useWorkOrdersPage';
 import { useWorkOrdersIntegration } from '@/hooks/useWorkOrdersIntegration';
 import { ClipboardList } from 'lucide-react';
 
 export const WorkOrdersPageRefactored = () => {
-  const [viewMode, setViewMode] = useState<'card' | 'list'>('card');
+  const [viewMode, setViewMode] = useState<'card' | 'list' | 'calendar'>('card');
   const [showNewDialog, setShowNewDialog] = useState(false);
   
   const { data: workOrders = [], isLoading } = useWorkOrdersIntegration();
@@ -27,7 +29,15 @@ export const WorkOrdersPageRefactored = () => {
     setFilters,
     filteredWorkOrders,
     selectedWorkOrder,
-    handleSelectWorkOrder
+    viewMode: contentViewMode,
+    selectedWorkOrderData,
+    editingWorkOrder,
+    handleSelectWorkOrder,
+    handleCreateWorkOrder,
+    handleEditWorkOrder,
+    handleFormSubmit,
+    handleFormCancel,
+    setViewModeToList
   } = useWorkOrdersPage(workOrders);
 
   const handleNewWorkOrder = () => {
@@ -56,6 +66,14 @@ export const WorkOrdersPageRefactored = () => {
           className="h-8 px-3"
         >
           <List className="w-4 h-4" />
+        </Button>
+        <Button
+          variant={viewMode === 'calendar' ? 'default' : 'ghost'}
+          size="sm"
+          onClick={() => setViewMode('calendar')}
+          className="h-8 px-3"
+        >
+          <Calendar className="w-4 h-4" />
         </Button>
       </div>
       <Button onClick={handleNewWorkOrder} className="gap-2">
@@ -88,6 +106,92 @@ export const WorkOrdersPageRefactored = () => {
     );
   }
 
+  // If calendar view is selected, show calendar view
+  if (viewMode === 'calendar') {
+    return (
+      <Layout>
+        <PageContainer>
+          <PageHeader
+            title="Work Orders"
+            description={`${filteredWorkOrders.length} ${filteredWorkOrders.length === 1 ? 'work order' : 'work orders'}`}
+            icon={ClipboardList}
+            actions={viewToggleActions}
+          />
+          
+          <FilterBar>
+            <WorkOrdersFilters
+              filters={filters}
+              onFiltersChange={setFilters}
+              workOrders={workOrders}
+            />
+          </FilterBar>
+
+          <PageContent>
+            <SectionCard padding="none">
+              <WorkOrderCalendarView
+                workOrders={filteredWorkOrders}
+                onSelectWorkOrder={handleSelectWorkOrder}
+                selectedWorkOrderId={selectedWorkOrder}
+              />
+            </SectionCard>
+          </PageContent>
+
+          <NewWorkOrderDialog
+            open={showNewDialog}
+            onOpenChange={setShowNewDialog}
+            onSuccess={handleDialogSuccess}
+          />
+        </PageContainer>
+      </Layout>
+    );
+  }
+
+  // If list/detail/form view is selected, show the original content layout
+  if (contentViewMode === 'detail' || contentViewMode === 'form') {
+    return (
+      <Layout>
+        <PageContainer>
+          <PageHeader
+            title="Work Orders"
+            description={`${filteredWorkOrders.length} ${filteredWorkOrders.length === 1 ? 'work order' : 'work orders'}`}
+            icon={ClipboardList}
+            actions={viewToggleActions}
+          />
+          
+          <FilterBar>
+            <WorkOrdersFilters
+              filters={filters}
+              onFiltersChange={setFilters}
+              workOrders={workOrders}
+            />
+          </FilterBar>
+
+          <PageContent>
+            <WorkOrdersContent
+              filteredWorkOrders={filteredWorkOrders}
+              selectedWorkOrder={selectedWorkOrder}
+              viewMode={contentViewMode}
+              selectedWorkOrderData={selectedWorkOrderData}
+              editingWorkOrder={editingWorkOrder}
+              onSelectWorkOrder={handleSelectWorkOrder}
+              onEditWorkOrder={handleEditWorkOrder}
+              onFormSubmit={handleFormSubmit}
+              onFormCancel={handleFormCancel}
+              onSetViewModeToList={setViewModeToList}
+            />
+          </PageContent>
+
+          <NewWorkOrderDialog
+            open={showNewDialog}
+            onOpenChange={setShowNewDialog}
+            onSuccess={handleDialogSuccess}
+          />
+        </PageContainer>
+      </Layout>
+    );
+  }
+
+  // Card/List view (default)
   return (
     <Layout>
       <PageContainer>
