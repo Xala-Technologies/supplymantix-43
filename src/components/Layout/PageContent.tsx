@@ -1,16 +1,34 @@
 
+import React from "react";
+import { cn } from "@/lib/utils";
+
 interface PageContentProps {
   children: React.ReactNode;
   className?: string;
   padding?: boolean;
+  spacing?: "sm" | "md" | "lg";
 }
 
-export function PageContent({ children, className = "", padding = true }: PageContentProps) {
-  const paddingClass = padding ? "p-4" : "";
-  
+export const PageContent: React.FC<PageContentProps> = ({ 
+  children, 
+  className,
+  padding = true,
+  spacing = "md"
+}) => {
+  const spacingClasses = {
+    sm: "space-y-4",
+    md: "space-y-6",
+    lg: "space-y-8"
+  };
+
   return (
-    <div className={`flex-1 overflow-y-auto ${paddingClass} ${className}`}>
+    <main className={cn(
+      "flex-1 overflow-y-auto",
+      padding && "px-4 sm:px-6 lg:px-8 py-6",
+      spacingClasses[spacing],
+      className
+    )}>
       {children}
-    </div>
+    </main>
   );
-}
+};

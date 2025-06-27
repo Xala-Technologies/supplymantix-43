@@ -104,31 +104,31 @@
   body {
     @apply bg-background text-foreground antialiased;
     font-family: var(--font-sans);
-    font-size: 14px;
+    font-size: 16px;
     line-height: 1.6;
     font-weight: 400;
     color: rgb(51 65 85);
   }
   
   /* Standardized Typography Hierarchy (3 levels as per requirements) */
-  h1, .heading-1 {
+  h1, .heading-xl {
     @apply text-2xl sm:text-3xl font-semibold tracking-tight text-slate-900;
     line-height: 1.2;
   }
   
-  h2, .heading-2 {
+  h2, .heading-m {
     @apply text-lg sm:text-xl font-medium text-slate-900;
     line-height: 1.3;
   }
   
-  h3, h4, h5, h6, .heading-3 {
+  h3, h4, h5, h6, .heading-s {
     @apply text-base sm:text-lg font-medium text-slate-900;
     line-height: 1.4;
   }
   
   /* Body text with improved contrast */
   p, .body-text {
-    @apply text-sm text-slate-600 leading-relaxed;
+    @apply text-base text-slate-600 leading-relaxed;
   }
   
   /* Small text */
@@ -154,15 +154,15 @@
   }
   
   .page-header {
-    @apply bg-white border-b border-gray-200 px-4 sm:px-6 py-4 sm:py-6;
+    @apply bg-white border-b border-gray-200 px-4 sm:px-6 lg:px-8 py-6;
   }
   
   .page-content {
-    @apply flex-1 overflow-hidden p-4 sm:p-6;
+    @apply flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6;
   }
   
-  .page-filters {
-    @apply bg-white border-b border-gray-100 px-4 sm:px-6 py-3;
+  .filter-bar {
+    @apply bg-white border-b border-gray-100 px-4 sm:px-6 lg:px-8 py-4;
   }
   
   /* Enhanced card styles */
@@ -246,83 +246,21 @@
     @apply bg-red-50 text-red-700 border-red-200;
   }
   
-  /* Navigation improvements */
-  .nav-item {
-    @apply relative flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium;
-    @apply transition-all duration-200 hover:bg-slate-100 hover:text-slate-900;
-  }
-  
-  .nav-item.active {
-    @apply bg-primary/10 text-primary;
-  }
-  
-  /* Form elements */
-  .form-group {
-    @apply space-y-2;
-  }
-  
-  .form-label {
-    @apply text-sm font-medium text-slate-700;
-  }
-  
-  .form-description {
-    @apply text-xs text-slate-500;
-  }
-  
-  .form-error {
-    @apply text-xs text-red-600;
-  }
-  
-  /* Enhanced data tables */
-  .data-table {
-    @apply w-full border-collapse;
-  }
-  
-  .data-table-header {
-    @apply text-xs font-medium text-slate-500 uppercase tracking-wider px-3 py-3 text-left;
-  }
-  
-  .data-table-cell {
-    @apply text-sm text-slate-900 px-3 py-4 border-t border-slate-200;
-  }
-  
-  /* Metric cards */
-  .metric-card {
-    @apply bg-white rounded-xl border border-slate-200 p-6 shadow-sm;
-  }
-  
-  .metric-title {
-    @apply text-sm font-medium text-slate-600;
-  }
-  
-  .metric-value {
-    @apply text-2xl font-semibold text-slate-900 mt-2;
-  }
-  
-  .metric-change {
-    @apply text-xs font-medium mt-2;
-  }
-  
-  /* Loading states */
-  .loading-spinner {
-    @apply animate-spin rounded-full border-2 border-slate-300 border-t-primary;
-  }
-  
   /* Empty states */
   .empty-state {
-    @apply text-center py-12;
+    @apply flex flex-col items-center justify-center text-center py-16 px-6;
   }
   
   .empty-state-icon {
-    @apply mx-auto h-12 w-12 text-slate-400 mb-4;
+    @apply w-16 h-16 bg-gray-100 rounded-xl flex items-center justify-center mb-6;
   }
   
   .empty-state-title {
-    @apply text-lg font-medium text-slate-900 mb-2;
+    @apply text-lg font-semibold text-gray-900 mb-2;
   }
   
   .empty-state-description {
-    @apply text-sm text-slate-600 mb-6;
+    @apply text-base text-gray-600 mb-6 max-w-md leading-relaxed;
   }
 }
 
@@ -379,7 +317,7 @@
 /* Mobile-first responsive adjustments */
 @media (max-width: 640px) {
   .mobile-stack {
-    @apply flex-col space-y-3 space-x-0;
+    @apply flex-col space-y-4 space-x-0;
   }
   
   .mobile-full-width {
@@ -388,36 +326,6 @@
   
   .mobile-hide {
     @apply hidden;
-  }
-}
-
-/* Tablet adjustments */
-@media (min-width: 641px) and (max-width: 1024px) {
-  .tablet-two-col {
-    @apply grid-cols-2;
-  }
-}
-
-/* Desktop enhancements */
-@media (min-width: 1025px) {
-  .desktop-multi-col {
-    @apply grid-cols-3 lg:grid-cols-4;
-  }
-}
-
-/* Print styles */
-@media print {
-  .no-print {
-    display: none !important;
-  }
-  
-  body {
-    font-size: 12px;
-    line-height: 1.4;
-  }
-  
-  h1, h2, h3, h4, h5, h6 {
-    page-break-after: avoid;
   }
 }
 
