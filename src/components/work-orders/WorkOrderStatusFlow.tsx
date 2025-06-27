@@ -106,7 +106,7 @@ export const WorkOrderStatusFlow = ({ workOrder, onStatusUpdate }: WorkOrderStat
     
     // Handle special statuses
     if (currentStatus === 'cancelled' || currentStatus === 'on_hold') {
-      return mainFlow.map((status, index) => ({
+      return mainFlow.map((status) => ({
         status,
         isActive: false,
         isCurrent: false

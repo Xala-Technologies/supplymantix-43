@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -219,7 +218,7 @@ export const EnhancedWorkOrderDetail = ({ workOrder, onEdit }: EnhancedWorkOrder
                     {typeof workOrder.asset === 'object' && 'status' in workOrder.asset && workOrder.asset.status && (
                       <div className="flex justify-between">
                         <span className="font-medium">Asset Status:</span>
-                        <Badge variant="outline">{workOrder.asset.status}</Badge>
+                        <Badge variant="outline">{String(workOrder.asset.status)}</Badge>
                       </div>
                     )}
                   </div>

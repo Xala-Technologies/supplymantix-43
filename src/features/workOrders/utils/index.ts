@@ -111,6 +111,7 @@ export const normalizeWorkOrderData = (rawWorkOrder: WorkOrderRow): WorkOrder =>
       tenant_id: rawWorkOrder.tenant_id,
       asset_id: rawWorkOrder.asset_id,
       location_id: rawWorkOrder.location_id,
+      start_date: rawWorkOrder.start_date,
       template_id: rawWorkOrder.template_id,
       recurrence_rules: rawWorkOrder.recurrence_rules as any
     };
