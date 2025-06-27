@@ -2,9 +2,11 @@ import { DashboardLayout } from "@/components/Layout/DashboardLayout";
 import { StandardPageLayout, StandardPageHeader, StandardPageContent } from "@/components/Layout/StandardPageLayout";
 import { EnhancedDashboardMetrics } from "@/components/dashboard/EnhancedDashboardMetrics";
 import { useWorkOrdersIntegration } from "@/hooks/useWorkOrdersIntegration";
+import { useAuth } from "@/contexts/AuthContext";
 import { WorkOrder } from "@/types/workOrder";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { Loader2 } from "lucide-react";
 
 // Sample data for demonstration
 const sampleWorkOrders: WorkOrder[] = [
@@ -120,6 +122,7 @@ const sampleWorkOrders: WorkOrder[] = [
 
 export default function Dashboard() {
   const { data: workOrders, isLoading } = useWorkOrdersIntegration();
+  const { user, loading: authLoading } = useAuth();
   const [isCreateLoading, setIsCreateLoading] = useState(false);
   const navigate = useNavigate();
 
@@ -144,16 +147,29 @@ export default function Dashboard() {
     navigate('/dashboard/organization');
   };
 
-  console.log('Dashboard rendering, isLoading:', isLoading, 'workOrders:', workOrders);
+  console.log('Dashboard rendering, authLoading:', authLoading, 'user:', user?.email, 'isLoading:', isLoading, 'workOrders:', workOrders);
 
+  // Show loading while authentication is being checked
+  if (authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="flex items-center space-x-2">
+          <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+          <span className="text-gray-600 text-lg">Loading dashboard...</span>
+        </div>
+      </div>
+    );
+  }
+
+  // Show loading while data is being fetched
   if (isLoading) {
     return (
       <DashboardLayout>
         <StandardPageLayout>
           <div className="h-full flex items-center justify-center">
             <div className="text-center">
-              <div className="loading-spinner h-8 w-8 mx-auto mb-4"></div>
-              <p className="text-slate-600">Loading dashboard...</p>
+              <Loader2 className="h-8 w-8 mx-auto mb-4 animate-spin text-blue-600" />
+              <p className="text-slate-600">Loading dashboard data...</p>
             </div>
           </div>
         </StandardPageLayout>

@@ -2,7 +2,7 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { ArrowRight, Zap, AlertCircle, Loader2, Mail, Lock } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
@@ -10,6 +10,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 
 const Login = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { signIn, user, loading: authLoading } = useAuth();
   const [formData, setFormData] = useState({
     email: "",
@@ -18,13 +19,16 @@ const Login = () => {
   const [error, setError] = useState<string>("");
   const [loading, setLoading] = useState(false);
 
+  // Get the intended destination from location state
+  const from = location.state?.from?.pathname || "/dashboard";
+
   // Redirect if already logged in
   useEffect(() => {
     if (!authLoading && user) {
-      console.log('User already logged in, redirecting to dashboard');
-      navigate("/dashboard", { replace: true });
+      console.log('User already logged in, redirecting to:', from);
+      navigate(from, { replace: true });
     }
-  }, [user, authLoading, navigate]);
+  }, [user, authLoading, navigate, from]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -46,8 +50,8 @@ const Login = () => {
           setError(error.message);
         }
       } else if (data?.user) {
-        console.log('Login successful, redirecting to dashboard');
-        navigate("/dashboard", { replace: true });
+        console.log('Login successful, redirecting to:', from);
+        navigate(from, { replace: true });
       }
     } catch (err) {
       console.error('Unexpected login error:', err);

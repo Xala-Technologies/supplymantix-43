@@ -13,6 +13,7 @@ export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
 
   console.log('ProtectedRoute - Loading:', loading, 'User:', user?.email, 'Path:', location.pathname);
 
+  // Show loading state while checking authentication
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
@@ -24,6 +25,7 @@ export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
     );
   }
 
+  // Redirect to login if not authenticated
   if (!user) {
     console.log('No user found, redirecting to login');
     // Save the attempted location for redirect after login

@@ -12,9 +12,15 @@ export const useAuthActions = () => {
       });
       
       console.log('Sign in result:', { user: data.user?.email, error });
-      return { data, error };
+      
+      if (error) {
+        console.error('Sign in error:', error);
+        return { data: null, error };
+      }
+      
+      return { data, error: null };
     } catch (error) {
-      console.error('Sign in error:', error);
+      console.error('Sign in exception:', error);
       return { data: null, error };
     }
   };
@@ -37,9 +43,15 @@ export const useAuthActions = () => {
       });
 
       console.log('Sign up result:', { user: data.user?.email, error });
-      return { data, error };
+      
+      if (error) {
+        console.error('Sign up error:', error);
+        return { data: null, error };
+      }
+      
+      return { data, error: null };
     } catch (error) {
-      console.error('Sign up error:', error);
+      console.error('Sign up exception:', error);
       return { data: null, error };
     }
   };
@@ -56,7 +68,7 @@ export const useAuthActions = () => {
         console.log('Successfully signed out');
       }
     } catch (error) {
-      console.error('Sign out error:', error);
+      console.error('Sign out exception:', error);
       throw error;
     }
   };

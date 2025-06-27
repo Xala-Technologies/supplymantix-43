@@ -27,7 +27,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     signOut,
   };
 
-  console.log('AuthProvider - User:', user?.email, 'Loading:', loading);
+  console.log('AuthProvider - User:', user?.email, 'Loading:', loading, 'Session:', !!session);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
