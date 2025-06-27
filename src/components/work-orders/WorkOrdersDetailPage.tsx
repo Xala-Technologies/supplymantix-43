@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { ArrowLeft, ClipboardList } from 'lucide-react';
+import { ArrowLeft, ClipboardList, Edit } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Layout } from '@/components/Layout/Layout';
 import { PageContainer } from '@/components/Layout/PageContainer';
@@ -44,6 +44,7 @@ export const WorkOrdersDetailPage = ({
               onClick={onEditWorkOrder}
               className="gap-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-lg hover:shadow-xl transition-all duration-200 rounded-xl px-6 py-2.5 font-medium"
             >
+              <Edit className="w-4 h-4" />
               Edit Work Order
             </Button>
           }

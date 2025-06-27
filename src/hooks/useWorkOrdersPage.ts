@@ -1,3 +1,4 @@
+
 import { useState, useMemo, useEffect } from "react";
 import { WorkOrder, WorkOrderFilters } from "@/types/workOrder";
 import { toast } from "sonner";
@@ -49,20 +50,7 @@ export const useWorkOrdersPage = (workOrders: WorkOrder[] = []) => {
     });
   }, [transformedWorkOrders, filters]);
 
-  // Auto-select first work order when filtered list changes
-  useEffect(() => {
-    if (filteredWorkOrders.length > 0) {
-      const firstWorkOrderId = filteredWorkOrders[0].id;
-      if (!selectedWorkOrder || !filteredWorkOrders.find(wo => wo.id === selectedWorkOrder)) {
-        setSelectedWorkOrder(firstWorkOrderId);
-        setViewMode('detail');
-      }
-    } else {
-      setSelectedWorkOrder(null);
-      setViewMode('list');
-    }
-  }, [filteredWorkOrders, selectedWorkOrder]);
-
+  // Remove automatic view mode changes - let user control the view
   const selectedWorkOrderData = useMemo(() => {
     return transformedWorkOrders.find(wo => wo.id === selectedWorkOrder);
   }, [transformedWorkOrders, selectedWorkOrder]);
@@ -137,7 +125,7 @@ export const useWorkOrdersPage = (workOrders: WorkOrder[] = []) => {
         toast.success("Work order created successfully");
       }
       
-      // Reset form state
+      // Reset form state and go back to list
       setViewMode('list');
       setEditingWorkOrder(null);
       setSelectedWorkOrder(null);
@@ -155,6 +143,7 @@ export const useWorkOrdersPage = (workOrders: WorkOrder[] = []) => {
   };
 
   const setViewModeToList = () => {
+    console.log('Setting view mode to list');
     setViewMode('list');
     setSelectedWorkOrder(null);
     setEditingWorkOrder(null);

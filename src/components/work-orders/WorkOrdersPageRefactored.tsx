@@ -38,12 +38,12 @@ export const WorkOrdersPageRefactored = () => {
   };
 
   const handleBackToList = () => {
-    console.log('Back to list clicked, current contentViewMode:', contentViewMode);
+    console.log('Back to list clicked, resetting to list view');
     setViewModeToList();
   };
 
   const handleFormCancelWithBack = () => {
-    console.log('Form cancel with back clicked');
+    console.log('Form cancel with back clicked, resetting to list view');
     setViewModeToList();
   };
 
