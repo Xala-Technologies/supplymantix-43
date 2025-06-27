@@ -102,7 +102,7 @@ const sampleWorkOrders: WorkOrder[] = [
   {
     id: '6',
     title: 'Preventive Maintenance - Generator',
-    status: 'open',
+    status: 'draft',
     priority: 'low',
     assignedTo: ['Sarah Davis'],
     asset: {
