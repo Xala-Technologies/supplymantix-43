@@ -27,11 +27,7 @@ export const WorkOrdersPageRefactored = () => {
     setFilters,
     filteredWorkOrders,
     selectedWorkOrder,
-    handleSelectWorkOrder,
-    handleCreateWorkOrder,
-    handleEditWorkOrder,
-    handleFormSubmit,
-    handleFormCancel
+    handleSelectWorkOrder
   } = useWorkOrdersPage(workOrders);
 
   const handleNewWorkOrder = () => {
