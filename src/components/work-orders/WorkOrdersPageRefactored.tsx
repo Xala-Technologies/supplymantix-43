@@ -173,6 +173,7 @@ export const WorkOrdersPageRefactored = () => {
               viewMode={contentViewMode}
               selectedWorkOrderData={selectedWorkOrderData}
               editingWorkOrder={editingWorkOrder}
+              displayMode={viewMode} // Pass the display mode
               onSelectWorkOrder={handleSelectWorkOrder}
               onEditWorkOrder={handleEditWorkOrder}
               onFormSubmit={handleFormSubmit}
@@ -191,7 +192,7 @@ export const WorkOrdersPageRefactored = () => {
     );
   }
 
-  // Card/List view (default) - This is the main fix
+  // Card/List view (default) - Now properly shows card or list view
   return (
     <Layout>
       <PageContainer>
