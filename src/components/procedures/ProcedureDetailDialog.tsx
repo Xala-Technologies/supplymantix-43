@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { 
@@ -23,8 +23,13 @@ import {
   PlayCircle,
   Edit,
   Save,
-  X
+  X,
+  Plus,
+  Trash2,
+  GripVertical
 } from 'lucide-react';
+import { FieldTypeSelector } from './FieldTypeSelector';
+import { ProcedureField } from '@/lib/database/procedures/types';
 
 interface ProcedureDetailDialogProps {
   open: boolean;
@@ -47,6 +52,21 @@ const CATEGORIES = [
   'Other'
 ];
 
+const FIELD_TYPES = [
+  { value: 'text', label: 'Text Input' },
+  { value: 'textarea', label: 'Long Text' },
+  { value: 'number', label: 'Number' },
+  { value: 'checkbox', label: 'Checkbox' },
+  { value: 'select', label: 'Dropdown' },
+  { value: 'multiselect', label: 'Multi-select' },
+  { value: 'radio', label: 'Radio Buttons' },
+  { value: 'date', label: 'Date' },
+  { value: 'time', label: 'Time' },
+  { value: 'file', label: 'File Upload' },
+  { value: 'section', label: 'Section Header' },
+  { value: 'info', label: 'Information' }
+];
+
 export const ProcedureDetailDialog: React.FC<ProcedureDetailDialogProps> = ({
   open,
   onOpenChange,
@@ -59,6 +79,7 @@ export const ProcedureDetailDialog: React.FC<ProcedureDetailDialogProps> = ({
   const [isEditing, setIsEditing] = useState(false);
   const [editData, setEditData] = useState<any>({});
   const [formData, setFormData] = useState<Record<string, any>>({});
+  const [newTag, setNewTag] = useState('');
 
   // Initialize edit data when procedure changes or dialog opens
   useEffect(() => {
@@ -67,6 +88,7 @@ export const ProcedureDetailDialog: React.FC<ProcedureDetailDialogProps> = ({
         title: procedure.title || '',
         description: procedure.description || '',
         category: procedure.category || 'Inspection',
+        tags: procedure.tags || [],
         is_global: procedure.is_global || false,
         fields: procedure.fields || []
       });
@@ -103,6 +125,7 @@ export const ProcedureDetailDialog: React.FC<ProcedureDetailDialogProps> = ({
       title: procedure.title || '',
       description: procedure.description || '',
       category: procedure.category || 'Inspection',
+      tags: procedure.tags || [],
       is_global: procedure.is_global || false,
       fields: procedure.fields || []
     });
@@ -114,6 +137,74 @@ export const ProcedureDetailDialog: React.FC<ProcedureDetailDialogProps> = ({
       ...prev,
       [fieldId]: value
     }));
+  };
+
+  const addTag = () => {
+    if (newTag.trim() && !editData.tags.includes(newTag.trim())) {
+      setEditData(prev => ({
+        ...prev,
+        tags: [...prev.tags, newTag.trim()]
+      }));
+      setNewTag('');
+    }
+  };
+
+  const removeTag = (tagToRemove: string) => {
+    setEditData(prev => ({
+      ...prev,
+      tags: prev.tags.filter((tag: string) => tag !== tagToRemove)
+    }));
+  };
+
+  const addField = () => {
+    const newField: ProcedureField = {
+      id: crypto.randomUUID(),
+      procedure_id: procedure.id,
+      label: 'New Field',
+      field_type: 'text',
+      is_required: false,
+      order_index: editData.fields.length,
+      options: {},
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    };
+
+    setEditData(prev => ({
+      ...prev,
+      fields: [...prev.fields, newField]
+    }));
+  };
+
+  const updateField = (index: number, updates: Partial<ProcedureField>) => {
+    setEditData(prev => ({
+      ...prev,
+      fields: prev.fields.map((field: ProcedureField, i: number) => 
+        i === index ? { ...field, ...updates } : field
+      )
+    }));
+  };
+
+  const removeField = (index: number) => {
+    setEditData(prev => ({
+      ...prev,
+      fields: prev.fields.filter((_: any, i: number) => i !== index)
+    }));
+  };
+
+  const moveField = (index: number, direction: 'up' | 'down') => {
+    const fields = [...editData.fields];
+    const targetIndex = direction === 'up' ? index - 1 : index + 1;
+    
+    if (targetIndex >= 0 && targetIndex < fields.length) {
+      [fields[index], fields[targetIndex]] = [fields[targetIndex], fields[index]];
+      
+      // Update order indexes
+      fields.forEach((field, i) => {
+        field.order_index = i;
+      });
+      
+      setEditData(prev => ({ ...prev, fields }));
+    }
   };
 
   const renderField = (field: any, index: number) => {
@@ -298,38 +389,156 @@ export const ProcedureDetailDialog: React.FC<ProcedureDetailDialogProps> = ({
     }
   };
 
+  const renderFieldEditor = (field: ProcedureField, index: number) => {
+    return (
+      <Card key={field.id} className="border border-gray-200">
+        <CardContent className="p-4">
+          <div className="flex items-start gap-3">
+            {/* Drag Handle */}
+            <div className="flex flex-col items-center gap-1 pt-2">
+              <GripVertical className="h-4 w-4 text-gray-400" />
+              <Badge variant="outline" className="text-xs px-1 py-0">
+                {index + 1}
+              </Badge>
+            </div>
+
+            {/* Field Configuration */}
+            <div className="flex-1 space-y-4">
+              {/* Field Label */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label className="text-sm font-medium">Field Label *</Label>
+                  <Input
+                    value={field.label}
+                    onChange={(e) => updateField(index, { label: e.target.value })}
+                    placeholder="Enter field label"
+                    className="mt-1"
+                  />
+                </div>
+                
+                <div>
+                  <Label className="text-sm font-medium">Field Type</Label>
+                  <Select 
+                    value={field.field_type} 
+                    onValueChange={(value) => updateField(index, { field_type: value as ProcedureField['field_type'] })}
+                  >
+                    <SelectTrigger className="mt-1">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {FIELD_TYPES.map(type => (
+                        <SelectItem key={type.value} value={type.value}>
+                          {type.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              {/* Options for Select/Multiselect */}
+              {(field.field_type === 'select' || field.field_type === 'multiselect' || field.field_type === 'radio') && (
+                <div>
+                  <Label className="text-sm font-medium">Options (one per line)</Label>
+                  <Textarea
+                    value={field.options?.choices?.join('\n') || ''}
+                    onChange={(e) =>
+                      updateField(index, {
+                        options: { 
+                          ...field.options, 
+                          choices: e.target.value.split('\n').filter(Boolean) 
+                        }
+                      })
+                    }
+                    placeholder="Option 1&#10;Option 2&#10;Option 3"
+                    rows={3}
+                    className="mt-1"
+                  />
+                </div>
+              )}
+
+              {/* Field Settings */}
+              <div className="flex items-center justify-between bg-gray-50 p-3 rounded-lg">
+                <div className="flex items-center gap-4">
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id={`required-${index}`}
+                      checked={field.is_required}
+                      onCheckedChange={(checked) => updateField(index, { is_required: checked })}
+                    />
+                    <Label htmlFor={`required-${index}`} className="text-sm">Required</Label>
+                  </div>
+                </div>
+                
+                <div className="flex items-center gap-2">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => moveField(index, 'up')}
+                    disabled={index === 0}
+                  >
+                    ↑
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => moveField(index, 'down')}
+                    disabled={index === editData.fields.length - 1}
+                  >
+                    ↓
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => removeField(index)}
+                    className="text-red-600 hover:text-red-700"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-5xl max-h-[90vh] overflow-hidden flex flex-col bg-white">
-        <DialogHeader className="flex-shrink-0 bg-gradient-to-r from-white to-gray-50 border-b border-gray-100 p-8 -m-6 mb-0 rounded-t-lg">
+      <DialogContent className="max-w-6xl max-h-[90vh] overflow-hidden flex flex-col bg-white">
+        <DialogHeader className="flex-shrink-0 bg-white border-b border-gray-100 p-6 -m-6 mb-0">
           <div className="flex items-start justify-between">
-            <div className="flex items-center gap-6">
-              <div className="w-16 h-16 bg-white rounded-xl shadow-sm border border-gray-200 flex items-center justify-center">
-                <PlayCircle className="h-8 w-8 text-gray-700" />
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 bg-gray-50 rounded-lg shadow-sm border border-gray-200 flex items-center justify-center">
+                <PlayCircle className="h-6 w-6 text-gray-600" />
               </div>
               <div className="flex-1">
                 {isEditing ? (
                   <Input
                     value={editData.title}
                     onChange={(e) => setEditData(prev => ({ ...prev, title: e.target.value }))}
-                    className="text-2xl font-bold mb-3 border-2 border-gray-200 focus:border-gray-400 rounded-lg px-4 py-2 bg-white"
+                    className="text-xl font-bold mb-2 border-gray-200 focus:border-gray-400"
                     placeholder="Procedure title"
                   />
                 ) : (
-                  <DialogTitle className="text-2xl font-bold text-gray-900 mb-3 leading-tight">
+                  <DialogTitle className="text-xl font-bold text-gray-900 mb-2">
                     {procedure.title}
                   </DialogTitle>
                 )}
-                <div className="flex items-center gap-3 flex-wrap">
+                <div className="flex items-center gap-2 flex-wrap">
                   {isEditing ? (
                     <Select
                       value={editData.category}
                       onValueChange={(value) => setEditData(prev => ({ ...prev, category: value }))}
                     >
-                      <SelectTrigger className="w-48 bg-white border-gray-200">
+                      <SelectTrigger className="w-40 bg-white border-gray-200">
                         <SelectValue />
                       </SelectTrigger>
-                      <SelectContent className="bg-white border shadow-lg z-50">
+                      <SelectContent>
                         {CATEGORIES.map(category => (
                           <SelectItem key={category} value={category}>
                             {category}
@@ -338,29 +547,29 @@ export const ProcedureDetailDialog: React.FC<ProcedureDetailDialogProps> = ({
                       </SelectContent>
                     </Select>
                   ) : (
-                    <Badge className="bg-white text-gray-700 border border-gray-200 hover:bg-gray-50 px-3 py-1 text-sm font-medium">
+                    <Badge variant="secondary" className="bg-gray-100 text-gray-700">
                       {procedure.category || 'Other'}
                     </Badge>
                   )}
                   {(isEditing ? editData.is_global : procedure.is_global) && (
-                    <Badge className="bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 px-3 py-1 text-sm font-medium">
-                      <Globe className="h-4 w-4 mr-1" />
+                    <Badge variant="outline" className="text-blue-600 border-blue-200">
+                      <Globe className="h-3 w-3 mr-1" />
                       Global
                     </Badge>
                   )}
-                  <div className="text-sm text-gray-500 bg-gray-50 px-3 py-1 rounded-full">
-                    {procedure.fields?.length || 0} fields
+                  <div className="text-sm text-gray-500 bg-gray-50 px-2 py-1 rounded">
+                    {(isEditing ? editData.fields : procedure.fields)?.length || 0} fields
                   </div>
                 </div>
               </div>
             </div>
-            <div className="flex gap-3 ml-4">
+            <div className="flex gap-2">
               {isEditing ? (
                 <>
                   <Button 
                     onClick={handleEditSave} 
                     size="sm" 
-                    className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg font-medium shadow-sm"
+                    className="bg-gray-900 hover:bg-gray-800 text-white"
                   >
                     <Save className="h-4 w-4 mr-2" />
                     Save Changes
@@ -369,7 +578,6 @@ export const ProcedureDetailDialog: React.FC<ProcedureDetailDialogProps> = ({
                     onClick={handleEditCancel} 
                     variant="outline" 
                     size="sm"
-                    className="border-gray-300 text-gray-700 hover:bg-gray-50 px-4 py-2 rounded-lg font-medium"
                   >
                     <X className="h-4 w-4 mr-2" />
                     Cancel
@@ -380,7 +588,6 @@ export const ProcedureDetailDialog: React.FC<ProcedureDetailDialogProps> = ({
                   onClick={handleEditStart} 
                   variant="outline" 
                   size="sm"
-                  className="border-gray-300 text-gray-700 hover:bg-gray-50 px-4 py-2 rounded-lg font-medium shadow-sm"
                 >
                   <Edit className="h-4 w-4 mr-2" />
                   Edit Procedure
@@ -391,220 +598,311 @@ export const ProcedureDetailDialog: React.FC<ProcedureDetailDialogProps> = ({
         </DialogHeader>
 
         <div className="flex-1 overflow-hidden">
-          <Tabs defaultValue="fields" className="h-full flex flex-col">
-            <TabsList className="grid w-full grid-cols-3 bg-gray-50/50 p-1 m-6 mb-0 rounded-xl border border-gray-100">
+          <Tabs defaultValue={isEditing ? "settings" : "fields"} className="h-full flex flex-col">
+            <TabsList className="grid w-full grid-cols-3 bg-gray-50 p-1 m-6 mb-0 rounded-lg">
               <TabsTrigger 
                 value="fields" 
-                className="data-[state=active]:bg-white data-[state=active]:text-gray-900 data-[state=active]:shadow-sm rounded-lg font-medium"
+                className="data-[state=active]:bg-white data-[state=active]:shadow-sm rounded-md"
               >
-                Fields & Content
+                {isEditing ? 'Edit Fields' : 'Fields & Content'}
               </TabsTrigger>
               <TabsTrigger 
-                value="details" 
-                className="data-[state=active]:bg-white data-[state=active]:text-gray-900 data-[state=active]:shadow-sm rounded-lg font-medium"
+                value="settings" 
+                className="data-[state=active]:bg-white data-[state=active]:shadow-sm rounded-md"
               >
-                Details & Settings
+                {isEditing ? 'Edit Settings' : 'Details & Settings'}
               </TabsTrigger>
               <TabsTrigger 
                 value="history" 
-                className="data-[state=active]:bg-white data-[state=active]:text-gray-900 data-[state=active]:shadow-sm rounded-lg font-medium"
+                className="data-[state=active]:bg-white data-[state=active]:shadow-sm rounded-md"
               >
                 History & Analytics
               </TabsTrigger>
             </TabsList>
 
             <div className="flex-1 overflow-y-auto px-6 pb-6">
-              <TabsContent value="fields" className="mt-6 space-y-6">
-                {procedure.fields && procedure.fields.length > 0 ? (
-                  <div className="space-y-6">
-                    {procedure.fields.map((field: any, index: number) => (
-                      <Card key={field.id || index} className="border border-gray-100 shadow-sm hover:shadow-md transition-shadow rounded-xl">
-                        <CardContent className="p-6">
-                          {renderField(field, index)}
-                        </CardContent>
-                      </Card>
-                    ))}
+              <TabsContent value="fields" className="mt-6 space-y-4">
+                {isEditing ? (
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-lg font-semibold text-gray-900">Procedure Fields</h3>
+                      <Button onClick={addField} size="sm">
+                        <Plus className="h-4 w-4 mr-2" />
+                        Add Field
+                      </Button>
+                    </div>
+                    
+                    {editData.fields?.length > 0 ? (
+                      <div className="space-y-4">
+                        {editData.fields.map((field: ProcedureField, index: number) => 
+                          renderFieldEditor(field, index)
+                        )}
+                      </div>
+                    ) : (
+                      <div className="text-center py-12">
+                        <FileText className="h-12 w-12 text-gray-300 mx-auto mb-4" />
+                        <h3 className="text-lg font-medium text-gray-900 mb-2">No Fields Yet</h3>
+                        <p className="text-gray-500 mb-4">Add fields to build your procedure form.</p>
+                        <Button onClick={addField} size="sm">
+                          <Plus className="h-4 w-4 mr-2" />
+                          Add Your First Field
+                        </Button>
+                      </div>
+                    )}
                   </div>
                 ) : (
-                  <div className="text-center py-20">
-                    <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-6 border border-gray-100">
-                      <FileText className="h-10 w-10 text-gray-400" />
+                  // View mode for fields
+                  procedure.fields && procedure.fields.length > 0 ? (
+                    <div className="space-y-4">
+                      {procedure.fields.map((field: any, index: number) => (
+                        <Card key={field.id || index} className="border border-gray-100 shadow-sm">
+                          <CardContent className="p-4">
+                            {renderField(field, index)}
+                          </CardContent>
+                        </Card>
+                      ))}
                     </div>
-                    <h3 className="text-xl font-semibold text-gray-900 mb-3">No Fields Configured</h3>
-                    <p className="text-gray-600 max-w-md mx-auto">This procedure doesn't have any fields set up yet. Edit the procedure to add fields and content.</p>
-                  </div>
+                  ) : (
+                    <div className="text-center py-12">
+                      <FileText className="h-12 w-12 text-gray-300 mx-auto mb-4" />
+                      <h3 className="text-lg font-medium text-gray-900 mb-2">No Fields Configured</h3>
+                      <p className="text-gray-500">This procedure doesn't have any fields set up yet.</p>
+                    </div>
+                  )
                 )}
               </TabsContent>
 
-              <TabsContent value="details" className="mt-6 space-y-6">
-                {/* Description */}
-                <Card className="border border-gray-100 shadow-sm rounded-xl">
-                  <CardContent className="p-6">
-                    <h3 className="text-lg font-semibold flex items-center gap-3 mb-4 text-gray-900">
-                      <div className="w-8 h-8 bg-gray-50 rounded-lg flex items-center justify-center">
-                        <FileText className="h-5 w-5 text-gray-600" />
-                      </div>
-                      Description
-                    </h3>
-                    {isEditing ? (
-                      <Textarea
-                        value={editData.description}
-                        onChange={(e) => setEditData(prev => ({ ...prev, description: e.target.value }))}
-                        placeholder="Enter procedure description"
-                        className="w-full min-h-[120px] border-gray-200 focus:border-gray-400"
-                      />
-                    ) : (
-                      <p className="text-gray-700 leading-relaxed bg-gray-50 p-4 rounded-lg">
-                        {procedure.description || 'No description provided'}
-                      </p>
-                    )}
-                  </CardContent>
-                </Card>
-
-                {/* Global Setting */}
-                {isEditing && (
-                  <Card className="border border-gray-100 shadow-sm rounded-xl">
-                    <CardContent className="p-6">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-4">
-                          <div className="w-8 h-8 bg-emerald-50 rounded-lg flex items-center justify-center">
-                            <Globe className="h-5 w-5 text-emerald-600" />
-                          </div>
-                          <div>
-                            <Label className="text-base font-medium text-gray-900">Global Procedure</Label>
-                            <p className="text-sm text-gray-600">Available to all users across organizations</p>
-                          </div>
+              <TabsContent value="settings" className="mt-6 space-y-6">
+                {isEditing ? (
+                  <div className="space-y-6">
+                    {/* Basic Information */}
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <FileText className="h-5 w-5" />
+                          Basic Information
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div>
+                          <Label className="text-sm font-medium">Title *</Label>
+                          <Input
+                            value={editData.title}
+                            onChange={(e) => setEditData(prev => ({ ...prev, title: e.target.value }))}
+                            placeholder="Enter procedure title"
+                            className="mt-1"
+                          />
                         </div>
-                        <Switch
-                          checked={editData.is_global}
-                          onCheckedChange={(checked) => setEditData(prev => ({ ...prev, is_global: checked }))}
-                        />
-                      </div>
-                    </CardContent>
-                  </Card>
-                )}
-
-                {/* Quick Stats */}
-                <div className="grid grid-cols-3 gap-6">
-                  <Card className="border border-gray-100 shadow-sm rounded-xl">
-                    <CardContent className="p-6 text-center">
-                      <div className="w-12 h-12 bg-gray-50 rounded-xl flex items-center justify-center mx-auto mb-4">
-                        <CheckCircle className="h-6 w-6 text-gray-600" />
-                      </div>
-                      <div className="text-2xl font-bold text-gray-900 mb-1">
-                        {procedure.fields?.length || 0}
-                      </div>
-                      <div className="text-sm text-gray-600">Fields</div>
-                    </CardContent>
-                  </Card>
-                  <Card className="border border-gray-100 shadow-sm rounded-xl">
-                    <CardContent className="p-6 text-center">
-                      <div className="w-12 h-12 bg-gray-50 rounded-xl flex items-center justify-center mx-auto mb-4">
-                        <Activity className="h-6 w-6 text-gray-600" />
-                      </div>
-                      <div className="text-2xl font-bold text-gray-900 mb-1">
-                        {procedure.executions_count || 0}
-                      </div>
-                      <div className="text-sm text-gray-600">Executions</div>
-                    </CardContent>
-                  </Card>
-                  <Card className="border border-gray-100 shadow-sm rounded-xl">
-                    <CardContent className="p-6 text-center">
-                      <div className="w-12 h-12 bg-gray-50 rounded-xl flex items-center justify-center mx-auto mb-4">
-                        <Clock className="h-6 w-6 text-gray-600" />
-                      </div>
-                      <div className="text-2xl font-bold text-gray-900 mb-1">
-                        {procedure.estimated_duration || 30}
-                      </div>
-                      <div className="text-sm text-gray-600">Minutes</div>
-                    </CardContent>
-                  </Card>
-                </div>
-
-                {/* Procedure Information */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <Card className="border border-gray-100 shadow-sm rounded-xl">
-                    <CardContent className="p-6">
-                      <h3 className="text-lg font-semibold mb-6 text-gray-900">Procedure Information</h3>
-                      <div className="space-y-6">
-                        <div className="flex items-center gap-4">
-                          <div className="w-10 h-10 bg-gray-50 rounded-xl flex items-center justify-center">
-                            <User className="h-5 w-5 text-gray-600" />
-                          </div>
-                          <div>
-                            <span className="text-sm text-gray-500">Created by</span>
-                            <p className="text-sm font-medium text-gray-900">{procedure.created_by || 'Unknown'}</p>
-                          </div>
+                        
+                        <div>
+                          <Label className="text-sm font-medium">Description</Label>
+                          <Textarea
+                            value={editData.description}
+                            onChange={(e) => setEditData(prev => ({ ...prev, description: e.target.value }))}
+                            placeholder="Enter procedure description"
+                            className="mt-1 min-h-[100px]"
+                          />
                         </div>
-                        <div className="flex items-center gap-4">
-                          <div className="w-10 h-10 bg-gray-50 rounded-xl flex items-center justify-center">
-                            <Calendar className="h-5 w-5 text-gray-600" />
-                          </div>
-                          <div>
-                            <span className="text-sm text-gray-500">Created</span>
-                            <p className="text-sm font-medium text-gray-900">
-                              {procedure.created_at ? formatDate(procedure.created_at) : 'Unknown'}
-                            </p>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-4">
-                          <div className="w-10 h-10 bg-gray-50 rounded-xl flex items-center justify-center">
-                            <Calendar className="h-5 w-5 text-gray-600" />
-                          </div>
-                          <div>
-                            <span className="text-sm text-gray-500">Last updated</span>
-                            <p className="text-sm font-medium text-gray-900">
-                              {procedure.updated_at ? formatDate(procedure.updated_at) : 'Unknown'}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
 
-                  <Card className="border border-gray-100 shadow-sm rounded-xl">
-                    <CardContent className="p-6">
-                      <h3 className="text-lg font-semibold mb-6 text-gray-900">Configuration</h3>
-                      <div className="space-y-6">
-                        <div className="flex items-center gap-4">
-                          <div className="w-10 h-10 bg-gray-50 rounded-xl flex items-center justify-center">
-                            <Tag className="h-5 w-5 text-gray-600" />
-                          </div>
+                        <div>
+                          <Label className="text-sm font-medium">Category</Label>
+                          <Select
+                            value={editData.category}
+                            onValueChange={(value) => setEditData(prev => ({ ...prev, category: value }))}
+                          >
+                            <SelectTrigger className="mt-1">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {CATEGORIES.map(category => (
+                                <SelectItem key={category} value={category}>
+                                  {category}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    {/* Tags */}
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Tag className="h-5 w-5" />
+                          Tags
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex flex-wrap gap-2">
+                          {editData.tags?.map((tag: string, index: number) => (
+                            <Badge key={index} variant="secondary" className="flex items-center gap-1">
+                              {tag}
+                              <button
+                                onClick={() => removeTag(tag)}
+                                className="ml-1 hover:text-red-600"
+                              >
+                                <X className="h-3 w-3" />
+                              </button>
+                            </Badge>
+                          ))}
+                        </div>
+                        
+                        <div className="flex gap-2">
+                          <Input
+                            value={newTag}
+                            onChange={(e) => setNewTag(e.target.value)}
+                            placeholder="Add a tag"
+                            onKeyPress={(e) => e.key === 'Enter' && addTag()}
+                          />
+                          <Button onClick={addTag} size="sm">
+                            Add
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    {/* Global Setting */}
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Globe className="h-5 w-5" />
+                          Visibility Settings
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="flex items-center justify-between">
                           <div>
-                            <span className="text-sm text-gray-500">Category</span>
-                            <div className="mt-1">
-                              <Badge className="bg-white text-gray-700 border border-gray-200 text-sm">
-                                {procedure.category || 'Other'}
-                              </Badge>
+                            <Label className="font-medium">Global Procedure</Label>
+                            <p className="text-sm text-gray-600">Make this procedure available to all users across organizations</p>
+                          </div>
+                          <Switch
+                            checked={editData.is_global}
+                            onCheckedChange={(checked) => setEditData(prev => ({ ...prev, is_global: checked }))}
+                          />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                ) : (
+                  // View mode for settings
+                  <div className="space-y-6">
+                    {/* Description */}
+                    <Card>
+                      <CardContent className="p-6">
+                        <h3 className="text-lg font-semibold flex items-center gap-3 mb-4 text-gray-900">
+                          <FileText className="h-5 w-5" />
+                          Description
+                        </h3>
+                        <p className="text-gray-700 leading-relaxed bg-gray-50 p-4 rounded-lg">
+                          {procedure.description || 'No description provided'}
+                        </p>
+                      </CardContent>
+                    </Card>
+
+                    <div className="grid grid-cols-3 gap-6">
+                      <Card>
+                        <CardContent className="p-6 text-center">
+                          <CheckCircle className="h-8 w-8 text-gray-400 mx-auto mb-3" />
+                          <div className="text-2xl font-bold text-gray-900 mb-1">
+                            {procedure.fields?.length || 0}
+                          </div>
+                          <div className="text-sm text-gray-600">Fields</div>
+                        </CardContent>
+                      </Card>
+                      <Card>
+                        <CardContent className="p-6 text-center">
+                          <Activity className="h-8 w-8 text-gray-400 mx-auto mb-3" />
+                          <div className="text-2xl font-bold text-gray-900 mb-1">
+                            {procedure.executions_count || 0}
+                          </div>
+                          <div className="text-sm text-gray-600">Executions</div>
+                        </CardContent>
+                      </Card>
+                      <Card>
+                        <CardContent className="p-6 text-center">
+                          <Clock className="h-8 w-8 text-gray-400 mx-auto mb-3" />
+                          <div className="text-2xl font-bold text-gray-900 mb-1">
+                            {procedure.estimated_duration || 30}
+                          </div>
+                          <div className="text-sm text-gray-600">Minutes</div>
+                        </CardContent>
+                      </Card>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <Card>
+                        <CardContent className="p-6">
+                          <h3 className="text-lg font-semibold mb-4 text-gray-900">Procedure Information</h3>
+                          <div className="space-y-4">
+                            <div className="flex items-center gap-3">
+                              <User className="h-5 w-5 text-gray-400" />
+                              <div>
+                                <span className="text-sm text-gray-500">Created by</span>
+                                <p className="text-sm font-medium text-gray-900">{procedure.created_by || 'Unknown'}</p>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-3">
+                              <Calendar className="h-5 w-5 text-gray-400" />
+                              <div>
+                                <span className="text-sm text-gray-500">Created</span>
+                                <p className="text-sm font-medium text-gray-900">
+                                  {procedure.created_at ? formatDate(procedure.created_at) : 'Unknown'}
+                                </p>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-3">
+                              <Calendar className="h-5 w-5 text-gray-400" />
+                              <div>
+                                <span className="text-sm text-gray-500">Last updated</span>
+                                <p className="text-sm font-medium text-gray-900">
+                                  {procedure.updated_at ? formatDate(procedure.updated_at) : 'Unknown'}
+                                </p>
+                              </div>
                             </div>
                           </div>
-                        </div>
-                        <div className="flex items-center gap-4">
-                          <div className="w-10 h-10 bg-gray-50 rounded-xl flex items-center justify-center">
-                            <Globe className="h-5 w-5 text-gray-600" />
+                        </CardContent>
+                      </Card>
+
+                      <Card>
+                        <CardContent className="p-6">
+                          <h3 className="text-lg font-semibold mb-4 text-gray-900">Configuration</h3>
+                          <div className="space-y-4">
+                            <div className="flex items-center gap-3">
+                              <Tag className="h-5 w-5 text-gray-400" />
+                              <div>
+                                <span className="text-sm text-gray-500">Category</span>
+                                <div className="mt-1">
+                                  <Badge variant="secondary">
+                                    {procedure.category || 'Other'}
+                                  </Badge>
+                                </div>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-3">
+                              <Globe className="h-5 w-5 text-gray-400" />
+                              <div>
+                                <span className="text-sm text-gray-500">Scope</span>
+                                <p className="text-sm font-medium text-gray-900">
+                                  {procedure.is_global ? 'Global' : 'Local'}
+                                </p>
+                              </div>
+                            </div>
                           </div>
-                          <div>
-                            <span className="text-sm text-gray-500">Scope</span>
-                            <p className="text-sm font-medium text-gray-900">
-                              {procedure.is_global ? 'Global' : 'Local'}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </div>
+                        </CardContent>
+                      </Card>
+                    </div>
+                  </div>
+                )}
               </TabsContent>
 
               <TabsContent value="history" className="mt-6">
-                <Card className="border border-gray-100 shadow-sm rounded-xl">
+                <Card>
                   <CardContent className="p-6">
-                    <div className="text-center py-20">
-                      <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-6 border border-gray-100">
-                        <Activity className="h-10 w-10 text-gray-400" />
-                      </div>
-                      <h3 className="text-xl font-semibold text-gray-900 mb-3">No Execution History</h3>
-                      <p className="text-gray-600 max-w-md mx-auto">This procedure hasn't been executed yet. Once it's used, execution history and analytics will appear here.</p>
+                    <div className="text-center py-12">
+                      <Activity className="h-12 w-12 text-gray-300 mx-auto mb-4" />
+                      <h3 className="text-lg font-medium text-gray-900 mb-2">No Execution History</h3>
+                      <p className="text-gray-500">This procedure hasn't been executed yet. History will appear here once it's used.</p>
                     </div>
                   </CardContent>
                 </Card>
