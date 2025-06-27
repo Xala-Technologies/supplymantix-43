@@ -45,15 +45,15 @@ export const ProcedureCardView: React.FC<ProcedureCardViewProps> = ({
             "group relative bg-white border border-gray-200/60 rounded-lg shadow-sm",
             "transition-all duration-200 ease-out",
             "hover:shadow-md hover:border-gray-300/80 hover:-translate-y-0.5",
-            "cursor-pointer overflow-hidden h-fit"
+            "cursor-pointer overflow-hidden h-64 flex flex-col"
           )}
         >
-          <CardContent className="p-6">
+          <CardContent className="p-4 flex flex-col h-full">
             {/* Header with Icon and Actions */}
             <div className="flex items-start justify-between mb-3">
               <div className="flex items-center gap-2 flex-1 min-w-0">
-                <div className="flex-shrink-0 w-8 h-8 bg-gradient-to-br from-blue-50 to-indigo-100 rounded-lg flex items-center justify-center">
-                  <PlayCircle className="h-4 w-4 text-blue-600" />
+                <div className="flex-shrink-0 w-7 h-7 bg-gradient-to-br from-blue-50 to-indigo-100 rounded-lg flex items-center justify-center">
+                  <PlayCircle className="h-3.5 w-3.5 text-blue-600" />
                 </div>
                 <div className="min-w-0 flex-1">
                   <button
@@ -72,44 +72,46 @@ export const ProcedureCardView: React.FC<ProcedureCardViewProps> = ({
                   <Button 
                     variant="ghost" 
                     size="sm" 
-                    className="opacity-0 group-hover:opacity-100 transition-opacity h-6 w-6 p-0 rounded-md"
+                    className="opacity-0 group-hover:opacity-100 transition-opacity h-6 w-6 p-0 rounded-md flex-shrink-0"
                   >
-                    <MoreVertical className="h-3.5 w-3.5 text-gray-500" />
+                    <MoreVertical className="h-3 w-3 text-gray-500" />
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-40">
+                <DropdownMenuContent align="end" className="w-36">
                   <DropdownMenuItem onClick={() => onViewDetails(procedure)}>
-                    <Eye className="h-4 w-4 mr-2" />
+                    <Eye className="h-3.5 w-3.5 mr-2" />
                     View
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => onEdit(procedure)}>
-                    <Edit className="h-4 w-4 mr-2" />
+                    <Edit className="h-3.5 w-3.5 mr-2" />
                     Edit
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => onDuplicate(procedure.id)}>
-                    <Copy className="h-4 w-4 mr-2" />
+                    <Copy className="h-3.5 w-3.5 mr-2" />
                     Duplicate
                   </DropdownMenuItem>
                   <DropdownMenuItem 
                     onClick={() => onDelete(procedure.id)}
                     className="text-red-600 focus:text-red-700"
                   >
-                    <Trash2 className="h-4 w-4 mr-2" />
+                    <Trash2 className="h-3.5 w-3.5 mr-2" />
                     Delete
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
 
-            {/* Description */}
-            {procedure.description && (
-              <p className="text-xs text-gray-600 line-clamp-2 mb-3 leading-relaxed">
-                {procedure.description}
-              </p>
-            )}
+            {/* Description - Fixed height container */}
+            <div className="mb-3 min-h-[2.5rem] flex-shrink-0">
+              {procedure.description && (
+                <p className="text-xs text-gray-600 line-clamp-2 leading-relaxed">
+                  {procedure.description}
+                </p>
+              )}
+            </div>
 
-            {/* Badges */}
-            <div className="flex items-center gap-1.5 mb-3 flex-wrap">
+            {/* Badges - Fixed height container */}
+            <div className="flex items-center gap-1.5 mb-3 flex-wrap min-h-[1.5rem] flex-shrink-0">
               <Badge className={cn(
                 "text-xs font-medium border-0 px-2 py-0.5 rounded-md",
                 getCategoryColor(procedure.category || 'Other')
@@ -118,14 +120,14 @@ export const ProcedureCardView: React.FC<ProcedureCardViewProps> = ({
               </Badge>
               {procedure.is_global && (
                 <Badge className="text-blue-700 bg-blue-50 border border-blue-200/50 text-xs font-medium px-2 py-0.5 rounded-md">
-                  <Globe className="h-2.5 w-2.5 mr-1" />
+                  <Globe className="h-2 w-2 mr-1" />
                   Global
                 </Badge>
               )}
             </div>
 
             {/* Stats */}
-            <div className="flex items-center justify-between text-xs text-gray-600 mb-3">
+            <div className="flex items-center justify-between text-xs text-gray-600 mb-3 flex-shrink-0">
               <div className="flex items-center gap-1">
                 <CheckCircle className="h-3 w-3 text-green-600" />
                 <span>{procedure.fields?.length || 0} fields</span>
@@ -136,15 +138,17 @@ export const ProcedureCardView: React.FC<ProcedureCardViewProps> = ({
               </div>
             </div>
 
-            {/* Action Button */}
-            <Button 
-              size="sm" 
-              className="w-full h-8 text-xs font-medium rounded-md bg-blue-600 hover:bg-blue-700"
-              onClick={() => onViewDetails(procedure)}
-            >
-              <Eye className="h-3 w-3 mr-1.5" />
-              View Details
-            </Button>
+            {/* Action Button - Always at bottom */}
+            <div className="mt-auto">
+              <Button 
+                size="sm" 
+                className="w-full h-7 text-xs font-medium rounded-md bg-blue-600 hover:bg-blue-700"
+                onClick={() => onViewDetails(procedure)}
+              >
+                <Eye className="h-3 w-3 mr-1.5" />
+                View Details
+              </Button>
+            </div>
           </CardContent>
         </Card>
       ))}
