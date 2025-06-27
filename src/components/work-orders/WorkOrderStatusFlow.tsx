@@ -100,7 +100,7 @@ export const WorkOrderStatusFlow = ({ workOrder, onStatusUpdate }: WorkOrderStat
   };
 
   const getStatusProgress = () => {
-    const mainFlow = ['draft', 'open', 'in_progress', 'completed'];
+    const mainFlow: WorkOrderStatus[] = ['draft', 'open', 'in_progress', 'completed'];
     const currentStatus = workOrder.status;
     
     // Handle special statuses
@@ -141,7 +141,6 @@ export const WorkOrderStatusFlow = ({ workOrder, onStatusUpdate }: WorkOrderStat
       </CardHeader>
       
       <CardContent className="space-y-6 p-6">
-        
         {/* Status Progress Timeline - Only show for main flow statuses */}
         {!['cancelled', 'on_hold'].includes(currentStatus) && (
           <div className="bg-gray-50/50 rounded-xl p-6 border border-gray-100">
