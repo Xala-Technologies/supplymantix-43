@@ -3,7 +3,7 @@ import React from 'react';
 import { ProcedureField } from '@/lib/database/procedures-enhanced';
 import { FieldsList } from './FieldsList';
 import { AddItemSidebar } from './AddItemSidebar';
-import { ProcedureSettingsEnhanced } from './ProcedureSettingsEnhanced';
+import { ProcedureSettingsContent } from './ProcedureSettingsContent';
 
 interface ProcedureBuilderContentProps {
   activeTab: string;
@@ -72,8 +72,8 @@ export const ProcedureBuilderContent: React.FC<ProcedureBuilderContentProps> = (
   }
 
   return (
-    <div className="w-full max-w-none">
-      <ProcedureSettingsEnhanced 
+    <div className="h-full overflow-y-auto bg-gray-50">
+      <ProcedureSettingsContent 
         formData={formData}
         onUpdate={onFormDataUpdate}
       />
