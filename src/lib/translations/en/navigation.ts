@@ -1,3 +1,4 @@
+
 export const navigation = {
   "nav.dashboard": "Dashboard",
   "nav.workOrders": "Work Orders",
@@ -15,6 +16,8 @@ export const navigation = {
   "nav.messages": "Messages",
   "nav.organization": "Organization",
   "nav.translations": "Translations",
-  clients: "Clients",
-  vendors: "Vendors",
+  "nav.clients": "Clients",
+  "nav.vendors": "Vendors",
 };
+
+export const navigationTranslations = navigation;

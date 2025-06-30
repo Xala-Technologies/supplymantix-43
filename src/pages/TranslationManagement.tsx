@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -39,7 +38,8 @@ const TranslationManagement = () => {
                           stringValue.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesCategory = categoryFilter === "all" || key.startsWith(categoryFilter + ".");
       return matchesSearch && matchesCategory;
-    });
+    })
+    .map(([key, value]) => [key, String(value)] as [string, string]);
 
   const handleSave = (editingKey: string, editValue: string) => {
     // Update the current translations state

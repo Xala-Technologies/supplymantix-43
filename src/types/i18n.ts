@@ -17,6 +17,9 @@ export interface TranslationKeys {
   'nav.locations': string;
   'nav.messages': string;
   'nav.translations': string;
+  'nav.clients': string;
+  'nav.vendors': string;
+  'nav.categories': string;
 
   // Sidebar groups
   'sidebar.overview': string;
@@ -24,6 +27,7 @@ export interface TranslationKeys {
   'sidebar.resources': string;
   'sidebar.collaboration': string;
   'sidebar.administration': string;
+  'sidebar.relationships': string;
 
   // Authentication
   'auth.login': string;
