@@ -1,110 +1,58 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { assetsApi, type Asset, type AssetInsert, type AssetUpdate } from "@/lib/database/assets";
-import { toast } from "sonner";
 
-// Get all assets with optional filters
-export const useAssets = (filters?: {
-  search?: string;
-  status?: string[];
-  category?: string[];
-  location?: string[];
-  criticality?: string[];
-}) => {
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+
+interface Asset {
+  id: string;
+  name: string;
+  description?: string;
+  location?: string;
+  asset_tag?: string;
+  category?: string;
+  status?: string;
+  criticality?: string;
+}
+
+export const useAssets = () => {
   return useQuery({
-    queryKey: ["assets", filters],
-    queryFn: () => assetsApi.getAssets(filters),
-    staleTime: 1000 * 60 * 5, // 5 minutes
+    queryKey: ['assets'],
+    queryFn: async (): Promise<Asset[]> => {
+      try {
+        const { data: userData } = await supabase.auth.getUser();
+        if (!userData.user) {
+          console.log('No authenticated user, returning empty assets');
+          return [];
+        }
+
+        const { data: userRecord } = await supabase
+          .from("users")
+          .select("tenant_id")
+          .eq("id", userData.user.id)
+          .single();
+
+        if (!userRecord) {
+          console.log('No user record found, returning empty assets');
+          return [];
+        }
+
+        const { data, error } = await supabase
+          .from('assets')
+          .select('*')
+          .eq('tenant_id', userRecord.tenant_id)
+          .order('name');
+
+        if (error) {
+          console.error('Error fetching assets:', error);
+          return [];
+        }
+
+        return data || [];
+      } catch (error) {
+        console.error('Error in useAssets:', error);
+        return [];
+      }
+    },
+    retry: 1,
     refetchOnWindowFocus: false,
   });
 };
-
-// Get single asset
-export const useAsset = (id: string) => {
-  return useQuery({
-    queryKey: ["assets", id],
-    queryFn: () => assetsApi.getAsset(id),
-    enabled: !!id,
-  });
-};
-
-// Create asset mutation
-export const useCreateAsset = () => {
-  const queryClient = useQueryClient();
-  
-  return useMutation({
-    mutationFn: (asset: Omit<AssetInsert, 'tenant_id'>) => assetsApi.createAsset(asset),
-    onSuccess: (newAsset) => {
-      queryClient.invalidateQueries({ queryKey: ["assets"] });
-      toast.success(`Asset "${newAsset.name}" created successfully`);
-    },
-    onError: (error: any) => {
-      console.error("Failed to create asset:", error);
-      const errorMessage = error?.message || "Failed to create asset";
-      toast.error(errorMessage);
-    },
-  });
-};
-
-// Update asset mutation
-export const useUpdateAsset = () => {
-  const queryClient = useQueryClient();
-  
-  return useMutation({
-    mutationFn: ({ id, updates }: { id: string; updates: Omit<AssetUpdate, 'tenant_id'> }) => 
-      assetsApi.updateAsset(id, updates),
-    onSuccess: (updatedAsset) => {
-      queryClient.invalidateQueries({ queryKey: ["assets"] });
-      queryClient.invalidateQueries({ queryKey: ["assets", updatedAsset.id] });
-      toast.success(`Asset "${updatedAsset.name}" updated successfully`);
-    },
-    onError: (error) => {
-      console.error("Failed to update asset:", error);
-      toast.error("Failed to update asset");
-    },
-  });
-};
-
-// Delete asset mutation
-export const useDeleteAsset = () => {
-  const queryClient = useQueryClient();
-  
-  return useMutation({
-    mutationFn: (id: string) => assetsApi.deleteAsset(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["assets"] });
-      toast.success("Asset deleted successfully");
-    },
-    onError: (error) => {
-      console.error("Failed to delete asset:", error);
-      toast.error("Failed to delete asset");
-    },
-  });
-};
-
-// Get assets by location
-export const useAssetsByLocation = (location: string) => {
-  return useQuery({
-    queryKey: ["assets", "location", location],
-    queryFn: () => assetsApi.getAssetsByLocation(location),
-    enabled: !!location,
-  });
-};
-
-// Get assets by category
-export const useAssetsByCategory = (category: string) => {
-  return useQuery({
-    queryKey: ["assets", "category", category],
-    queryFn: () => assetsApi.getAssetsByCategory(category),
-    enabled: !!category,
-  });
-};
-
-// Get asset statistics
-export const useAssetStatistics = () => {
-  return useQuery({
-    queryKey: ["assets", "statistics"],
-    queryFn: () => assetsApi.getAssetStatistics(),
-  });
-};
-
-export type { Asset, AssetInsert, AssetUpdate };
