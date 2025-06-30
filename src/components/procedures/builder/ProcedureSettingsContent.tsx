@@ -8,6 +8,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Badge } from '@/components/ui/badge';
 import { Search, ChevronDown } from 'lucide-react';
+import { useAssets } from '@/hooks/useAssets';
+import { useLocations } from '@/hooks/useLocations';
+import { useCategories } from '@/hooks/useCategories';
 
 interface ProcedureSettingsContentProps {
   formData: {
@@ -31,26 +34,6 @@ const CATEGORIES = [
   'Other'
 ];
 
-const ASSETS = [
-  'Compressor',
-  'Pump',
-  'Generator',
-  'HVAC System',
-  'Conveyor Belt',
-  'Motor',
-  'Valve',
-  'Sensor'
-];
-
-const LOCATIONS = [
-  'Facility A',
-  'Facility B',
-  'Warehouse',
-  'Production Floor',
-  'Maintenance Shop',
-  'Office Building'
-];
-
 const TEAMS = [
   'Maintenance Team',
   'Operations Team',
@@ -64,6 +47,11 @@ export const ProcedureSettingsContent: React.FC<ProcedureSettingsContentProps> =
   onUpdate
 }) => {
   const [customTag, setCustomTag] = useState('');
+  
+  // Fetch real data from the database
+  const { data: assets, isLoading: assetsLoading } = useAssets();
+  const { data: locations, isLoading: locationsLoading } = useLocations();
+  const { data: categories, isLoading: categoriesLoading } = useCategories();
 
   const handleAddCustomTag = () => {
     if (customTag.trim() && !formData.tags.includes(customTag.trim())) {
@@ -107,11 +95,23 @@ export const ProcedureSettingsContent: React.FC<ProcedureSettingsContentProps> =
                   <ChevronDown className="h-4 w-4 text-gray-400 ml-auto" />
                 </SelectTrigger>
                 <SelectContent>
-                  {CATEGORIES.map(category => (
-                    <SelectItem key={category} value={category}>
-                      {category}
-                    </SelectItem>
-                  ))}
+                  {/* Use database categories first, then fallback to hardcoded ones */}
+                  {categoriesLoading ? (
+                    <SelectItem value="" disabled>Loading categories...</SelectItem>
+                  ) : (
+                    <>
+                      {categories?.map(category => (
+                        <SelectItem key={category.id} value={category.name}>
+                          {category.name}
+                        </SelectItem>
+                      ))}
+                      {CATEGORIES.map(category => (
+                        <SelectItem key={category} value={category}>
+                          {category}
+                        </SelectItem>
+                      ))}
+                    </>
+                  )}
                 </SelectContent>
               </Select>
             </div>
@@ -128,11 +128,17 @@ export const ProcedureSettingsContent: React.FC<ProcedureSettingsContentProps> =
                   <ChevronDown className="h-4 w-4 text-gray-400 ml-auto" />
                 </SelectTrigger>
                 <SelectContent>
-                  {ASSETS.map(asset => (
-                    <SelectItem key={asset} value={asset}>
-                      {asset}
-                    </SelectItem>
-                  ))}
+                  {assetsLoading ? (
+                    <SelectItem value="" disabled>Loading assets...</SelectItem>
+                  ) : assets && assets.length > 0 ? (
+                    assets.map(asset => (
+                      <SelectItem key={asset.id} value={asset.id}>
+                        {asset.name}
+                      </SelectItem>
+                    ))
+                  ) : (
+                    <SelectItem value="" disabled>No assets found</SelectItem>
+                  )}
                 </SelectContent>
               </Select>
             </div>
@@ -149,11 +155,17 @@ export const ProcedureSettingsContent: React.FC<ProcedureSettingsContentProps> =
                   <ChevronDown className="h-4 w-4 text-gray-400 ml-auto" />
                 </SelectTrigger>
                 <SelectContent>
-                  {LOCATIONS.map(location => (
-                    <SelectItem key={location} value={location}>
-                      {location}
-                    </SelectItem>
-                  ))}
+                  {locationsLoading ? (
+                    <SelectItem value="" disabled>Loading locations...</SelectItem>
+                  ) : locations && locations.length > 0 ? (
+                    locations.map(location => (
+                      <SelectItem key={location.id} value={location.id}>
+                        {location.name}
+                      </SelectItem>
+                    ))
+                  ) : (
+                    <SelectItem value="" disabled>No locations found</SelectItem>
+                  )}
                 </SelectContent>
               </Select>
             </div>
