@@ -80,6 +80,9 @@ export const ProcedureSettingsEnhanced: React.FC<ProcedureSettingsEnhancedProps>
     team.toLowerCase().includes(teamSearch.toLowerCase())
   );
 
+  // Get unique asset categories from real data
+  const assetCategories = [...new Set(assets.map(asset => asset.category).filter(Boolean))];
+
   return (
     <div className="flex-1 overflow-y-auto bg-gradient-to-br from-gray-50 to-blue-50/30">
       <div className="max-w-4xl mx-auto p-8 space-y-8">
@@ -164,7 +167,7 @@ export const ProcedureSettingsEnhanced: React.FC<ProcedureSettingsEnhancedProps>
                       }}
                     >
                       <div className="font-medium">{asset.name}</div>
-                      <div className="text-sm text-gray-500">{asset.location}</div>
+                      <div className="text-sm text-gray-500">{asset.category} • {asset.location}</div>
                     </div>
                   ))}
                 </div>
@@ -217,7 +220,7 @@ export const ProcedureSettingsEnhanced: React.FC<ProcedureSettingsEnhancedProps>
                       }}
                     >
                       <div className="font-medium">{location.name}</div>
-                      <div className="text-sm text-gray-500">{location.location_type}</div>
+                      <div className="text-sm text-gray-500">{location.location_type} • {location.address}</div>
                     </div>
                   ))}
                 </div>
@@ -356,7 +359,7 @@ export const ProcedureSettingsEnhanced: React.FC<ProcedureSettingsEnhancedProps>
           </CardContent>
         </Card>
 
-        {/* Procedure Visibility */}
+        {/* Procedure Visibility - Fixed positioning */}
         <Card className="shadow-lg border-0 bg-white/80 backdrop-blur-sm">
           <CardHeader className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-t-lg">
             <div className="flex items-center gap-3">
@@ -411,6 +414,38 @@ export const ProcedureSettingsEnhanced: React.FC<ProcedureSettingsEnhancedProps>
             </RadioGroup>
           </CardContent>
         </Card>
+
+        {/* Asset Categories - Additional section using real data */}
+        {assetCategories.length > 0 && (
+          <Card className="shadow-lg border-0 bg-white/80 backdrop-blur-sm">
+            <CardHeader className="bg-gradient-to-r from-teal-500 to-cyan-600 text-white rounded-t-lg">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-white/20 rounded-lg">
+                  <Package className="h-6 w-6" />
+                </div>
+                <div>
+                  <CardTitle className="text-xl font-semibold">Asset Categories</CardTitle>
+                  <p className="text-teal-100 text-sm mt-1">
+                    Available asset categories in your organization
+                  </p>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent className="p-6">
+              <div className="flex flex-wrap gap-2">
+                {assetCategories.map(category => (
+                  <Badge 
+                    key={category}
+                    variant="outline"
+                    className="px-3 py-1 bg-teal-50 text-teal-700 border-teal-200"
+                  >
+                    {category}
+                  </Badge>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
       </div>
     </div>
   );
