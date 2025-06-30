@@ -12,9 +12,9 @@ export const useInventoryIntegration = () => {
         databaseApi.getPurchaseOrders()
       ]);
       
-      return inventory.map(item => {
+      return inventory.map((item: any) => {
         const isLowStock = item.quantity <= (item.min_quantity || 0);
-        const pendingOrders = purchaseOrders.filter(po => 
+        const pendingOrders = purchaseOrders.filter((po: any) => 
           po.status === 'pending' && 
           po.line_items && JSON.parse(po.line_items as string)?.some((li: any) => li.inventory_item_id === item.id)
         );
@@ -25,7 +25,7 @@ export const useInventoryIntegration = () => {
           ...item,
           isLowStock,
           needsReorder: isLowStock && pendingOrders.length === 0,
-          pendingQuantity: pendingOrders.reduce((sum, po) => 
+          pendingQuantity: pendingOrders.reduce((sum: number, po: any) => 
             sum + (lineItems(po)?.find((li: any) => li.inventory_item_id === item.id)?.quantity || 0), 0
           ),
           totalValue: (item.quantity || 0) * (item.unit_cost || 0),

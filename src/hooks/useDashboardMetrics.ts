@@ -8,15 +8,22 @@ interface DashboardMetrics {
     overdue: number;
     completedLastMonth: number;
     avgCompletionTime: number;
+    total: number;
   };
   assets: {
     total: number;
     online: number;
     uptime: number;
+    critical: number;
   };
   inventory: {
     totalValue: number;
     lowStock: number;
+    totalItems: number;
+  };
+  purchaseOrders: {
+    pending: number;
+    totalPendingValue: number;
   };
   alerts: Array<{
     type: string;
@@ -39,22 +46,30 @@ export const useDashboardMetrics = () => {
       }).length || 0;
       
       const completedWorkOrders = workOrders?.filter(wo => wo.status === 'completed').length || 0;
+      const totalWorkOrders = workOrders?.length || 0;
 
       return {
         workOrders: {
           open: openWorkOrders,
           overdue: overdueWorkOrders,
           completedLastMonth: completedWorkOrders,
-          avgCompletionTime: 2.5
+          avgCompletionTime: 2.5,
+          total: totalWorkOrders
         },
         assets: {
           total: 24,
           online: 22,
-          uptime: 92
+          uptime: 92,
+          critical: 3
         },
         inventory: {
           totalValue: 125000,
-          lowStock: 8
+          lowStock: 8,
+          totalItems: 156
+        },
+        purchaseOrders: {
+          pending: 5,
+          totalPendingValue: 45000
         },
         alerts: [
           { type: 'error', message: 'Work Order #1234 is overdue', action: '/dashboard/work-orders/1234' },

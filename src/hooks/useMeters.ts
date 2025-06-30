@@ -37,7 +37,7 @@ export const useMeters = () => {
           return [];
         }
         
-        return meters.map(meter => ({
+        return meters.map((meter: any) => ({
           id: meter.id,
           name: meter.name,
           type: meter.type,
