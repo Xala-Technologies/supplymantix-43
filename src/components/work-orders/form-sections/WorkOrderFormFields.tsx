@@ -90,7 +90,7 @@ export const WorkOrderFormFields = ({ form, users, assets, locations }: WorkOrde
         <div className="space-y-2">
           <Label className="text-sm font-medium">Priority</Label>
           <Select
-            value={form.watch("priority")}
+            value={form.watch("priority") || ""}
             onValueChange={(value: "low" | "medium" | "high" | "urgent") => 
               form.setValue("priority", value)
             }
@@ -164,7 +164,7 @@ export const WorkOrderFormFields = ({ form, users, assets, locations }: WorkOrde
         <div className="space-y-2">
           <Label className="text-sm font-medium">Assigned To</Label>
           <Select
-            value={form.watch("assignedTo")}
+            value={form.watch("assignedTo") || ""}
             onValueChange={(value) => form.setValue("assignedTo", value)}
           >
             <SelectTrigger>
@@ -186,7 +186,7 @@ export const WorkOrderFormFields = ({ form, users, assets, locations }: WorkOrde
         <div className="space-y-2">
           <Label className="text-sm font-medium">Category</Label>
           <Select
-            value={form.watch("category")}
+            value={form.watch("category") || ""}
             onValueChange={(value) => form.setValue("category", value)}
           >
             <SelectTrigger>
@@ -208,7 +208,7 @@ export const WorkOrderFormFields = ({ form, users, assets, locations }: WorkOrde
         <div className="space-y-2">
           <Label className="text-sm font-medium">Asset</Label>
           <Select
-            value={form.watch("asset")}
+            value={form.watch("asset") || ""}
             onValueChange={(value) => form.setValue("asset", value)}
           >
             <SelectTrigger>
@@ -228,7 +228,7 @@ export const WorkOrderFormFields = ({ form, users, assets, locations }: WorkOrde
         <div className="space-y-2">
           <Label className="text-sm font-medium">Location</Label>
           <Select
-            value={form.watch("location")}
+            value={form.watch("location") || ""}
             onValueChange={(value) => form.setValue("location", value)}
           >
             <SelectTrigger>

@@ -89,7 +89,7 @@ export const FieldInput: React.FC<FieldInputProps> = ({ field, value, onChange }
           <Input
             value={value || ''}
             onChange={(e) => onChange(e.target.value)}
-            placeholder={field.options?.placeholder || 'Enter text...'}
+            placeholder={field.options?.placeholder || ''}
             className="w-full"
           />
           {field.options?.helpText && (
@@ -105,7 +105,7 @@ export const FieldInput: React.FC<FieldInputProps> = ({ field, value, onChange }
           <Textarea
             value={value || ''}
             onChange={(e) => onChange(e.target.value)}
-            placeholder={field.options?.placeholder || 'Enter text...'}
+            placeholder={field.options?.placeholder || ''}
             className="w-full min-h-[100px]"
           />
           {field.options?.helpText && (
@@ -122,7 +122,7 @@ export const FieldInput: React.FC<FieldInputProps> = ({ field, value, onChange }
             type="number"
             value={value || ''}
             onChange={(e) => onChange(parseFloat(e.target.value) || 0)}
-            placeholder={field.options?.placeholder || 'Enter number...'}
+            placeholder={field.options?.placeholder || ''}
             min={field.options?.minValue}
             max={field.options?.maxValue}
             step={field.options?.step || 1}
@@ -166,7 +166,7 @@ export const FieldInput: React.FC<FieldInputProps> = ({ field, value, onChange }
             type="email"
             value={value || ''}
             onChange={(e) => onChange(e.target.value)}
-            placeholder={field.options?.placeholder || 'Enter email address'}
+            placeholder={field.options?.placeholder || ''}
             className="w-full"
           />
           {field.options?.helpText && (
@@ -183,7 +183,7 @@ export const FieldInput: React.FC<FieldInputProps> = ({ field, value, onChange }
             type="url"
             value={value || ''}
             onChange={(e) => onChange(e.target.value)}
-            placeholder={field.options?.placeholder || 'https://'}
+            placeholder={field.options?.placeholder || ''}
             className="w-full"
           />
           {field.options?.helpText && (
@@ -200,7 +200,7 @@ export const FieldInput: React.FC<FieldInputProps> = ({ field, value, onChange }
             type="tel"
             value={value || ''}
             onChange={(e) => onChange(e.target.value)}
-            placeholder={field.options?.placeholder || '+1 (555) 123-4567'}
+            placeholder={field.options?.placeholder || ''}
             className="w-full"
           />
           {field.options?.helpText && (

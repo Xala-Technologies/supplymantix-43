@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -85,15 +86,15 @@ export const EnhancedWorkOrderForm = ({
   const form = useForm<WorkOrderFormData>({
     resolver: zodResolver(workOrderSchema),
     defaultValues: {
-      title: workOrder?.title || "",
-      description: workOrder?.description || "",
-      priority: workOrder?.priority || "medium",
-      assignedTo: getAssignee(workOrder?.assignedTo),
-      category: workOrder?.category || "maintenance",
-      tags: workOrder?.tags || [],
-      dueDate: workOrder?.due_date ? new Date(workOrder.due_date).toISOString().split('T')[0] : "",
-      assetId: getAssetId(workOrder?.asset),
-      location: getLocationId(workOrder?.location),
+      title: "",
+      description: "",
+      priority: "medium",
+      assignedTo: "",
+      category: "maintenance",
+      tags: [],
+      dueDate: "",
+      assetId: "",
+      location: "",
     },
   });
 
@@ -144,6 +145,19 @@ export const EnhancedWorkOrderForm = ({
       };
       console.log('Form data being set:', formData);
       reset(formData);
+    } else {
+      // Reset to empty values for new work order
+      reset({
+        title: "",
+        description: "",
+        priority: "medium",
+        assignedTo: "",
+        category: "maintenance",
+        tags: [],
+        dueDate: "",
+        assetId: "",
+        location: "",
+      });
     }
   }, [workOrder, reset]);
 

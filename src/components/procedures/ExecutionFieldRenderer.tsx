@@ -93,7 +93,7 @@ export const ExecutionFieldRenderer: React.FC<ExecutionFieldRendererProps> = ({
               console.log(`Text field ${fieldId} changed to:`, e.target.value);
               onChange(e.target.value);
             }}
-            placeholder={`Enter ${field.label.toLowerCase()}`}
+            placeholder=""
             className="text-base h-12 border-2 focus:border-blue-500 transition-colors"
           />
         );
@@ -109,7 +109,7 @@ export const ExecutionFieldRenderer: React.FC<ExecutionFieldRendererProps> = ({
               console.log(`Number field ${fieldId} changed to:`, numValue);
               onChange(numValue);
             }}
-            placeholder={`Enter ${field.label.toLowerCase()}`}
+            placeholder=""
             className="text-base h-12 border-2 focus:border-blue-500 transition-colors"
             step="any"
           />
@@ -158,7 +158,7 @@ export const ExecutionFieldRenderer: React.FC<ExecutionFieldRendererProps> = ({
             }}
           >
             <SelectTrigger className="text-base h-12 border-2 focus:border-blue-500 transition-colors">
-              <SelectValue placeholder={`Select ${field.label.toLowerCase()}`} />
+              <SelectValue placeholder="Select an option" />
             </SelectTrigger>
             <SelectContent className="bg-white border-2 shadow-xl z-50">
               {choices.length === 0 ? (
@@ -255,7 +255,7 @@ export const ExecutionFieldRenderer: React.FC<ExecutionFieldRendererProps> = ({
               console.log(`Textarea field ${fieldId} changed to:`, e.target.value);
               onChange(e.target.value);
             }}
-            placeholder={`Enter ${field.label.toLowerCase()}`}
+            placeholder=""
             rows={4}
             className="resize-none text-base border-2 focus:border-blue-500 transition-colors"
           />
