@@ -1,4 +1,3 @@
-
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
 import { Bell, Search, Settings, User, Menu, LogOut } from "lucide-react";
@@ -8,49 +7,42 @@ import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 export const TopBar = () => {
-  const { user, signOut } = useAuth();
+  const {
+    user,
+    signOut
+  } = useAuth();
   const navigate = useNavigate();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
-
   const handleLogout = async () => {
     try {
       setIsLoggingOut(true);
       console.log('Logging out user:', user?.email);
       await signOut();
       console.log('Logout successful, redirecting to home');
-      navigate('/', { replace: true });
+      navigate('/', {
+        replace: true
+      });
     } catch (error) {
       console.error('Logout error:', error);
     } finally {
       setIsLoggingOut(false);
     }
   };
-
   const getUserInitials = () => {
     if (user?.email) {
       return user.email.charAt(0).toUpperCase();
     }
     return 'U';
   };
-
   const getUserDisplayName = () => {
     if (user?.user_metadata?.first_name && user?.user_metadata?.last_name) {
       return `${user.user_metadata.first_name} ${user.user_metadata.last_name}`;
     }
     return user?.email || 'User';
   };
-
-  return (
-    <header className="fixed top-0 right-0 left-0 md:left-[var(--sidebar-width)] md:peer-data-[state=collapsed]:left-[var(--sidebar-width-icon)] h-16 bg-white/95 backdrop-blur-sm border-b border-gray-200/50 z-30 transition-[left] duration-300 ease-linear">
+  return <header className="fixed top-0 right-0 left-0 md:left-[var(--sidebar-width)] md:peer-data-[state=collapsed]:left-[var(--sidebar-width-icon)] h-16 bg-white/95 backdrop-blur-sm border-b border-gray-200/50 z-30 transition-[left] duration-300 ease-linear">
       <div className="flex items-center justify-between h-full px-6">
         {/* Left side with modern sidebar toggle */}
         <div className="flex items-center gap-4">
@@ -59,10 +51,7 @@ export const TopBar = () => {
           {/* Search */}
           <div className="relative hidden md:block">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-            <Input
-              placeholder="Search anything..."
-              className="pl-10 w-80 bg-gray-50/50 border-gray-200 focus:bg-white transition-colors"
-            />
+            <Input placeholder="Search anything..." className="pl-10 w-80 bg-gray-50/50 border-gray-200 focus:bg-white transition-colors" />
           </div>
         </div>
 
@@ -77,9 +66,7 @@ export const TopBar = () => {
           </Button>
 
           {/* Settings */}
-          <Button variant="ghost" size="sm" className="h-9 w-9 rounded-lg">
-            <Settings className="w-4 h-4" />
-          </Button>
+          
 
           {/* User Avatar with Dropdown */}
           <div className="flex items-center gap-2 pl-2 border-l border-gray-200">
@@ -109,11 +96,7 @@ export const TopBar = () => {
                   <span>Settings</span>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem 
-                  className="cursor-pointer text-red-600 focus:text-red-600"
-                  onClick={handleLogout}
-                  disabled={isLoggingOut}
-                >
+                <DropdownMenuItem className="cursor-pointer text-red-600 focus:text-red-600" onClick={handleLogout} disabled={isLoggingOut}>
                   <LogOut className="mr-2 h-4 w-4" />
                   <span>{isLoggingOut ? 'Signing out...' : 'Sign out'}</span>
                 </DropdownMenuItem>
@@ -122,6 +105,5 @@ export const TopBar = () => {
           </div>
         </div>
       </div>
-    </header>
-  );
+    </header>;
 };
