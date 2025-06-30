@@ -39,16 +39,38 @@ export const FieldsList: React.FC<FieldsListProps> = ({
   const [showImageUpload, setShowImageUpload] = useState<Set<number>>(new Set());
   const [pendingUpdates, setPendingUpdates] = useState<Record<string, any>>({});
   const fileInputRefs = useRef<{ [key: number]: HTMLInputElement | null }>({});
+  const previousFieldsLength = useRef(fields.length);
   
   const { mutate: updateProcedure } = useUpdateProcedure();
-  const debouncedUpdates = useDebounce(pendingUpdates, 1000);
+  const debouncedUpdates = useDebounce(pendingUpdates, 500); // Reduced debounce time for faster saves
 
-  // Auto-save field values when they change
+  // Auto-save when fields are added or when debounced updates occur
+  useEffect(() => {
+    if (procedureId && !isExecutionMode) {
+      // Check if a new field was added
+      const fieldsAdded = fields.length > previousFieldsLength.current;
+      
+      if (fieldsAdded || Object.keys(debouncedUpdates).length > 0) {
+        console.log('Auto-saving procedure fields:', { fieldsAdded, debouncedUpdates });
+        
+        updateProcedure({
+          id: procedureId,
+          updates: { fields: fields }
+        });
+        
+        // Clear pending updates after save
+        setPendingUpdates({});
+      }
+      
+      // Update the previous length reference
+      previousFieldsLength.current = fields.length;
+    }
+  }, [fields, debouncedUpdates, procedureId, isExecutionMode, updateProcedure]);
+
+  // Auto-save field values when they change (for execution mode)
   useEffect(() => {
     if (isExecutionMode && procedureId && Object.keys(debouncedUpdates).length > 0) {
-      // Save execution values to procedure_executions table
       console.log('Auto-saving execution values:', debouncedUpdates);
-      // This would typically save to a different table for execution data
       setPendingUpdates({});
     }
   }, [debouncedUpdates, isExecutionMode, procedureId]);
@@ -70,11 +92,12 @@ export const FieldsList: React.FC<FieldsListProps> = ({
       onFieldUpdate(index, updates);
     }
 
-    // Auto-save field configuration changes
+    // Trigger immediate auto-save for field configuration changes
     if (procedureId && !isExecutionMode) {
       const updatedFields = [...fields];
       updatedFields[index] = { ...updatedFields[index], ...updates };
       
+      console.log('Auto-saving field update:', updates);
       updateProcedure({
         id: procedureId,
         updates: { fields: updatedFields }
@@ -105,7 +128,7 @@ export const FieldsList: React.FC<FieldsListProps> = ({
     if (dragIndex !== dropIndex && onFieldReorder) {
       onFieldReorder(dragIndex, dropIndex);
       
-      // Auto-save reordered fields
+      // Auto-save reordered fields immediately
       if (procedureId && !isExecutionMode) {
         const reorderedFields = [...fields];
         const [movedField] = reorderedFields.splice(dragIndex, 1);
@@ -117,6 +140,7 @@ export const FieldsList: React.FC<FieldsListProps> = ({
           order_index: i
         }));
         
+        console.log('Auto-saving reordered fields');
         updateProcedure({
           id: procedureId,
           updates: { fields: updatedFields }
