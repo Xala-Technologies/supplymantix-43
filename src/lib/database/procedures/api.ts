@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import type { Procedure, ProcedureInsert, ProcedureUpdate, ProcedureFieldType } from "./types";
 
@@ -102,7 +103,8 @@ export const procedureApi = {
           field_type: field.field_type as ProcedureFieldType,
           procedure_id: field.procedure_id || procedure.id,
           created_at: field.created_at || new Date().toISOString(),
-          updated_at: field.updated_at || new Date().toISOString()
+          updated_at: field.updated_at || new Date().toISOString(),
+          options: (field.options as any) || {}
         })),
         executions_count: 0 // TODO: Add actual count from procedure_executions
       }));
@@ -154,7 +156,8 @@ export const procedureApi = {
           field_type: field.field_type as ProcedureFieldType,
           procedure_id: field.procedure_id || data.id,
           created_at: field.created_at || new Date().toISOString(),
-          updated_at: field.updated_at || new Date().toISOString()
+          updated_at: field.updated_at || new Date().toISOString(),
+          options: (field.options as any) || {}
         })),
         executions_count: 0 // TODO: Add actual count from procedure_executions
       };
