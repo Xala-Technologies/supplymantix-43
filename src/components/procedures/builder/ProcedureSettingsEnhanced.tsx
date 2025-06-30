@@ -243,11 +243,11 @@ export const ProcedureSettingsEnhanced: React.FC<ProcedureSettingsEnhancedProps>
             <RadioGroup
               value={formData.is_global ? "public" : "private"}
               onValueChange={(value) => onUpdate({ is_global: value === "public" })}
-              className="space-y-4"
+              className="space-y-6"
             >
               <div className="flex items-start space-x-3">
                 <RadioGroupItem value="private" id="private" className="mt-1" />
-                <div className="space-y-1">
+                <div className="space-y-1 flex-1">
                   <Label htmlFor="private" className="font-medium text-gray-900">
                     Keep Private
                   </Label>
@@ -259,7 +259,7 @@ export const ProcedureSettingsEnhanced: React.FC<ProcedureSettingsEnhancedProps>
 
               <div className="flex items-start space-x-3">
                 <RadioGroupItem value="public" id="public" className="mt-1" />
-                <div className="space-y-1">
+                <div className="space-y-1 flex-1">
                   <Label htmlFor="public" className="font-medium text-gray-900">
                     Make Public
                   </Label>
