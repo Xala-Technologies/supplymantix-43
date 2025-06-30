@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { DashboardLayout } from "@/components/Layout/DashboardLayout";
 import { StandardPageLayout, StandardPageHeader, StandardPageFilters, StandardPageContent } from "@/components/Layout/StandardPageLayout";
@@ -40,7 +41,6 @@ const Procedures = () => {
   const { data: proceduresData, isLoading } = useProceduresEnhanced({
     search: searchTerm || undefined,
     category: selectedCategory !== "all" ? selectedCategory : undefined,
-    categories: selectedCategories.length > 0 ? selectedCategories : undefined,
     is_global: showGlobalOnly || undefined
   });
 
