@@ -32,9 +32,22 @@ export const categoriesApi = {
   },
 
   async createCategory(categoryData: CreateCategoryData): Promise<Category> {
+    // Get the current user's tenant_id
+    const { data: userData, error: userError } = await supabase
+      .from('users')
+      .select('tenant_id')
+      .eq('id', (await supabase.auth.getUser()).data.user?.id)
+      .single();
+
+    if (userError) throw userError;
+    if (!userData?.tenant_id) throw new Error('User tenant not found');
+
     const { data, error } = await supabase
       .from('categories')
-      .insert(categoryData)
+      .insert({
+        ...categoryData,
+        tenant_id: userData.tenant_id
+      })
       .select()
       .single();
 
