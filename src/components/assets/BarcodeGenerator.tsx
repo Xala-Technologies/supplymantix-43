@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { QrCode, Barcode3, Keyboard } from 'lucide-react';
+import { QrCode, Barcode, Keyboard } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 
 interface BarcodeGeneratorProps {
@@ -77,13 +77,13 @@ export const BarcodeGenerator: React.FC<BarcodeGeneratorProps> = ({
               size="sm"
               onClick={generateBarcode}
             >
-              <Barcode3 className="h-4 w-4" />
+              <Barcode className="h-4 w-4" />
             </Button>
           </div>
           {barcode && (
             <div className="p-2 border rounded-lg text-center">
               <div className="w-full h-12 bg-gray-100 rounded border-2 border-dashed border-gray-300 flex items-center justify-center">
-                <Barcode3 className="h-6 w-6 text-gray-400" />
+                <Barcode className="h-6 w-6 text-gray-400" />
               </div>
               <p className="text-xs text-gray-500 mt-1">Barcode Preview</p>
             </div>

@@ -1,3 +1,4 @@
+
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -115,7 +116,14 @@ export const useAssets = (filters?: any) => {
         .eq("tenant_id", userRecord.tenant_id);
 
       if (error) throw error;
-      return data || [];
+      
+      // Transform the data to ensure parts is always an array
+      const transformedData = (data || []).map(asset => ({
+        ...asset,
+        parts: Array.isArray(asset.parts) ? asset.parts : (asset.parts ? [asset.parts] : [])
+      }));
+      
+      return transformedData;
     },
   });
 };
@@ -143,7 +151,14 @@ export const useCreateAsset = () => {
         .single();
 
       if (error) throw error;
-      return data;
+      
+      // Transform the response to ensure parts is always an array
+      const transformedData = {
+        ...data,
+        parts: Array.isArray(data.parts) ? data.parts : (data.parts ? [data.parts] : [])
+      };
+      
+      return transformedData;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["assets"] });
@@ -176,7 +191,14 @@ export const useUpdateAsset = () => {
         .single();
 
       if (error) throw error;
-      return data;
+      
+      // Transform the response to ensure parts is always an array
+      const transformedData = {
+        ...data,
+        parts: Array.isArray(data.parts) ? data.parts : (data.parts ? [data.parts] : [])
+      };
+      
+      return transformedData;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["assets"] });

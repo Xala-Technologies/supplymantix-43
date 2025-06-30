@@ -319,8 +319,8 @@ export const AssetDetailCard = ({ asset, onEdit, onDelete }: AssetDetailCardProp
                     <DialogTitle>Upload Documentation</DialogTitle>
                   </DialogHeader>
                   <AssetDocumentUpload 
-                    assetId={asset.id} 
-                    onUploadComplete={handleUploadComplete}
+                    documents={[]} 
+                    onDocumentsChanged={() => handleUploadComplete()}
                   />
                 </DialogContent>
               </Dialog>
