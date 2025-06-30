@@ -1,61 +1,24 @@
 
 export type ProcedureFieldType = 
-  | 'text'
+  | 'text' 
   | 'textarea' 
-  | 'number'
-  | 'amount'
-  | 'email'
-  | 'url'
-  | 'phone'
-  | 'checkbox'
-  | 'select'
-  | 'multiselect'
-  | 'radio'
-  | 'date'
-  | 'time'
-  | 'datetime'
-  | 'file'
-  | 'image'
-  | 'rating'
-  | 'slider'
-  | 'section'
-  | 'divider'
-  | 'info'
-  | 'inspection';
+  | 'number' 
+  | 'select' 
+  | 'multi_select' 
+  | 'checkbox' 
+  | 'date' 
+  | 'time' 
+  | 'file_upload' 
+  | 'signature';
 
 export interface ProcedureField {
   id: string;
   procedure_id: string;
-  field_type: ProcedureFieldType;
   label: string;
+  field_type: ProcedureFieldType;
   is_required: boolean;
   order_index: number;
-  options?: {
-    choices?: string[];
-    placeholder?: string;
-    helpText?: string;
-    defaultValue?: string | number;
-    minValue?: number;
-    maxValue?: number;
-    step?: number;
-    minRating?: number;
-    maxRating?: number;
-    points?: number;
-    passFailCriteria?: 'pass' | 'fail';
-    requiresSignature?: boolean;
-    allowMultipleFiles?: boolean;
-    acceptedFileTypes?: string[];
-    maxFileSize?: number;
-    showInSummary?: boolean;
-    attachedFile?: {
-      name: string;
-      url: string;
-      type: string;
-      size: number;
-    };
-    image?: string;
-    infoText?: string;
-  };
+  options: Record<string, any>;
   created_at: string;
   updated_at: string;
 }
@@ -65,66 +28,78 @@ export interface Procedure {
   tenant_id: string;
   title: string;
   description?: string;
-  category?: string;
-  tags?: string[];
-  is_global?: boolean;
+  asset_type?: string;
+  category: string;
+  tags: string[];
+  is_global: boolean;
+  template_data: Record<string, any>;
+  steps?: Record<string, any>;
+  estimated_duration?: number;
+  created_by?: string;
   created_at: string;
   updated_at: string;
+  asset_ids: string[];
+  location_ids: string[];
+  team_ids: string[];
+  fields?: ProcedureField[];
+  executions_count?: number;
 }
 
 export interface ProcedureInsert {
   title: string;
   description?: string;
+  asset_type?: string;
   category?: string;
   tags?: string[];
   is_global?: boolean;
-  tenant_id?: string;
-  fields?: ProcedureField[];
+  template_data?: Record<string, any>;
+  steps?: Record<string, any>;
+  estimated_duration?: number;
+  asset_ids?: string[];
+  location_ids?: string[];
+  team_ids?: string[];
+  fields?: Omit<ProcedureField, 'id' | 'procedure_id' | 'created_at' | 'updated_at'>[];
 }
 
 export interface ProcedureUpdate {
   title?: string;
   description?: string;
+  asset_type?: string;
   category?: string;
   tags?: string[];
   is_global?: boolean;
-  fields?: ProcedureField[];
+  template_data?: Record<string, any>;
+  steps?: Record<string, any>;
+  estimated_duration?: number;
+  asset_ids?: string[];
+  location_ids?: string[];
+  team_ids?: string[];
 }
 
 export interface ProcedureExecution {
-  id?: string;
+  id: string;
   procedure_id: string;
   work_order_id?: string;
   user_id?: string;
   tenant_id: string;
-  answers: any;
-  score?: number;
-  status: 'in_progress' | 'completed' | 'cancelled';
-  started_at?: string;
+  answers: Record<string, any>;
+  score: number;
+  status: string;
+  started_at: string;
   completed_at?: string;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface ProcedureTemplate {
-  id?: string;
+  id: string;
   tenant_id: string;
   name: string;
   description?: string;
-  template_data: any;
-  tags?: string[];
+  template_data: Record<string, any>;
+  tags: string[];
   is_public: boolean;
   created_by?: string;
-}
-
-export interface ProcedureWithFields {
-  id: string;
-  tenant_id: string;
-  title: string;
-  description?: string;
-  category?: string;
-  tags?: string[];
-  is_global?: boolean;
   created_at: string;
   updated_at: string;
-  fields?: ProcedureField[];
-  executions_count?: number;
 }

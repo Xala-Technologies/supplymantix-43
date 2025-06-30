@@ -98,6 +98,9 @@ export const coreApi = {
       // Transform the data to match expected format
       const procedures = (data || []).map(procedure => ({
         ...procedure,
+        asset_ids: procedure.asset_ids || [],
+        location_ids: procedure.location_ids || [],
+        team_ids: procedure.team_ids || [],
         fields: (procedure.procedure_fields || []).map(field => ({
           ...field,
           field_type: field.field_type as ProcedureFieldType,
@@ -151,6 +154,9 @@ export const coreApi = {
 
       return {
         ...data,
+        asset_ids: data.asset_ids || [],
+        location_ids: data.location_ids || [],
+        team_ids: data.team_ids || [],
         fields: (data.procedure_fields || []).map(field => ({
           ...field,
           field_type: field.field_type as ProcedureFieldType,
@@ -186,7 +192,13 @@ export const coreApi = {
 
       const { data, error } = await supabase
         .from("procedures")
-        .insert({ ...procedureData, tenant_id: userRecord.tenant_id })
+        .insert({ 
+          ...procedureData, 
+          tenant_id: userRecord.tenant_id,
+          asset_ids: procedureData.asset_ids || [],
+          location_ids: procedureData.location_ids || [],
+          team_ids: procedureData.team_ids || []
+        })
         .select()
         .single();
 

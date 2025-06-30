@@ -1792,6 +1792,7 @@ export type Database = {
       }
       procedures: {
         Row: {
+          asset_ids: string[] | null
           asset_type: string | null
           category: string | null
           created_at: string | null
@@ -1800,14 +1801,17 @@ export type Database = {
           estimated_duration: number | null
           id: string
           is_global: boolean | null
+          location_ids: string[] | null
           steps: Json | null
           tags: string[] | null
+          team_ids: string[] | null
           template_data: Json | null
           tenant_id: string
           title: string
           updated_at: string | null
         }
         Insert: {
+          asset_ids?: string[] | null
           asset_type?: string | null
           category?: string | null
           created_at?: string | null
@@ -1816,14 +1820,17 @@ export type Database = {
           estimated_duration?: number | null
           id?: string
           is_global?: boolean | null
+          location_ids?: string[] | null
           steps?: Json | null
           tags?: string[] | null
+          team_ids?: string[] | null
           template_data?: Json | null
           tenant_id: string
           title: string
           updated_at?: string | null
         }
         Update: {
+          asset_ids?: string[] | null
           asset_type?: string | null
           category?: string | null
           created_at?: string | null
@@ -1832,8 +1839,10 @@ export type Database = {
           estimated_duration?: number | null
           id?: string
           is_global?: boolean | null
+          location_ids?: string[] | null
           steps?: Json | null
           tags?: string[] | null
+          team_ids?: string[] | null
           template_data?: Json | null
           tenant_id?: string
           title?: string
