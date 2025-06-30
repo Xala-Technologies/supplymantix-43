@@ -1,5 +1,5 @@
 
-import React, { createContext, useContext } from 'react';
+import React, { createContext, useContext, useMemo } from 'react';
 import { AuthContextType } from '@/types/auth';
 import { useAuthState } from '@/hooks/useAuthState';
 import { useAuthActions } from '@/hooks/useAuthActions';
@@ -18,14 +18,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const { user, session, loading, initialized } = useAuthState();
   const { signIn, signUp, signOut } = useAuthActions();
 
-  const value: AuthContextType = {
+  const value: AuthContextType = useMemo(() => ({
     user,
     session,
     loading: loading || !initialized,
     signIn,
     signUp,
     signOut,
-  };
+  }), [user, session, loading, initialized, signIn, signUp, signOut]);
 
   console.log('AuthProvider - User:', user?.email, 'Loading:', loading, 'Initialized:', initialized, 'Session:', !!session);
 

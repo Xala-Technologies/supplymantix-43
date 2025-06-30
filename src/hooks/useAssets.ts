@@ -15,18 +15,12 @@ export const useAssets = (filters?: {
   const { user, loading: authLoading } = useAuth();
   
   return useQuery({
-    queryKey: ["assets", filters, user?.id],
+    queryKey: ["assets", filters],
     queryFn: () => assetsApi.getAssets(filters),
     enabled: !authLoading && !!user,
     staleTime: 1000 * 60 * 5, // 5 minutes
     refetchOnWindowFocus: false,
-    retry: (failureCount, error: any) => {
-      // Don't retry if it's an auth error
-      if (error?.code === 'PGRST301' || error?.message?.includes('JWT')) {
-        return false;
-      }
-      return failureCount < 3;
-    },
+    retry: 2,
   });
 };
 
@@ -35,7 +29,7 @@ export const useAsset = (id: string) => {
   const { user, loading: authLoading } = useAuth();
   
   return useQuery({
-    queryKey: ["assets", id, user?.id],
+    queryKey: ["assets", id],
     queryFn: () => assetsApi.getAsset(id),
     enabled: !authLoading && !!user && !!id,
   });
@@ -100,7 +94,7 @@ export const useAssetsByLocation = (location: string) => {
   const { user, loading: authLoading } = useAuth();
   
   return useQuery({
-    queryKey: ["assets", "location", location, user?.id],
+    queryKey: ["assets", "location", location],
     queryFn: () => assetsApi.getAssetsByLocation(location),
     enabled: !authLoading && !!user && !!location,
   });
@@ -111,7 +105,7 @@ export const useAssetsByCategory = (category: string) => {
   const { user, loading: authLoading } = useAuth();
   
   return useQuery({
-    queryKey: ["assets", "category", category, user?.id],
+    queryKey: ["assets", "category", category],
     queryFn: () => assetsApi.getAssetsByCategory(category),
     enabled: !authLoading && !!user && !!category,
   });
@@ -122,7 +116,7 @@ export const useAssetStatistics = () => {
   const { user, loading: authLoading } = useAuth();
   
   return useQuery({
-    queryKey: ["assets", "statistics", user?.id],
+    queryKey: ["assets", "statistics"],
     queryFn: () => assetsApi.getAssetStatistics(),
     enabled: !authLoading && !!user,
   });
