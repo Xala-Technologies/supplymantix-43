@@ -1,4 +1,3 @@
-
 import { DashboardLayout } from "@/components/Layout/DashboardLayout";
 import { StandardPageLayout, StandardPageHeader, StandardPageContent } from "@/components/Layout/StandardPageLayout";
 import { EnhancedDashboardMetrics } from "@/components/dashboard/EnhancedDashboardMetrics";
@@ -122,7 +121,7 @@ const sampleWorkOrders: WorkOrder[] = [
 ];
 
 export default function Dashboard() {
-  const { data: workOrders, isLoading, error } = useWorkOrdersIntegration();
+  const { data: workOrders, isLoading: workOrdersLoading, error } = useWorkOrdersIntegration();
   const { user, loading: authLoading } = useAuth();
   const [isCreateLoading, setIsCreateLoading] = useState(false);
   const navigate = useNavigate();
@@ -148,7 +147,7 @@ export default function Dashboard() {
     navigate('/dashboard/organization');
   };
 
-  console.log('Dashboard rendering, authLoading:', authLoading, 'user:', user?.email, 'isLoading:', isLoading, 'workOrders:', workOrders, 'error:', error);
+  console.log('Dashboard rendering, authLoading:', authLoading, 'user:', user?.email, 'workOrdersLoading:', workOrdersLoading, 'workOrders:', workOrders, 'error:', error);
 
   // Show loading while authentication is being checked
   if (authLoading) {
@@ -159,22 +158,6 @@ export default function Dashboard() {
           <span className="text-gray-600 text-lg">Loading dashboard...</span>
         </div>
       </div>
-    );
-  }
-
-  // Show loading while data is being fetched (but only for a short time)
-  if (isLoading) {
-    return (
-      <DashboardLayout>
-        <StandardPageLayout>
-          <div className="h-full flex items-center justify-center">
-            <div className="text-center">
-              <Loader2 className="h-8 w-8 mx-auto mb-4 animate-spin text-blue-600" />
-              <p className="text-slate-600">Loading dashboard data...</p>
-            </div>
-          </div>
-        </StandardPageLayout>
-      </DashboardLayout>
     );
   }
 

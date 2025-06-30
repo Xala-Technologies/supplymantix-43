@@ -15,19 +15,19 @@ export const useAuth = () => {
 };
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { user, session, loading } = useAuthState();
+  const { user, session, loading, initialized } = useAuthState();
   const { signIn, signUp, signOut } = useAuthActions();
 
   const value: AuthContextType = {
     user,
     session,
-    loading,
+    loading: loading || !initialized,
     signIn,
     signUp,
     signOut,
   };
 
-  console.log('AuthProvider - User:', user?.email, 'Loading:', loading, 'Session:', !!session);
+  console.log('AuthProvider - User:', user?.email, 'Loading:', loading, 'Initialized:', initialized, 'Session:', !!session);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

@@ -8,6 +8,7 @@ import { useState } from "react";
 import { ChevronLeft, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAssets, useCreateAsset, useUpdateAsset, useDeleteAsset, type Asset as DatabaseAsset } from "@/hooks/useAssets";
+import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 
 // UI Asset type for AssetsGrid component
@@ -48,6 +49,7 @@ interface DetailAsset {
 type ViewMode = 'grid' | 'detail' | 'create' | 'edit';
 
 export default function Assets() {
+  const { user, loading: authLoading } = useAuth();
   const [selectedAsset, setSelectedAsset] = useState<DatabaseAsset | null>(null);
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
   const [filters, setFilters] = useState({
@@ -58,13 +60,13 @@ export default function Assets() {
     criticality: [] as string[]
   });
 
-  // API hooks
+  // API hooks - these will now wait for auth to be ready
   const { data: assets = [], isLoading, error, refetch } = useAssets(filters);
   const createAsset = useCreateAsset();
   const updateAsset = useUpdateAsset();
   const deleteAsset = useDeleteAsset();
 
-  console.log('Assets data:', assets);
+  console.log('Assets page - authLoading:', authLoading, 'user:', user?.email, 'assetsLoading:', isLoading, 'assets:', assets);
 
   // Convert database assets to UI assets
   const convertToUIAssets = (dbAssets: DatabaseAsset[]): UIAsset[] => {
@@ -196,6 +198,24 @@ export default function Assets() {
   const handleFiltersChange = (newFilters: typeof filters) => {
     setFilters(newFilters);
   };
+
+  // Show loading while authentication is being checked
+  if (authLoading) {
+    return (
+      <DashboardLayout>
+        <StandardPageLayout>
+          <StandardPageContent>
+            <div className="h-full flex items-center justify-center">
+              <div className="text-center">
+                <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                <p className="text-slate-600">Loading assets...</p>
+              </div>
+            </div>
+          </StandardPageContent>
+        </StandardPageLayout>
+      </DashboardLayout>
+    );
+  }
 
   if (error) {
     return (

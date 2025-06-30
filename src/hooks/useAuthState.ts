@@ -7,6 +7,7 @@ export const useAuthState = () => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+  const [initialized, setInitialized] = useState(false);
 
   useEffect(() => {
     console.log('Setting up auth state listener...');
@@ -19,6 +20,7 @@ export const useAuthState = () => {
         setSession(session);
         setUser(session?.user ?? null);
         setLoading(false);
+        setInitialized(true);
       }
     );
 
@@ -37,6 +39,7 @@ export const useAuthState = () => {
         console.error('Error in getSession:', error);
       } finally {
         setLoading(false);
+        setInitialized(true);
       }
     };
 
@@ -48,5 +51,5 @@ export const useAuthState = () => {
     };
   }, []);
 
-  return { user, session, loading };
+  return { user, session, loading, initialized };
 };

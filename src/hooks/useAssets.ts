@@ -1,6 +1,8 @@
+
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { assetsApi, type Asset, type AssetInsert, type AssetUpdate } from "@/lib/database/assets";
 import { toast } from "sonner";
+import { useAuth } from "@/contexts/AuthContext";
 
 // Get all assets with optional filters
 export const useAssets = (filters?: {
@@ -10,20 +12,32 @@ export const useAssets = (filters?: {
   location?: string[];
   criticality?: string[];
 }) => {
+  const { user, loading: authLoading } = useAuth();
+  
   return useQuery({
-    queryKey: ["assets", filters],
+    queryKey: ["assets", filters, user?.id],
     queryFn: () => assetsApi.getAssets(filters),
+    enabled: !authLoading && !!user,
     staleTime: 1000 * 60 * 5, // 5 minutes
     refetchOnWindowFocus: false,
+    retry: (failureCount, error: any) => {
+      // Don't retry if it's an auth error
+      if (error?.code === 'PGRST301' || error?.message?.includes('JWT')) {
+        return false;
+      }
+      return failureCount < 3;
+    },
   });
 };
 
 // Get single asset
 export const useAsset = (id: string) => {
+  const { user, loading: authLoading } = useAuth();
+  
   return useQuery({
-    queryKey: ["assets", id],
+    queryKey: ["assets", id, user?.id],
     queryFn: () => assetsApi.getAsset(id),
-    enabled: !!id,
+    enabled: !authLoading && !!user && !!id,
   });
 };
 
@@ -83,27 +97,34 @@ export const useDeleteAsset = () => {
 
 // Get assets by location
 export const useAssetsByLocation = (location: string) => {
+  const { user, loading: authLoading } = useAuth();
+  
   return useQuery({
-    queryKey: ["assets", "location", location],
+    queryKey: ["assets", "location", location, user?.id],
     queryFn: () => assetsApi.getAssetsByLocation(location),
-    enabled: !!location,
+    enabled: !authLoading && !!user && !!location,
   });
 };
 
 // Get assets by category
 export const useAssetsByCategory = (category: string) => {
+  const { user, loading: authLoading } = useAuth();
+  
   return useQuery({
-    queryKey: ["assets", "category", category],
+    queryKey: ["assets", "category", category, user?.id],
     queryFn: () => assetsApi.getAssetsByCategory(category),
-    enabled: !!category,
+    enabled: !authLoading && !!user && !!category,
   });
 };
 
 // Get asset statistics
 export const useAssetStatistics = () => {
+  const { user, loading: authLoading } = useAuth();
+  
   return useQuery({
-    queryKey: ["assets", "statistics"],
+    queryKey: ["assets", "statistics", user?.id],
     queryFn: () => assetsApi.getAssetStatistics(),
+    enabled: !authLoading && !!user,
   });
 };
 
