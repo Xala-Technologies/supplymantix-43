@@ -1,6 +1,5 @@
-
 import { supabase } from "@/integrations/supabase/client";
-import type { Procedure, ProcedureInsert, ProcedureUpdate } from "./types";
+import type { Procedure, ProcedureInsert, ProcedureUpdate, ProcedureFieldType } from "./types";
 
 export const procedureApi = {
   // Get procedures with optional filters
@@ -100,6 +99,7 @@ export const procedureApi = {
         ...procedure,
         fields: (procedure.procedure_fields || []).map(field => ({
           ...field,
+          field_type: field.field_type as ProcedureFieldType,
           procedure_id: field.procedure_id || procedure.id,
           created_at: field.created_at || new Date().toISOString(),
           updated_at: field.updated_at || new Date().toISOString()
@@ -151,6 +151,7 @@ export const procedureApi = {
         ...data,
         fields: (data.procedure_fields || []).map(field => ({
           ...field,
+          field_type: field.field_type as ProcedureFieldType,
           procedure_id: field.procedure_id || data.id,
           created_at: field.created_at || new Date().toISOString(),
           updated_at: field.updated_at || new Date().toISOString()
@@ -177,13 +178,31 @@ export const procedureApi = {
 
       if (!userRecord) throw new Error("User record not found");
 
+      // Separate fields from procedure data
+      const { fields, ...procedureData } = procedure;
+
       const { data, error } = await supabase
         .from("procedures")
-        .insert({ ...procedure, tenant_id: userRecord.tenant_id })
+        .insert({ ...procedureData, tenant_id: userRecord.tenant_id })
         .select()
         .single();
 
       if (error) throw error;
+
+      // Insert fields if provided
+      if (fields && fields.length > 0) {
+        const fieldsToInsert = fields.map(field => ({
+          ...field,
+          procedure_id: data.id,
+        }));
+
+        const { error: fieldsError } = await supabase
+          .from("procedure_fields")
+          .insert(fieldsToInsert);
+
+        if (fieldsError) throw fieldsError;
+      }
+
       return data;
     } catch (error) {
       console.error("Error creating procedure:", error);
@@ -275,12 +294,21 @@ export const procedureApi = {
       const { data: userData } = await supabase.auth.getUser();
       if (!userData.user) throw new Error("User not authenticated");
 
+      const { data: userRecord } = await supabase
+        .from("users")
+        .select("tenant_id")
+        .eq("id", userData.user.id)
+        .single();
+
+      if (!userRecord) throw new Error("User record not found");
+
       const { data, error } = await supabase
         .from("procedure_executions")
         .insert({
           procedure_id: procedureId,
           user_id: userData.user.id,
           work_order_id: workOrderId,
+          tenant_id: userRecord.tenant_id,
           status: "in_progress",
           started_at: new Date().toISOString(),
         })

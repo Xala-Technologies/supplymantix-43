@@ -79,6 +79,7 @@ export interface ProcedureInsert {
   tags?: string[];
   is_global?: boolean;
   tenant_id?: string;
+  fields?: ProcedureField[];
 }
 
 export interface ProcedureUpdate {

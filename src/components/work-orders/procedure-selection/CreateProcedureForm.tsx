@@ -8,7 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Plus, Trash2, Save } from 'lucide-react';
 import { useCreateProcedure } from '@/hooks/useProceduresEnhanced';
-import { ProcedureField } from '@/lib/database/procedures-enhanced';
+import { ProcedureField, ProcedureFieldType } from '@/lib/database/procedures/types';
 
 interface CreateProcedureFormProps {
   onSuccess?: (procedure: any) => void;
@@ -22,7 +22,7 @@ const FIELD_TYPES = [
   { value: 'checkbox', label: 'Checkbox' },
   { value: 'select', label: 'Dropdown' },
   { value: 'section', label: 'Section Header' }
-];
+] as const;
 
 const CATEGORIES = [
   'Inspection',
@@ -53,7 +53,7 @@ export const CreateProcedureForm: React.FC<CreateProcedureFormProps> = ({
       id: crypto.randomUUID(),
       procedure_id: '',
       label: 'New Field',
-      field_type: 'text',
+      field_type: 'text' as ProcedureFieldType,
       is_required: false,
       order_index: formData.fields.length,
       options: {},
@@ -183,7 +183,7 @@ export const CreateProcedureForm: React.FC<CreateProcedureFormProps> = ({
                             <Select
                               value={field.field_type}
                               onValueChange={(value) =>
-                                updateField(index, { field_type: value as ProcedureField['field_type'] })
+                                updateField(index, { field_type: value as ProcedureFieldType })
                               }
                             >
                               <SelectTrigger>
