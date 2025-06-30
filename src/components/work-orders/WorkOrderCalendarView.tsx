@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { WorkOrder } from "@/features/workOrders/types";
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, addMonths, subMonths, startOfWeek, endOfWeek } from "date-fns";
@@ -28,8 +27,9 @@ export const WorkOrderCalendarView = ({
 
   const monthStart = startOfMonth(currentDate);
   const monthEnd = endOfMonth(currentDate);
-  const calendarStart = startOfWeek(monthStart);
-  const calendarEnd = endOfWeek(monthEnd);
+  // Start the week on Monday (weekStartsOn: 1)
+  const calendarStart = startOfWeek(monthStart, { weekStartsOn: 1 });
+  const calendarEnd = endOfWeek(monthEnd, { weekStartsOn: 1 });
   const calendarDays = eachDayOfInterval({ start: calendarStart, end: calendarEnd });
 
   const getWorkOrdersForDay = (day: Date) => {

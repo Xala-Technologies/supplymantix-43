@@ -1,6 +1,6 @@
 
 export const WeekdayHeader = () => {
-  const weekdays = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+  const weekdays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
   
   return (
     <div className="grid grid-cols-7 gap-2 mb-4">
