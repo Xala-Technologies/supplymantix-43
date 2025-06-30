@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Plus, Tags } from "lucide-react";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { useCategories, useCreateCategory, useUpdateCategory, useDeleteCategory } from "@/hooks/useCategories";
+import { usePredefinedCategories } from "@/hooks/usePredefinedCategories";
 import { CategoryForm } from "@/components/categories/CategoryForm";
 import { CategoryCard } from "@/components/categories/CategoryCard";
 import { Category, CreateCategoryData } from "@/lib/database/categories";
@@ -16,6 +17,7 @@ const Categories = () => {
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
 
   const { data: categories, isLoading } = useCategories();
+  const { isCreating } = usePredefinedCategories();
   const createCategory = useCreateCategory();
   const updateCategory = useUpdateCategory();
   const deleteCategory = useDeleteCategory();
@@ -49,7 +51,7 @@ const Categories = () => {
     });
   };
 
-  if (isLoading) {
+  if (isLoading || isCreating) {
     return (
       <DashboardLayout>
         <StandardPageLayout>
@@ -57,7 +59,9 @@ const Categories = () => {
             <div className="flex items-center justify-center h-[60vh]">
               <div className="text-center space-y-3">
                 <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto"></div>
-                <p className="text-muted-foreground text-sm">Loading categories...</p>
+                <p className="text-muted-foreground text-sm">
+                  {isCreating ? 'Setting up categories...' : 'Loading categories...'}
+                </p>
               </div>
             </div>
           </StandardPageContent>
