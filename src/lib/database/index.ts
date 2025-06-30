@@ -1,6 +1,8 @@
 
 import { workOrdersApi } from './work-orders';
 import { purchaseOrdersApi } from './purchase-orders';
+import { organizationsApi } from './organizations';
+import { proceduresApi } from './procedures';
 
 export const databaseApi = {
   // Work Orders
@@ -17,6 +19,23 @@ export const databaseApi = {
   updatePurchaseOrder: purchaseOrdersApi.updatePurchaseOrder,
   deletePurchaseOrder: purchaseOrdersApi.deletePurchaseOrder,
   getPurchaseOrderLineItems: purchaseOrdersApi.getPurchaseOrderLineItems,
+
+  // Organizations
+  getOrganizations: organizationsApi.getOrganizations,
+  createOrganization: organizationsApi.createOrganization,
+  updateOrganization: organizationsApi.updateOrganization,
+  getOrganizationMembers: organizationsApi.getOrganizationMembers,
+  inviteOrganizationMember: organizationsApi.inviteOrganizationMember,
+  updateOrganizationMember: organizationsApi.updateOrganizationMember,
+  removeOrganizationMember: organizationsApi.removeOrganizationMember,
+  getInvitationByToken: organizationsApi.getInvitationByToken,
+  acceptInvitation: organizationsApi.acceptInvitation,
+
+  // Procedures
+  getProcedures: proceduresApi.getProcedures,
+  createProcedure: proceduresApi.createProcedure,
+  updateProcedure: proceduresApi.updateProcedure,
+  deleteProcedure: proceduresApi.deleteProcedure,
 
   // Stub implementations for missing methods
   getInventoryItems: async () => {

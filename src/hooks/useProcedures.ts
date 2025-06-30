@@ -13,7 +13,7 @@ export const useProcedures = () => {
 export const useProcedure = (id: string) => {
   return useQuery({
     queryKey: ["procedure", id],
-    queryFn: () => databaseApi.getProcedures().then(procedures => procedures.find(p => p.id === id)),
+    queryFn: () => databaseApi.getProcedures().then((procedures: any[]) => procedures.find((p: any) => p.id === id)),
     enabled: !!id,
   });
 };

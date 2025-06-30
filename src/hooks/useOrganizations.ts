@@ -50,8 +50,10 @@ export const useInviteOrganizationMember = () => {
   
   return useMutation({
     mutationFn: databaseApi.inviteOrganizationMember,
-    onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ["organization-members", data.organization_id] });
+    onSuccess: (data: any) => {
+      if (data?.organization_id) {
+        queryClient.invalidateQueries({ queryKey: ["organization-members", data.organization_id] });
+      }
     },
   });
 };
@@ -64,7 +66,7 @@ export const useUpdateOrganizationMember = () => {
       memberId: string; 
       updates: Tables["organization_members"]["Update"] 
     }) => databaseApi.updateOrganizationMember(memberId, updates),
-    onSuccess: (data) => {
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["organization-members"] });
     },
   });
