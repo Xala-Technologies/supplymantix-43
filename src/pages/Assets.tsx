@@ -94,20 +94,30 @@ export default function Assets() {
       location: dbAsset.location || 'Unassigned',
       category: dbAsset.category || 'Equipment',
       criticality: dbAsset.criticality || 'Medium',
-      manufacturer: 'Unknown',
-      model: 'Unknown',
-      serialNumber: dbAsset.asset_tag || 'N/A',
-      installDate: dbAsset.created_at?.split('T')[0] || '2024-01-01',
-      lastMaintenance: '2024-06-01',
-      nextMaintenance: '2024-07-01',
-      workOrders: 0,
-      totalDowntime: '0h',
+      manufacturer: dbAsset.manufacturer || 'Unknown',
+      model: dbAsset.model || 'Unknown',
+      serialNumber: dbAsset.serial_number || 'N/A',
+      installDate: dbAsset.purchase_date || dbAsset.created_at?.split('T')[0] || '2024-01-01',
+      lastMaintenance: '2024-06-01', // This would come from maintenance records
+      nextMaintenance: '2024-07-01', // This would be calculated based on maintenance schedule
+      workOrders: 0, // This would come from work orders count
+      totalDowntime: '0h', // This would be calculated from work orders
       specifications: {
-        'Power': 'N/A',
-        'Weight': 'N/A',
-        'Dimensions': 'N/A'
+        'Manufacturer': dbAsset.manufacturer || 'N/A',
+        'Model': dbAsset.model || 'N/A',
+        'Year': dbAsset.year ? dbAsset.year.toString() : 'N/A',
+        'Serial Number': dbAsset.serial_number || 'N/A',
+        'VIN': dbAsset.vin_number || 'N/A',
+        'Purchase Price': dbAsset.purchase_price ? `$${dbAsset.purchase_price.toLocaleString()}` : 'N/A',
+        'Annual Depreciation': dbAsset.annual_depreciation_value ? `$${dbAsset.annual_depreciation_value.toLocaleString()}` : 'N/A',
+        'Warranty End': dbAsset.warranty_end_date || 'N/A',
+        'Replacement Date': dbAsset.replacement_date || 'N/A',
+        'Vendor': dbAsset.vendor || 'N/A',
+        'Asset Type': dbAsset.asset_type || 'N/A',
+        'QR Code': dbAsset.qr_code || 'N/A',
+        'Barcode': dbAsset.barcode || 'N/A'
       },
-      documentation: []
+      documentation: [] // This would come from asset documents
     };
   };
 
