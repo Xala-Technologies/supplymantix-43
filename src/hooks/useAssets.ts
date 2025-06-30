@@ -1,100 +1,29 @@
 
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { assetsApi, type Asset, type AssetInsert, type AssetUpdate } from "@/lib/database/assets";
-import { toast } from "sonner";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
-// Re-export types for components that import them from this hook
-export type { Asset, AssetInsert, AssetUpdate };
-
-export const useAssets = (filters?: {
-  search?: string;
-  status?: string[];
-  category?: string[];
-  location?: string[];
-  criticality?: string[];
-}) => {
+export const useAssets = () => {
   return useQuery({
-    queryKey: ['assets', filters],
-    queryFn: () => assetsApi.getAssets(filters),
-    staleTime: 1000 * 60 * 5, // 5 minutes
-    retry: 1,
-  });
-};
+    queryKey: ["assets"],
+    queryFn: async () => {
+      const { data: userData } = await supabase.auth.getUser();
+      if (!userData.user) throw new Error("User not authenticated");
 
-export const useAsset = (id: string) => {
-  return useQuery({
-    queryKey: ['assets', id],
-    queryFn: () => assetsApi.getAsset(id),
-    enabled: !!id,
-  });
-};
+      const { data: userRecord } = await supabase
+        .from("users")
+        .select("tenant_id")
+        .eq("id", userData.user.id)
+        .single();
 
-export const useCreateAsset = () => {
-  const queryClient = useQueryClient();
-  
-  return useMutation({
-    mutationFn: assetsApi.createAsset,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['assets'] });
-      toast.success('Asset created successfully');
+      if (!userRecord) throw new Error("User record not found");
+
+      const { data, error } = await supabase
+        .from("assets")
+        .select("*")
+        .eq("tenant_id", userRecord.tenant_id);
+
+      if (error) throw error;
+      return data || [];
     },
-    onError: (error: Error) => {
-      toast.error(`Failed to create asset: ${error.message}`);
-    }
-  });
-};
-
-export const useUpdateAsset = () => {
-  const queryClient = useQueryClient();
-  
-  return useMutation({
-    mutationFn: ({ id, updates }: { id: string; updates: any }) => 
-      assetsApi.updateAsset(id, updates),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['assets'] });
-      toast.success('Asset updated successfully');
-    },
-    onError: (error: Error) => {
-      toast.error(`Failed to update asset: ${error.message}`);
-    }
-  });
-};
-
-export const useDeleteAsset = () => {
-  const queryClient = useQueryClient();
-  
-  return useMutation({
-    mutationFn: assetsApi.deleteAsset,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['assets'] });
-      toast.success('Asset deleted successfully');
-    },
-    onError: (error: Error) => {
-      toast.error(`Failed to delete asset: ${error.message}`);
-    }
-  });
-};
-
-export const useAssetsByLocation = (locationId: string) => {
-  return useQuery({
-    queryKey: ['assets', 'location', locationId],
-    queryFn: () => assetsApi.getAssetsByLocation(locationId),
-    enabled: !!locationId,
-  });
-};
-
-export const useAssetsByCategory = (category: string) => {
-  return useQuery({
-    queryKey: ['assets', 'category', category],
-    queryFn: () => assetsApi.getAssetsByCategory(category),
-    enabled: !!category,
-  });
-};
-
-export const useAssetStatistics = () => {
-  return useQuery({
-    queryKey: ['assets', 'statistics'],
-    queryFn: assetsApi.getAssetStatistics,
-    staleTime: 1000 * 60 * 10, // 10 minutes
   });
 };

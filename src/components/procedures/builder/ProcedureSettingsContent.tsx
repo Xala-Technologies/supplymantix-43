@@ -97,7 +97,7 @@ export const ProcedureSettingsContent: React.FC<ProcedureSettingsContentProps> =
                 <SelectContent>
                   {/* Use database categories first, then fallback to hardcoded ones */}
                   {categoriesLoading ? (
-                    <SelectItem value="" disabled>Loading categories...</SelectItem>
+                    <SelectItem value="loading">Loading categories...</SelectItem>
                   ) : (
                     <>
                       {categories?.map(category => (
@@ -129,7 +129,7 @@ export const ProcedureSettingsContent: React.FC<ProcedureSettingsContentProps> =
                 </SelectTrigger>
                 <SelectContent>
                   {assetsLoading ? (
-                    <SelectItem value="" disabled>Loading assets...</SelectItem>
+                    <SelectItem value="loading">Loading assets...</SelectItem>
                   ) : assets && assets.length > 0 ? (
                     assets.map(asset => (
                       <SelectItem key={asset.id} value={asset.id}>
@@ -137,7 +137,7 @@ export const ProcedureSettingsContent: React.FC<ProcedureSettingsContentProps> =
                       </SelectItem>
                     ))
                   ) : (
-                    <SelectItem value="" disabled>No assets found</SelectItem>
+                    <SelectItem value="no-assets">No assets found</SelectItem>
                   )}
                 </SelectContent>
               </Select>
@@ -156,7 +156,7 @@ export const ProcedureSettingsContent: React.FC<ProcedureSettingsContentProps> =
                 </SelectTrigger>
                 <SelectContent>
                   {locationsLoading ? (
-                    <SelectItem value="" disabled>Loading locations...</SelectItem>
+                    <SelectItem value="loading">Loading locations...</SelectItem>
                   ) : locations && locations.length > 0 ? (
                     locations.map(location => (
                       <SelectItem key={location.id} value={location.id}>
@@ -164,7 +164,7 @@ export const ProcedureSettingsContent: React.FC<ProcedureSettingsContentProps> =
                       </SelectItem>
                     ))
                   ) : (
-                    <SelectItem value="" disabled>No locations found</SelectItem>
+                    <SelectItem value="no-locations">No locations found</SelectItem>
                   )}
                 </SelectContent>
               </Select>

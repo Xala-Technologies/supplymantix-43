@@ -1,57 +1,29 @@
 
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { categoriesApi, CreateCategoryData, UpdateCategoryData } from "@/lib/database/categories";
-import { toast } from "sonner";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 export const useCategories = () => {
   return useQuery({
-    queryKey: ['categories'],
-    queryFn: categoriesApi.getCategories
-  });
-};
+    queryKey: ["categories"],
+    queryFn: async () => {
+      const { data: userData } = await supabase.auth.getUser();
+      if (!userData.user) throw new Error("User not authenticated");
 
-export const useCreateCategory = () => {
-  const queryClient = useQueryClient();
-  
-  return useMutation({
-    mutationFn: (data: CreateCategoryData) => categoriesApi.createCategory(data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['categories'] });
-      toast.success('Category created successfully');
-    },
-    onError: (error: Error) => {
-      toast.error(`Failed to create category: ${error.message}`);
-    }
-  });
-};
+      const { data: userRecord } = await supabase
+        .from("users")
+        .select("tenant_id")
+        .eq("id", userData.user.id)
+        .single();
 
-export const useUpdateCategory = () => {
-  const queryClient = useQueryClient();
-  
-  return useMutation({
-    mutationFn: ({ id, updates }: { id: string; updates: UpdateCategoryData }) => 
-      categoriesApi.updateCategory(id, updates),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['categories'] });
-      toast.success('Category updated successfully');
-    },
-    onError: (error: Error) => {
-      toast.error(`Failed to update category: ${error.message}`);
-    }
-  });
-};
+      if (!userRecord) throw new Error("User record not found");
 
-export const useDeleteCategory = () => {
-  const queryClient = useQueryClient();
-  
-  return useMutation({
-    mutationFn: (id: string) => categoriesApi.deleteCategory(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['categories'] });
-      toast.success('Category deleted successfully');
+      const { data, error } = await supabase
+        .from("categories")
+        .select("*")
+        .eq("tenant_id", userRecord.tenant_id);
+
+      if (error) throw error;
+      return data || [];
     },
-    onError: (error: Error) => {
-      toast.error(`Failed to delete category: ${error.message}`);
-    }
   });
 };
