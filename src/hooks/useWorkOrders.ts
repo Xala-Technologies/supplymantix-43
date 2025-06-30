@@ -4,18 +4,21 @@ import { databaseApi } from "@/lib/database";
 import type { Database } from "@/integrations/supabase/types";
 import { toast } from "sonner";
 import { normalizeWorkOrderData } from "@/features/workOrders/utils";
+import { useAuth } from "@/contexts/AuthContext";
 
 type Tables = Database["public"]["Tables"];
 
 // Work Orders
 export const useWorkOrders = () => {
+  const { user, loading: authLoading } = useAuth();
+  
   return useQuery({
-    queryKey: ["work-orders"],
+    queryKey: ["work-orders", user?.id], // Include user ID in query key
     queryFn: async () => {
       try {
-        console.log('useWorkOrders - Starting query...');
+        console.log('useWorkOrders - Starting query for user:', user?.email);
         const result = await databaseApi.getWorkOrders();
-        console.log('useWorkOrders - Raw result:', result);
+        console.log('useWorkOrders - Raw result for user:', user?.email, result);
         
         if (!result || !Array.isArray(result)) {
           console.warn('useWorkOrders - Invalid result format:', result);
@@ -23,7 +26,7 @@ export const useWorkOrders = () => {
         }
         
         const normalizedResult = result.map(normalizeWorkOrderData);
-        console.log('useWorkOrders - Normalized result:', normalizedResult);
+        console.log('useWorkOrders - Normalized result for user:', user?.email, normalizedResult);
         
         return normalizedResult;
       } catch (error) {
@@ -35,8 +38,16 @@ export const useWorkOrders = () => {
         return [];
       }
     },
-    retry: 1,
+    enabled: !authLoading && !!user, // Only run when user is authenticated
+    retry: (failureCount, error) => {
+      // Don't retry auth errors
+      if (error instanceof Error && error.message.includes('not authenticated')) {
+        return false;
+      }
+      return failureCount < 1;
+    },
     staleTime: 30000, // 30 seconds
+    gcTime: 1000, // Reduce cache time to ensure fresh data
     refetchOnWindowFocus: true,
     refetchOnMount: true,
   });
@@ -44,13 +55,14 @@ export const useWorkOrders = () => {
 
 export const useCreateWorkOrder = () => {
   const queryClient = useQueryClient();
+  const { user } = useAuth();
   
   return useMutation({
     mutationFn: async (workOrder: Tables["work_orders"]["Insert"]) => {
       try {
-        console.log('useCreateWorkOrder - Creating:', workOrder);
+        console.log('useCreateWorkOrder - Creating for user:', user?.email, workOrder);
         const result = await databaseApi.createWorkOrder(workOrder);
-        console.log('useCreateWorkOrder - Success:', result);
+        console.log('useCreateWorkOrder - Success for user:', user?.email, result);
         return result;
       } catch (error) {
         console.error('useCreateWorkOrder - Failed:', error);
@@ -60,7 +72,7 @@ export const useCreateWorkOrder = () => {
       }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["work-orders"] });
+      queryClient.invalidateQueries({ queryKey: ["work-orders", user?.id] });
       toast.success('Work order created successfully');
     },
   });
@@ -68,13 +80,14 @@ export const useCreateWorkOrder = () => {
 
 export const useUpdateWorkOrder = () => {
   const queryClient = useQueryClient();
+  const { user } = useAuth();
   
   return useMutation({
     mutationFn: async ({ id, updates }: { id: string; updates: Tables["work_orders"]["Update"] }) => {
       try {
-        console.log('useUpdateWorkOrder - Updating:', id, updates);
+        console.log('useUpdateWorkOrder - Updating for user:', user?.email, id, updates);
         const result = await databaseApi.updateWorkOrder(id, updates);
-        console.log('useUpdateWorkOrder - Success:', result);
+        console.log('useUpdateWorkOrder - Success for user:', user?.email, result);
         return result;
       } catch (error) {
         console.error('useUpdateWorkOrder - Failed:', error);
@@ -84,7 +97,7 @@ export const useUpdateWorkOrder = () => {
       }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["work-orders"] });
+      queryClient.invalidateQueries({ queryKey: ["work-orders", user?.id] });
       toast.success('Work order updated successfully');
     },
   });
@@ -92,20 +105,23 @@ export const useUpdateWorkOrder = () => {
 
 // Chat Messages
 export const useChatMessages = (workOrderId: string) => {
+  const { user } = useAuth();
+  
   return useQuery({
-    queryKey: ["chat-messages", workOrderId],
+    queryKey: ["chat-messages", workOrderId, user?.id],
     queryFn: () => databaseApi.getChatMessages(workOrderId),
-    enabled: !!workOrderId,
+    enabled: !!workOrderId && !!user,
   });
 };
 
 export const useCreateChatMessage = () => {
   const queryClient = useQueryClient();
+  const { user } = useAuth();
   
   return useMutation({
     mutationFn: databaseApi.createChatMessage,
     onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ["chat-messages", data.work_order_id] });
+      queryClient.invalidateQueries({ queryKey: ["chat-messages", data.work_order_id, user?.id] });
     },
   });
 };

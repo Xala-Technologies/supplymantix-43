@@ -15,12 +15,19 @@ export const useAssets = (filters?: {
   const { user, loading: authLoading } = useAuth();
   
   return useQuery({
-    queryKey: ["assets", filters],
+    queryKey: ["assets", user?.id, filters],
     queryFn: () => assetsApi.getAssets(filters),
     enabled: !authLoading && !!user,
     staleTime: 1000 * 60 * 5, // 5 minutes
+    gcTime: 1000 * 60 * 2, // 2 minutes cache time
     refetchOnWindowFocus: false,
-    retry: 2,
+    retry: (failureCount, error) => {
+      // Don't retry auth errors
+      if (error instanceof Error && error.message.includes('not authenticated')) {
+        return false;
+      }
+      return failureCount < 2;
+    },
   });
 };
 
@@ -29,7 +36,7 @@ export const useAsset = (id: string) => {
   const { user, loading: authLoading } = useAuth();
   
   return useQuery({
-    queryKey: ["assets", id],
+    queryKey: ["assets", id, user?.id],
     queryFn: () => assetsApi.getAsset(id),
     enabled: !authLoading && !!user && !!id,
   });
@@ -38,11 +45,12 @@ export const useAsset = (id: string) => {
 // Create asset mutation
 export const useCreateAsset = () => {
   const queryClient = useQueryClient();
+  const { user } = useAuth();
   
   return useMutation({
     mutationFn: (asset: Omit<AssetInsert, 'tenant_id'>) => assetsApi.createAsset(asset),
     onSuccess: (newAsset) => {
-      queryClient.invalidateQueries({ queryKey: ["assets"] });
+      queryClient.invalidateQueries({ queryKey: ["assets", user?.id] });
       toast.success(`Asset "${newAsset.name}" created successfully`);
     },
     onError: (error: any) => {
@@ -56,13 +64,14 @@ export const useCreateAsset = () => {
 // Update asset mutation
 export const useUpdateAsset = () => {
   const queryClient = useQueryClient();
+  const { user } = useAuth();
   
   return useMutation({
     mutationFn: ({ id, updates }: { id: string; updates: Omit<AssetUpdate, 'tenant_id'> }) => 
       assetsApi.updateAsset(id, updates),
     onSuccess: (updatedAsset) => {
-      queryClient.invalidateQueries({ queryKey: ["assets"] });
-      queryClient.invalidateQueries({ queryKey: ["assets", updatedAsset.id] });
+      queryClient.invalidateQueries({ queryKey: ["assets", user?.id] });
+      queryClient.invalidateQueries({ queryKey: ["assets", updatedAsset.id, user?.id] });
       toast.success(`Asset "${updatedAsset.name}" updated successfully`);
     },
     onError: (error) => {
@@ -75,11 +84,12 @@ export const useUpdateAsset = () => {
 // Delete asset mutation
 export const useDeleteAsset = () => {
   const queryClient = useQueryClient();
+  const { user } = useAuth();
   
   return useMutation({
     mutationFn: (id: string) => assetsApi.deleteAsset(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["assets"] });
+      queryClient.invalidateQueries({ queryKey: ["assets", user?.id] });
       toast.success("Asset deleted successfully");
     },
     onError: (error) => {
@@ -94,7 +104,7 @@ export const useAssetsByLocation = (location: string) => {
   const { user, loading: authLoading } = useAuth();
   
   return useQuery({
-    queryKey: ["assets", "location", location],
+    queryKey: ["assets", "location", location, user?.id],
     queryFn: () => assetsApi.getAssetsByLocation(location),
     enabled: !authLoading && !!user && !!location,
   });
@@ -105,7 +115,7 @@ export const useAssetsByCategory = (category: string) => {
   const { user, loading: authLoading } = useAuth();
   
   return useQuery({
-    queryKey: ["assets", "category", category],
+    queryKey: ["assets", "category", category, user?.id],
     queryFn: () => assetsApi.getAssetsByCategory(category),
     enabled: !authLoading && !!user && !!category,
   });
@@ -116,7 +126,7 @@ export const useAssetStatistics = () => {
   const { user, loading: authLoading } = useAuth();
   
   return useQuery({
-    queryKey: ["assets", "statistics"],
+    queryKey: ["assets", "statistics", user?.id],
     queryFn: () => assetsApi.getAssetStatistics(),
     enabled: !authLoading && !!user,
   });

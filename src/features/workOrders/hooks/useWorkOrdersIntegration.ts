@@ -1,16 +1,20 @@
+
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { workOrdersApi } from "@/lib/database/work-orders";
 import { toast } from "sonner";
 import { WorkOrder, WorkOrderStatus } from "../types";
 import { WORK_ORDER_QUERY_KEYS } from "../constants";
 import { normalizeWorkOrderData } from "../utils";
+import { useAuth } from "@/contexts/AuthContext";
 
 export const useWorkOrdersIntegration = () => {
+  const { user, loading: authLoading } = useAuth();
+  
   return useQuery({
-    queryKey: WORK_ORDER_QUERY_KEYS.all,
+    queryKey: [...WORK_ORDER_QUERY_KEYS.all, user?.id], // Include user ID in query key
     queryFn: async (): Promise<WorkOrder[]> => {
       try {
-        console.log('Fetching work orders...');
+        console.log('Fetching work orders for user:', user?.email);
         const workOrders = await workOrdersApi.getWorkOrders();
         console.log('Raw work orders from API:', workOrders);
         
@@ -20,7 +24,7 @@ export const useWorkOrdersIntegration = () => {
         }
         
         const normalized = workOrders.map(normalizeWorkOrderData);
-        console.log('Normalized work orders:', normalized);
+        console.log('Normalized work orders for user:', user?.email, normalized);
         return normalized;
       } catch (error) {
         console.error('Error fetching work orders:', error);
@@ -31,16 +35,24 @@ export const useWorkOrdersIntegration = () => {
         return [];
       }
     },
+    enabled: !authLoading && !!user, // Only run when user is authenticated
     staleTime: 30000, // 30 seconds
-    gcTime: 5 * 60 * 1000, // 5 minutes
+    gcTime: 1000, // Reduce cache time to 1 second to ensure fresh data
     refetchOnWindowFocus: true,
     refetchOnMount: true,
-    retry: 1,
+    retry: (failureCount, error) => {
+      // Don't retry auth errors
+      if (error instanceof Error && error.message.includes('not authenticated')) {
+        return false;
+      }
+      return failureCount < 1;
+    },
   });
 };
 
 export const useWorkOrderStatusUpdate = () => {
   const queryClient = useQueryClient();
+  const { user } = useAuth();
   
   return useMutation({
     mutationFn: async ({ 
@@ -74,7 +86,8 @@ export const useWorkOrderStatusUpdate = () => {
       return updatedWorkOrder;
     },
     onSuccess: (data, variables) => {
-      queryClient.invalidateQueries({ queryKey: WORK_ORDER_QUERY_KEYS.all });
+      // Invalidate queries with user context
+      queryClient.invalidateQueries({ queryKey: [...WORK_ORDER_QUERY_KEYS.all, user?.id] });
       queryClient.invalidateQueries({ 
         queryKey: WORK_ORDER_QUERY_KEYS.comments(variables.id) 
       });
@@ -90,6 +103,7 @@ export const useWorkOrderStatusUpdate = () => {
 
 export const usePartsUsageTracking = () => {
   const queryClient = useQueryClient();
+  const { user } = useAuth();
   
   return useMutation({
     mutationFn: async ({ 
@@ -106,7 +120,7 @@ export const usePartsUsageTracking = () => {
       console.log('Parts usage tracking not fully implemented yet');
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: WORK_ORDER_QUERY_KEYS.all });
+      queryClient.invalidateQueries({ queryKey: [...WORK_ORDER_QUERY_KEYS.all, user?.id] });
       toast.success("Parts usage recorded successfully");
     },
     onError: (error) => {
