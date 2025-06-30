@@ -1,5 +1,5 @@
 
-import React, { createContext, useContext, useMemo, useEffect } from 'react';
+import React, { createContext, useContext, useMemo, useEffect, useRef } from 'react';
 import { AuthContextType } from '@/types/auth';
 import { useAuthState } from '@/hooks/useAuthState';
 import { useAuthActions } from '@/hooks/useAuthActions';
@@ -19,12 +19,32 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const { user, session, loading, initialized } = useAuthState();
   const { signIn, signUp, signOut } = useAuthActions();
   const queryClient = useQueryClient();
+  const previousUserIdRef = useRef<string | null>(null);
 
-  // Clear cache whenever user changes (including logout)
+  // Clear cache when user changes (including login/logout)
   useEffect(() => {
     if (initialized) {
-      console.log('User changed, clearing cache. New user:', user?.email || 'none');
-      queryClient.clear();
+      const currentUserId = user?.id || null;
+      const previousUserId = previousUserIdRef.current;
+      
+      // If user has changed (login, logout, or user switch)
+      if (currentUserId !== previousUserId) {
+        console.log('User changed from', previousUserId, 'to', currentUserId, '- clearing cache');
+        
+        // Clear all queries to prevent data bleeding between users
+        queryClient.clear();
+        
+        // Update the ref with the new user ID
+        previousUserIdRef.current = currentUserId;
+        
+        // If we have a new user, invalidate all queries to force fresh data
+        if (currentUserId) {
+          console.log('New user logged in, invalidating all queries');
+          setTimeout(() => {
+            queryClient.invalidateQueries();
+          }, 100);
+        }
+      }
     }
   }, [user?.id, initialized, queryClient]);
 

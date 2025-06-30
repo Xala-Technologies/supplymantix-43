@@ -46,10 +46,11 @@ export const useWorkOrders = () => {
       }
       return failureCount < 1;
     },
-    staleTime: 30000, // 30 seconds
-    gcTime: 1000, // Reduce cache time to ensure fresh data
+    staleTime: 0, // Always consider data stale
+    gcTime: 100, // Very short cache time
     refetchOnWindowFocus: true,
     refetchOnMount: true,
+    refetchOnReconnect: true,
   });
 };
 
@@ -111,6 +112,8 @@ export const useChatMessages = (workOrderId: string) => {
     queryKey: ["chat-messages", workOrderId, user?.id],
     queryFn: () => databaseApi.getChatMessages(workOrderId),
     enabled: !!workOrderId && !!user,
+    staleTime: 0,
+    gcTime: 100,
   });
 };
 

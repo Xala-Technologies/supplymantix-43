@@ -36,10 +36,11 @@ export const useWorkOrdersIntegration = () => {
       }
     },
     enabled: !authLoading && !!user, // Only run when user is authenticated
-    staleTime: 30000, // 30 seconds
-    gcTime: 1000, // Reduce cache time to 1 second to ensure fresh data
+    staleTime: 0, // Always consider data stale to ensure fresh data
+    gcTime: 100, // Very short cache time to prevent cross-user data leakage
     refetchOnWindowFocus: true,
     refetchOnMount: true,
+    refetchOnReconnect: true,
     retry: (failureCount, error) => {
       // Don't retry auth errors
       if (error instanceof Error && error.message.includes('not authenticated')) {
