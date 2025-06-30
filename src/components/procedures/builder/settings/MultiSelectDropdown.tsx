@@ -34,10 +34,13 @@ export const MultiSelectDropdown: React.FC<MultiSelectDropdownProps> = ({
 
   if (isLoading) {
     return (
-      <div className="space-y-2">
-        <label className="text-sm font-medium text-gray-700">{label}</label>
-        <div className="p-3 border rounded-md bg-gray-50">
-          <span className="text-sm text-gray-500">Loading...</span>
+      <div className="space-y-3">
+        <label className="block text-sm font-medium text-gray-900">{label}</label>
+        <div className="w-full p-4 border border-gray-200 rounded-lg bg-gray-50">
+          <div className="flex items-center justify-center">
+            <div className="w-4 h-4 border-2 border-gray-300 border-t-transparent rounded-full animate-spin"></div>
+            <span className="ml-2 text-sm text-gray-500">Loading...</span>
+          </div>
         </div>
       </div>
     );
@@ -45,9 +48,9 @@ export const MultiSelectDropdown: React.FC<MultiSelectDropdownProps> = ({
 
   if (error) {
     return (
-      <div className="space-y-2">
-        <label className="text-sm font-medium text-gray-700">{label}</label>
-        <div className="p-3 border rounded-md bg-red-50 border-red-200">
+      <div className="space-y-3">
+        <label className="block text-sm font-medium text-gray-900">{label}</label>
+        <div className="w-full p-4 border border-red-200 rounded-lg bg-red-50">
           <span className="text-sm text-red-600">Error loading {label.toLowerCase()}</span>
         </div>
       </div>
@@ -55,23 +58,27 @@ export const MultiSelectDropdown: React.FC<MultiSelectDropdownProps> = ({
   }
 
   return (
-    <div className="space-y-2">
-      <label className="text-sm font-medium text-gray-700">{label}</label>
+    <div className="space-y-3">
+      <label className="block text-sm font-medium text-gray-900">{label}</label>
       
       {/* Selected items display */}
       {selectedNames.length > 0 && (
-        <div className="flex flex-wrap gap-2 mb-2">
+        <div className="flex flex-wrap gap-2">
           {selectedNames.map((name, index) => {
             const item = items.find(item => item.name === name);
             if (!item) return null;
             
             return (
-              <Badge key={index} variant="secondary" className="flex items-center gap-1">
-                {name}
+              <Badge 
+                key={index} 
+                variant="secondary" 
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100 transition-colors"
+              >
+                <span className="text-sm font-medium">{name}</span>
                 <button
                   type="button"
                   onClick={() => onRemove(item.id)}
-                  className="ml-1 hover:bg-gray-300 rounded-full p-0.5"
+                  className="ml-1 hover:bg-blue-200 rounded-full p-0.5 transition-colors"
                 >
                   <X className="h-3 w-3" />
                 </button>
@@ -86,36 +93,50 @@ export const MultiSelectDropdown: React.FC<MultiSelectDropdownProps> = ({
         <PopoverTrigger asChild>
           <Button
             variant="outline"
-            className="w-full justify-between text-left font-normal"
+            className="w-full justify-between text-left font-normal h-11 px-4 border-gray-200 hover:border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all"
             type="button"
           >
-            {selectedNames.length > 0 
-              ? `${selectedNames.length} selected`
-              : placeholder
-            }
-            <ChevronDown className="h-4 w-4 opacity-50" />
+            <span className={selectedNames.length > 0 ? 'text-gray-900' : 'text-gray-500'}>
+              {selectedNames.length > 0 
+                ? `${selectedNames.length} selected`
+                : placeholder
+              }
+            </span>
+            <ChevronDown className="h-4 w-4 text-gray-400" />
           </Button>
         </PopoverTrigger>
         
-        <PopoverContent className="w-full p-0 bg-white border border-gray-200 shadow-lg z-50" align="start">
-          <div className="max-h-60 overflow-y-auto">
+        <PopoverContent 
+          className="w-full p-0 bg-white border border-gray-200 shadow-lg rounded-lg z-50" 
+          align="start"
+          style={{ width: 'var(--radix-popover-trigger-width)' }}
+        >
+          <div className="max-h-64 overflow-y-auto">
             {items.length === 0 ? (
-              <div className="p-4 text-sm text-gray-500 text-center">
-                No {label.toLowerCase()} available
+              <div className="p-6 text-center">
+                <div className="text-gray-400 mb-2">
+                  <div className="w-8 h-8 mx-auto mb-2 rounded-full bg-gray-100 flex items-center justify-center">
+                    <span className="text-gray-400 text-sm">•</span>
+                  </div>
+                </div>
+                <p className="text-sm text-gray-500">No {label.toLowerCase()} available</p>
               </div>
             ) : (
-              <div className="p-2 space-y-1">
-                {items.map((item) => (
+              <div className="p-2">
+                {items.map((item, index) => (
                   <div
                     key={item.id}
-                    className="flex items-center space-x-2 p-2 hover:bg-gray-50 rounded cursor-pointer"
+                    className="flex items-center space-x-3 p-3 hover:bg-gray-50 rounded-md cursor-pointer transition-colors group"
                     onClick={() => onToggle(item.id)}
                   >
                     <Checkbox
                       checked={selectedIds.includes(item.id)}
                       onChange={() => onToggle(item.id)}
+                      className="data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600"
                     />
-                    <span className="text-sm flex-1">{item.name}</span>
+                    <span className="text-sm text-gray-900 font-medium flex-1 group-hover:text-gray-700">
+                      {item.name}
+                    </span>
                   </div>
                 ))}
               </div>
