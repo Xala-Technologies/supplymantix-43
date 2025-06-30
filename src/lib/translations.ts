@@ -1,3 +1,4 @@
+
 export const translations = {
   en: {
     // Navigation
@@ -12,6 +13,7 @@ export const translations = {
     "nav.inventory": "Inventory",
     "nav.meters": "Meters",
     "nav.locations": "Locations",
+    "nav.categories": "Categories",
     "nav.reporting": "Reporting",
     "nav.messages": "Messages",
     "nav.organization": "Organization",
@@ -159,6 +161,7 @@ export const translations = {
     "nav.inventory": "Inventaire",
     "nav.meters": "Compteurs",
     "nav.locations": "Emplacements",
+    "nav.categories": "Catégories",
     "nav.reporting": "Rapports",
     "nav.messages": "Messages",
     "nav.organization": "Organisation",
@@ -306,6 +309,7 @@ export const translations = {
     "nav.inventory": "Beholdning",
     "nav.meters": "Målere",
     "nav.locations": "Lokasjoner",
+    "nav.categories": "Kategorier",
     "nav.reporting": "Rapportering",
     "nav.messages": "Meldinger",
     "nav.organization": "Organisasjon",
