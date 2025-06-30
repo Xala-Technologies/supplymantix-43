@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
@@ -142,7 +143,32 @@ export const AssetForm = ({
 
   const handleFormSubmit = (data: AssetFormData) => {
     console.log('Submitting asset data:', data);
-    onSubmit({ ...data, parts: documents });
+    
+    // Clean up the data to convert empty strings to null for UUID fields
+    const cleanedData = {
+      ...data,
+      parts: documents,
+      // Convert empty strings to null for UUID fields
+      parent_asset_id: data.parent_asset_id === "" ? null : data.parent_asset_id,
+      // Convert empty strings to null for optional string fields
+      picture_url: data.picture_url === "" ? null : data.picture_url,
+      asset_tag: data.asset_tag === "" ? null : data.asset_tag,
+      location: data.location === "" ? null : data.location,
+      description: data.description === "" ? null : data.description,
+      purchase_date: data.purchase_date === "" ? null : data.purchase_date,
+      warranty_end_date: data.warranty_end_date === "" ? null : data.warranty_end_date,
+      vin_number: data.vin_number === "" ? null : data.vin_number,
+      replacement_date: data.replacement_date === "" ? null : data.replacement_date,
+      serial_number: data.serial_number === "" ? null : data.serial_number,
+      model: data.model === "" ? null : data.model,
+      manufacturer: data.manufacturer === "" ? null : data.manufacturer,
+      qr_code: data.qr_code === "" ? null : data.qr_code,
+      barcode: data.barcode === "" ? null : data.barcode,
+      asset_type: data.asset_type === "" ? null : data.asset_type,
+      vendor: data.vendor === "" ? null : data.vendor,
+    };
+    
+    onSubmit(cleanedData);
   };
 
   return (
