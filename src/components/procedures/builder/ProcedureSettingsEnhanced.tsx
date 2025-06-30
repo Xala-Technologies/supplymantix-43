@@ -85,10 +85,10 @@ export const ProcedureSettingsEnhanced: React.FC<ProcedureSettingsEnhancedProps>
 
   return (
     <div className="h-full overflow-y-auto bg-gray-50">
-      <div className="min-h-full flex items-start justify-center py-8 px-6">
-        <div className="w-full max-w-3xl space-y-8">
+      <div className="min-h-full flex justify-center py-8">
+        <div className="w-full max-w-2xl px-6 space-y-8">
           {/* Tag your procedure */}
-          <Card className="shadow-sm border-gray-200">
+          <Card className="shadow-sm border-gray-200 bg-white">
             <CardHeader className="pb-4">
               <CardTitle className="text-xl font-semibold text-gray-900">Tag your procedure</CardTitle>
               <p className="text-sm text-gray-600 mt-1">
@@ -209,7 +209,7 @@ export const ProcedureSettingsEnhanced: React.FC<ProcedureSettingsEnhancedProps>
           </Card>
 
           {/* Teams in charge */}
-          <Card className="shadow-sm border-gray-200">
+          <Card className="shadow-sm border-gray-200 bg-white">
             <CardHeader className="pb-4">
               <CardTitle className="text-xl font-semibold text-gray-900">Teams in charge</CardTitle>
               <p className="text-sm text-gray-600 mt-1">
@@ -237,7 +237,7 @@ export const ProcedureSettingsEnhanced: React.FC<ProcedureSettingsEnhancedProps>
           </Card>
 
           {/* Procedure Visibility */}
-          <Card className="shadow-sm border-gray-200">
+          <Card className="shadow-sm border-gray-200 bg-white">
             <CardHeader className="pb-4">
               <CardTitle className="text-xl font-semibold text-gray-900">Procedure Visibility</CardTitle>
             </CardHeader>
@@ -245,7 +245,7 @@ export const ProcedureSettingsEnhanced: React.FC<ProcedureSettingsEnhancedProps>
               <RadioGroup
                 value={formData.is_global ? "public" : "private"}
                 onValueChange={(value) => onUpdate({ is_global: value === "public" })}
-                className="space-y-6"
+                className="space-y-4"
               >
                 <div className="flex items-start space-x-4 p-4 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 transition-colors">
                   <RadioGroupItem value="private" id="private" className="mt-1" />
@@ -274,7 +274,7 @@ export const ProcedureSettingsEnhanced: React.FC<ProcedureSettingsEnhancedProps>
             </CardContent>
           </Card>
 
-          {/* Add some bottom padding for better scrolling */}
+          {/* Bottom padding for better scrolling */}
           <div className="h-8"></div>
         </div>
       </div>
