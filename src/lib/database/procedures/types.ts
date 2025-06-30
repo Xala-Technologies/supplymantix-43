@@ -3,13 +3,28 @@ export type ProcedureFieldType =
   | 'text' 
   | 'textarea' 
   | 'number' 
+  | 'amount'
+  | 'email'
+  | 'url'
+  | 'phone'
   | 'select' 
-  | 'multi_select' 
+  | 'multi_select'
+  | 'multiselect' // Keep both for compatibility
+  | 'radio'
   | 'checkbox' 
   | 'date' 
-  | 'time' 
-  | 'file_upload' 
-  | 'signature';
+  | 'time'
+  | 'datetime'
+  | 'file_upload'
+  | 'file' // Keep both for compatibility
+  | 'image'
+  | 'signature'
+  | 'rating'
+  | 'slider'
+  | 'section'
+  | 'divider'
+  | 'info'
+  | 'inspection';
 
 export interface ProcedureField {
   id: string;
@@ -43,6 +58,11 @@ export interface Procedure {
   team_ids: string[];
   fields?: ProcedureField[];
   executions_count?: number;
+}
+
+// Add the missing ProcedureWithFields type that components are trying to import
+export interface ProcedureWithFields extends Procedure {
+  fields: ProcedureField[];
 }
 
 export interface ProcedureInsert {
