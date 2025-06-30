@@ -60,6 +60,36 @@ export interface ProcedureField {
   updated_at: string;
 }
 
+export interface Procedure {
+  id: string;
+  tenant_id: string;
+  title: string;
+  description?: string;
+  category?: string;
+  tags?: string[];
+  is_global?: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ProcedureInsert {
+  title: string;
+  description?: string;
+  category?: string;
+  tags?: string[];
+  is_global?: boolean;
+  tenant_id?: string;
+}
+
+export interface ProcedureUpdate {
+  title?: string;
+  description?: string;
+  category?: string;
+  tags?: string[];
+  is_global?: boolean;
+  fields?: ProcedureField[];
+}
+
 export interface ProcedureExecution {
   id?: string;
   procedure_id: string;

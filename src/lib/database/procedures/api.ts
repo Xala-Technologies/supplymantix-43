@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import type { Procedure, ProcedureInsert, ProcedureUpdate } from "./types";
 
@@ -43,11 +44,14 @@ export const procedureApi = {
           *,
           procedure_fields (
             id,
+            procedure_id,
             label,
             field_type,
             is_required,
             order_index,
-            options
+            options,
+            created_at,
+            updated_at
           )
         `)
         .eq("tenant_id", userRecord.tenant_id);
@@ -94,7 +98,12 @@ export const procedureApi = {
       // Transform the data to match expected format
       const procedures = (data || []).map(procedure => ({
         ...procedure,
-        fields: procedure.procedure_fields || [],
+        fields: (procedure.procedure_fields || []).map(field => ({
+          ...field,
+          procedure_id: field.procedure_id || procedure.id,
+          created_at: field.created_at || new Date().toISOString(),
+          updated_at: field.updated_at || new Date().toISOString()
+        })),
         executions_count: 0 // TODO: Add actual count from procedure_executions
       }));
 
@@ -117,11 +126,14 @@ export const procedureApi = {
           *,
           procedure_fields (
             id,
+            procedure_id,
             label,
             field_type,
             is_required,
             order_index,
-            options
+            options,
+            created_at,
+            updated_at
           )
         `)
         .eq("id", id)
@@ -137,7 +149,12 @@ export const procedureApi = {
 
       return {
         ...data,
-        fields: data.procedure_fields || [],
+        fields: (data.procedure_fields || []).map(field => ({
+          ...field,
+          procedure_id: field.procedure_id || data.id,
+          created_at: field.created_at || new Date().toISOString(),
+          updated_at: field.updated_at || new Date().toISOString()
+        })),
         executions_count: 0 // TODO: Add actual count from procedure_executions
       };
     } catch (error) {
@@ -265,7 +282,7 @@ export const procedureApi = {
           user_id: userData.user.id,
           work_order_id: workOrderId,
           status: "in_progress",
-          start_time: new Date().toISOString(),
+          started_at: new Date().toISOString(),
         })
         .select()
         .single();
@@ -285,7 +302,7 @@ export const procedureApi = {
         .from("procedure_executions")
         .update({
           status: "completed",
-          end_time: new Date().toISOString(),
+          completed_at: new Date().toISOString(),
           answers: answers,
           score: score,
         })
