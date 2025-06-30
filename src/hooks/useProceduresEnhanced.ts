@@ -14,7 +14,17 @@ export const useProceduresEnhanced = (params?: {
 }) => {
   return useQuery({
     queryKey: ["procedures-enhanced", params],
-    queryFn: () => proceduresEnhancedApi.getProcedures(params),
+    queryFn: async () => {
+      console.log('Fetching procedures with params:', params);
+      try {
+        const result = await proceduresEnhancedApi.getProcedures(params);
+        console.log('Procedures fetched successfully:', result);
+        return result;
+      } catch (error) {
+        console.error('Error fetching procedures:', error);
+        throw error;
+      }
+    },
     staleTime: 1000 * 60 * 2, // 2 minutes
   });
 };
