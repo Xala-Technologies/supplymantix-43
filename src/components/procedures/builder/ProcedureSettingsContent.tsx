@@ -43,11 +43,14 @@ export const ProcedureSettingsContent: React.FC<ProcedureSettingsContentProps> =
   const [assetSearch, setAssetSearch] = useState('');
   const [locationSearch, setLocationSearch] = useState('');
   const [teamSearch, setTeamSearch] = useState('');
+  const [showAssetDropdown, setShowAssetDropdown] = useState(false);
+  const [showLocationDropdown, setShowLocationDropdown] = useState(false);
+  const [showTeamDropdown, setShowTeamDropdown] = useState(false);
   
   // Fetch real data from the database
-  const { data: assets, isLoading: assetsLoading } = useAssets();
-  const { data: locations, isLoading: locationsLoading } = useLocations();
-  const { data: teams, isLoading: teamsLoading } = useTeams();
+  const { data: assets, isLoading: assetsLoading, error: assetsError } = useAssets();
+  const { data: locations, isLoading: locationsLoading, error: locationsError } = useLocations();
+  const { data: teams, isLoading: teamsLoading, error: teamsError } = useTeams();
 
   const handleAddCustomTag = () => {
     if (customTag.trim() && !formData.tags.includes(customTag.trim())) {
@@ -158,42 +161,48 @@ export const ProcedureSettingsContent: React.FC<ProcedureSettingsContentProps> =
                   </div>
                 )}
                 
-                <Select>
-                  <SelectTrigger className="h-11">
-                    <div className="flex items-center gap-2">
-                      <Search className="h-4 w-4 text-gray-400" />
-                      <span className="text-gray-500">Search and select assets...</span>
+                <div className="relative">
+                  <div 
+                    className="flex items-center gap-2 h-11 px-3 border border-gray-200 rounded-md cursor-pointer hover:bg-gray-50"
+                    onClick={() => setShowAssetDropdown(!showAssetDropdown)}
+                  >
+                    <Search className="h-4 w-4 text-gray-400" />
+                    <span className="text-gray-500 flex-1">Search and select assets...</span>
+                    <ChevronDown className="h-4 w-4 text-gray-400" />
+                  </div>
+                  
+                  {showAssetDropdown && (
+                    <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-md shadow-lg z-50 max-h-64 overflow-y-auto">
+                      <div className="p-2">
+                        <Input
+                          placeholder="Search assets..."
+                          value={assetSearch}
+                          onChange={(e) => setAssetSearch(e.target.value)}
+                          className="mb-2"
+                        />
+                      </div>
+                      {assetsLoading ? (
+                        <div className="p-2 text-sm text-gray-500">Loading assets...</div>
+                      ) : assetsError ? (
+                        <div className="p-2 text-sm text-red-500">Error loading assets</div>
+                      ) : filteredAssets.length > 0 ? (
+                        filteredAssets.map(asset => (
+                          <div key={asset.id} className="flex items-center space-x-2 p-2 hover:bg-gray-50 cursor-pointer">
+                            <Checkbox
+                              checked={formData.asset_ids?.includes(asset.id) || false}
+                              onCheckedChange={() => handleAssetToggle(asset.id)}
+                            />
+                            <label className="text-sm cursor-pointer flex-1" onClick={() => handleAssetToggle(asset.id)}>
+                              {asset.name}
+                            </label>
+                          </div>
+                        ))
+                      ) : (
+                        <div className="p-2 text-sm text-gray-500">No assets found</div>
+                      )}
                     </div>
-                    <ChevronDown className="h-4 w-4 text-gray-400 ml-auto" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-white z-50">
-                    <div className="p-2">
-                      <Input
-                        placeholder="Search assets..."
-                        value={assetSearch}
-                        onChange={(e) => setAssetSearch(e.target.value)}
-                        className="mb-2"
-                      />
-                    </div>
-                    {assetsLoading ? (
-                      <div className="p-2 text-sm text-gray-500">Loading assets...</div>
-                    ) : filteredAssets.length > 0 ? (
-                      filteredAssets.map(asset => (
-                        <div key={asset.id} className="flex items-center space-x-2 p-2 hover:bg-gray-50">
-                          <Checkbox
-                            checked={formData.asset_ids?.includes(asset.id) || false}
-                            onCheckedChange={() => handleAssetToggle(asset.id)}
-                          />
-                          <label className="text-sm cursor-pointer flex-1">
-                            {asset.name}
-                          </label>
-                        </div>
-                      ))
-                    ) : (
-                      <div className="p-2 text-sm text-gray-500">No assets found</div>
-                    )}
-                  </SelectContent>
-                </Select>
+                  )}
+                </div>
               </div>
             </div>
 
@@ -219,42 +228,48 @@ export const ProcedureSettingsContent: React.FC<ProcedureSettingsContentProps> =
                   </div>
                 )}
                 
-                <Select>
-                  <SelectTrigger className="h-11">
-                    <div className="flex items-center gap-2">
-                      <Search className="h-4 w-4 text-gray-400" />
-                      <span className="text-gray-500">Search and select locations...</span>
+                <div className="relative">
+                  <div 
+                    className="flex items-center gap-2 h-11 px-3 border border-gray-200 rounded-md cursor-pointer hover:bg-gray-50"
+                    onClick={() => setShowLocationDropdown(!showLocationDropdown)}
+                  >
+                    <Search className="h-4 w-4 text-gray-400" />
+                    <span className="text-gray-500 flex-1">Search and select locations...</span>
+                    <ChevronDown className="h-4 w-4 text-gray-400" />
+                  </div>
+                  
+                  {showLocationDropdown && (
+                    <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-md shadow-lg z-50 max-h-64 overflow-y-auto">
+                      <div className="p-2">
+                        <Input
+                          placeholder="Search locations..."
+                          value={locationSearch}
+                          onChange={(e) => setLocationSearch(e.target.value)}
+                          className="mb-2"
+                        />
+                      </div>
+                      {locationsLoading ? (
+                        <div className="p-2 text-sm text-gray-500">Loading locations...</div>
+                      ) : locationsError ? (
+                        <div className="p-2 text-sm text-red-500">Error loading locations</div>
+                      ) : filteredLocations.length > 0 ? (
+                        filteredLocations.map(location => (
+                          <div key={location.id} className="flex items-center space-x-2 p-2 hover:bg-gray-50 cursor-pointer">
+                            <Checkbox
+                              checked={formData.location_ids?.includes(location.id) || false}
+                              onCheckedChange={() => handleLocationToggle(location.id)}
+                            />
+                            <label className="text-sm cursor-pointer flex-1" onClick={() => handleLocationToggle(location.id)}>
+                              {location.name}
+                            </label>
+                          </div>
+                        ))
+                      ) : (
+                        <div className="p-2 text-sm text-gray-500">No locations found</div>
+                      )}
                     </div>
-                    <ChevronDown className="h-4 w-4 text-gray-400 ml-auto" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-white z-50">
-                    <div className="p-2">
-                      <Input
-                        placeholder="Search locations..."
-                        value={locationSearch}
-                        onChange={(e) => setLocationSearch(e.target.value)}
-                        className="mb-2"
-                      />
-                    </div>
-                    {locationsLoading ? (
-                      <div className="p-2 text-sm text-gray-500">Loading locations...</div>
-                    ) : filteredLocations.length > 0 ? (
-                      filteredLocations.map(location => (
-                        <div key={location.id} className="flex items-center space-x-2 p-2 hover:bg-gray-50">
-                          <Checkbox
-                            checked={formData.location_ids?.includes(location.id) || false}
-                            onCheckedChange={() => handleLocationToggle(location.id)}
-                          />
-                          <label className="text-sm cursor-pointer flex-1">
-                            {location.name}
-                          </label>
-                        </div>
-                      ))
-                    ) : (
-                      <div className="p-2 text-sm text-gray-500">No locations found</div>
-                    )}
-                  </SelectContent>
-                </Select>
+                  )}
+                </div>
               </div>
             </div>
 
@@ -333,56 +348,63 @@ export const ProcedureSettingsContent: React.FC<ProcedureSettingsContentProps> =
                 </div>
               )}
               
-              <Select>
-                <SelectTrigger className="h-11">
-                  <div className="flex items-center gap-2">
-                    <Search className="h-4 w-4 text-gray-400" />
-                    <span className="text-gray-500">Search and select teams...</span>
-                  </div>
-                  <ChevronDown className="h-4 w-4 text-gray-400 ml-auto" />
-                </SelectTrigger>
-                <SelectContent className="bg-white z-50">
-                  <div className="p-2">
-                    <Input
-                      placeholder="Search teams..."
-                      value={teamSearch}
-                      onChange={(e) => setTeamSearch(e.target.value)}
-                      className="mb-2"
-                    />
-                  </div>
-                  {teamsLoading ? (
-                    <div className="p-2 text-sm text-gray-500">Loading teams...</div>
-                  ) : filteredTeams.length > 0 ? (
-                    filteredTeams.map(team => (
-                      <div key={team.id} className="flex items-center space-x-2 p-2 hover:bg-gray-50">
-                        <Checkbox
-                          checked={formData.team_ids?.includes(team.id) || false}
-                          onCheckedChange={() => handleTeamToggle(team.id)}
-                        />
-                        <label className="text-sm cursor-pointer flex-1">
-                          {team.name}
-                        </label>
-                      </div>
-                    ))
-                  ) : (
-                    <div className="p-2 text-sm text-gray-500">No teams found</div>
-                  )}
-                  
-                  {/* Fallback teams if no real teams exist */}
-                  {(!teams || teams.length === 0) && !teamsLoading && (
-                    <>
-                      <div className="px-2 py-1 text-xs text-gray-400 border-t">Suggested Teams:</div>
-                      {FALLBACK_TEAMS.filter(team => 
-                        team.toLowerCase().includes(teamSearch.toLowerCase())
-                      ).map(team => (
-                        <div key={team} className="flex items-center space-x-2 p-2 hover:bg-gray-50">
-                          <span className="text-sm text-gray-600 px-2">{team}</span>
+              <div className="relative">
+                <div 
+                  className="flex items-center gap-2 h-11 px-3 border border-gray-200 rounded-md cursor-pointer hover:bg-gray-50"
+                  onClick={() => setShowTeamDropdown(!showTeamDropdown)}
+                >
+                  <Search className="h-4 w-4 text-gray-400" />
+                  <span className="text-gray-500 flex-1">Search and select teams...</span>
+                  <ChevronDown className="h-4 w-4 text-gray-400" />
+                </div>
+                
+                {showTeamDropdown && (
+                  <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-md shadow-lg z-50 max-h-64 overflow-y-auto">
+                    <div className="p-2">
+                      <Input
+                        placeholder="Search teams..."
+                        value={teamSearch}
+                        onChange={(e) => setTeamSearch(e.target.value)}
+                        className="mb-2"
+                      />
+                    </div>
+                    {teamsLoading ? (
+                      <div className="p-2 text-sm text-gray-500">Loading teams...</div>
+                    ) : teamsError ? (
+                      <div className="p-2 text-sm text-red-500">Error loading teams</div>
+                    ) : filteredTeams.length > 0 ? (
+                      filteredTeams.map(team => (
+                        <div key={team.id} className="flex items-center space-x-2 p-2 hover:bg-gray-50 cursor-pointer">
+                          <Checkbox
+                            checked={formData.team_ids?.includes(team.id) || false}
+                            onCheckedChange={() => handleTeamToggle(team.id)}
+                          />
+                          <label className="text-sm cursor-pointer flex-1" onClick={() => handleTeamToggle(team.id)}>
+                            {team.name}
+                          </label>
                         </div>
-                      ))}
-                    </>
-                  )}
-                </SelectContent>
-              </Select>
+                      ))
+                    ) : (
+                      <>
+                        <div className="p-2 text-sm text-gray-500">No teams found</div>
+                        {/* Fallback teams if no real teams exist */}
+                        {(!teams || teams.length === 0) && !teamsLoading && (
+                          <>
+                            <div className="px-2 py-1 text-xs text-gray-400 border-t">Suggested Teams:</div>
+                            {FALLBACK_TEAMS.filter(team => 
+                              team.toLowerCase().includes(teamSearch.toLowerCase())
+                            ).map(team => (
+                              <div key={team} className="flex items-center space-x-2 p-2 hover:bg-gray-50">
+                                <span className="text-sm text-gray-600 px-2">{team}</span>
+                              </div>
+                            ))}
+                          </>
+                        )}
+                      </>
+                    )}
+                  </div>
+                )}
+              </div>
             </div>
           </CardContent>
         </Card>
