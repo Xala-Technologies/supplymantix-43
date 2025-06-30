@@ -3,7 +3,8 @@ import React, { useState } from "react";
 import { DashboardLayout } from "@/components/Layout/DashboardLayout";
 import { StandardPageLayout, StandardPageHeader, StandardPageContent } from "@/components/Layout/StandardPageLayout";
 import { Button } from "@/components/ui/button";
-import { Plus, Tags } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Plus, Tags, Trash2 } from "lucide-react";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { useCategories, useCreateCategory, useUpdateCategory, useDeleteCategory } from "@/hooks/useCategories";
 import { CategoryForm } from "@/components/categories/CategoryForm";
@@ -14,6 +15,8 @@ const Categories = () => {
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [showBulkDeleteConfirm, setShowBulkDeleteConfirm] = useState(false);
 
   const { data: categories, isLoading } = useCategories();
   const createCategory = useCreateCategory();
@@ -49,6 +52,33 @@ const Categories = () => {
     });
   };
 
+  const handleBulkDelete = () => {
+    selectedCategories.forEach(id => {
+      deleteCategory.mutate(id);
+    });
+    setSelectedCategories([]);
+    setShowBulkDeleteConfirm(false);
+  };
+
+  const handleSelectCategory = (categoryId: string, checked: boolean) => {
+    if (checked) {
+      setSelectedCategories(prev => [...prev, categoryId]);
+    } else {
+      setSelectedCategories(prev => prev.filter(id => id !== categoryId));
+    }
+  };
+
+  const handleSelectAll = (checked: boolean) => {
+    if (checked && categories) {
+      setSelectedCategories(categories.map(cat => cat.id));
+    } else {
+      setSelectedCategories([]);
+    }
+  };
+
+  const isAllSelected = categories && selectedCategories.length === categories.length;
+  const hasSelection = selectedCategories.length > 0;
+
   if (isLoading) {
     return (
       <DashboardLayout>
@@ -73,10 +103,22 @@ const Categories = () => {
           title="Categories"
           description={`${categories?.length || 0} ${categories?.length === 1 ? 'category' : 'categories'} available`}
         >
-          <Button onClick={() => setShowCreateForm(true)}>
-            <Plus className="h-4 w-4 mr-2" />
-            New Category
-          </Button>
+          <div className="flex items-center gap-3">
+            {hasSelection && (
+              <Button 
+                variant="destructive" 
+                onClick={() => setShowBulkDeleteConfirm(true)}
+                disabled={deleteCategory.isPending}
+              >
+                <Trash2 className="h-4 w-4 mr-2" />
+                Delete Selected ({selectedCategories.length})
+              </Button>
+            )}
+            <Button onClick={() => setShowCreateForm(true)}>
+              <Plus className="h-4 w-4 mr-2" />
+              New Category
+            </Button>
+          </div>
         </StandardPageHeader>
 
         <StandardPageContent>
@@ -95,15 +137,42 @@ const Categories = () => {
               </Button>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {categories.map((category) => (
-                <CategoryCard
-                  key={category.id}
-                  category={category}
-                  onEdit={setEditingCategory}
-                  onDelete={setDeleteConfirm}
+            <div className="space-y-4">
+              {/* Bulk selection controls */}
+              <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-lg">
+                <Checkbox
+                  checked={isAllSelected}
+                  onCheckedChange={handleSelectAll}
                 />
-              ))}
+                <span className="text-sm font-medium">
+                  Select All ({categories.length})
+                </span>
+                {hasSelection && (
+                  <span className="text-sm text-muted-foreground ml-auto">
+                    {selectedCategories.length} selected
+                  </span>
+                )}
+              </div>
+
+              {/* Categories grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {categories.map((category) => (
+                  <div key={category.id} className="relative">
+                    <div className="absolute top-3 left-3 z-10">
+                      <Checkbox
+                        checked={selectedCategories.includes(category.id)}
+                        onCheckedChange={(checked) => handleSelectCategory(category.id, !!checked)}
+                        className="bg-white border-2"
+                      />
+                    </div>
+                    <CategoryCard
+                      category={category}
+                      onEdit={setEditingCategory}
+                      onDelete={setDeleteConfirm}
+                    />
+                  </div>
+                ))}
+              </div>
             </div>
           )}
         </StandardPageContent>
@@ -126,7 +195,7 @@ const Categories = () => {
         category={editingCategory || undefined}
       />
 
-      {/* Delete Confirmation */}
+      {/* Single Delete Confirmation */}
       <AlertDialog open={!!deleteConfirm} onOpenChange={() => setDeleteConfirm(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -142,6 +211,28 @@ const Categories = () => {
               className="bg-red-600 hover:bg-red-700"
             >
               Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Bulk Delete Confirmation */}
+      <AlertDialog open={showBulkDeleteConfirm} onOpenChange={setShowBulkDeleteConfirm}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Selected Categories</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete {selectedCategories.length} selected categories? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleBulkDelete}
+              className="bg-red-600 hover:bg-red-700"
+              disabled={deleteCategory.isPending}
+            >
+              Delete {selectedCategories.length} Categories
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

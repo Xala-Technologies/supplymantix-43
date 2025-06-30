@@ -18,8 +18,8 @@ export const CategoryCard: React.FC<CategoryCardProps> = ({
   onDelete
 }) => {
   return (
-    <Card className="hover:shadow-md transition-shadow">
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+    <Card className="hover:shadow-md transition-shadow relative">
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 pl-12">
         <CardTitle className="text-lg font-semibold">{category.name}</CardTitle>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -42,7 +42,7 @@ export const CategoryCard: React.FC<CategoryCardProps> = ({
           </DropdownMenuContent>
         </DropdownMenu>
       </CardHeader>
-      <CardContent>
+      <CardContent className="pl-12">
         {category.description && (
           <p className="text-gray-600 text-sm">{category.description}</p>
         )}
