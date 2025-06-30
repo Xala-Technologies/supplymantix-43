@@ -1,7 +1,10 @@
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { assetsApi } from "@/lib/database/assets";
+import { assetsApi, type Asset, type AssetInsert, type AssetUpdate } from "@/lib/database/assets";
 import { toast } from "sonner";
+
+// Re-export types for components that import them from this hook
+export type { Asset, AssetInsert, AssetUpdate };
 
 export const useAssets = (filters?: {
   search?: string;
