@@ -1,5 +1,6 @@
 
-import { procedureApi } from './procedures/api';
+import { coreApi } from './procedures/core-api';
+import { executionsApi } from './procedures/executions-api';
 import { executionApi } from './procedures/executions';
 import { templateApi } from './procedures/templates';
 
@@ -8,7 +9,8 @@ export * from './procedures/types';
 
 // Combine all APIs into a single interface
 export const proceduresEnhancedApi = {
-  ...procedureApi,
+  ...coreApi,
+  ...executionsApi,
   ...executionApi,
   ...templateApi
 };

@@ -2,7 +2,7 @@
 import { supabase } from "@/integrations/supabase/client";
 import type { Procedure, ProcedureInsert, ProcedureUpdate, ProcedureFieldType } from "./types";
 
-export const procedureApi = {
+export const coreApi = {
   // Get procedures with optional filters
   getProcedures: async (params?: {
     search?: string;
@@ -250,7 +250,7 @@ export const procedureApi = {
   duplicateProcedure: async (id: string, newTitle?: string) => {
     try {
       // Fetch the original procedure
-      const originalProcedure = await procedureApi.getProcedure(id);
+      const originalProcedure = await coreApi.getProcedure(id);
 
       if (!originalProcedure) {
         throw new Error("Procedure not found");
@@ -263,85 +263,20 @@ export const procedureApi = {
       const newProcedure: ProcedureInsert = {
         ...procedureData,
         title: newTitle || `Copy of ${procedureData.title}`,
+        fields: fields || [],
       };
 
       // Create the new procedure
-      const { id: newProcedureId } = await procedureApi.createProcedure(newProcedure);
+      const createdProcedure = await coreApi.createProcedure(newProcedure);
 
-      if (!newProcedureId) {
+      if (!createdProcedure?.id) {
         throw new Error("Failed to create duplicate procedure");
       }
 
-      // Duplicate the fields
-      if (fields && fields.length > 0) {
-        for (const field of fields) {
-          delete field.id; // Remove the original field ID
-          await supabase.from("procedure_fields").insert({
-            ...field,
-            procedure_id: newProcedureId,
-          });
-        }
-      }
-
       // Return the new procedure
-      return procedureApi.getProcedure(newProcedureId);
+      return coreApi.getProcedure(createdProcedure.id);
     } catch (error) {
       console.error("Error duplicating procedure:", error);
-      throw error;
-    }
-  },
-
-  // Start a procedure execution
-  startExecution: async (procedureId: string, workOrderId?: string) => {
-    try {
-      const { data: userData } = await supabase.auth.getUser();
-      if (!userData.user) throw new Error("User not authenticated");
-
-      const { data: userRecord } = await supabase
-        .from("users")
-        .select("tenant_id")
-        .eq("id", userData.user.id)
-        .single();
-
-      if (!userRecord) throw new Error("User record not found");
-
-      const { data, error } = await supabase
-        .from("procedure_executions")
-        .insert({
-          procedure_id: procedureId,
-          user_id: userData.user.id,
-          work_order_id: workOrderId,
-          tenant_id: userRecord.tenant_id,
-          status: "in_progress",
-          started_at: new Date().toISOString(),
-        })
-        .select()
-        .single();
-
-      if (error) throw error;
-      return data;
-    } catch (error) {
-      console.error("Error starting procedure execution:", error);
-      throw error;
-    }
-  },
-
-  // Submit a procedure execution
-  submitExecution: async (executionId: string, answers: any, score?: number) => {
-    try {
-      const { error } = await supabase
-        .from("procedure_executions")
-        .update({
-          status: "completed",
-          completed_at: new Date().toISOString(),
-          answers: answers,
-          score: score,
-        })
-        .eq("id", executionId);
-
-      if (error) throw error;
-    } catch (error) {
-      console.error("Error submitting procedure execution:", error);
       throw error;
     }
   },
