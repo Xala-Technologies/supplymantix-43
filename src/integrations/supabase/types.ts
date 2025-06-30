@@ -1429,6 +1429,7 @@ export type Database = {
           is_required: boolean | null
           label: string
           options: Json | null
+          order_index: number | null
           procedure_id: string
           updated_at: string | null
         }
@@ -1440,6 +1441,7 @@ export type Database = {
           is_required?: boolean | null
           label: string
           options?: Json | null
+          order_index?: number | null
           procedure_id: string
           updated_at?: string | null
         }
@@ -1451,6 +1453,7 @@ export type Database = {
           is_required?: boolean | null
           label?: string
           options?: Json | null
+          order_index?: number | null
           procedure_id?: string
           updated_at?: string | null
         }
