@@ -1,3 +1,4 @@
+
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { databaseApi } from "@/lib/database";
 import type { Database } from "@/integrations/supabase/types";
@@ -27,8 +28,11 @@ export const useWorkOrders = () => {
         return normalizedResult;
       } catch (error) {
         console.error('useWorkOrders - Query failed:', error);
-        toast.error('Failed to fetch work orders: ' + (error instanceof Error ? error.message : 'Unknown error'));
-        return []; // Return empty array instead of throwing
+        // Don't show toast for auth errors, let auth system handle it
+        if (error instanceof Error && !error.message.includes('not authenticated')) {
+          toast.error('Failed to fetch work orders: ' + error.message);
+        }
+        return [];
       }
     },
     retry: 1,
@@ -50,7 +54,8 @@ export const useCreateWorkOrder = () => {
         return result;
       } catch (error) {
         console.error('useCreateWorkOrder - Failed:', error);
-        toast.error('Failed to create work order: ' + (error instanceof Error ? error.message : 'Unknown error'));
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        toast.error('Failed to create work order: ' + errorMessage);
         throw error;
       }
     },
@@ -73,7 +78,8 @@ export const useUpdateWorkOrder = () => {
         return result;
       } catch (error) {
         console.error('useUpdateWorkOrder - Failed:', error);
-        toast.error('Failed to update work order: ' + (error instanceof Error ? error.message : 'Unknown error'));
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        toast.error('Failed to update work order: ' + errorMessage);
         throw error;
       }
     },

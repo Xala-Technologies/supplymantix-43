@@ -1,3 +1,4 @@
+
 import { DashboardLayout } from "@/components/Layout/DashboardLayout";
 import { StandardPageLayout, StandardPageHeader, StandardPageContent } from "@/components/Layout/StandardPageLayout";
 import { EnhancedDashboardMetrics } from "@/components/dashboard/EnhancedDashboardMetrics";
@@ -8,7 +9,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Loader2 } from "lucide-react";
 
-// Sample data for demonstration
+// Sample data for demonstration when no real data exists
 const sampleWorkOrders: WorkOrder[] = [
   {
     id: '1',
@@ -121,7 +122,7 @@ const sampleWorkOrders: WorkOrder[] = [
 ];
 
 export default function Dashboard() {
-  const { data: workOrders, isLoading } = useWorkOrdersIntegration();
+  const { data: workOrders, isLoading, error } = useWorkOrdersIntegration();
   const { user, loading: authLoading } = useAuth();
   const [isCreateLoading, setIsCreateLoading] = useState(false);
   const navigate = useNavigate();
@@ -147,7 +148,7 @@ export default function Dashboard() {
     navigate('/dashboard/organization');
   };
 
-  console.log('Dashboard rendering, authLoading:', authLoading, 'user:', user?.email, 'isLoading:', isLoading, 'workOrders:', workOrders);
+  console.log('Dashboard rendering, authLoading:', authLoading, 'user:', user?.email, 'isLoading:', isLoading, 'workOrders:', workOrders, 'error:', error);
 
   // Show loading while authentication is being checked
   if (authLoading) {
@@ -161,7 +162,7 @@ export default function Dashboard() {
     );
   }
 
-  // Show loading while data is being fetched
+  // Show loading while data is being fetched (but only for a short time)
   if (isLoading) {
     return (
       <DashboardLayout>
@@ -175,6 +176,11 @@ export default function Dashboard() {
         </StandardPageLayout>
       </DashboardLayout>
     );
+  }
+
+  // Show error state if there's an error
+  if (error) {
+    console.error('Dashboard error:', error);
   }
 
   return (

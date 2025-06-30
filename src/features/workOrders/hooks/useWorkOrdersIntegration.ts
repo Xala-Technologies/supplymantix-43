@@ -1,4 +1,3 @@
-
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { workOrdersApi } from "@/lib/database/work-orders";
 import { toast } from "sonner";
@@ -15,17 +14,28 @@ export const useWorkOrdersIntegration = () => {
         const workOrders = await workOrdersApi.getWorkOrders();
         console.log('Raw work orders from API:', workOrders);
         
-        return workOrders.map(normalizeWorkOrderData);
+        if (!Array.isArray(workOrders)) {
+          console.warn('Work orders API returned non-array:', workOrders);
+          return [];
+        }
+        
+        const normalized = workOrders.map(normalizeWorkOrderData);
+        console.log('Normalized work orders:', normalized);
+        return normalized;
       } catch (error) {
         console.error('Error fetching work orders:', error);
-        toast.error('Failed to fetch work orders');
+        // Don't show toast for authentication errors, let the auth system handle it
+        if (error instanceof Error && !error.message.includes('not authenticated')) {
+          toast.error('Failed to fetch work orders');
+        }
         return [];
       }
     },
-    staleTime: 0,
-    gcTime: 5 * 60 * 1000,
+    staleTime: 30000, // 30 seconds
+    gcTime: 5 * 60 * 1000, // 5 minutes
     refetchOnWindowFocus: true,
     refetchOnMount: true,
+    retry: 1,
   });
 };
 

@@ -17,9 +17,33 @@ export const purchaseOrdersApi = {
       throw new Error("User not authenticated");
     }
 
+    // Get user's tenant_id
+    const { data: userRecord, error: userRecordError } = await supabase
+      .from("users")
+      .select("tenant_id")
+      .eq("id", userData.user.id)
+      .single();
+
+    if (userRecordError) {
+      console.error('Error fetching user record:', userRecordError);
+      if (userRecordError.code === 'PGRST116') {
+        console.log('User not found in users table, returning empty array');
+        return [];
+      }
+      throw userRecordError;
+    }
+
+    if (!userRecord) {
+      console.log('No user record found, returning empty array');
+      return [];
+    }
+
+    console.log('User tenant_id:', userRecord.tenant_id);
+
     const { data, error } = await supabase
       .from("purchase_orders")
       .select("*")
+      .eq("tenant_id", userRecord.tenant_id)
       .order("created_at", { ascending: false });
     
     console.log("Purchase orders query result:", { data, error, count: data?.length });
@@ -30,7 +54,7 @@ export const purchaseOrdersApi = {
     }
     
     console.log("=== getPurchaseOrders END ===");
-    return data;
+    return data || [];
   },
 
   async getPurchaseOrderById(id: string) {
@@ -61,7 +85,7 @@ export const purchaseOrdersApi = {
     
     console.log("Authenticated user:", userData.user.id);
 
-    // Get user's tenant_id - try to find existing user record first
+    // Get user's tenant_id
     console.log("Querying users table for tenant_id...");
     const { data: existingUser, error: userQueryError } = await supabase
       .from("users")
@@ -78,9 +102,6 @@ export const purchaseOrdersApi = {
     
     if (!existingUser) {
       console.error("User record not found in users table");
-      // Let's check what users exist
-      const { data: allUsers } = await supabase.from("users").select("id, email");
-      console.log("All users in database:", allUsers);
       throw new Error("User record not found. Please contact support.");
     }
 
