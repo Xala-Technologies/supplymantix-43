@@ -1,6 +1,7 @@
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { locationsApi } from "@/lib/database/locations";
 
 export interface Location {
   id: string;
@@ -48,24 +49,7 @@ export const useLocationHierarchy = () => {
   return useQuery({
     queryKey: ["locationHierarchy"],
     queryFn: async () => {
-      const { data: userData } = await supabase.auth.getUser();
-      if (!userData.user) throw new Error("User not authenticated");
-
-      const { data: userRecord } = await supabase
-        .from("users")
-        .select("tenant_id")
-        .eq("id", userData.user.id)
-        .single();
-
-      if (!userRecord) throw new Error("User record not found");
-
-      const { data, error } = await supabase
-        .from("locations")
-        .select("*")
-        .eq("tenant_id", userRecord.tenant_id);
-
-      if (error) throw error;
-      return data || [];
+      return await locationsApi.getLocationHierarchy();
     },
   });
 };
@@ -75,28 +59,7 @@ export const useLocationBreadcrumbs = (locationId: string) => {
     queryKey: ["locationBreadcrumbs", locationId],
     queryFn: async () => {
       if (!locationId) return [];
-
-      const { data: userData } = await supabase.auth.getUser();
-      if (!userData.user) throw new Error("User not authenticated");
-
-      const { data: userRecord } = await supabase
-        .from("users")
-        .select("tenant_id")
-        .eq("id", userData.user.id)
-        .single();
-
-      if (!userRecord) throw new Error("User record not found");
-
-      // Simple breadcrumb implementation - get the location and its parents
-      const { data, error } = await supabase
-        .from("locations")
-        .select("*")
-        .eq("id", locationId)
-        .eq("tenant_id", userRecord.tenant_id)
-        .single();
-
-      if (error) throw error;
-      return data ? [data] : [];
+      return await locationsApi.getLocationBreadcrumbs(locationId);
     },
     enabled: !!locationId,
   });
@@ -106,12 +69,8 @@ export const useLocationStats = (locationId: string) => {
   return useQuery({
     queryKey: ["locationStats", locationId],
     queryFn: async () => {
-      // Return mock stats for now
-      return {
-        asset_count: 0,
-        meter_count: 0,
-        child_location_count: 0
-      };
+      if (!locationId) return { asset_count: 0, meter_count: 0, child_location_count: 0, work_order_count: 0 };
+      return await locationsApi.getLocationStats(locationId);
     },
     enabled: !!locationId,
   });
@@ -122,9 +81,20 @@ export const useCreateLocation = () => {
   
   return useMutation({
     mutationFn: async (locationData: Omit<Location, 'id' | 'created_at' | 'updated_at'>) => {
+      const { data: userData } = await supabase.auth.getUser();
+      if (!userData.user) throw new Error("User not authenticated");
+
+      const { data: userRecord } = await supabase
+        .from("users")
+        .select("tenant_id")
+        .eq("id", userData.user.id)
+        .single();
+
+      if (!userRecord) throw new Error("User record not found");
+
       const { data, error } = await supabase
         .from("locations")
-        .insert(locationData)
+        .insert({ ...locationData, tenant_id: userRecord.tenant_id })
         .select()
         .single();
 
@@ -165,12 +135,7 @@ export const useDeleteLocation = () => {
   
   return useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase
-        .from("locations")
-        .delete()
-        .eq("id", id);
-
-      if (error) throw error;
+      await locationsApi.deleteLocation(id);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["locations"] });
