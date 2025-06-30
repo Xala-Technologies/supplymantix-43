@@ -17,3 +17,7 @@ export const createProcedureExecution = (data: any): ProcedureExecution => {
     updated_at: data.updated_at || new Date().toISOString()
   };
 };
+
+export const mapExecutionFromDB = (data: any): ProcedureExecution => {
+  return createProcedureExecution(data);
+};
