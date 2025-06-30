@@ -56,47 +56,135 @@ export type Database = {
           },
         ]
       }
+      asset_types: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          id: string
+          name: string
+          tenant_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          name: string
+          tenant_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          name?: string
+          tenant_id?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       assets: {
         Row: {
+          annual_depreciation_value: number | null
           asset_tag: string | null
+          asset_type: string | null
+          barcode: string | null
           category: string | null
           created_at: string | null
           criticality: string | null
           description: string | null
           id: string
           location: string | null
+          manufacturer: string | null
+          model: string | null
           name: string
+          parent_asset_id: string | null
+          parts: Json | null
+          picture_url: string | null
+          purchase_date: string | null
+          purchase_price: number | null
+          qr_code: string | null
+          replacement_date: string | null
+          serial_number: string | null
           status: Database["public"]["Enums"]["asset_status"]
+          teams_in_charge: string[] | null
           tenant_id: string
           updated_at: string | null
+          vendor: string | null
+          vin_number: string | null
+          warranty_end_date: string | null
+          year: number | null
         }
         Insert: {
+          annual_depreciation_value?: number | null
           asset_tag?: string | null
+          asset_type?: string | null
+          barcode?: string | null
           category?: string | null
           created_at?: string | null
           criticality?: string | null
           description?: string | null
           id?: string
           location?: string | null
+          manufacturer?: string | null
+          model?: string | null
           name: string
+          parent_asset_id?: string | null
+          parts?: Json | null
+          picture_url?: string | null
+          purchase_date?: string | null
+          purchase_price?: number | null
+          qr_code?: string | null
+          replacement_date?: string | null
+          serial_number?: string | null
           status?: Database["public"]["Enums"]["asset_status"]
+          teams_in_charge?: string[] | null
           tenant_id: string
           updated_at?: string | null
+          vendor?: string | null
+          vin_number?: string | null
+          warranty_end_date?: string | null
+          year?: number | null
         }
         Update: {
+          annual_depreciation_value?: number | null
           asset_tag?: string | null
+          asset_type?: string | null
+          barcode?: string | null
           category?: string | null
           created_at?: string | null
           criticality?: string | null
           description?: string | null
           id?: string
           location?: string | null
+          manufacturer?: string | null
+          model?: string | null
           name?: string
+          parent_asset_id?: string | null
+          parts?: Json | null
+          picture_url?: string | null
+          purchase_date?: string | null
+          purchase_price?: number | null
+          qr_code?: string | null
+          replacement_date?: string | null
+          serial_number?: string | null
           status?: Database["public"]["Enums"]["asset_status"]
+          teams_in_charge?: string[] | null
           tenant_id?: string
           updated_at?: string | null
+          vendor?: string | null
+          vin_number?: string | null
+          warranty_end_date?: string | null
+          year?: number | null
         }
         Relationships: [
+          {
+            foreignKeyName: "assets_parent_asset_id_fkey"
+            columns: ["parent_asset_id"]
+            isOneToOne: false
+            referencedRelation: "assets"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "assets_tenant_id_fkey"
             columns: ["tenant_id"]
@@ -1339,6 +1427,50 @@ export type Database = {
           },
         ]
       }
+      parts: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          id: string
+          name: string
+          part_number: string | null
+          tenant_id: string
+          unit_cost: number | null
+          updated_at: string | null
+          vendor_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          name: string
+          part_number?: string | null
+          tenant_id: string
+          unit_cost?: number | null
+          updated_at?: string | null
+          vendor_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          name?: string
+          part_number?: string | null
+          tenant_id?: string
+          unit_cost?: number | null
+          updated_at?: string | null
+          vendor_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "parts_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       procedure_executions: {
         Row: {
           answers: Json | null
@@ -2009,6 +2141,33 @@ export type Database = {
           },
         ]
       }
+      teams: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          id: string
+          name: string
+          tenant_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          name: string
+          tenant_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          name?: string
+          tenant_id?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       template_checklist_items: {
         Row: {
           created_at: string
@@ -2181,6 +2340,39 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      vendors: {
+        Row: {
+          address: string | null
+          contact_email: string | null
+          contact_phone: string | null
+          created_at: string | null
+          id: string
+          name: string
+          tenant_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          address?: string | null
+          contact_email?: string | null
+          contact_phone?: string | null
+          created_at?: string | null
+          id?: string
+          name: string
+          tenant_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          address?: string | null
+          contact_email?: string | null
+          contact_phone?: string | null
+          created_at?: string | null
+          id?: string
+          name?: string
+          tenant_id?: string
+          updated_at?: string | null
+        }
+        Relationships: []
       }
       work_order_comments: {
         Row: {

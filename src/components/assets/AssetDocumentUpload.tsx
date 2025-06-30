@@ -1,53 +1,77 @@
 
-import React, { useCallback, useState } from "react";
-import { useDropzone } from "react-dropzone";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Upload, File, X, Loader2 } from "lucide-react";
-import { useUploadAssetDocument } from "@/hooks/useAssetDocuments";
-import { cn } from "@/lib/utils";
+import React, { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { supabase } from '@/integrations/supabase/client';
+import { Upload, X, FileText, Download } from 'lucide-react';
+import { toast } from 'sonner';
 
-interface AssetDocumentUploadProps {
-  assetId: string;
-  onUploadComplete?: () => void;
+interface Document {
+  name: string;
+  url: string;
+  size: number;
 }
 
-export const AssetDocumentUpload = ({ assetId, onUploadComplete }: AssetDocumentUploadProps) => {
-  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
-  const uploadMutation = useUploadAssetDocument();
+interface AssetDocumentUploadProps {
+  documents: Document[];
+  onDocumentsChanged: (documents: Document[]) => void;
+}
 
-  const onDrop = useCallback((acceptedFiles: File[]) => {
-    setSelectedFiles(prev => [...prev, ...acceptedFiles]);
-  }, []);
+export const AssetDocumentUpload: React.FC<AssetDocumentUploadProps> = ({
+  documents,
+  onDocumentsChanged
+}) => {
+  const [uploading, setUploading] = useState(false);
 
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({
-    onDrop,
-    accept: {
-      'application/pdf': ['.pdf'],
-      'application/msword': ['.doc'],
-      'application/vnd.openxmlformats-officedocument.wordprocessingml.document': ['.docx'],
-      'image/*': ['.png', '.jpg', '.jpeg', '.gif'],
-      'text/plain': ['.txt'],
-    },
-    multiple: true
-  });
+  const uploadDocument = async (file: File) => {
+    setUploading(true);
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Date.now()}_${file.name}`;
+      const filePath = `documents/${fileName}`;
 
-  const removeFile = (index: number) => {
-    setSelectedFiles(prev => prev.filter((_, i) => i !== index));
+      const { error: uploadError } = await supabase.storage
+        .from('asset-documents')
+        .upload(filePath, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data } = supabase.storage
+        .from('asset-documents')
+        .getPublicUrl(filePath);
+
+      const newDoc: Document = {
+        name: file.name,
+        url: data.publicUrl,
+        size: file.size
+      };
+
+      onDocumentsChanged([...documents, newDoc]);
+      toast.success('Document uploaded successfully');
+    } catch (error) {
+      console.error('Error uploading document:', error);
+      toast.error('Error uploading document');
+    } finally {
+      setUploading(false);
+    }
   };
 
-  const uploadFiles = async () => {
-    if (selectedFiles.length === 0) return;
-
-    try {
-      for (const file of selectedFiles) {
-        await uploadMutation.mutateAsync({ assetId, file });
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      if (file.size > 10 * 1024 * 1024) { // 10MB limit
+        toast.error('File size must be less than 10MB');
+        return;
       }
-      setSelectedFiles([]);
-      onUploadComplete?.();
-    } catch (error) {
-      console.error('Upload failed:', error);
+      uploadDocument(file);
     }
+  };
+
+  const removeDocument = (index: number) => {
+    const newDocs = documents.filter((_, i) => i !== index);
+    onDocumentsChanged(newDocs);
+    toast.success('Document removed');
   };
 
   const formatFileSize = (bytes: number) => {
@@ -60,76 +84,63 @@ export const AssetDocumentUpload = ({ assetId, onUploadComplete }: AssetDocument
 
   return (
     <div className="space-y-4">
-      <Card>
-        <CardContent className="p-6">
-          <div
-            {...getRootProps()}
-            className={cn(
-              "border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors",
-              isDragActive ? "border-blue-500 bg-blue-50" : "border-gray-300 hover:border-gray-400"
-            )}
-          >
-            <input {...getInputProps()} />
-            <Upload className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-            {isDragActive ? (
-              <p className="text-blue-600">Drop the files here...</p>
-            ) : (
-              <div>
-                <p className="text-gray-600 mb-2">
-                  Drag & drop files here, or click to select files
-                </p>
-                <p className="text-sm text-gray-500">
-                  Supports PDF, DOC, DOCX, images, and text files
-                </p>
-              </div>
-            )}
-          </div>
-        </CardContent>
-      </Card>
-
-      {selectedFiles.length > 0 && (
-        <Card>
-          <CardContent className="p-4">
-            <h4 className="font-medium mb-3">Selected Files ({selectedFiles.length})</h4>
-            <div className="space-y-2">
-              {selectedFiles.map((file, index) => (
-                <div key={index} className="flex items-center justify-between p-2 bg-gray-50 rounded">
-                  <div className="flex items-center gap-2">
-                    <File className="h-4 w-4 text-gray-500" />
-                    <span className="text-sm font-medium">{file.name}</span>
-                    <span className="text-xs text-gray-500">({formatFileSize(file.size)})</span>
-                  </div>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => removeFile(index)}
-                    disabled={uploadMutation.isPending}
-                  >
-                    <X className="h-4 w-4" />
-                  </Button>
+      <Label>Documents</Label>
+      
+      {documents.length > 0 && (
+        <div className="space-y-2">
+          {documents.map((doc, index) => (
+            <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
+              <div className="flex items-center gap-2">
+                <FileText className="h-4 w-4 text-gray-500" />
+                <div>
+                  <p className="text-sm font-medium">{doc.name}</p>
+                  <p className="text-xs text-gray-500">{formatFileSize(doc.size)}</p>
                 </div>
-              ))}
+              </div>
+              <div className="flex items-center gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => window.open(doc.url, '_blank')}
+                >
+                  <Download className="h-3 w-3" />
+                </Button>
+                <Button
+                  type="button"
+                  variant="destructive"
+                  size="sm"
+                  onClick={() => removeDocument(index)}
+                >
+                  <X className="h-3 w-3" />
+                </Button>
+              </div>
             </div>
-            <div className="flex justify-end mt-4 gap-2">
-              <Button
-                variant="outline"
-                onClick={() => setSelectedFiles([])}
-                disabled={uploadMutation.isPending}
-              >
-                Clear All
-              </Button>
-              <Button
-                onClick={uploadFiles}
-                disabled={uploadMutation.isPending}
-                className="bg-blue-600 hover:bg-blue-700"
-              >
-                {uploadMutation.isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-                Upload Files
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+          ))}
+        </div>
       )}
+
+      <div className="flex items-center gap-2">
+        <Input
+          type="file"
+          accept=".pdf,.doc,.docx,.xls,.xlsx,.txt,.png,.jpg,.jpeg"
+          onChange={handleFileChange}
+          disabled={uploading}
+          className="hidden"
+          id="asset-document-upload"
+        />
+        <Label htmlFor="asset-document-upload" asChild>
+          <Button
+            type="button"
+            variant="outline"
+            disabled={uploading}
+            className="cursor-pointer"
+          >
+            <Upload className="h-4 w-4 mr-2" />
+            {uploading ? 'Uploading...' : 'Upload Document'}
+          </Button>
+        </Label>
+      </div>
     </div>
   );
 };

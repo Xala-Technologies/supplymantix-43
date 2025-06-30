@@ -1,4 +1,3 @@
-
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -14,6 +13,25 @@ export interface Asset {
   tenant_id: string;
   created_at: string;
   updated_at: string;
+  // New fields
+  picture_url?: string;
+  purchase_date?: string;
+  purchase_price?: number;
+  annual_depreciation_value?: number;
+  warranty_end_date?: string;
+  vin_number?: string;
+  replacement_date?: string;
+  serial_number?: string;
+  model?: string;
+  manufacturer?: string;
+  year?: number;
+  teams_in_charge?: string[];
+  qr_code?: string;
+  barcode?: string;
+  asset_type?: string;
+  vendor?: string;
+  parts?: any[];
+  parent_asset_id?: string;
 }
 
 export interface AssetInsert {
@@ -25,6 +43,25 @@ export interface AssetInsert {
   criticality: string;
   status: "active" | "maintenance" | "out_of_service" | "retired";
   tenant_id: string;
+  // New fields
+  picture_url?: string;
+  purchase_date?: string;
+  purchase_price?: number;
+  annual_depreciation_value?: number;
+  warranty_end_date?: string;
+  vin_number?: string;
+  replacement_date?: string;
+  serial_number?: string;
+  model?: string;
+  manufacturer?: string;
+  year?: number;
+  teams_in_charge?: string[];
+  qr_code?: string;
+  barcode?: string;
+  asset_type?: string;
+  vendor?: string;
+  parts?: any[];
+  parent_asset_id?: string;
 }
 
 export interface AssetUpdate {
@@ -36,6 +73,25 @@ export interface AssetUpdate {
   criticality?: string;
   status?: "active" | "maintenance" | "out_of_service" | "retired";
   tenant_id: string;
+  // New fields
+  picture_url?: string;
+  purchase_date?: string;
+  purchase_price?: number;
+  annual_depreciation_value?: number;
+  warranty_end_date?: string;
+  vin_number?: string;
+  replacement_date?: string;
+  serial_number?: string;
+  model?: string;
+  manufacturer?: string;
+  year?: number;
+  teams_in_charge?: string[];
+  qr_code?: string;
+  barcode?: string;
+  asset_type?: string;
+  vendor?: string;
+  parts?: any[];
+  parent_asset_id?: string;
 }
 
 export const useAssets = (filters?: any) => {
