@@ -1,4 +1,3 @@
-
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/sonner";
@@ -26,6 +25,8 @@ import Reporting from "@/pages/Reporting";
 import Meters from "@/pages/Meters";
 import TranslationManagement from "@/pages/TranslationManagement";
 import InviteAccept from "@/pages/InviteAccept";
+import Clients from "@/pages/Clients";
+import Vendors from "@/pages/Vendors";
 import NotFound from "@/pages/NotFound";
 
 // Create a single query client instance
@@ -64,6 +65,7 @@ function App() {
                   <Dashboard />
                 </ProtectedRoute>
               } />
+              
               <Route path="/dashboard/work-orders" element={
                 <ProtectedRoute>
                   <WorkOrders />
@@ -142,6 +144,17 @@ function App() {
               <Route path="/dashboard/translations" element={
                 <ProtectedRoute>
                   <TranslationManagement />
+                </ProtectedRoute>
+              } />
+              
+              <Route path="/dashboard/clients" element={
+                <ProtectedRoute>
+                  <Clients />
+                </ProtectedRoute>
+              } />
+              <Route path="/dashboard/vendors" element={
+                <ProtectedRoute>
+                  <Vendors />
                 </ProtectedRoute>
               } />
               

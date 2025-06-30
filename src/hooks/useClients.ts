@@ -2,41 +2,41 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
-export interface Vendor {
+export interface Client {
   id: string;
   tenant_id: string;
   name: string;
-  contact_email?: string;
-  contact_phone?: string;
   address?: string;
-  status?: string;
+  phone?: string;
+  email?: string;
   notes?: string;
+  status: string;
   created_at: string;
   updated_at: string;
 }
 
-export interface VendorInsert {
+export interface ClientInsert {
   name: string;
-  contact_email?: string;
-  contact_phone?: string;
   address?: string;
-  status?: string;
+  phone?: string;
+  email?: string;
   notes?: string;
+  status?: string;
   tenant_id: string;
 }
 
-export interface VendorUpdate {
+export interface ClientUpdate {
   name?: string;
-  contact_email?: string;
-  contact_phone?: string;
   address?: string;
-  status?: string;
+  phone?: string;
+  email?: string;
   notes?: string;
+  status?: string;
 }
 
-export const useVendors = (filters?: any) => {
+export const useClients = (filters?: any) => {
   return useQuery({
-    queryKey: ["vendors", filters],
+    queryKey: ["clients", filters],
     queryFn: async () => {
       const { data: userData } = await supabase.auth.getUser();
       if (!userData.user) throw new Error("User not authenticated");
@@ -50,7 +50,7 @@ export const useVendors = (filters?: any) => {
       if (!userRecord) throw new Error("User record not found");
 
       let query = supabase
-        .from("vendors")
+        .from("clients")
         .select("*")
         .eq("tenant_id", userRecord.tenant_id);
 
@@ -70,11 +70,11 @@ export const useVendors = (filters?: any) => {
   });
 };
 
-export const useCreateVendor = () => {
+export const useCreateClient = () => {
   const queryClient = useQueryClient();
   
   return useMutation({
-    mutationFn: async (vendorData: Omit<VendorInsert, 'tenant_id'>) => {
+    mutationFn: async (clientData: Omit<ClientInsert, 'tenant_id'>) => {
       const { data: userData } = await supabase.auth.getUser();
       if (!userData.user) throw new Error("User not authenticated");
 
@@ -87,8 +87,8 @@ export const useCreateVendor = () => {
       if (!userRecord) throw new Error("User record not found");
 
       const { data, error } = await supabase
-        .from("vendors")
-        .insert({ ...vendorData, tenant_id: userRecord.tenant_id })
+        .from("clients")
+        .insert({ ...clientData, tenant_id: userRecord.tenant_id })
         .select()
         .single();
 
@@ -96,16 +96,16 @@ export const useCreateVendor = () => {
       return data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["vendors"] });
+      queryClient.invalidateQueries({ queryKey: ["clients"] });
     }
   });
 };
 
-export const useUpdateVendor = () => {
+export const useUpdateClient = () => {
   const queryClient = useQueryClient();
   
   return useMutation({
-    mutationFn: async ({ id, updates }: { id: string; updates: VendorUpdate }) => {
+    mutationFn: async ({ id, updates }: { id: string; updates: ClientUpdate }) => {
       const { data: userData } = await supabase.auth.getUser();
       if (!userData.user) throw new Error("User not authenticated");
 
@@ -118,7 +118,7 @@ export const useUpdateVendor = () => {
       if (!userRecord) throw new Error("User record not found");
 
       const { data, error } = await supabase
-        .from("vendors")
+        .from("clients")
         .update(updates)
         .eq("id", id)
         .eq("tenant_id", userRecord.tenant_id)
@@ -129,12 +129,12 @@ export const useUpdateVendor = () => {
       return data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["vendors"] });
+      queryClient.invalidateQueries({ queryKey: ["clients"] });
     }
   });
 };
 
-export const useDeleteVendor = () => {
+export const useDeleteClient = () => {
   const queryClient = useQueryClient();
   
   return useMutation({
@@ -151,7 +151,7 @@ export const useDeleteVendor = () => {
       if (!userRecord) throw new Error("User record not found");
 
       const { error } = await supabase
-        .from("vendors")
+        .from("clients")
         .update({ status: 'inactive' })
         .eq("id", id)
         .eq("tenant_id", userRecord.tenant_id);
@@ -159,7 +159,7 @@ export const useDeleteVendor = () => {
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["vendors"] });
+      queryClient.invalidateQueries({ queryKey: ["clients"] });
     }
   });
 };

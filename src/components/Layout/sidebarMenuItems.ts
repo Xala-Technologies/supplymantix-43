@@ -13,7 +13,9 @@ import {
   MessageSquare,
   Languages,
   LayoutDashboard,
-  Tags
+  Tags,
+  Users,
+  Truck
 } from "lucide-react";
 
 export const menuItems = [
@@ -76,6 +78,18 @@ export const menuItems = [
     url: "/dashboard/categories",
     icon: Tags,
     group: "sidebar.resources"
+  },
+  {
+    title: "nav.clients",
+    url: "/dashboard/clients",
+    icon: Users,
+    group: "sidebar.relationships"
+  },
+  {
+    title: "nav.vendors",
+    url: "/dashboard/vendors",
+    icon: Truck,
+    group: "sidebar.relationships"
   },
   {
     title: "nav.reporting",
