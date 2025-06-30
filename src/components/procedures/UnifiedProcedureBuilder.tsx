@@ -221,7 +221,7 @@ export const UnifiedProcedureBuilder: React.FC<UnifiedProcedureBuilderProps> = (
   return <div className="h-screen flex flex-col bg-gray-50">
       <ProcedureBuilderHeader activeTab={activeTab} setActiveTab={setActiveTab} scoringEnabled={scoringEnabled} setScoringEnabled={setScoringEnabled} onCancel={onCancel} onPreview={() => setIsPreviewMode(true)} onSubmit={handleSubmit} isLoading={isLoading} hasTitle={!!formData.title} />
 
-      <div className="flex-1 flex overflow-hidden px-[240px]">
+      <div className="flex-1 flex overflow-hidden px-0">
         {activeTab === 'fields' ? <>
             <div className="flex-1 flex flex-col bg-gray-50">
               <FieldsList fields={formData.fields} selectedFieldIndex={selectedFieldIndex} procedureId={initialData?.id} onFieldSelect={setSelectedFieldIndex} onFieldMove={moveField} onFieldUpdate={updateField} onFieldDuplicate={duplicateField} onFieldDelete={removeField} onFieldReorder={reorderFields} />
