@@ -11,7 +11,6 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Search, ChevronDown, X, Plus } from 'lucide-react';
 import { useAssets } from '@/hooks/useAssets';
 import { useLocations } from '@/hooks/useLocations';
-import { useCategories } from '@/hooks/useCategories';
 import { useTeams } from '@/hooks/useTeams';
 
 interface ProcedureSettingsContentProps {
@@ -27,17 +26,6 @@ interface ProcedureSettingsContentProps {
   };
   onUpdate: (updates: Partial<ProcedureSettingsContentProps['formData']>) => void;
 }
-
-const FALLBACK_CATEGORIES = [
-  'Inspection',
-  'Safety',
-  'Calibration',
-  'Reactive Maintenance',
-  'Preventive Maintenance',
-  'Quality Control',
-  'Training',
-  'Other'
-];
 
 const FALLBACK_TEAMS = [
   'Maintenance Team',
@@ -59,7 +47,6 @@ export const ProcedureSettingsContent: React.FC<ProcedureSettingsContentProps> =
   // Fetch real data from the database
   const { data: assets, isLoading: assetsLoading } = useAssets();
   const { data: locations, isLoading: locationsLoading } = useLocations();
-  const { data: categories, isLoading: categoriesLoading } = useCategories();
   const { data: teams, isLoading: teamsLoading } = useTeams();
 
   const handleAddCustomTag = () => {
@@ -149,41 +136,6 @@ export const ProcedureSettingsContent: React.FC<ProcedureSettingsContentProps> =
             </p>
           </CardHeader>
           <CardContent className="space-y-6">
-            {/* Categories */}
-            <div>
-              <Label className="text-sm font-medium text-gray-700 mb-2 block">Categories</Label>
-              <Select
-                value={formData.category}
-                onValueChange={(value) => onUpdate({ category: value })}
-              >
-                <SelectTrigger className="h-11">
-                  <div className="flex items-center gap-2">
-                    <Search className="h-4 w-4 text-gray-400" />
-                    <SelectValue placeholder="Start typing..." />
-                  </div>
-                  <ChevronDown className="h-4 w-4 text-gray-400 ml-auto" />
-                </SelectTrigger>
-                <SelectContent className="bg-white z-50">
-                  {categoriesLoading ? (
-                    <SelectItem value="loading" disabled>Loading categories...</SelectItem>
-                  ) : (
-                    <>
-                      {categories?.map(category => (
-                        <SelectItem key={category.id} value={category.name}>
-                          {category.name}
-                        </SelectItem>
-                      ))}
-                      {FALLBACK_CATEGORIES.map(category => (
-                        <SelectItem key={category} value={category}>
-                          {category}
-                        </SelectItem>
-                      ))}
-                    </>
-                  )}
-                </SelectContent>
-              </Select>
-            </div>
-
             {/* Assets */}
             <div>
               <Label className="text-sm font-medium text-gray-700 mb-2 block">Assets</Label>
