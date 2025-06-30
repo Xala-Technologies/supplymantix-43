@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { DashboardLayout } from "@/components/Layout/DashboardLayout";
 import { StandardPageLayout, StandardPageHeader, StandardPageFilters, StandardPageContent } from "@/components/Layout/StandardPageLayout";
@@ -21,14 +20,12 @@ import { ProcedureViewToggle } from "@/components/procedures/ProcedureViewToggle
 import { ProcedureCardView } from "@/components/procedures/ProcedureCardView";
 import { ProcedureListView } from "@/components/procedures/ProcedureListView";
 import { ProcedureDetailDialog } from "@/components/procedures/ProcedureDetailDialog";
-import { CategorySidebar } from "@/components/categories/CategorySidebar";
 import { Card, CardContent } from "@/components/ui/card";
 import { toast } from "sonner";
 
 const Procedures = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
-  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [showGlobalOnly, setShowGlobalOnly] = useState(false);
   const [viewMode, setViewMode] = useState<'card' | 'list'>('card');
   const [showCreateWizard, setShowCreateWizard] = useState(false);
@@ -53,14 +50,6 @@ const Procedures = () => {
   const { categories, getCategoryColor } = useProcedureUtils();
 
   const procedures = proceduresData?.procedures || [];
-
-  const handleCategoryToggle = (categoryId: string) => {
-    setSelectedCategories(prev =>
-      prev.includes(categoryId)
-        ? prev.filter(id => id !== categoryId)
-        : [...prev, categoryId]
-    );
-  };
 
   const handleCreateFromTemplate = (template: any) => {
     const templateData = template.template_data;
@@ -171,55 +160,46 @@ const Procedures = () => {
         </StandardPageFilters>
 
         <StandardPageContent>
-          <div className="flex gap-6">
-            <CategorySidebar
-              selectedCategories={selectedCategories}
-              onCategoryToggle={handleCategoryToggle}
-            />
-            
-            <div className="flex-1">
-              {procedures.length === 0 ? (
-                <div className="text-center py-16">
-                  <div className="text-gray-400 mb-6">
-                    <FileText className="h-20 w-20 mx-auto" />
-                  </div>
-                  <h3 className="text-xl font-semibold text-gray-900 mb-3">No procedures found</h3>
-                  <p className="text-gray-600 mb-8 max-w-md mx-auto">
-                    {searchTerm || selectedCategory !== 'all' || showGlobalOnly || selectedCategories.length > 0
-                      ? "No procedures match your current filters. Try adjusting your search criteria."
-                      : "Get started by creating your first procedure template."
-                    }
-                  </p>
-                  {!searchTerm && selectedCategory === 'all' && !showGlobalOnly && selectedCategories.length === 0 && (
-                    <Button onClick={() => setShowNewProcedureModal(true)}>
-                      <Plus className="h-4 w-4 mr-2" />
-                      Create Your First Procedure
-                    </Button>
-                  )}
-                </div>
-              ) : viewMode === 'card' ? (
-                <ProcedureCardView
-                  procedures={procedures}
-                  onEdit={handleEditProcedure}
-                  onDuplicate={handleDuplicateProcedure}
-                  onDelete={setDeleteConfirm}
-                  onOpenInNewWindow={handleOpenInNewWindow}
-                  onViewDetails={handleViewDetails}
-                  getCategoryColor={getCategoryColor}
-                />
-              ) : (
-                <ProcedureListView
-                  procedures={procedures}
-                  onEdit={handleEditProcedure}
-                  onDuplicate={handleDuplicateProcedure}
-                  onDelete={setDeleteConfirm}
-                  onOpenInNewWindow={handleOpenInNewWindow}
-                  onViewDetails={handleViewDetails}
-                  getCategoryColor={getCategoryColor}
-                />
+          {procedures.length === 0 ? (
+            <div className="text-center py-16">
+              <div className="text-gray-400 mb-6">
+                <FileText className="h-20 w-20 mx-auto" />
+              </div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-3">No procedures found</h3>
+              <p className="text-gray-600 mb-8 max-w-md mx-auto">
+                {searchTerm || selectedCategory !== 'all' || showGlobalOnly
+                  ? "No procedures match your current filters. Try adjusting your search criteria."
+                  : "Get started by creating your first procedure template."
+                }
+              </p>
+              {!searchTerm && selectedCategory === 'all' && !showGlobalOnly && (
+                <Button onClick={() => setShowNewProcedureModal(true)}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Create Your First Procedure
+                </Button>
               )}
             </div>
-          </div>
+          ) : viewMode === 'card' ? (
+            <ProcedureCardView
+              procedures={procedures}
+              onEdit={handleEditProcedure}
+              onDuplicate={handleDuplicateProcedure}
+              onDelete={setDeleteConfirm}
+              onOpenInNewWindow={handleOpenInNewWindow}
+              onViewDetails={handleViewDetails}
+              getCategoryColor={getCategoryColor}
+            />
+          ) : (
+            <ProcedureListView
+              procedures={procedures}
+              onEdit={handleEditProcedure}
+              onDuplicate={handleDuplicateProcedure}
+              onDelete={setDeleteConfirm}
+              onOpenInNewWindow={handleOpenInNewWindow}
+              onViewDetails={handleViewDetails}
+              getCategoryColor={getCategoryColor}
+            />
+          )}
         </StandardPageContent>
       </StandardPageLayout>
 

@@ -12,8 +12,7 @@ import {
   TrendingUp, 
   MessageSquare,
   Languages,
-  LayoutDashboard,
-  FolderOpen
+  LayoutDashboard
 } from "lucide-react";
 
 export const menuItems = [
@@ -57,12 +56,6 @@ export const menuItems = [
     title: "nav.procedures",
     url: "/dashboard/procedures",
     icon: ClipboardList,
-    group: "sidebar.resources"
-  },
-  {
-    title: "nav.categories",
-    url: "/dashboard/categories",
-    icon: FolderOpen,
     group: "sidebar.resources"
   },
   {
