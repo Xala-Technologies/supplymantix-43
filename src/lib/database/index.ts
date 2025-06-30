@@ -3,6 +3,7 @@ import { workOrdersApi } from './work-orders';
 import { purchaseOrdersApi } from './purchase-orders';
 import { organizationsApi } from './organizations';
 import { proceduresApi } from './procedures';
+import { categoriesApi } from './categories';
 
 export const databaseApi = {
   // Work Orders
@@ -36,6 +37,12 @@ export const databaseApi = {
   createProcedure: proceduresApi.createProcedure,
   updateProcedure: proceduresApi.updateProcedure,
   deleteProcedure: proceduresApi.deleteProcedure,
+
+  // Categories
+  getCategories: categoriesApi.getCategories,
+  createCategory: categoriesApi.createCategory,
+  updateCategory: categoriesApi.updateCategory,
+  deleteCategory: categoriesApi.deleteCategory,
 
   // Stub implementations for missing methods
   getInventoryItems: async () => {

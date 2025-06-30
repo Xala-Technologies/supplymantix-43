@@ -24,6 +24,7 @@ import CreatePurchaseOrder from "@/pages/CreatePurchaseOrder";
 import Requests from "@/pages/Requests";
 import Meters from "@/pages/Meters";
 import Locations from "@/pages/Locations";
+import Categories from "@/pages/Categories";
 import Reporting from "@/pages/Reporting";
 import Messages from "@/pages/Messages";
 import Organization from "@/pages/Organization";
@@ -113,6 +114,12 @@ function App() {
               <Route path="/dashboard/locations" element={
                 <ProtectedRoute>
                   <Locations />
+                </ProtectedRoute>
+              } />
+              
+              <Route path="/dashboard/categories" element={
+                <ProtectedRoute>
+                  <Categories />
                 </ProtectedRoute>
               } />
               
