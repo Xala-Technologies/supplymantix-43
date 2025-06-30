@@ -5,6 +5,7 @@ import { ProcedureBuilderHeader } from './builder/ProcedureBuilderHeader';
 import { FieldsList } from './builder/FieldsList';
 import { AddItemSidebar } from './builder/AddItemSidebar';
 import { ProcedureSettingsEnhanced } from './builder/ProcedureSettingsEnhanced';
+
 interface UnifiedProcedureBuilderProps {
   initialData?: {
     id?: string;
@@ -27,6 +28,7 @@ interface UnifiedProcedureBuilderProps {
   isLoading?: boolean;
   mode?: 'create' | 'edit';
 }
+
 export const UnifiedProcedureBuilder: React.FC<UnifiedProcedureBuilderProps> = ({
   initialData,
   onSave,
@@ -106,6 +108,7 @@ export const UnifiedProcedureBuilder: React.FC<UnifiedProcedureBuilderProps> = (
       updated_at: new Date().toISOString()
     }]
   });
+
   const addField = (type: ProcedureField['field_type'] = 'text') => {
     const newField: ProcedureField = {
       id: crypto.randomUUID(),
@@ -126,12 +129,15 @@ export const UnifiedProcedureBuilder: React.FC<UnifiedProcedureBuilderProps> = (
     }));
     setSelectedFieldIndex(formData.fields.length);
   };
+
   const addHeading = () => {
     addField('section');
   };
+
   const addSection = () => {
     addField('section');
   };
+
   const updateField = (index: number, field: Partial<ProcedureField>) => {
     setFormData(prev => ({
       ...prev,
@@ -141,6 +147,7 @@ export const UnifiedProcedureBuilder: React.FC<UnifiedProcedureBuilderProps> = (
       } : f)
     }));
   };
+
   const removeField = (index: number) => {
     setFormData(prev => ({
       ...prev,
@@ -151,6 +158,7 @@ export const UnifiedProcedureBuilder: React.FC<UnifiedProcedureBuilderProps> = (
     }));
     setSelectedFieldIndex(null);
   };
+
   const duplicateField = (index: number) => {
     const fieldToDuplicate = formData.fields[index];
     const duplicatedField: ProcedureField = {
@@ -169,6 +177,7 @@ export const UnifiedProcedureBuilder: React.FC<UnifiedProcedureBuilderProps> = (
       }))]
     }));
   };
+
   const moveField = (index: number, direction: 'up' | 'down') => {
     const fields = [...formData.fields];
     const targetIndex = direction === 'up' ? index - 1 : index + 1;
@@ -190,6 +199,7 @@ export const UnifiedProcedureBuilder: React.FC<UnifiedProcedureBuilderProps> = (
       }
     }
   };
+
   const reorderFields = (fromIndex: number, toIndex: number) => {
     const fields = [...formData.fields];
     const [movedField] = fields.splice(fromIndex, 1);
@@ -209,29 +219,69 @@ export const UnifiedProcedureBuilder: React.FC<UnifiedProcedureBuilderProps> = (
       setSelectedFieldIndex(toIndex);
     }
   };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onSave(formData);
   };
+
   if (isPreviewMode) {
-    return <div className="h-screen bg-gray-50">
-        <ProcedurePreview procedure={formData} scoringEnabled={scoringEnabled} onClose={() => setIsPreviewMode(false)} />
-      </div>;
-  }
-  return <div className="h-screen flex flex-col bg-gray-50">
-      <ProcedureBuilderHeader activeTab={activeTab} setActiveTab={setActiveTab} scoringEnabled={scoringEnabled} setScoringEnabled={setScoringEnabled} onCancel={onCancel} onPreview={() => setIsPreviewMode(true)} onSubmit={handleSubmit} isLoading={isLoading} hasTitle={!!formData.title} />
-
-      <div className="flex-1 flex overflow-hidden px-0">
-        {activeTab === 'fields' ? <>
-            <div className="flex-1 flex flex-col bg-gray-50">
-              <FieldsList fields={formData.fields} selectedFieldIndex={selectedFieldIndex} procedureId={initialData?.id} onFieldSelect={setSelectedFieldIndex} onFieldMove={moveField} onFieldUpdate={updateField} onFieldDuplicate={duplicateField} onFieldDelete={removeField} onFieldReorder={reorderFields} />
-            </div>
-
-            <AddItemSidebar onAddField={addField} onAddHeading={addHeading} onAddSection={addSection} />
-          </> : <ProcedureSettingsEnhanced formData={formData} onUpdate={updates => setFormData(prev => ({
-        ...prev,
-        ...updates
-      }))} />}
+    return (
+      <div className="h-screen bg-gray-50">
+        <ProcedurePreview 
+          procedure={formData} 
+          scoringEnabled={scoringEnabled} 
+          onClose={() => setIsPreviewMode(false)} 
+        />
       </div>
-    </div>;
+    );
+  }
+
+  return (
+    <div className="h-screen flex flex-col bg-gray-50">
+      <ProcedureBuilderHeader 
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        scoringEnabled={scoringEnabled}
+        setScoringEnabled={setScoringEnabled}
+        onCancel={onCancel}
+        onPreview={() => setIsPreviewMode(true)}
+        onSubmit={handleSubmit}
+        isLoading={isLoading}
+        hasTitle={!!formData.title}
+      />
+
+      <div className="flex-1 overflow-hidden">
+        {activeTab === 'fields' ? (
+          <div className="flex h-full px-0">
+            <div className="flex-1 flex flex-col bg-gray-50">
+              <FieldsList 
+                fields={formData.fields}
+                selectedFieldIndex={selectedFieldIndex}
+                procedureId={initialData?.id}
+                onFieldSelect={setSelectedFieldIndex}
+                onFieldMove={moveField}
+                onFieldUpdate={updateField}
+                onFieldDuplicate={duplicateField}
+                onFieldDelete={removeField}
+                onFieldReorder={reorderFields}
+              />
+            </div>
+            <AddItemSidebar 
+              onAddField={addField}
+              onAddHeading={addHeading}
+              onAddSection={addSection}
+            />
+          </div>
+        ) : (
+          <div className="w-full h-full">
+            <ProcedureSettingsEnhanced 
+              formData={formData}
+              onUpdate={updates => setFormData(prev => ({ ...prev, ...updates }))}
+            />
+          </div>
+        )}
+      </div>
+    </div>
+  );
 };
