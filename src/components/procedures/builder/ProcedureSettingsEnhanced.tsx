@@ -84,7 +84,7 @@ export const ProcedureSettingsEnhanced: React.FC<ProcedureSettingsEnhancedProps>
   };
 
   return (
-    <div className="h-full overflow-y-auto bg-gray-50">
+    <div className="h-full overflow-y-auto">
       <div className="flex justify-center py-8 px-4">
         <div className="w-full max-w-2xl space-y-8">
           {/* Tag your procedure */}
@@ -275,7 +275,7 @@ export const ProcedureSettingsEnhanced: React.FC<ProcedureSettingsEnhancedProps>
           </Card>
 
           {/* Bottom padding for better scrolling */}
-          <div className="h-8"></div>
+          <div className="h-16"></div>
         </div>
       </div>
     </div>
