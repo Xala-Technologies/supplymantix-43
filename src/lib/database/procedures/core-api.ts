@@ -157,6 +157,8 @@ export const coreApi = {
         asset_ids: data.asset_ids || [],
         location_ids: data.location_ids || [],
         team_ids: data.team_ids || [],
+        template_data: data.template_data as any,
+        steps: data.steps as any,
         fields: (data.procedure_fields || []).map(field => ({
           ...field,
           field_type: field.field_type as ProcedureFieldType,
@@ -270,7 +272,7 @@ export const coreApi = {
 
       // Prepare the new procedure data
       const { fields, ...procedureData } = originalProcedure;
-      delete procedureData.id; // Remove the original ID
+      delete (procedureData as any).id; // Remove the original ID
 
       const newProcedure: ProcedureInsert = {
         ...procedureData,

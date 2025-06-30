@@ -47,8 +47,8 @@ export interface Procedure {
   category: string;
   tags: string[];
   is_global: boolean;
-  template_data: Record<string, any>;
-  steps?: Record<string, any>;
+  template_data: any; // Changed from Record<string, any> to any to match Supabase Json type
+  steps?: any; // Changed from Record<string, any> to any
   estimated_duration?: number;
   created_by?: string;
   created_at: string;
@@ -72,8 +72,8 @@ export interface ProcedureInsert {
   category?: string;
   tags?: string[];
   is_global?: boolean;
-  template_data?: Record<string, any>;
-  steps?: Record<string, any>;
+  template_data?: any; // Changed from Record<string, any> to any
+  steps?: any; // Changed from Record<string, any> to any
   estimated_duration?: number;
   asset_ids?: string[];
   location_ids?: string[];
@@ -88,8 +88,8 @@ export interface ProcedureUpdate {
   category?: string;
   tags?: string[];
   is_global?: boolean;
-  template_data?: Record<string, any>;
-  steps?: Record<string, any>;
+  template_data?: any; // Changed from Record<string, any> to any
+  steps?: any; // Changed from Record<string, any> to any
   estimated_duration?: number;
   asset_ids?: string[];
   location_ids?: string[];
@@ -102,7 +102,7 @@ export interface ProcedureExecution {
   work_order_id?: string;
   user_id?: string;
   tenant_id: string;
-  answers: Record<string, any>;
+  answers: any; // Changed from Record<string, any> to any
   score: number;
   status: string;
   started_at: string;
@@ -116,7 +116,7 @@ export interface ProcedureTemplate {
   tenant_id: string;
   name: string;
   description?: string;
-  template_data: Record<string, any>;
+  template_data: any; // Changed from Record<string, any> to any
   tags: string[];
   is_public: boolean;
   created_by?: string;

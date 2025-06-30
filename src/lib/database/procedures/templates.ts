@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { getCurrentTenantId } from "@/hooks/useInventoryHelpers";
 import { ProcedureTemplate } from './types';
 
-export const getSampleTemplates = (): Omit<ProcedureTemplate, 'id' | 'tenant_id' | 'created_by'>[] => [
+export const getSampleTemplates = (): Omit<ProcedureTemplate, 'id' | 'tenant_id' | 'created_by' | 'created_at' | 'updated_at'>[] => [
   {
     name: "Equipment Safety Inspection",
     description: "Standard safety inspection checklist for industrial equipment",
@@ -227,10 +227,18 @@ export const templateApi = {
         throw newError;
       }
 
-      return newData || [];
+      // Type cast the data properly
+      return (newData || []).map(item => ({
+        ...item,
+        template_data: item.template_data as any
+      })) as ProcedureTemplate[];
     }
 
-    return data || [];
+    // Type cast the data properly
+    return (data || []).map(item => ({
+      ...item,
+      template_data: item.template_data as any
+    })) as ProcedureTemplate[];
   },
 
   async createSampleTemplates(): Promise<void> {
@@ -282,7 +290,11 @@ export const templateApi = {
       throw error;
     }
 
-    return data;
+    // Type cast the data properly
+    return {
+      ...data,
+      template_data: data.template_data as any
+    } as ProcedureTemplate;
   },
 
   async deleteTemplate(id: string): Promise<void> {

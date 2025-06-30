@@ -1,27 +1,19 @@
 
-import { ProcedureField, ProcedureExecution } from './types';
+import { ProcedureExecution } from './types';
 
-export const mapFieldFromDB = (dbField: any): ProcedureField => ({
-  id: dbField.id,
-  procedure_id: dbField.procedure_id,
-  label: dbField.label,
-  field_type: dbField.field_type as ProcedureField['field_type'],
-  is_required: dbField.is_required || false,
-  order_index: dbField.field_order || 0,
-  options: dbField.options || {},
-  created_at: dbField.created_at,
-  updated_at: dbField.updated_at
-});
-
-export const mapExecutionFromDB = (dbExecution: any): ProcedureExecution => ({
-  id: dbExecution.id,
-  procedure_id: dbExecution.procedure_id,
-  work_order_id: dbExecution.work_order_id,
-  user_id: dbExecution.user_id,
-  tenant_id: dbExecution.tenant_id,
-  answers: dbExecution.answers,
-  score: dbExecution.score,
-  status: dbExecution.status as ProcedureExecution['status'],
-  started_at: dbExecution.started_at,
-  completed_at: dbExecution.completed_at
-});
+export const createProcedureExecution = (data: any): ProcedureExecution => {
+  return {
+    id: data.id,
+    procedure_id: data.procedure_id,
+    work_order_id: data.work_order_id,
+    user_id: data.user_id,
+    tenant_id: data.tenant_id,
+    answers: data.answers,
+    score: data.score,
+    status: data.status,
+    started_at: data.started_at,
+    completed_at: data.completed_at,
+    created_at: data.created_at || new Date().toISOString(),
+    updated_at: data.updated_at || new Date().toISOString()
+  };
+};
