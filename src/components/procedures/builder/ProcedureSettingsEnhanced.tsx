@@ -85,8 +85,8 @@ export const ProcedureSettingsEnhanced: React.FC<ProcedureSettingsEnhancedProps>
 
   return (
     <div className="h-full overflow-y-auto">
-      <div className="p-6 pb-24">
-        <div className="max-w-2xl mx-auto space-y-6">
+      <div className="p-6 pb-24 flex justify-center">
+        <div className="w-full max-w-2xl space-y-6">
           {/* Tag your procedure */}
           <Card>
             <CardHeader>
