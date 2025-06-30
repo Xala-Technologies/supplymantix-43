@@ -1,9 +1,12 @@
 
 import { useState, useEffect } from "react";
-import { useOrganizations } from "./useOrganizations";
+import { useOrganizations, useUpdateOrganization } from "./useOrganizations";
+import { toast } from "sonner";
 
 export const useOrganizationSettingsForm = (organizationId: string) => {
-  const { data: organizations } = useOrganizations();
+  const { data: organizations, isLoading: organizationsLoading } = useOrganizations();
+  const updateOrganizationMutation = useUpdateOrganization();
+  
   const [formData, setFormData] = useState({
     name: "",
     address: "",
@@ -14,22 +17,47 @@ export const useOrganizationSettingsForm = (organizationId: string) => {
     default_language: "en",
   });
 
-  useEffect(() => {
-    if (organizations && Array.isArray(organizations)) {
-      const organization = organizations.find((org: any) => org.id === organizationId);
-      if (organization) {
-        setFormData({
-          name: organization.name || "",
-          address: organization.address || "",
-          website: organization.website || "",
-          contact_email: organization.contact_email || "",
-          contact_phone: organization.contact_phone || "",
-          contact_fax: organization.contact_fax || "",
-          default_language: organization.default_language || "en",
-        });
-      }
-    }
-  }, [organizations, organizationId]);
+  const currentOrganization = Array.isArray(organizations) 
+    ? organizations.find((org: any) => org.id === organizationId)
+    : null;
 
-  return { formData, setFormData };
+  useEffect(() => {
+    if (currentOrganization) {
+      setFormData({
+        name: currentOrganization.name || "",
+        address: currentOrganization.address || "",
+        website: currentOrganization.website || "",
+        contact_email: currentOrganization.contact_email || "",
+        contact_phone: currentOrganization.contact_phone || "",
+        contact_fax: currentOrganization.contact_fax || "",
+        default_language: currentOrganization.default_language || "en",
+      });
+    }
+  }, [currentOrganization]);
+
+  const handleSave = async () => {
+    if (!currentOrganization) {
+      toast.error("Organization not found");
+      return;
+    }
+
+    try {
+      await updateOrganizationMutation.mutateAsync({
+        id: organizationId,
+        updates: formData
+      });
+      toast.success("Organization settings updated successfully");
+    } catch (error) {
+      console.error("Failed to update organization:", error);
+      toast.error("Failed to update organization settings");
+    }
+  };
+
+  return { 
+    formData, 
+    setFormData, 
+    handleSave,
+    currentOrganization,
+    isLoading: organizationsLoading || updateOrganizationMutation.isPending
+  };
 };

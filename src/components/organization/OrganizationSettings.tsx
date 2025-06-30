@@ -35,6 +35,25 @@ export const OrganizationSettings = ({ organizationId }: OrganizationSettingsPro
     setFormData(prev => ({ ...prev, ...updates }));
   };
 
+  // Map form data to component expected format
+  const contactInfoData = {
+    email: formData.contact_email,
+    phone: formData.contact_phone,
+    fax: formData.contact_fax,
+  };
+
+  const handleContactInfoChange = (updates: Partial<{ email: string; phone: string; fax: string }>) => {
+    const mappedUpdates: Partial<typeof formData> = {};
+    if (updates.email !== undefined) mappedUpdates.contact_email = updates.email;
+    if (updates.phone !== undefined) mappedUpdates.contact_phone = updates.phone;
+    if (updates.fax !== undefined) mappedUpdates.contact_fax = updates.fax;
+    updateFormData(mappedUpdates);
+  };
+
+  const handleLanguageChange = (language: string) => {
+    updateFormData({ default_language: language });
+  };
+
   return (
     <div className="w-full p-6 space-y-6 text-left">
       <Card className="shadow-sm border-0 bg-gray-50/30">
@@ -69,12 +88,8 @@ export const OrganizationSettings = ({ organizationId }: OrganizationSettingsPro
         </CardHeader>
         <CardContent className="space-y-6 text-left">
           <OrganizationContactInfo
-            formData={{
-              email: formData.email,
-              phone: formData.phone,
-              fax: formData.fax,
-            }}
-            onFormDataChange={updateFormData}
+            formData={contactInfoData}
+            onFormDataChange={handleContactInfoChange}
           />
         </CardContent>
       </Card>
@@ -90,8 +105,8 @@ export const OrganizationSettings = ({ organizationId }: OrganizationSettingsPro
         </CardHeader>
         <CardContent className="space-y-6 text-left">
           <OrganizationLanguageSettings
-            defaultLanguage={formData.defaultLanguage}
-            onLanguageChange={(language) => updateFormData({ defaultLanguage: language })}
+            defaultLanguage={formData.default_language}
+            onLanguageChange={handleLanguageChange}
           />
         </CardContent>
       </Card>
