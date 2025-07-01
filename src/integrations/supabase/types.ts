@@ -1693,6 +1693,7 @@ export type Database = {
           options: Json | null
           order_index: number | null
           procedure_id: string
+          tenant_id: string
           updated_at: string | null
         }
         Insert: {
@@ -1705,6 +1706,7 @@ export type Database = {
           options?: Json | null
           order_index?: number | null
           procedure_id: string
+          tenant_id: string
           updated_at?: string | null
         }
         Update: {
@@ -1717,6 +1719,7 @@ export type Database = {
           options?: Json | null
           order_index?: number | null
           procedure_id?: string
+          tenant_id?: string
           updated_at?: string | null
         }
         Relationships: [
@@ -1725,6 +1728,13 @@ export type Database = {
             columns: ["procedure_id"]
             isOneToOne: false
             referencedRelation: "procedures"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "procedure_fields_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
             referencedColumns: ["id"]
           },
         ]
