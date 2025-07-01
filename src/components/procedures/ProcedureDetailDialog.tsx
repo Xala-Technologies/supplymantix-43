@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -156,8 +155,8 @@ export const ProcedureDetailDialog: React.FC<ProcedureDetailDialogProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
-        <DialogHeader className="pb-2">
+      <DialogContent className="max-w-4xl h-[85vh] flex flex-col">
+        <DialogHeader className="flex-shrink-0 pb-4">
           <ProcedureDialogHeader
             procedure={procedure}
             isEditing={isEditing}
@@ -169,96 +168,94 @@ export const ProcedureDetailDialog: React.FC<ProcedureDetailDialogProps> = ({
           />
         </DialogHeader>
 
-        <div className="flex-1 overflow-hidden">
-          <Tabs defaultValue={isEditing ? "settings" : "fields"} className="h-full flex flex-col">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="fields">
-                {isEditing ? 'Edit Fields' : 'Fields'}
-              </TabsTrigger>
-              <TabsTrigger value="settings">
-                Settings
-              </TabsTrigger>
-            </TabsList>
+        <Tabs defaultValue={isEditing ? "settings" : "fields"} className="flex-1 flex flex-col min-h-0">
+          <TabsList className="flex-shrink-0 grid w-full grid-cols-2">
+            <TabsTrigger value="fields">
+              {isEditing ? 'Edit Fields' : 'Fields'}
+            </TabsTrigger>
+            <TabsTrigger value="settings">
+              Settings
+            </TabsTrigger>
+          </TabsList>
 
-            <div className="flex-1 overflow-y-auto p-4">
-              <TabsContent value="fields" className="space-y-3">
-                {isEditing ? (
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <h3 className="font-semibold">Procedure Fields</h3>
-                      <Button onClick={addField} size="sm">
-                        <Plus className="h-4 w-4 mr-1" />
-                        Add Field
-                      </Button>
-                    </div>
-                    
-                    {editData.fields?.length > 0 ? (
-                      <div className="space-y-3">
-                        {editData.fields.map((field: ProcedureField, index: number) => (
-                          <ProcedureFieldEditor
-                            key={field.id}
-                            field={field}
-                            index={index}
-                            onUpdate={updateField}
-                            onMove={moveField}
-                            onRemove={removeField}
-                            totalFields={editData.fields.length}
-                          />
-                        ))}
-                      </div>
-                    ) : (
-                      <div className="text-center py-8">
-                        <FileText className="h-10 w-10 text-gray-300 mx-auto mb-3" />
-                        <h3 className="font-medium text-gray-900 mb-2">No Fields Yet</h3>
-                        <p className="text-gray-500 mb-3">Add fields to build your procedure form.</p>
-                        <Button onClick={addField} size="sm">
-                          <Plus className="h-4 w-4 mr-1" />
-                          Add First Field
-                        </Button>
-                      </div>
-                    )}
+          <div className="flex-1 min-h-0">
+            <TabsContent value="fields" className="h-full p-4 overflow-y-auto space-y-3 mt-0">
+              {isEditing ? (
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <h3 className="font-semibold">Procedure Fields</h3>
+                    <Button onClick={addField} size="sm">
+                      <Plus className="h-4 w-4 mr-1" />
+                      Add Field
+                    </Button>
                   </div>
-                ) : (
-                  procedure.fields && procedure.fields.length > 0 ? (
+                  
+                  {editData.fields?.length > 0 ? (
                     <div className="space-y-3">
-                      {procedure.fields.map((field: any, index: number) => (
-                        <Card key={field.id || index}>
-                          <CardContent className="p-3">
-                            <ProcedureFieldRenderer
-                              field={field}
-                              index={index}
-                              value={formData[field.id]}
-                              onChange={handleFieldChange}
-                            />
-                          </CardContent>
-                        </Card>
+                      {editData.fields.map((field: ProcedureField, index: number) => (
+                        <ProcedureFieldEditor
+                          key={field.id}
+                          field={field}
+                          index={index}
+                          onUpdate={updateField}
+                          onMove={moveField}
+                          onRemove={removeField}
+                          totalFields={editData.fields.length}
+                        />
                       ))}
                     </div>
                   ) : (
                     <div className="text-center py-8">
                       <FileText className="h-10 w-10 text-gray-300 mx-auto mb-3" />
-                      <h3 className="font-medium text-gray-900 mb-2">No Fields</h3>
-                      <p className="text-gray-500">This procedure doesn't have any fields yet.</p>
+                      <h3 className="font-medium text-gray-900 mb-2">No Fields Yet</h3>
+                      <p className="text-gray-500 mb-3">Add fields to build your procedure form.</p>
+                      <Button onClick={addField} size="sm">
+                        <Plus className="h-4 w-4 mr-1" />
+                        Add First Field
+                      </Button>
                     </div>
-                  )
-                )}
-              </TabsContent>
+                  )}
+                </div>
+              ) : (
+                procedure.fields && procedure.fields.length > 0 ? (
+                  <div className="space-y-3">
+                    {procedure.fields.map((field: any, index: number) => (
+                      <Card key={field.id || index}>
+                        <CardContent className="p-3">
+                          <ProcedureFieldRenderer
+                            field={field}
+                            index={index}
+                            value={formData[field.id]}
+                            onChange={handleFieldChange}
+                          />
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-8">
+                    <FileText className="h-10 w-10 text-gray-300 mx-auto mb-3" />
+                    <h3 className="font-medium text-gray-900 mb-2">No Fields</h3>
+                    <p className="text-gray-500">This procedure doesn't have any fields yet.</p>
+                  </div>
+                )
+              )}
+            </TabsContent>
 
-              <TabsContent value="settings" className="space-y-4">
-                <ProcedureSettingsPanel
-                  procedure={procedure}
-                  isEditing={isEditing}
-                  editData={editData}
-                  newTag={newTag}
-                  onEditDataChange={handleEditDataChange}
-                  onNewTagChange={setNewTag}
-                  onAddTag={addTag}
-                  onRemoveTag={removeTag}
-                />
-              </TabsContent>
-            </div>
-          </Tabs>
-        </div>
+            <TabsContent value="settings" className="h-full p-4 overflow-y-auto mt-0">
+              <ProcedureSettingsPanel
+                procedure={procedure}
+                isEditing={isEditing}
+                editData={editData}
+                newTag={newTag}
+                onEditDataChange={handleEditDataChange}
+                onNewTagChange={setNewTag}
+                onAddTag={addTag}
+                onRemoveTag={removeTag}
+              />
+            </TabsContent>
+          </div>
+        </Tabs>
       </DialogContent>
     </Dialog>
   );
