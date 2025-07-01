@@ -23,7 +23,7 @@ export const useDialogState = (procedure: any, open: boolean, onEdit: (procedure
         category: procedure.category || 'Inspection',
         tags: procedure.tags || [],
         is_global: procedure.is_global || false,
-        fields: procedure.fields || []
+        fields: procedure.fields || procedure.procedure_fields || []
       };
       setEditData(initialData);
       setFormData({});
@@ -107,7 +107,7 @@ export const useDialogState = (procedure: any, open: boolean, onEdit: (procedure
       category: procedure.category || 'Inspection',
       tags: procedure.tags || [],
       is_global: procedure.is_global || false,
-      fields: procedure.fields || []
+      fields: procedure.fields || procedure.procedure_fields || []
     });
     setIsEditing(false);
     setIsSaving(false);

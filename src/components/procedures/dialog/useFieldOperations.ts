@@ -8,13 +8,14 @@ export const useFieldOperations = (
   procedureId: string
 ) => {
   const addField = useCallback(() => {
+    const fieldsLength = editData?.fields?.length ?? 0;
+    
     const newField: ProcedureField = {
       id: crypto.randomUUID(),
-      procedure_id: procedureId,
       label: 'New Field',
       field_type: 'text',
       is_required: false,
-      order_index: editData.fields.length,
+      order_index: fieldsLength,
       options: {},
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString()
@@ -23,15 +24,15 @@ export const useFieldOperations = (
     console.log('Adding new field:', newField);
     setEditData(prev => ({
       ...prev,
-      fields: [...prev.fields, newField]
+      fields: [...(prev.fields || []), newField]
     }));
-  }, [procedureId, editData.fields.length, setEditData]);
+  }, [editData?.fields, setEditData]);
 
   const updateField = useCallback((index: number, updates: Partial<ProcedureField>) => {
     console.log('Updating field at index:', index, updates);
     setEditData(prev => ({
       ...prev,
-      fields: prev.fields.map((field: ProcedureField, i: number) => 
+      fields: (prev.fields || []).map((field: ProcedureField, i: number) => 
         i === index ? { ...field, ...updates, updated_at: new Date().toISOString() } : field
       )
     }));
@@ -41,7 +42,7 @@ export const useFieldOperations = (
     console.log('Removing field at index:', index);
     setEditData(prev => ({
       ...prev,
-      fields: prev.fields.filter((_: any, i: number) => i !== index).map((field: ProcedureField, i: number) => ({
+      fields: (prev.fields || []).filter((_: any, i: number) => i !== index).map((field: ProcedureField, i: number) => ({
         ...field,
         order_index: i
       }))
@@ -49,7 +50,7 @@ export const useFieldOperations = (
   }, [setEditData]);
 
   const moveField = useCallback((index: number, direction: 'up' | 'down') => {
-    const fields = [...editData.fields];
+    const fields = [...(editData?.fields || [])];
     const targetIndex = direction === 'up' ? index - 1 : index + 1;
     
     if (targetIndex >= 0 && targetIndex < fields.length) {
@@ -64,7 +65,7 @@ export const useFieldOperations = (
       
       setEditData(prev => ({ ...prev, fields }));
     }
-  }, [editData.fields, setEditData]);
+  }, [editData?.fields, setEditData]);
 
   return {
     addField,
