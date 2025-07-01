@@ -27,9 +27,9 @@ export const ProcedureFieldRenderer: React.FC<ProcedureFieldRendererProps> = ({
 
     const { attachedFile } = field.options;
     return (
-      <div className="mt-3 p-3 bg-gray-50 rounded-lg border">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
+      <div className="mt-3 p-4 bg-gray-50 rounded-lg border">
+        <div className="flex items-start gap-4">
+          <div className="flex items-center gap-3 flex-1">
             <Paperclip className="h-4 w-4 text-gray-500" />
             <div>
               <div className="text-sm font-medium text-gray-700">{attachedFile.name}</div>
@@ -39,11 +39,14 @@ export const ProcedureFieldRenderer: React.FC<ProcedureFieldRendererProps> = ({
             </div>
           </div>
           {attachedFile.type.startsWith('image/') && (
-            <img 
-              src={attachedFile.url} 
-              alt="Attachment preview" 
-              className="w-12 h-12 object-cover rounded border"
-            />
+            <div className="flex-shrink-0">
+              <img 
+                src={attachedFile.url} 
+                alt="Attachment preview" 
+                className="w-32 h-32 object-cover rounded-lg border shadow-sm cursor-pointer hover:shadow-md transition-shadow"
+                onClick={() => window.open(attachedFile.url, '_blank')}
+              />
+            </div>
           )}
         </div>
       </div>
