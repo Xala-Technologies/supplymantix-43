@@ -1,5 +1,3 @@
-
-
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -65,7 +63,7 @@ export const ProcedureDetailDialog: React.FC<ProcedureDetailDialogProps> = ({
       console.log('Saving procedure changes:', editData);
       
       // Only update the procedure table fields, not the fields array
-      await updateProcedure.mutateAsync({
+      const updatedProcedure = await updateProcedure.mutateAsync({
         id: procedure.id,
         updates: {
           title: editData.title,
@@ -80,8 +78,16 @@ export const ProcedureDetailDialog: React.FC<ProcedureDetailDialogProps> = ({
       setIsEditing(false);
       toast.success('Procedure updated successfully');
       
-      // Call the parent's onEdit to refresh the data
-      onEdit({ ...procedure, ...editData });
+      // Update the parent component with the new data
+      // This ensures the UI reflects the changes immediately
+      onEdit({
+        ...procedure,
+        title: editData.title,
+        description: editData.description,
+        category: editData.category,
+        tags: editData.tags,
+        is_global: editData.is_global
+      });
     } catch (error) {
       console.error('Error saving procedure:', error);
       toast.error('Failed to save procedure changes');
@@ -285,4 +291,3 @@ export const ProcedureDetailDialog: React.FC<ProcedureDetailDialogProps> = ({
     </Dialog>
   );
 };
-
