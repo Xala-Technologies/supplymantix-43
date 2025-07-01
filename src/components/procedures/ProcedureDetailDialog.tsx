@@ -213,7 +213,7 @@ export const ProcedureDetailDialog: React.FC<ProcedureDetailDialogProps> = ({
     switch (field.field_type || field.type) {
       case 'text':
         return (
-          <div key={field.id || index} className="space-y-3">
+          <div key={field.id || index} className="space-y-2">
             <label className="text-sm font-medium text-gray-700">
               {field.label || field.title}
               {field.is_required && <span className="text-red-500 ml-1">*</span>}
@@ -232,7 +232,7 @@ export const ProcedureDetailDialog: React.FC<ProcedureDetailDialogProps> = ({
 
       case 'textarea':
         return (
-          <div key={field.id || index} className="space-y-3">
+          <div key={field.id || index} className="space-y-2">
             <label className="text-sm font-medium text-gray-700">
               {field.label || field.title}
               {field.is_required && <span className="text-red-500 ml-1">*</span>}
@@ -241,15 +241,15 @@ export const ProcedureDetailDialog: React.FC<ProcedureDetailDialogProps> = ({
               value={fieldValue}
               onChange={(e) => handleFieldChange(field.id, e.target.value)}
               placeholder={field.options?.placeholder || ''}
-              className="w-full min-h-[100px]"
+              className="w-full min-h-[80px]"
             />
           </div>
         );
 
       case 'checkbox':
         return (
-          <div key={field.id || index} className="space-y-3">
-            <div className="flex items-center space-x-3">
+          <div key={field.id || index} className="space-y-2">
+            <div className="flex items-center space-x-2">
               <Checkbox
                 id={field.id}
                 checked={Boolean(fieldValue)}
@@ -261,7 +261,7 @@ export const ProcedureDetailDialog: React.FC<ProcedureDetailDialogProps> = ({
               </label>
             </div>
             {field.description && (
-              <p className="text-xs text-gray-500 ml-6">{field.description}</p>
+              <p className="text-xs text-gray-500 ml-5">{field.description}</p>
             )}
           </div>
         );
@@ -269,13 +269,13 @@ export const ProcedureDetailDialog: React.FC<ProcedureDetailDialogProps> = ({
       case 'select':
       case 'radio':
         return (
-          <div key={field.id || index} className="space-y-3">
+          <div key={field.id || index} className="space-y-2">
             <label className="text-sm font-medium text-gray-700">
               {field.label || field.title}
               {field.is_required && <span className="text-red-500 ml-1">*</span>}
             </label>
             {field.field_type === 'radio' ? (
-              <div className="flex gap-4">
+              <div className="flex gap-3">
                 {field.options?.choices?.map((choice: string, choiceIndex: number) => (
                   <div key={choiceIndex} className="flex items-center space-x-2">
                     <input
@@ -312,7 +312,7 @@ export const ProcedureDetailDialog: React.FC<ProcedureDetailDialogProps> = ({
 
       case 'number':
         return (
-          <div key={field.id || index} className="space-y-3">
+          <div key={field.id || index} className="space-y-2">
             <label className="text-sm font-medium text-gray-700">
               {field.label || field.title}
               {field.is_required && <span className="text-red-500 ml-1">*</span>}
@@ -331,7 +331,7 @@ export const ProcedureDetailDialog: React.FC<ProcedureDetailDialogProps> = ({
 
       case 'date':
         return (
-          <div key={field.id || index} className="space-y-3">
+          <div key={field.id || index} className="space-y-2">
             <label className="text-sm font-medium text-gray-700">
               {field.label || field.title}
               {field.is_required && <span className="text-red-500 ml-1">*</span>}
@@ -347,8 +347,8 @@ export const ProcedureDetailDialog: React.FC<ProcedureDetailDialogProps> = ({
 
       case 'section':
         return (
-          <div key={field.id || index} className="py-4">
-            <h3 className="text-lg font-semibold text-gray-900 border-b pb-2">
+          <div key={field.id || index} className="py-3">
+            <h3 className="text-lg font-semibold text-gray-900 border-b pb-1">
               {field.label || field.title}
             </h3>
             {field.description && (
@@ -359,9 +359,9 @@ export const ProcedureDetailDialog: React.FC<ProcedureDetailDialogProps> = ({
 
       case 'info':
         return (
-          <div key={field.id || index} className="bg-gray-50 p-4 rounded-lg border">
-            <div className="flex items-start gap-3">
-              <FileText className="h-5 w-5 text-gray-600 mt-0.5" />
+          <div key={field.id || index} className="bg-gray-50 p-3 rounded-lg border">
+            <div className="flex items-start gap-2">
+              <FileText className="h-4 w-4 text-gray-600 mt-0.5" />
               <div>
                 <h4 className="font-medium text-gray-900">{field.label || field.title}</h4>
                 {field.options?.infoText && (
@@ -374,7 +374,7 @@ export const ProcedureDetailDialog: React.FC<ProcedureDetailDialogProps> = ({
 
       default:
         return (
-          <div key={field.id || index} className="space-y-3">
+          <div key={field.id || index} className="space-y-2">
             <label className="text-sm font-medium text-gray-700">
               {field.label || field.title}
               {field.is_required && <span className="text-red-500 ml-1">*</span>}
@@ -392,10 +392,10 @@ export const ProcedureDetailDialog: React.FC<ProcedureDetailDialogProps> = ({
   const renderFieldEditor = (field: ProcedureField, index: number) => {
     return (
       <Card key={field.id} className="border border-gray-200">
-        <CardContent className="p-4">
-          <div className="flex items-start gap-3">
+        <CardContent className="p-3">
+          <div className="flex items-start gap-2">
             {/* Drag Handle */}
-            <div className="flex flex-col items-center gap-1 pt-2">
+            <div className="flex flex-col items-center gap-1 pt-1">
               <GripVertical className="h-4 w-4 text-gray-400" />
               <Badge variant="outline" className="text-xs px-1 py-0">
                 {index + 1}
@@ -403,9 +403,9 @@ export const ProcedureDetailDialog: React.FC<ProcedureDetailDialogProps> = ({
             </div>
 
             {/* Field Configuration */}
-            <div className="flex-1 space-y-4">
+            <div className="flex-1 space-y-3">
               {/* Field Label */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <div>
                   <Label className="text-sm font-medium">Field Label *</Label>
                   <Input
@@ -458,8 +458,8 @@ export const ProcedureDetailDialog: React.FC<ProcedureDetailDialogProps> = ({
               )}
 
               {/* Field Settings */}
-              <div className="flex items-center justify-between bg-gray-50 p-3 rounded-lg">
-                <div className="flex items-center gap-4">
+              <div className="flex items-center justify-between bg-gray-50 p-2 rounded-lg">
+                <div className="flex items-center gap-3">
                   <div className="flex items-center space-x-2">
                     <Checkbox
                       id={`required-${index}`}
@@ -470,13 +470,14 @@ export const ProcedureDetailDialog: React.FC<ProcedureDetailDialogProps> = ({
                   </div>
                 </div>
                 
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1">
                   <Button
                     type="button"
                     variant="ghost"
                     size="sm"
                     onClick={() => moveField(index, 'up')}
                     disabled={index === 0}
+                    className="h-7 w-7 p-0"
                   >
                     ↑
                   </Button>
@@ -486,6 +487,7 @@ export const ProcedureDetailDialog: React.FC<ProcedureDetailDialogProps> = ({
                     size="sm"
                     onClick={() => moveField(index, 'down')}
                     disabled={index === editData.fields.length - 1}
+                    className="h-7 w-7 p-0"
                   >
                     ↓
                   </Button>
@@ -494,9 +496,9 @@ export const ProcedureDetailDialog: React.FC<ProcedureDetailDialogProps> = ({
                     variant="ghost"
                     size="sm"
                     onClick={() => removeField(index)}
-                    className="text-red-600 hover:text-red-700"
+                    className="text-red-600 hover:text-red-700 h-7 w-7 p-0"
                   >
-                    <Trash2 className="h-4 w-4" />
+                    <Trash2 className="h-3 w-3" />
                   </Button>
                 </div>
               </div>
@@ -510,22 +512,22 @@ export const ProcedureDetailDialog: React.FC<ProcedureDetailDialogProps> = ({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-6xl max-h-[90vh] overflow-hidden flex flex-col bg-white">
-        <DialogHeader className="flex-shrink-0 bg-white border-b border-gray-100 p-6 -m-6 mb-0">
+        <DialogHeader className="flex-shrink-0 bg-white border-b border-gray-100 p-4 -m-6 mb-0">
           <div className="flex items-start justify-between">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-gray-50 rounded-lg shadow-sm border border-gray-200 flex items-center justify-center">
-                <PlayCircle className="h-6 w-6 text-gray-600" />
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-gray-50 rounded-lg shadow-sm border border-gray-200 flex items-center justify-center">
+                <PlayCircle className="h-5 w-5 text-gray-600" />
               </div>
               <div className="flex-1">
                 {isEditing ? (
                   <Input
                     value={editData.title}
                     onChange={(e) => setEditData(prev => ({ ...prev, title: e.target.value }))}
-                    className="text-xl font-bold mb-2 border-gray-200 focus:border-gray-400"
+                    className="text-lg font-bold mb-2 border-gray-200 focus:border-gray-400"
                     placeholder="Procedure title"
                   />
                 ) : (
-                  <DialogTitle className="text-xl font-bold text-gray-900 mb-2">
+                  <DialogTitle className="text-lg font-bold text-gray-900 mb-1">
                     {procedure.title}
                   </DialogTitle>
                 )}
@@ -535,7 +537,7 @@ export const ProcedureDetailDialog: React.FC<ProcedureDetailDialogProps> = ({
                       value={editData.category}
                       onValueChange={(value) => setEditData(prev => ({ ...prev, category: value }))}
                     >
-                      <SelectTrigger className="w-40 bg-white border-gray-200">
+                      <SelectTrigger className="w-36 bg-white border-gray-200">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -557,7 +559,7 @@ export const ProcedureDetailDialog: React.FC<ProcedureDetailDialogProps> = ({
                       Global
                     </Badge>
                   )}
-                  <div className="text-sm text-gray-500 bg-gray-50 px-2 py-1 rounded">
+                  <div className="text-sm text-gray-500 bg-gray-50 px-2 py-0.5 rounded">
                     {(isEditing ? editData.fields : procedure.fields)?.length || 0} fields
                   </div>
                 </div>
@@ -599,7 +601,7 @@ export const ProcedureDetailDialog: React.FC<ProcedureDetailDialogProps> = ({
 
         <div className="flex-1 overflow-hidden">
           <Tabs defaultValue={isEditing ? "settings" : "fields"} className="h-full flex flex-col">
-            <TabsList className="grid w-full grid-cols-3 bg-gray-50 p-1 m-6 mb-0 rounded-lg">
+            <TabsList className="grid w-full grid-cols-3 bg-gray-50 p-1 m-4 mb-0 rounded-lg">
               <TabsTrigger 
                 value="fields" 
                 className="data-[state=active]:bg-white data-[state=active]:shadow-sm rounded-md"
@@ -620,10 +622,10 @@ export const ProcedureDetailDialog: React.FC<ProcedureDetailDialogProps> = ({
               </TabsTrigger>
             </TabsList>
 
-            <div className="flex-1 overflow-y-auto px-6 pb-6">
-              <TabsContent value="fields" className="mt-6 space-y-4">
+            <div className="flex-1 overflow-y-auto px-4 pb-4">
+              <TabsContent value="fields" className="mt-4 space-y-3">
                 {isEditing ? (
-                  <div className="space-y-4">
+                  <div className="space-y-3">
                     <div className="flex items-center justify-between">
                       <h3 className="text-lg font-semibold text-gray-900">Procedure Fields</h3>
                       <Button onClick={addField} size="sm">
@@ -633,16 +635,16 @@ export const ProcedureDetailDialog: React.FC<ProcedureDetailDialogProps> = ({
                     </div>
                     
                     {editData.fields?.length > 0 ? (
-                      <div className="space-y-4">
+                      <div className="space-y-3">
                         {editData.fields.map((field: ProcedureField, index: number) => 
                           renderFieldEditor(field, index)
                         )}
                       </div>
                     ) : (
-                      <div className="text-center py-12">
-                        <FileText className="h-12 w-12 text-gray-300 mx-auto mb-4" />
+                      <div className="text-center py-8">
+                        <FileText className="h-10 w-10 text-gray-300 mx-auto mb-3" />
                         <h3 className="text-lg font-medium text-gray-900 mb-2">No Fields Yet</h3>
-                        <p className="text-gray-500 mb-4">Add fields to build your procedure form.</p>
+                        <p className="text-gray-500 mb-3">Add fields to build your procedure form.</p>
                         <Button onClick={addField} size="sm">
                           <Plus className="h-4 w-4 mr-2" />
                           Add Your First Field
@@ -653,18 +655,18 @@ export const ProcedureDetailDialog: React.FC<ProcedureDetailDialogProps> = ({
                 ) : (
                   // View mode for fields
                   procedure.fields && procedure.fields.length > 0 ? (
-                    <div className="space-y-4">
+                    <div className="space-y-3">
                       {procedure.fields.map((field: any, index: number) => (
                         <Card key={field.id || index} className="border border-gray-100 shadow-sm">
-                          <CardContent className="p-4">
+                          <CardContent className="p-3">
                             {renderField(field, index)}
                           </CardContent>
                         </Card>
                       ))}
                     </div>
                   ) : (
-                    <div className="text-center py-12">
-                      <FileText className="h-12 w-12 text-gray-300 mx-auto mb-4" />
+                    <div className="text-center py-8">
+                      <FileText className="h-10 w-10 text-gray-300 mx-auto mb-3" />
                       <h3 className="text-lg font-medium text-gray-900 mb-2">No Fields Configured</h3>
                       <p className="text-gray-500">This procedure doesn't have any fields set up yet.</p>
                     </div>
@@ -672,18 +674,18 @@ export const ProcedureDetailDialog: React.FC<ProcedureDetailDialogProps> = ({
                 )}
               </TabsContent>
 
-              <TabsContent value="settings" className="mt-6 space-y-6">
+              <TabsContent value="settings" className="mt-4 space-y-4">
                 {isEditing ? (
-                  <div className="space-y-6">
+                  <div className="space-y-4">
                     {/* Basic Information */}
                     <Card>
-                      <CardHeader>
-                        <CardTitle className="flex items-center gap-2">
-                          <FileText className="h-5 w-5" />
+                      <CardHeader className="pb-3">
+                        <CardTitle className="flex items-center gap-2 text-base">
+                          <FileText className="h-4 w-4" />
                           Basic Information
                         </CardTitle>
                       </CardHeader>
-                      <CardContent className="space-y-4">
+                      <CardContent className="space-y-3">
                         <div>
                           <Label className="text-sm font-medium">Title *</Label>
                           <Input
@@ -700,7 +702,7 @@ export const ProcedureDetailDialog: React.FC<ProcedureDetailDialogProps> = ({
                             value={editData.description}
                             onChange={(e) => setEditData(prev => ({ ...prev, description: e.target.value }))}
                             placeholder="Enter procedure description"
-                            className="mt-1 min-h-[100px]"
+                            className="mt-1 min-h-[80px]"
                           />
                         </div>
 
@@ -727,13 +729,13 @@ export const ProcedureDetailDialog: React.FC<ProcedureDetailDialogProps> = ({
 
                     {/* Tags */}
                     <Card>
-                      <CardHeader>
-                        <CardTitle className="flex items-center gap-2">
-                          <Tag className="h-5 w-5" />
+                      <CardHeader className="pb-3">
+                        <CardTitle className="flex items-center gap-2 text-base">
+                          <Tag className="h-4 w-4" />
                           Tags
                         </CardTitle>
                       </CardHeader>
-                      <CardContent className="space-y-4">
+                      <CardContent className="space-y-3">
                         <div className="flex flex-wrap gap-2">
                           {editData.tags?.map((tag: string, index: number) => (
                             <Badge key={index} variant="secondary" className="flex items-center gap-1">
@@ -764,9 +766,9 @@ export const ProcedureDetailDialog: React.FC<ProcedureDetailDialogProps> = ({
 
                     {/* Global Setting */}
                     <Card>
-                      <CardHeader>
-                        <CardTitle className="flex items-center gap-2">
-                          <Globe className="h-5 w-5" />
+                      <CardHeader className="pb-3">
+                        <CardTitle className="flex items-center gap-2 text-base">
+                          <Globe className="h-4 w-4" />
                           Visibility Settings
                         </CardTitle>
                       </CardHeader>
@@ -786,25 +788,25 @@ export const ProcedureDetailDialog: React.FC<ProcedureDetailDialogProps> = ({
                   </div>
                 ) : (
                   // View mode for settings
-                  <div className="space-y-6">
+                  <div className="space-y-4">
                     {/* Description */}
                     <Card>
-                      <CardContent className="p-6">
-                        <h3 className="text-lg font-semibold flex items-center gap-3 mb-4 text-gray-900">
-                          <FileText className="h-5 w-5" />
+                      <CardContent className="p-4">
+                        <h3 className="text-base font-semibold flex items-center gap-2 mb-3 text-gray-900">
+                          <FileText className="h-4 w-4" />
                           Description
                         </h3>
-                        <p className="text-gray-700 leading-relaxed bg-gray-50 p-4 rounded-lg">
+                        <p className="text-gray-700 leading-relaxed bg-gray-50 p-3 rounded-lg">
                           {procedure.description || 'No description provided'}
                         </p>
                       </CardContent>
                     </Card>
 
-                    <div className="grid grid-cols-1 gap-6">
+                    <div className="grid grid-cols-1 gap-4">
                       <Card>
-                        <CardContent className="p-6 text-center">
-                          <CheckCircle className="h-8 w-8 text-gray-400 mx-auto mb-3" />
-                          <div className="text-2xl font-bold text-gray-900 mb-1">
+                        <CardContent className="p-4 text-center">
+                          <CheckCircle className="h-6 w-6 text-gray-400 mx-auto mb-2" />
+                          <div className="text-xl font-bold text-gray-900 mb-1">
                             {procedure.fields?.length || 0}
                           </div>
                           <div className="text-sm text-gray-600">Fields</div>
@@ -812,20 +814,20 @@ export const ProcedureDetailDialog: React.FC<ProcedureDetailDialogProps> = ({
                       </Card>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <Card>
-                        <CardContent className="p-6">
-                          <h3 className="text-lg font-semibold mb-4 text-gray-900">Procedure Information</h3>
-                          <div className="space-y-4">
-                            <div className="flex items-center gap-3">
-                              <User className="h-5 w-5 text-gray-400" />
+                        <CardContent className="p-4">
+                          <h3 className="text-base font-semibold mb-3 text-gray-900">Procedure Information</h3>
+                          <div className="space-y-3">
+                            <div className="flex items-center gap-2">
+                              <User className="h-4 w-4 text-gray-400" />
                               <div>
                                 <span className="text-sm text-gray-500">Created by</span>
                                 <p className="text-sm font-medium text-gray-900">{procedure.created_by || 'Unknown'}</p>
                               </div>
                             </div>
-                            <div className="flex items-center gap-3">
-                              <Calendar className="h-5 w-5 text-gray-400" />
+                            <div className="flex items-center gap-2">
+                              <Calendar className="h-4 w-4 text-gray-400" />
                               <div>
                                 <span className="text-sm text-gray-500">Created</span>
                                 <p className="text-sm font-medium text-gray-900">
@@ -833,8 +835,8 @@ export const ProcedureDetailDialog: React.FC<ProcedureDetailDialogProps> = ({
                                 </p>
                               </div>
                             </div>
-                            <div className="flex items-center gap-3">
-                              <Calendar className="h-5 w-5 text-gray-400" />
+                            <div className="flex items-center gap-2">
+                              <Calendar className="h-4 w-4 text-gray-400" />
                               <div>
                                 <span className="text-sm text-gray-500">Last updated</span>
                                 <p className="text-sm font-medium text-gray-900">
@@ -847,11 +849,11 @@ export const ProcedureDetailDialog: React.FC<ProcedureDetailDialogProps> = ({
                       </Card>
 
                       <Card>
-                        <CardContent className="p-6">
-                          <h3 className="text-lg font-semibold mb-4 text-gray-900">Configuration</h3>
-                          <div className="space-y-4">
-                            <div className="flex items-center gap-3">
-                              <Tag className="h-5 w-5 text-gray-400" />
+                        <CardContent className="p-4">
+                          <h3 className="text-base font-semibold mb-3 text-gray-900">Configuration</h3>
+                          <div className="space-y-3">
+                            <div className="flex items-center gap-2">
+                              <Tag className="h-4 w-4 text-gray-400" />
                               <div>
                                 <span className="text-sm text-gray-500">Category</span>
                                 <div className="mt-1">
@@ -861,8 +863,8 @@ export const ProcedureDetailDialog: React.FC<ProcedureDetailDialogProps> = ({
                                 </div>
                               </div>
                             </div>
-                            <div className="flex items-center gap-3">
-                              <Globe className="h-5 w-5 text-gray-400" />
+                            <div className="flex items-center gap-2">
+                              <Globe className="h-4 w-4 text-gray-400" />
                               <div>
                                 <span className="text-sm text-gray-500">Scope</span>
                                 <p className="text-sm font-medium text-gray-900">
@@ -878,11 +880,11 @@ export const ProcedureDetailDialog: React.FC<ProcedureDetailDialogProps> = ({
                 )}
               </TabsContent>
 
-              <TabsContent value="history" className="mt-6">
+              <TabsContent value="history" className="mt-4">
                 <Card>
-                  <CardContent className="p-6">
-                    <div className="text-center py-12">
-                      <Activity className="h-12 w-12 text-gray-300 mx-auto mb-4" />
+                  <CardContent className="p-4">
+                    <div className="text-center py-8">
+                      <Activity className="h-10 w-10 text-gray-300 mx-auto mb-3" />
                       <h3 className="text-lg font-medium text-gray-900 mb-2">No Execution History</h3>
                       <p className="text-gray-500">This procedure hasn't been executed yet. History will appear here once it's used.</p>
                     </div>
