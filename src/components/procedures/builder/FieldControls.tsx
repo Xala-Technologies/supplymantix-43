@@ -32,6 +32,12 @@ export const FieldControls: React.FC<FieldControlsProps> = ({
   onSelect,
   onExpand
 }) => {
+  const handleLinkClick = () => {
+    // Copy field link to clipboard or show field linking dialog
+    navigator.clipboard.writeText(`Field: ${field.label} (ID: ${field.id})`);
+    console.log('Field link copied to clipboard');
+  };
+
   return (
     <div className="flex items-center gap-1">
       {/* Move Controls */}
@@ -41,6 +47,7 @@ export const FieldControls: React.FC<FieldControlsProps> = ({
         onClick={() => onMove && onMove(index, 'up')}
         disabled={index === 0}
         className="h-8 w-8 p-0 text-gray-400 hover:text-gray-600"
+        title="Move field up"
       >
         <ChevronUp className="h-4 w-4" />
       </Button>
@@ -51,6 +58,7 @@ export const FieldControls: React.FC<FieldControlsProps> = ({
         onClick={() => onMove && onMove(index, 'down')}
         disabled={index === fieldsLength - 1}
         className="h-8 w-8 p-0 text-gray-400 hover:text-gray-600"
+        title="Move field down"
       >
         <ChevronDown className="h-4 w-4" />
       </Button>
@@ -59,7 +67,9 @@ export const FieldControls: React.FC<FieldControlsProps> = ({
       <Button
         variant="ghost"
         size="sm"
+        onClick={handleLinkClick}
         className="h-8 w-8 p-0 text-blue-500 hover:text-blue-600 hover:bg-blue-50"
+        title="Copy field reference"
       >
         <Link className="h-4 w-4" />
       </Button>
@@ -70,6 +80,7 @@ export const FieldControls: React.FC<FieldControlsProps> = ({
         size="sm"
         onClick={() => onAttachmentClick(index)}
         className="h-8 w-8 p-0 text-gray-500 hover:text-gray-600 hover:bg-gray-50"
+        title="Add attachment"
       >
         <Paperclip className="h-4 w-4" />
       </Button>
@@ -80,6 +91,7 @@ export const FieldControls: React.FC<FieldControlsProps> = ({
         size="sm"
         onClick={() => onDelete && onDelete(index)}
         className="h-8 w-8 p-0 text-gray-500 hover:text-red-600 hover:bg-red-50"
+        title="Delete field"
       >
         <Trash2 className="h-4 w-4" />
       </Button>
@@ -103,6 +115,7 @@ export const FieldControls: React.FC<FieldControlsProps> = ({
             variant="ghost"
             size="sm"
             className="h-8 w-8 p-0 text-gray-500 hover:text-gray-600 hover:bg-gray-50"
+            title="More options"
           >
             <MoreHorizontal className="h-4 w-4" />
           </Button>
