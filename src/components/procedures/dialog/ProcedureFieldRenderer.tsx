@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -6,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Slider } from '@/components/ui/slider';
 import { Separator } from '@/components/ui/separator';
-import { FileText, Paperclip, Star, Upload } from 'lucide-react';
+import { FileText, Paperclip, Star, Upload, DollarSign } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Label } from '@/components/ui/label';
@@ -74,7 +75,7 @@ export const ProcedureFieldRenderer: React.FC<ProcedureFieldRendererProps> = ({
   };
 
   const renderFieldWithAttachment = (fieldContent: React.ReactNode) => (
-    <div className="space-y-3">
+    <div className="space-y-4">
       {fieldContent}
       {renderFieldImage()}
       {renderAttachedFile()}
@@ -92,14 +93,12 @@ export const ProcedureFieldRenderer: React.FC<ProcedureFieldRendererProps> = ({
   const renderRatingField = () => {
     const maxRating = field.options?.maxRating || 5;
     const currentRating = fieldValue || 0;
-    const allowHalfStars = field.options?.allowHalfStars || false;
 
     return (
       <div className="flex items-center gap-1">
         {Array.from({ length: maxRating }, (_, i) => {
           const starValue = i + 1;
           const isSelected = currentRating >= starValue;
-          const isHalfSelected = allowHalfStars && currentRating >= starValue - 0.5 && currentRating < starValue;
           
           return (
             <button
@@ -110,9 +109,7 @@ export const ProcedureFieldRenderer: React.FC<ProcedureFieldRendererProps> = ({
             >
               <Star 
                 className={`h-7 w-7 ${
-                  isSelected ? 'fill-yellow-400 text-yellow-400' : 
-                  isHalfSelected ? 'fill-yellow-200 text-yellow-400' : 
-                  'text-gray-300 hover:text-yellow-300'
+                  isSelected ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300 hover:text-yellow-300'
                 }`}
               />
             </button>
@@ -188,12 +185,12 @@ export const ProcedureFieldRenderer: React.FC<ProcedureFieldRendererProps> = ({
             {field.is_required && <span className="text-red-500 ml-1">*</span>}
           </label>
           <div className="relative">
-            <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 font-medium">$</span>
+            <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 h-4 w-4" />
             <Input
               type="number"
               value={fieldValue}
               onChange={(e) => onChange(field.id, parseFloat(e.target.value) || 0)}
-              className="pl-8 border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+              className="pl-10 border-gray-300 focus:border-blue-500 focus:ring-blue-500"
               min={field.options?.minValue}
               max={field.options?.maxValue}
               step={field.options?.step || 0.01}
@@ -257,7 +254,7 @@ export const ProcedureFieldRenderer: React.FC<ProcedureFieldRendererProps> = ({
     case 'checkbox':
       return renderFieldWithAttachment(
         <div key={field.id || index} className="space-y-3">
-          <div className="flex items-start space-x-3 p-3 rounded-lg hover:bg-gray-50 transition-colors">
+          <div className="flex items-start space-x-3 p-4 rounded-lg hover:bg-gray-50 transition-colors border border-gray-200">
             <Checkbox
               id={field.id}
               checked={Boolean(fieldValue)}
@@ -301,13 +298,13 @@ export const ProcedureFieldRenderer: React.FC<ProcedureFieldRendererProps> = ({
             {field.label || field.title}
             {field.is_required && <span className="text-red-500 ml-1">*</span>}
           </label>
-          <div className="space-y-2 p-4 border border-gray-300 rounded-lg bg-gray-50">
+          <div className="space-y-2 p-4 border border-gray-200 rounded-lg bg-white">
             {field.options?.choices?.map((choice: string, choiceIndex: number) => {
               const selectedValues = Array.isArray(fieldValue) ? fieldValue : [];
               const isSelected = selectedValues.includes(choice);
               
               return (
-                <div key={choiceIndex} className="flex items-center space-x-3 p-2 rounded hover:bg-white transition-colors">
+                <div key={choiceIndex} className="flex items-center space-x-3 p-2 rounded hover:bg-gray-50 transition-colors">
                   <Checkbox
                     id={`${field.id}-${choiceIndex}`}
                     checked={isSelected}
@@ -336,16 +333,18 @@ export const ProcedureFieldRenderer: React.FC<ProcedureFieldRendererProps> = ({
             {field.label || field.title}
             {field.is_required && <span className="text-red-500 ml-1">*</span>}
           </label>
-          <RadioGroup value={fieldValue} onValueChange={(value) => onChange(field.id, value)} className="space-y-2">
-            {field.options?.choices?.map((choice: string, choiceIndex: number) => (
-              <div key={choiceIndex} className="flex items-center space-x-3 p-2 rounded hover:bg-gray-50 transition-colors">
-                <RadioGroupItem value={choice} id={`${field.id}-${choiceIndex}`} />
-                <Label htmlFor={`${field.id}-${choiceIndex}`} className="text-sm text-gray-900 cursor-pointer flex-1">
-                  {choice}
-                </Label>
-              </div>
-            ))}
-          </RadioGroup>
+          <div className="p-4 border border-gray-200 rounded-lg bg-white">
+            <RadioGroup value={fieldValue} onValueChange={(value) => onChange(field.id, value)} className="space-y-3">
+              {field.options?.choices?.map((choice: string, choiceIndex: number) => (
+                <div key={choiceIndex} className="flex items-center space-x-3 p-2 rounded hover:bg-gray-50 transition-colors">
+                  <RadioGroupItem value={choice} id={`${field.id}-${choiceIndex}`} />
+                  <Label htmlFor={`${field.id}-${choiceIndex}`} className="text-sm text-gray-900 cursor-pointer flex-1">
+                    {choice}
+                  </Label>
+                </div>
+              ))}
+            </RadioGroup>
+          </div>
         </div>
       );
 
@@ -356,7 +355,7 @@ export const ProcedureFieldRenderer: React.FC<ProcedureFieldRendererProps> = ({
             {field.label || field.title}
             {field.is_required && <span className="text-red-500 ml-1">*</span>}
           </label>
-          <div className="p-4 bg-gray-50 rounded-lg border">
+          <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
             {renderRatingField()}
           </div>
         </div>
@@ -369,7 +368,7 @@ export const ProcedureFieldRenderer: React.FC<ProcedureFieldRendererProps> = ({
             {field.label || field.title}
             {field.is_required && <span className="text-red-500 ml-1">*</span>}
           </label>
-          <div className="px-4 py-6 bg-gray-50 rounded-lg border">
+          <div className="px-4 py-6 bg-gray-50 rounded-lg border border-gray-200">
             <Slider
               value={[fieldValue || field.options?.minValue || 0]}
               onValueChange={(values) => onChange(field.id, values[0])}
@@ -449,9 +448,9 @@ export const ProcedureFieldRenderer: React.FC<ProcedureFieldRendererProps> = ({
             {field.label || field.title}
             {field.is_required && <span className="text-red-500 ml-1">*</span>}
           </label>
-          <div className="border-2 border-dashed border-gray-300 rounded-lg p-5 text-center">
+          <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-gray-400 transition-colors">
             <Upload className="h-8 w-8 text-gray-400 mx-auto mb-3" />
-            <p className="text-sm text-gray-700">
+            <p className="text-sm text-gray-700 mb-2">
               {field.field_type === 'image' ? 'Upload an image' : 'Upload a file'}
             </p>
             <input
@@ -462,7 +461,7 @@ export const ProcedureFieldRenderer: React.FC<ProcedureFieldRendererProps> = ({
                 const files = Array.from(e.target.files || []);
                 onChange(field.id, field.options?.allowMultipleFiles ? files : files[0]);
               }}
-              className="mt-3 text-sm"
+              className="mt-3 text-sm w-full"
             />
           </div>
         </div>
@@ -483,11 +482,11 @@ export const ProcedureFieldRenderer: React.FC<ProcedureFieldRendererProps> = ({
                 variant={fieldValue === option ? "default" : "outline"}
                 size="sm"
                 onClick={() => onChange(field.id, option)}
-                className={`flex-1 ${
+                className={`flex-1 transition-all ${
                   fieldValue === option 
-                    ? option === 'Pass' ? 'bg-green-600 hover:bg-green-700 text-white' :
-                      option === 'Fail' ? 'bg-red-600 hover:bg-red-700 text-white' :
-                      'bg-yellow-600 hover:bg-yellow-700 text-white'
+                    ? option === 'Pass' ? 'bg-green-600 hover:bg-green-700 text-white border-green-600' :
+                      option === 'Fail' ? 'bg-red-600 hover:bg-red-700 text-white border-red-600' :
+                      'bg-yellow-600 hover:bg-yellow-700 text-white border-yellow-600'
                     : option === 'Pass' ? 'border-green-300 text-green-700 hover:bg-green-50' :
                       option === 'Fail' ? 'border-red-300 text-red-700 hover:bg-red-50' :
                       'border-yellow-300 text-yellow-700 hover:bg-yellow-50'
@@ -512,8 +511,8 @@ export const ProcedureFieldRenderer: React.FC<ProcedureFieldRendererProps> = ({
 
     case 'section':
       return renderFieldWithAttachment(
-        <div key={field.id || index} className="py-5">
-          <h3 className="text-lg font-semibold text-gray-900 border-b pb-3">
+        <div key={field.id || index} className="py-6">
+          <h3 className="text-xl font-semibold text-gray-900 border-b border-gray-200 pb-3">
             {field.label || field.title}
           </h3>
           {field.description && (
@@ -524,8 +523,8 @@ export const ProcedureFieldRenderer: React.FC<ProcedureFieldRendererProps> = ({
 
     case 'divider':
       return (
-        <div key={field.id || index} className="py-3">
-          <Separator className="my-3" />
+        <div key={field.id || index} className="py-4">
+          <Separator className="my-2" />
         </div>
       );
 
