@@ -1,9 +1,10 @@
 
 import React from 'react';
-import { Dialog, DialogContent, DialogHeader } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { ProcedureDialogHeader } from './dialog/ProcedureDialogHeader';
 import { ProcedureDialogContent } from './dialog/ProcedureDialogContent';
 import { useProcedureDialogState } from './dialog/useProcedureDialogState';
+import { ErrorBoundary } from '@/components/ui/ErrorBoundary';
 
 interface ProcedureDetailDialogProps {
   open: boolean;
@@ -50,35 +51,44 @@ export const ProcedureDetailDialog: React.FC<ProcedureDetailDialogProps> = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl h-[85vh] flex flex-col">
         <DialogHeader className="flex-shrink-0 pb-4">
-          <ProcedureDialogHeader
-            procedure={procedure}
-            isEditing={isEditing}
-            isSaving={isSaving}
-            editData={editData}
-            onEditStart={handleEditStart}
-            onEditSave={handleEditSave}
-            onEditCancel={handleEditCancel}
-            onEditDataChange={handleEditDataChange}
-          />
+          <DialogTitle>
+            <ErrorBoundary fallback={<div>Error loading procedure header</div>}>
+              <ProcedureDialogHeader
+                procedure={procedure}
+                isEditing={isEditing}
+                isSaving={isSaving}
+                editData={editData}
+                onEditStart={handleEditStart}
+                onEditSave={handleEditSave}
+                onEditCancel={handleEditCancel}
+                onEditDataChange={handleEditDataChange}
+              />
+            </ErrorBoundary>
+          </DialogTitle>
+          <DialogDescription>
+            {procedure.description || 'No description available'}
+          </DialogDescription>
         </DialogHeader>
 
-        <ProcedureDialogContent
-          procedure={procedure}
-          isEditing={isEditing}
-          editData={editData}
-          formData={formData}
-          newTag={newTag}
-          disableAutoSave={true}
-          onFieldChange={handleFieldChange}
-          onEditDataChange={handleEditDataChange}
-          onNewTagChange={setNewTag}
-          onAddTag={addTag}
-          onRemoveTag={removeTag}
-          onAddField={addField}
-          onUpdateField={updateField}
-          onMoveField={moveField}
-          onRemoveField={removeField}
-        />
+        <ErrorBoundary fallback={<div className="flex-1 flex items-center justify-center text-red-600">Error loading procedure content</div>}>
+          <ProcedureDialogContent
+            procedure={procedure}
+            isEditing={isEditing}
+            editData={editData}
+            formData={formData}
+            newTag={newTag}
+            disableAutoSave={true}
+            onFieldChange={handleFieldChange}
+            onEditDataChange={handleEditDataChange}
+            onNewTagChange={setNewTag}
+            onAddTag={addTag}
+            onRemoveTag={removeTag}
+            onAddField={addField}
+            onUpdateField={updateField}
+            onMoveField={moveField}
+            onRemoveField={removeField}
+          />
+        </ErrorBoundary>
       </DialogContent>
     </Dialog>
   );

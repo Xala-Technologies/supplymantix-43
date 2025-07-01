@@ -1,340 +1,325 @@
 
-import { supabase } from '@/integrations/supabase/client';
-import { CreateProcedureData, UpdateProcedureData, ProcedureFilters, ProcedureField, ProcedureFieldType } from './types';
+import { supabase } from "@/integrations/supabase/client";
+import { ProcedureField } from './types';
 
 export const coreApi = {
-  // Get procedures with enhanced filtering
-  getProcedures: async (filters: ProcedureFilters = {}) => {
-    console.log('Fetching procedures with filters:', filters);
-    
-    const { data: userData } = await supabase.auth.getUser();
-    if (!userData.user) throw new Error("User not authenticated");
+  getProcedures: async (params?: {
+    search?: string;
+    category?: string;
+    tags?: string[];
+    is_global?: boolean;
+    limit?: number;
+    offset?: number;
+  }) => {
+    try {
+      console.log('Fetching procedures with filters:', params);
+      
+      // Get current user and tenant info with enhanced security checks
+      const { data: userData, error: userError } = await supabase.auth.getUser();
+      if (userError || !userData.user) {
+        console.error('User authentication failed:', userError);
+        throw new Error("User not authenticated");
+      }
 
-    const { data: userRecord } = await supabase
-      .from("users")
-      .select("tenant_id")
-      .eq("id", userData.user.id)
-      .single();
+      const { data: userRecord, error: userRecordError } = await supabase
+        .from("users")
+        .select("tenant_id")
+        .eq("id", userData.user.id)
+        .single();
 
-    if (!userRecord) throw new Error("User record not found");
+      if (userRecordError || !userRecord) {
+        console.error('User record not found:', userRecordError);
+        throw new Error("User record not found");
+      }
 
-    let query = supabase
-      .from('procedures')
-      .select(`
-        *,
-        procedure_fields (
-          id,
-          label,
-          field_type,
-          is_required,
-          order_index,
-          options,
-          created_at,
-          updated_at
-        )
-      `)
-      .eq('tenant_id', userRecord.tenant_id)
-      .order('created_at', { ascending: false });
+      console.log('Authenticated user tenant:', userRecord.tenant_id);
 
-    // Apply filters
-    if (filters.search) {
-      query = query.or(`title.ilike.%${filters.search}%,description.ilike.%${filters.search}%`);
-    }
+      // Build query with strict tenant isolation
+      let query = supabase
+        .from("procedures")
+        .select(`
+          *,
+          procedure_fields (
+            id,
+            procedure_id,
+            label,
+            field_type,
+            is_required,
+            order_index,
+            options,
+            created_at,
+            updated_at
+          )
+        `)
+        .eq("tenant_id", userRecord.tenant_id); // CRITICAL: Always filter by tenant
 
-    if (filters.category) {
-      query = query.eq('category', filters.category);
-    }
+      // Apply filters safely
+      if (params?.search) {
+        query = query.ilike("title", `%${params.search}%`);
+      }
+      
+      if (params?.category) {
+        query = query.eq("category", params.category);
+      }
+      
+      if (params?.is_global !== undefined) {
+        query = query.eq("is_global", params.is_global);
+      }
 
-    if (filters.tags && filters.tags.length > 0) {
-      query = query.overlaps('tags', filters.tags);
-    }
+      if (params?.limit) {
+        query = query.limit(params.limit);
+      }
 
-    if (filters.is_global !== undefined) {
-      query = query.eq('is_global', filters.is_global);
-    }
+      if (params?.offset) {
+        query = query.range(params.offset, params.offset + (params.limit || 10) - 1);
+      }
 
-    if (filters.limit) {
-      query = query.limit(filters.limit);
-    }
+      const { data, error, count } = await query;
 
-    if (filters.offset) {
-      query = query.range(filters.offset, filters.offset + (filters.limit || 50) - 1);
-    }
+      if (error) {
+        console.error('Database query error:', error);
+        throw error;
+      }
 
-    const { data, error } = await query;
-
-    if (error) {
-      console.error('Error fetching procedures:', error);
-      throw error;
-    }
-
-    // Transform the data to match expected format and add missing properties
-    const procedures = data?.map(procedure => ({
-      ...procedure,
-      fields: (procedure.procedure_fields || []).map(field => ({
-        ...field,
-        procedure_id: procedure.id,
-        field_type: field.field_type as ProcedureFieldType
-      })) as ProcedureField[],
-      executions_count: 0
-    })) || [];
-
-    return {
-      procedures,
-      total: procedures.length
-    };
-  },
-
-  // Get single procedure
-  getProcedure: async (id: string) => {
-    const { data: userData } = await supabase.auth.getUser();
-    if (!userData.user) throw new Error("User not authenticated");
-
-    const { data: userRecord } = await supabase
-      .from("users")
-      .select("tenant_id")
-      .eq("id", userData.user.id)
-      .single();
-
-    if (!userRecord) throw new Error("User record not found");
-
-    const { data, error } = await supabase
-      .from('procedures')
-      .select(`
-        *,
-        procedure_fields (
-          id,
-          label,
-          field_type,
-          is_required,
-          order_index,
-          options,
-          created_at,
-          updated_at
-        )
-      `)
-      .eq('id', id)
-      .eq('tenant_id', userRecord.tenant_id)
-      .single();
-
-    if (error) throw error;
-
-    return {
-      ...data,
-      fields: (data.procedure_fields || []).map(field => ({
-        ...field,
-        procedure_id: data.id,
-        field_type: field.field_type as ProcedureFieldType
-      })) as ProcedureField[],
-      executions_count: 0
-    };
-  },
-
-  // Create procedure
-  createProcedure: async (procedureData: CreateProcedureData) => {
-    console.log('Creating procedure with data:', procedureData);
-
-    const { data: userData } = await supabase.auth.getUser();
-    if (!userData.user) throw new Error("User not authenticated");
-
-    const { data: userRecord } = await supabase
-      .from("users")
-      .select("tenant_id")
-      .eq("id", userData.user.id)
-      .single();
-
-    if (!userRecord) throw new Error("User record not found");
-
-    const { fields, ...procedureInfo } = procedureData;
-
-    // Create the procedure first
-    const { data: procedure, error: procedureError } = await supabase
-      .from('procedures')
-      .insert({
-        ...procedureInfo,
-        tenant_id: userRecord.tenant_id,
-        created_by: userData.user.id,
-        tags: procedureInfo.tags || [],
-        is_global: procedureInfo.is_global || false,
-        category: procedureInfo.category || 'Inspection'
-      })
-      .select()
-      .single();
-
-    if (procedureError) {
-      console.error('Error creating procedure:', procedureError);
-      throw procedureError;
-    }
-
-    console.log('Procedure created successfully:', procedure);
-
-    // Create fields if provided
-    if (fields && fields.length > 0) {
-      const fieldsToInsert = fields.map((field, index) => ({
-        label: field.label,
-        field_type: field.field_type,
-        is_required: field.is_required || false,
-        order_index: field.order_index !== undefined ? field.order_index : index,
-        options: field.options || {},
-        procedure_id: procedure.id,
-        tenant_id: userRecord.tenant_id
+      // Process data safely with null checks
+      const processedData = (data || []).map((procedure: any) => ({
+        ...procedure,
+        fields: procedure.procedure_fields || [],
+        executions_count: 0 // Default value
       }));
 
-      console.log('Creating procedure fields:', fieldsToInsert);
-
-      const { error: fieldsError } = await supabase
-        .from('procedure_fields')
-        .insert(fieldsToInsert);
-
-      if (fieldsError) {
-        console.error('Error creating procedure fields:', fieldsError);
-        throw fieldsError;
-      }
-
-      console.log('Procedure fields created successfully');
+      console.log('Procedures fetched successfully:', processedData.length);
+      
+      return {
+        procedures: processedData,
+        total: count || processedData.length
+      };
+    } catch (error) {
+      console.error('Error in getProcedures:', error);
+      throw error;
     }
-
-    return procedure;
   },
 
-  // Update procedure
-  updateProcedure: async (id: string, updates: UpdateProcedureData) => {
-    console.log('Updating procedure:', id, updates);
+  getProcedure: async (id: string) => {
+    try {
+      // Verify authentication and tenant
+      const { data: userData } = await supabase.auth.getUser();
+      if (!userData.user) throw new Error("User not authenticated");
 
-    const { data: userData } = await supabase.auth.getUser();
-    if (!userData.user) throw new Error("User not authenticated");
+      const { data: userRecord } = await supabase
+        .from("users")
+        .select("tenant_id")
+        .eq("id", userData.user.id)
+        .single();
 
-    const { data: userRecord } = await supabase
-      .from("users")
-      .select("tenant_id")
-      .eq("id", userData.user.id)
-      .single();
+      if (!userRecord) throw new Error("User record not found");
 
-    if (!userRecord) throw new Error("User record not found");
+      const { data, error } = await supabase
+        .from("procedures")
+        .select(`
+          *,
+          procedure_fields (*)
+        `)
+        .eq("id", id)
+        .eq("tenant_id", userRecord.tenant_id) // CRITICAL: Tenant isolation
+        .single();
 
-    const { fields, ...procedureUpdates } = updates;
+      if (error) throw error;
+      if (!data) throw new Error("Procedure not found");
 
-    // Update the procedure
-    const { data: procedure, error: procedureError } = await supabase
-      .from('procedures')
-      .update({
-        ...procedureUpdates,
-        updated_at: new Date().toISOString()
-      })
-      .eq('id', id)
-      .eq('tenant_id', userRecord.tenant_id)
-      .select()
-      .single();
-
-    if (procedureError) {
-      console.error('Error updating procedure:', procedureError);
-      throw procedureError;
+      return {
+        ...data,
+        fields: data.procedure_fields || []
+      };
+    } catch (error) {
+      console.error('Error fetching procedure:', error);
+      throw error;
     }
+  },
 
-    // Handle fields update if provided
-    if (fields !== undefined) {
-      console.log('Updating procedure fields:', fields);
-      
-      // Delete existing fields
-      const { error: deleteError } = await supabase
-        .from('procedure_fields')
-        .delete()
-        .eq('procedure_id', id);
+  createProcedure: async (procedure: {
+    title: string;
+    description?: string;
+    category?: string;
+    tags?: string[];
+    is_global?: boolean;
+    fields?: Partial<ProcedureField>[];
+  }) => {
+    try {
+      // Verify authentication
+      const { data: userData } = await supabase.auth.getUser();
+      if (!userData.user) throw new Error("User not authenticated");
 
-      if (deleteError) {
-        console.error('Error deleting existing fields:', deleteError);
-        throw deleteError;
-      }
+      const { data: userRecord } = await supabase
+        .from("users")
+        .select("tenant_id")
+        .eq("id", userData.user.id)
+        .single();
 
-      // Insert new fields
-      if (fields.length > 0) {
-        const fieldsToInsert = fields.map((field, index) => ({
-          label: field.label,
-          field_type: field.field_type,
+      if (!userRecord) throw new Error("User record not found");
+
+      // Create procedure with tenant isolation
+      const { data, error } = await supabase
+        .from("procedures")
+        .insert({
+          ...procedure,
+          tenant_id: userRecord.tenant_id,
+          created_by: userData.user.id
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      // Create fields if provided
+      if (procedure.fields && procedure.fields.length > 0) {
+        const fieldsToInsert = procedure.fields.map((field, index) => ({
+          procedure_id: data.id,
+          label: field.label || '',
+          field_type: field.field_type || 'text',
           is_required: field.is_required || false,
           order_index: field.order_index !== undefined ? field.order_index : index,
-          options: field.options || {},
-          procedure_id: id,
-          tenant_id: userRecord.tenant_id
+          options: field.options || {}
         }));
 
         const { error: fieldsError } = await supabase
-          .from('procedure_fields')
+          .from("procedure_fields")
           .insert(fieldsToInsert);
 
         if (fieldsError) {
-          console.error('Error inserting new fields:', fieldsError);
-          throw fieldsError;
+          console.error('Error creating procedure fields:', fieldsError);
+          // Don't throw here to avoid leaving orphaned procedure
         }
       }
 
-      console.log('Procedure fields updated successfully');
+      return data;
+    } catch (error) {
+      console.error('Error creating procedure:', error);
+      throw error;
     }
-
-    return procedure;
   },
 
-  // Delete procedure
+  updateProcedure: async (id: string, updates: any) => {
+    try {
+      // Verify authentication and ownership
+      const { data: userData } = await supabase.auth.getUser();
+      if (!userData.user) throw new Error("User not authenticated");
+
+      const { data: userRecord } = await supabase
+        .from("users")
+        .select("tenant_id")
+        .eq("id", userData.user.id)
+        .single();
+
+      if (!userRecord) throw new Error("User record not found");
+
+      // Update procedure with tenant check
+      const { data, error } = await supabase
+        .from("procedures")
+        .update({
+          title: updates.title,
+          description: updates.description,
+          category: updates.category,
+          tags: updates.tags,
+          is_global: updates.is_global,
+          updated_at: new Date().toISOString()
+        })
+        .eq("id", id)
+        .eq("tenant_id", userRecord.tenant_id) // CRITICAL: Tenant isolation
+        .select()
+        .single();
+
+      if (error) throw error;
+      if (!data) throw new Error("Procedure not found or access denied");
+
+      // Update fields if provided
+      if (updates.fields) {
+        console.log('Updating procedure fields:', updates.fields);
+        
+        // Delete existing fields
+        await supabase
+          .from("procedure_fields")
+          .delete()
+          .eq("procedure_id", id);
+
+        // Insert new fields
+        if (updates.fields.length > 0) {
+          const fieldsToInsert = updates.fields.map((field: any, index: number) => ({
+            procedure_id: id,
+            label: field.label || '',
+            field_type: field.field_type || 'text',
+            is_required: field.is_required || false,
+            order_index: field.order_index !== undefined ? field.order_index : index,
+            options: field.options || {}
+          }));
+
+          const { error: fieldsError } = await supabase
+            .from("procedure_fields")
+            .insert(fieldsToInsert);
+
+          if (fieldsError) {
+            console.error('Error updating procedure fields:', fieldsError);
+            throw fieldsError;
+          }
+        }
+
+        console.log('Procedure fields updated successfully');
+      }
+
+      return data;
+    } catch (error) {
+      console.error('Error updating procedure:', error);
+      throw error;
+    }
+  },
+
   deleteProcedure: async (id: string) => {
-    const { data: userData } = await supabase.auth.getUser();
-    if (!userData.user) throw new Error("User not authenticated");
+    try {
+      // Verify authentication and ownership
+      const { data: userData } = await supabase.auth.getUser();
+      if (!userData.user) throw new Error("User not authenticated");
 
-    const { data: userRecord } = await supabase
-      .from("users")
-      .select("tenant_id")
-      .eq("id", userData.user.id)
-      .single();
+      const { data: userRecord } = await supabase
+        .from("users")
+        .select("tenant_id")
+        .eq("id", userData.user.id)
+        .single();
 
-    if (!userRecord) throw new Error("User record not found");
+      if (!userRecord) throw new Error("User record not found");
 
-    // Delete procedure fields first
-    await supabase
-      .from('procedure_fields')
-      .delete()
-      .eq('procedure_id', id);
+      // Delete with tenant check
+      const { error } = await supabase
+        .from("procedures")
+        .delete()
+        .eq("id", id)
+        .eq("tenant_id", userRecord.tenant_id); // CRITICAL: Tenant isolation
 
-    // Delete the procedure
-    const { error } = await supabase
-      .from('procedures')
-      .delete()
-      .eq('id', id)
-      .eq('tenant_id', userRecord.tenant_id);
-
-    if (error) throw error;
+      if (error) throw error;
+    } catch (error) {
+      console.error('Error deleting procedure:', error);
+      throw error;
+    }
   },
 
-  // Duplicate procedure
   duplicateProcedure: async (id: string, newTitle?: string) => {
-    console.log('Duplicating procedure:', id);
-    
-    const original = await coreApi.getProcedure(id);
-    
-    // Transform fields to the format expected by createProcedure
-    const transformedFields = original.fields?.map(field => ({
-      label: field.label,
-      field_type: field.field_type,
-      is_required: field.is_required,
-      order_index: field.order_index,
-      options: field.options || {}
-    })) || [];
+    try {
+      // Get original procedure
+      const original = await coreApi.getProcedure(id);
+      
+      // Create duplicate
+      const duplicate = await coreApi.createProcedure({
+        title: newTitle || `${original.title} (Copy)`,
+        description: original.description,
+        category: original.category,
+        tags: original.tags || [],
+        is_global: false, // Duplicates are never global
+        fields: original.fields || []
+      });
 
-    const duplicateData: CreateProcedureData = {
-      title: newTitle || `${original.title} (Copy)`,
-      description: original.description,
-      asset_type: original.asset_type,
-      category: original.category,
-      tags: original.tags,
-      is_global: false, // Duplicates are not global by default
-      template_data: original.template_data,
-      steps: original.steps,
-      estimated_duration: original.estimated_duration,
-      asset_ids: original.asset_ids,
-      location_ids: original.location_ids,
-      team_ids: original.team_ids,
-      fields: transformedFields
-    };
-
-    console.log('Creating duplicate with data:', duplicateData);
-    return coreApi.createProcedure(duplicateData);
+      return duplicate;
+    } catch (error) {
+      console.error('Error duplicating procedure:', error);
+      throw error;
+    }
   }
 };
