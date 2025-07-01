@@ -52,8 +52,8 @@ export const ProcedureDetailDialog: React.FC<ProcedureDetailDialogProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl h-[85vh] flex flex-col">
-        <DialogHeader className="flex-shrink-0 pb-4">
+      <DialogContent className="max-w-4xl h-[85vh] flex flex-col p-0">
+        <DialogHeader className="flex-shrink-0 px-6 pt-6 pb-0">
           <DialogTitle className="sr-only">
             Procedure Details
           </DialogTitle>
@@ -71,25 +71,27 @@ export const ProcedureDetailDialog: React.FC<ProcedureDetailDialogProps> = ({
           </ErrorBoundary>
         </DialogHeader>
 
-        <ErrorBoundary fallback={<div className="flex-1 flex items-center justify-center text-red-600">Error loading procedure content</div>}>
-          <ProcedureDialogContent
-            procedure={displayData}
-            isEditing={isEditing}
-            editData={editData}
-            formData={formData}
-            newTag={newTag}
-            disableAutoSave={true}
-            onFieldChange={handleFieldChange}
-            onEditDataChange={handleEditDataChange}
-            onNewTagChange={setNewTag}
-            onAddTag={addTag}
-            onRemoveTag={removeTag}
-            onAddField={addField}
-            onUpdateField={updateField}
-            onMoveField={moveField}
-            onRemoveField={removeField}
-          />
-        </ErrorBoundary>
+        <div className="flex-1 min-h-0 px-6 pb-6">
+          <ErrorBoundary fallback={<div className="flex-1 flex items-center justify-center text-red-600">Error loading procedure content</div>}>
+            <ProcedureDialogContent
+              procedure={displayData}
+              isEditing={isEditing}
+              editData={editData}
+              formData={formData}
+              newTag={newTag}
+              disableAutoSave={true}
+              onFieldChange={handleFieldChange}
+              onEditDataChange={handleEditDataChange}
+              onNewTagChange={setNewTag}
+              onAddTag={addTag}
+              onRemoveTag={removeTag}
+              onAddField={addField}
+              onUpdateField={updateField}
+              onMoveField={moveField}
+              onRemoveField={removeField}
+            />
+          </ErrorBoundary>
+        </div>
       </DialogContent>
     </Dialog>
   );

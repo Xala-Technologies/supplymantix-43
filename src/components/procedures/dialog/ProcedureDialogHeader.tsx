@@ -45,27 +45,27 @@ export const ProcedureDialogHeader: React.FC<ProcedureDialogHeaderProps> = ({
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
       <div className="flex items-start justify-between gap-4">
-        <div className="flex-1 space-y-3">
+        <div className="flex-1 space-y-2">
           {isEditing ? (
             <>
               <Input
                 value={editData.title}
                 onChange={(e) => onEditDataChange({ title: e.target.value })}
                 placeholder="Procedure title"
-                className="text-xl font-semibold border-0 p-0 shadow-none focus-visible:ring-0"
+                className="text-xl font-semibold border-0 p-0 shadow-none focus-visible:ring-0 h-auto"
                 disabled={isSaving}
               />
               <Textarea
                 value={editData.description || ''}
                 onChange={(e) => onEditDataChange({ description: e.target.value })}
                 placeholder="Procedure description"
-                className="text-gray-600 border-0 p-0 shadow-none focus-visible:ring-0 resize-none"
+                className="text-gray-600 border-0 p-0 shadow-none focus-visible:ring-0 resize-none min-h-0"
                 rows={2}
                 disabled={isSaving}
               />
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-3">
                 <div className="flex items-center gap-2">
                   <span className="text-sm font-medium">Category:</span>
                   <Select
@@ -73,7 +73,7 @@ export const ProcedureDialogHeader: React.FC<ProcedureDialogHeaderProps> = ({
                     onValueChange={(value) => onEditDataChange({ category: value })}
                     disabled={isSaving}
                   >
-                    <SelectTrigger className="w-48">
+                    <SelectTrigger className="w-44 h-8">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -92,15 +92,15 @@ export const ProcedureDialogHeader: React.FC<ProcedureDialogHeaderProps> = ({
             </>
           ) : (
             <>
-              <h2 className="text-xl font-semibold text-gray-900">
+              <h2 className="text-xl font-semibold text-gray-900 leading-tight">
                 {procedure.title}
               </h2>
               {procedure.description && (
-                <p className="text-gray-600">
+                <p className="text-gray-600 text-sm leading-relaxed">
                   {procedure.description}
                 </p>
               )}
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-3 flex-wrap">
                 <Badge 
                   variant="secondary" 
                   className={`${getCategoryColor(procedure.category)} text-white`}
@@ -111,7 +111,7 @@ export const ProcedureDialogHeader: React.FC<ProcedureDialogHeaderProps> = ({
                   <Badge variant="outline">Global</Badge>
                 )}
                 {procedure.tags && procedure.tags.length > 0 && (
-                  <div className="flex items-center gap-1">
+                  <div className="flex items-center gap-1 flex-wrap">
                     {procedure.tags.slice(0, 3).map((tag: string) => (
                       <Badge key={tag} variant="outline" className="text-xs">
                         {tag}
@@ -129,7 +129,7 @@ export const ProcedureDialogHeader: React.FC<ProcedureDialogHeaderProps> = ({
           )}
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-shrink-0">
           {isEditing ? (
             <>
               <Button
@@ -137,6 +137,7 @@ export const ProcedureDialogHeader: React.FC<ProcedureDialogHeaderProps> = ({
                 size="sm"
                 onClick={onEditCancel}
                 disabled={isSaving}
+                className="h-8"
               >
                 <X className="h-4 w-4 mr-2" />
                 Cancel
@@ -145,6 +146,7 @@ export const ProcedureDialogHeader: React.FC<ProcedureDialogHeaderProps> = ({
                 size="sm"
                 onClick={onEditSave}
                 disabled={isSaving || !editData.title?.trim()}
+                className="h-8"
               >
                 {isSaving ? (
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -159,6 +161,7 @@ export const ProcedureDialogHeader: React.FC<ProcedureDialogHeaderProps> = ({
               variant="outline"
               size="sm"
               onClick={onEditStart}
+              className="h-8"
             >
               <Edit2 className="h-4 w-4 mr-2" />
               Edit
