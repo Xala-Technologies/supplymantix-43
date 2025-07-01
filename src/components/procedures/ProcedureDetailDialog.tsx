@@ -47,8 +47,8 @@ export const ProcedureDetailDialog: React.FC<ProcedureDetailDialogProps> = ({
 
   if (!procedure) return null;
 
-  // Use editData for display when editing, otherwise use the original procedure
-  const displayData = isEditing ? editData : procedure;
+  // Always use editData when available (which includes saved changes), otherwise use procedure
+  const displayData = editData && Object.keys(editData).length > 0 ? editData : procedure;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

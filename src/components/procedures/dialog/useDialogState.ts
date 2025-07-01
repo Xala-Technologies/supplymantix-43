@@ -77,17 +77,7 @@ export const useDialogState = (procedure: any, open: boolean, onEdit: (procedure
         updates: updateData
       });
       
-      // Update the local edit data immediately with the saved data
-      const updatedEditData = {
-        ...updateData,
-        fields: editData.fields // Keep the current fields structure
-      };
-      setEditData(updatedEditData);
-      
-      setIsEditing(false);
-      toast.success('Procedure updated successfully');
-      
-      // Update the parent component with the complete updated data
+      // Create the complete updated procedure object
       const fullUpdatedProcedure = {
         ...procedure,
         ...updateData,
@@ -95,8 +85,15 @@ export const useDialogState = (procedure: any, open: boolean, onEdit: (procedure
         updated_at: new Date().toISOString()
       };
       
+      // Update the local edit data to reflect the saved state
+      setEditData(fullUpdatedProcedure);
+      setIsEditing(false);
+      toast.success('Procedure updated successfully');
+      
+      // Notify parent component with the complete updated data
       console.log('Notifying parent of update:', fullUpdatedProcedure);
       onEdit(fullUpdatedProcedure);
+      
     } catch (error) {
       console.error('Error saving procedure:', error);
       toast.error('Failed to save procedure changes');
