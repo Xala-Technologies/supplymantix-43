@@ -39,7 +39,7 @@ export const ProcedureDialogHeader: React.FC<ProcedureDialogHeaderProps> = ({
 }) => {
   return (
     <>
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between pr-8">
         <div className="flex items-center gap-2">
           <PlayCircle className="h-5 w-5 text-gray-600" />
           {isEditing ? (
