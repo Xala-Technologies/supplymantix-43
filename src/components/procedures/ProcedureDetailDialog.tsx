@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -9,6 +10,8 @@ import { ProcedureDialogHeader } from './dialog/ProcedureDialogHeader';
 import { ProcedureFieldRenderer } from './dialog/ProcedureFieldRenderer';
 import { ProcedureFieldEditor } from './dialog/ProcedureFieldEditor';
 import { ProcedureSettingsPanel } from './dialog/ProcedureSettingsPanel';
+import { useUpdateProcedure } from '@/hooks/useProceduresEnhanced';
+import { toast } from 'sonner';
 
 interface ProcedureDetailDialogProps {
   open: boolean;
@@ -34,6 +37,8 @@ export const ProcedureDetailDialog: React.FC<ProcedureDetailDialogProps> = ({
   const [formData, setFormData] = useState<Record<string, any>>({});
   const [newTag, setNewTag] = useState('');
 
+  const updateProcedure = useUpdateProcedure();
+
   useEffect(() => {
     if (procedure && open) {
       setEditData({
@@ -54,12 +59,27 @@ export const ProcedureDetailDialog: React.FC<ProcedureDetailDialogProps> = ({
     setIsEditing(true);
   };
 
-  const handleEditSave = () => {
+  const handleEditSave = async () => {
     try {
-      onEdit({ ...procedure, ...editData });
+      console.log('Saving procedure changes:', editData);
+      
+      await updateProcedure.mutateAsync({
+        id: procedure.id,
+        updates: {
+          title: editData.title,
+          description: editData.description,
+          category: editData.category,
+          tags: editData.tags,
+          is_global: editData.is_global,
+          fields: editData.fields
+        }
+      });
+      
       setIsEditing(false);
+      toast.success('Procedure updated successfully');
     } catch (error) {
       console.error('Error saving procedure:', error);
+      toast.error('Failed to save procedure changes');
     }
   };
 
