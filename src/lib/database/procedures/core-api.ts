@@ -164,11 +164,15 @@ export const coreApi = {
 
       if (!userRecord) throw new Error("User record not found");
 
-      // Create procedure with tenant isolation
+      // Create procedure WITHOUT fields data - fields go in separate table
       const { data, error } = await supabase
         .from("procedures")
         .insert({
-          ...procedure,
+          title: procedure.title,
+          description: procedure.description,
+          category: procedure.category || 'Inspection',
+          tags: procedure.tags || [],
+          is_global: procedure.is_global || false,
           tenant_id: userRecord.tenant_id,
           created_by: userData.user.id
         })
@@ -177,11 +181,10 @@ export const coreApi = {
 
       if (error) throw error;
 
-      // Create fields if provided
+      // Create fields if provided in separate table
       if (procedure.fields && procedure.fields.length > 0) {
         const fieldsToInsert = procedure.fields.map((field, index) => ({
           procedure_id: data.id,
-          tenant_id: userRecord.tenant_id, // Add missing tenant_id
           label: field.label || '',
           field_type: field.field_type || 'text',
           is_required: field.is_required || false,
@@ -220,7 +223,7 @@ export const coreApi = {
 
       if (!userRecord) throw new Error("User record not found");
 
-      // Update procedure with tenant check
+      // Update procedure without fields - fields are in separate table
       const { data, error } = await supabase
         .from("procedures")
         .update({
@@ -239,7 +242,7 @@ export const coreApi = {
       if (error) throw error;
       if (!data) throw new Error("Procedure not found or access denied");
 
-      // Update fields if provided
+      // Update fields if provided in separate table
       if (updates.fields) {
         console.log('Updating procedure fields:', updates.fields);
         
@@ -253,7 +256,6 @@ export const coreApi = {
         if (updates.fields.length > 0) {
           const fieldsToInsert = updates.fields.map((field: any, index: number) => ({
             procedure_id: id,
-            tenant_id: userRecord.tenant_id, // Add missing tenant_id
             label: field.label || '',
             field_type: String(field.field_type || 'text'), // Ensure it's a string
             is_required: field.is_required || false,
