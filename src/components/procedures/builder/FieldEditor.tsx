@@ -6,7 +6,6 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Paperclip, X, Upload } from 'lucide-react';
 import { ProcedureField } from '@/lib/database/procedures-enhanced';
 import { FieldTypeSelector } from '../FieldTypeSelector';
@@ -97,11 +96,9 @@ export const FieldEditor: React.FC<FieldEditorProps> = ({
         );
 
       case 'select':
-      case 'multiselect':
-      case 'radio':
         return (
           <div className="mb-4">
-            <Label className="text-sm font-medium mb-2 block">Options (one per line)</Label>
+            <Label className="text-sm font-medium mb-2 block">Dropdown Options (one per line)</Label>
             <Textarea
               value={field.options?.choices?.join('\n') || ''}
               onChange={(e) => handleChoicesUpdate(e.target.value)}
@@ -109,23 +106,49 @@ export const FieldEditor: React.FC<FieldEditorProps> = ({
               rows={4}
               className="resize-none text-sm"
             />
-            {field.field_type === 'multiselect' && (
-              <div className="mt-2 flex items-center space-x-2">
-                <Checkbox
-                  id={`allow-other-${index}`}
-                  checked={field.options?.allowOther || false}
-                  onCheckedChange={(checked) => onUpdate && onUpdate(index, {
-                    options: {
-                      ...field.options,
-                      allowOther: Boolean(checked)
-                    }
-                  })}
-                />
-                <Label htmlFor={`allow-other-${index}`} className="text-sm">
-                  Allow "Other" option with text input
-                </Label>
-              </div>
-            )}
+          </div>
+        );
+
+      case 'multiselect':
+        return (
+          <div className="mb-4">
+            <Label className="text-sm font-medium mb-2 block">Checklist Options (one per line)</Label>
+            <Textarea
+              value={field.options?.choices?.join('\n') || ''}
+              onChange={(e) => handleChoicesUpdate(e.target.value)}
+              placeholder="Option 1&#10;Option 2&#10;Option 3"
+              rows={4}
+              className="resize-none text-sm"
+            />
+            <div className="mt-2 flex items-center space-x-2">
+              <Checkbox
+                id={`allow-other-${index}`}
+                checked={field.options?.allowOther || false}
+                onCheckedChange={(checked) => onUpdate && onUpdate(index, {
+                  options: {
+                    ...field.options,
+                    allowOther: Boolean(checked)
+                  }
+                })}
+              />
+              <Label htmlFor={`allow-other-${index}`} className="text-sm">
+                Allow "Other" option with text input
+              </Label>
+            </div>
+          </div>
+        );
+
+      case 'radio':
+        return (
+          <div className="mb-4">
+            <Label className="text-sm font-medium mb-2 block">Multiple Choice Options (one per line)</Label>
+            <Textarea
+              value={field.options?.choices?.join('\n') || ''}
+              onChange={(e) => handleChoicesUpdate(e.target.value)}
+              placeholder="Option 1&#10;Option 2&#10;Option 3"
+              rows={4}
+              className="resize-none text-sm"
+            />
           </div>
         );
 
@@ -343,6 +366,31 @@ export const FieldEditor: React.FC<FieldEditorProps> = ({
               rows={3}
               className="resize-none text-sm"
             />
+          </div>
+        );
+
+      case 'text':
+      case 'textarea':
+      case 'email':
+      case 'phone':
+      case 'url':
+        return (
+          <div className="mb-4">
+            <Label className="text-sm font-medium mb-2 block">Text Field Settings</Label>
+            <div>
+              <Label className="text-xs text-gray-600">Placeholder Text</Label>
+              <Input
+                value={field.options?.placeholder || ''}
+                onChange={(e) => onUpdate && onUpdate(index, {
+                  options: {
+                    ...field.options,
+                    placeholder: e.target.value
+                  }
+                })}
+                placeholder="Enter placeholder text..."
+                className="text-sm"
+              />
+            </div>
           </div>
         );
 
