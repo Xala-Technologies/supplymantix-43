@@ -30,10 +30,10 @@ export interface ProcedureField {
   id: string;
   procedure_id: string;
   label: string;
-  field_type: string; // Changed from ProcedureFieldType to string to match database
+  field_type: string; // Keep as string to match database
   is_required: boolean;
   order_index: number;
-  options: Record<string, any>;
+  options: any; // Changed from Record<string, any> to any to match Supabase Json type
   created_at: string;
   updated_at: string;
 }

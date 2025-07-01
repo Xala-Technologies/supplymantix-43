@@ -81,10 +81,13 @@ export const coreApi = {
         throw error;
       }
 
-      // Process data safely with null checks
+      // Process data safely with null checks and proper type conversion
       const processedData = (data || []).map((procedure: any) => ({
         ...procedure,
-        fields: procedure.procedure_fields || [],
+        fields: (procedure.procedure_fields || []).map((field: any) => ({
+          ...field,
+          options: typeof field.options === 'string' ? JSON.parse(field.options) : (field.options || {})
+        })),
         executions_count: 0 // Default value
       }));
 
@@ -129,7 +132,10 @@ export const coreApi = {
 
       return {
         ...data,
-        fields: data.procedure_fields || []
+        fields: (data.procedure_fields || []).map((field: any) => ({
+          ...field,
+          options: typeof field.options === 'string' ? JSON.parse(field.options) : (field.options || {})
+        }))
       };
     } catch (error) {
       console.error('Error fetching procedure:', error);
