@@ -155,8 +155,7 @@ export const useProcedureDialogState = (procedure: any, open: boolean, onEdit: (
       order_index: editData.fields.length,
       options: {},
       created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-      tenant_id: procedure.tenant_id || ''
+      updated_at: new Date().toISOString()
     };
 
     console.log('Adding new field:', newField);
@@ -164,7 +163,7 @@ export const useProcedureDialogState = (procedure: any, open: boolean, onEdit: (
       ...prev,
       fields: [...prev.fields, newField]
     }));
-  }, [procedure.id, procedure.tenant_id, editData.fields.length]);
+  }, [procedure.id, editData.fields.length]);
 
   const updateField = useCallback((index: number, updates: Partial<ProcedureField>) => {
     console.log('Updating field at index:', index, updates);

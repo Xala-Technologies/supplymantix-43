@@ -12,6 +12,7 @@ interface ProcedureFieldsTabProps {
   isEditing: boolean;
   editData: any;
   formData: Record<string, any>;
+  disableAutoSave?: boolean;
   onFieldChange: (fieldId: string, value: any) => void;
   onAddField: () => void;
   onUpdateField: (index: number, updates: Partial<ProcedureField>) => void;
@@ -24,6 +25,7 @@ export const ProcedureFieldsTab: React.FC<ProcedureFieldsTabProps> = ({
   isEditing,
   editData,
   formData,
+  disableAutoSave = false,
   onFieldChange,
   onAddField,
   onUpdateField,
