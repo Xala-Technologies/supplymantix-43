@@ -9,7 +9,7 @@ export const useAuthState = () => {
   const [loading, setLoading] = useState(true);
   const [initialized, setInitialized] = useState(false);
   
-  // Ref to track the current user ID to prevent unwanted switches
+  // All refs must be declared at the top level to maintain hook order
   const currentUserIdRef = useRef<string | null>(null);
   const isUnmountedRef = useRef(false);
   const initializationTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -21,13 +21,14 @@ export const useAuthState = () => {
     console.log('Setting up auth state listener...');
     
     // Set initialization timeout as fallback
-    initializationTimeoutRef.current = setTimeout(() => {
+    const timeoutId = setTimeout(() => {
       if (mounted && !isUnmountedRef.current && !initialized) {
         console.log('Auth initialization timeout - forcing completion');
         setLoading(false);
         setInitialized(true);
       }
     }, 3000);
+    initializationTimeoutRef.current = timeoutId;
     
     // Get initial session first
     const getInitialSession = async () => {
@@ -125,7 +126,7 @@ export const useAuthState = () => {
         initializationTimeoutRef.current = null;
       }
     };
-  }, []);
+  }, []); // Empty dependency array to prevent re-running
 
   return { user, session, loading, initialized };
 };

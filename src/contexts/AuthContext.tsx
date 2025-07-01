@@ -19,6 +19,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const { user, session, loading, initialized } = useAuthState();
   const { signIn, signUp, signOut } = useAuthActions();
   const queryClient = useQueryClient();
+  
+  // All refs must be declared at the top level to maintain hook order
   const previousUserIdRef = useRef<string | null>(null);
   const isProcessingUserChangeRef = useRef(false);
 
