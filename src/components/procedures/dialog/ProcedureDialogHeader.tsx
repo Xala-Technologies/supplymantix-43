@@ -46,7 +46,7 @@ export const ProcedureDialogHeader: React.FC<ProcedureDialogHeaderProps> = ({
 
   return (
     <div className="space-y-4">
-      <div className="flex items-start justify-between">
+      <div className="flex items-start justify-between gap-4">
         <div className="flex-1 space-y-3">
           {isEditing ? (
             <>
@@ -58,7 +58,7 @@ export const ProcedureDialogHeader: React.FC<ProcedureDialogHeaderProps> = ({
                 disabled={isSaving}
               />
               <Textarea
-                value={editData.description}
+                value={editData.description || ''}
                 onChange={(e) => onEditDataChange({ description: e.target.value })}
                 placeholder="Procedure description"
                 className="text-gray-600 border-0 p-0 shadow-none focus-visible:ring-0 resize-none"
@@ -129,7 +129,7 @@ export const ProcedureDialogHeader: React.FC<ProcedureDialogHeaderProps> = ({
           )}
         </div>
 
-        <div className="flex items-center gap-2 ml-4">
+        <div className="flex items-center gap-2">
           {isEditing ? (
             <>
               <Button
@@ -138,7 +138,7 @@ export const ProcedureDialogHeader: React.FC<ProcedureDialogHeaderProps> = ({
                 onClick={onEditCancel}
                 disabled={isSaving}
               >
-                <X className="h-4 w-4 mr-1" />
+                <X className="h-4 w-4 mr-2" />
                 Cancel
               </Button>
               <Button
@@ -147,9 +147,9 @@ export const ProcedureDialogHeader: React.FC<ProcedureDialogHeaderProps> = ({
                 disabled={isSaving || !editData.title?.trim()}
               >
                 {isSaving ? (
-                  <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                 ) : (
-                  <Save className="h-4 w-4 mr-1" />
+                  <Save className="h-4 w-4 mr-2" />
                 )}
                 {isSaving ? 'Saving...' : 'Save'}
               </Button>
@@ -160,7 +160,7 @@ export const ProcedureDialogHeader: React.FC<ProcedureDialogHeaderProps> = ({
               size="sm"
               onClick={onEditStart}
             >
-              <Edit2 className="h-4 w-4 mr-1" />
+              <Edit2 className="h-4 w-4 mr-2" />
               Edit
             </Button>
           )}

@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { ProcedureDialogHeader } from './dialog/ProcedureDialogHeader';
 import { ProcedureDialogContent } from './dialog/ProcedureDialogContent';
 import { useProcedureDialogState } from './dialog/useProcedureDialogState';
@@ -54,23 +54,21 @@ export const ProcedureDetailDialog: React.FC<ProcedureDetailDialogProps> = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl h-[85vh] flex flex-col">
         <DialogHeader className="flex-shrink-0 pb-4">
-          <DialogTitle>
-            <ErrorBoundary fallback={<div>Error loading procedure header</div>}>
-              <ProcedureDialogHeader
-                procedure={displayData}
-                isEditing={isEditing}
-                isSaving={isSaving}
-                editData={editData}
-                onEditStart={handleEditStart}
-                onEditSave={handleEditSave}
-                onEditCancel={handleEditCancel}
-                onEditDataChange={handleEditDataChange}
-              />
-            </ErrorBoundary>
+          <DialogTitle className="sr-only">
+            Procedure Details
           </DialogTitle>
-          <DialogDescription>
-            {displayData.description || 'No description available'}
-          </DialogDescription>
+          <ErrorBoundary fallback={<div>Error loading procedure header</div>}>
+            <ProcedureDialogHeader
+              procedure={displayData}
+              isEditing={isEditing}
+              isSaving={isSaving}
+              editData={editData}
+              onEditStart={handleEditStart}
+              onEditSave={handleEditSave}
+              onEditCancel={handleEditCancel}
+              onEditDataChange={handleEditDataChange}
+            />
+          </ErrorBoundary>
         </DialogHeader>
 
         <ErrorBoundary fallback={<div className="flex-1 flex items-center justify-center text-red-600">Error loading procedure content</div>}>
