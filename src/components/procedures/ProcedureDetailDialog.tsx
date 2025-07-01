@@ -47,6 +47,9 @@ export const ProcedureDetailDialog: React.FC<ProcedureDetailDialogProps> = ({
 
   if (!procedure) return null;
 
+  // Use editData for display when editing, otherwise use the original procedure
+  const displayData = isEditing ? editData : procedure;
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl h-[85vh] flex flex-col">
@@ -54,7 +57,7 @@ export const ProcedureDetailDialog: React.FC<ProcedureDetailDialogProps> = ({
           <DialogTitle>
             <ErrorBoundary fallback={<div>Error loading procedure header</div>}>
               <ProcedureDialogHeader
-                procedure={procedure}
+                procedure={displayData}
                 isEditing={isEditing}
                 isSaving={isSaving}
                 editData={editData}
@@ -66,13 +69,13 @@ export const ProcedureDetailDialog: React.FC<ProcedureDetailDialogProps> = ({
             </ErrorBoundary>
           </DialogTitle>
           <DialogDescription>
-            {procedure.description || 'No description available'}
+            {displayData.description || 'No description available'}
           </DialogDescription>
         </DialogHeader>
 
         <ErrorBoundary fallback={<div className="flex-1 flex items-center justify-center text-red-600">Error loading procedure content</div>}>
           <ProcedureDialogContent
-            procedure={procedure}
+            procedure={displayData}
             isEditing={isEditing}
             editData={editData}
             formData={formData}

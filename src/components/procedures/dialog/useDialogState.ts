@@ -77,6 +77,13 @@ export const useDialogState = (procedure: any, open: boolean, onEdit: (procedure
         updates: updateData
       });
       
+      // Update the local edit data immediately with the saved data
+      const updatedEditData = {
+        ...updateData,
+        fields: editData.fields // Keep the current fields structure
+      };
+      setEditData(updatedEditData);
+      
       setIsEditing(false);
       toast.success('Procedure updated successfully');
       
