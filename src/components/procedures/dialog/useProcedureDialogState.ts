@@ -41,7 +41,13 @@ export const useProcedureDialogState = (procedure: any, open: boolean, onEdit: (
         category: editData.category,
         tags: editData.tags,
         is_global: editData.is_global,
-        fields: editData.fields // Include fields in the update
+        fields: editData.fields.map((field: ProcedureField) => ({
+          label: field.label,
+          field_type: field.field_type,
+          is_required: field.is_required,
+          order_index: field.order_index,
+          options: field.options || {}
+        }))
       };
       
       const updatedProcedure = await updateProcedure.mutateAsync({
@@ -56,7 +62,7 @@ export const useProcedureDialogState = (procedure: any, open: boolean, onEdit: (
       const fullUpdatedProcedure = {
         ...procedure,
         ...updateData,
-        fields: editData.fields // Ensure fields are included
+        fields: editData.fields
       };
       
       onEdit(fullUpdatedProcedure);

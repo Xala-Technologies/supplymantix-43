@@ -124,9 +124,9 @@ export const coreApi = {
       fields: (data.procedure_fields || []).map(field => ({
         ...field,
         procedure_id: data.id,
-        field_type: field.field_type as ProcedureFieldType // Cast to proper type
+        field_type: field.field_type as ProcedureFieldType
       })) as ProcedureField[],
-      executions_count: 0 // Add default executions_count
+      executions_count: 0
     };
   },
 
@@ -172,7 +172,6 @@ export const coreApi = {
 
       if (fieldsError) {
         console.error('Error creating procedure fields:', fieldsError);
-        // Don't throw here, procedure creation was successful
       }
     }
 
@@ -209,7 +208,8 @@ export const coreApi = {
     if (procedureError) throw procedureError;
 
     // Handle fields update if provided
-    if (fields) {
+    if (fields !== undefined) {
+      // Only delete and recreate if fields array is provided
       // Delete existing fields
       await supabase
         .from('procedure_fields')
@@ -219,7 +219,11 @@ export const coreApi = {
       // Insert new fields
       if (fields.length > 0) {
         const fieldsToInsert = fields.map(field => ({
-          ...field,
+          label: field.label,
+          field_type: field.field_type,
+          is_required: field.is_required,
+          order_index: field.order_index,
+          options: field.options || {},
           procedure_id: id,
           tenant_id: userRecord.tenant_id
         }));
@@ -270,12 +274,29 @@ export const coreApi = {
   duplicateProcedure: async (id: string, newTitle?: string) => {
     const original = await coreApi.getProcedure(id);
     
-    const duplicateData = {
-      ...original,
+    // Transform fields to the format expected by createProcedure
+    const transformedFields = original.fields?.map(field => ({
+      label: field.label,
+      field_type: field.field_type,
+      is_required: field.is_required,
+      order_index: field.order_index,
+      options: field.options || {}
+    })) || [];
+
+    const duplicateData: CreateProcedureData = {
       title: newTitle || `${original.title} (Copy)`,
-      created_at: undefined,
-      updated_at: undefined,
-      id: undefined
+      description: original.description,
+      asset_type: original.asset_type,
+      category: original.category,
+      tags: original.tags,
+      is_global: false,
+      template_data: original.template_data,
+      steps: original.steps,
+      estimated_duration: original.estimated_duration,
+      asset_ids: original.asset_ids,
+      location_ids: original.location_ids,
+      team_ids: original.team_ids,
+      fields: transformedFields
     };
 
     return coreApi.createProcedure(duplicateData);
