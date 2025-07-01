@@ -12,6 +12,7 @@ export const useFieldOperations = (
     
     const newField: ProcedureField = {
       id: crypto.randomUUID(),
+      procedure_id: procedureId,
       label: 'New Field',
       field_type: 'text',
       is_required: false,
@@ -26,7 +27,7 @@ export const useFieldOperations = (
       ...prev,
       fields: [...(prev.fields || []), newField]
     }));
-  }, [editData?.fields, setEditData]);
+  }, [editData?.fields, setEditData, procedureId]);
 
   const updateField = useCallback((index: number, updates: Partial<ProcedureField>) => {
     console.log('Updating field at index:', index, updates);
