@@ -57,7 +57,7 @@ export interface Procedure {
   location_ids: string[];
   team_ids: string[];
   fields?: ProcedureField[];
-  executions_count?: number;
+  executions_count?: number; // Add this missing property
 }
 
 // Add the missing ProcedureWithFields type that components are trying to import
@@ -94,6 +94,21 @@ export interface ProcedureUpdate {
   asset_ids?: string[];
   location_ids?: string[];
   team_ids?: string[];
+  fields?: ProcedureField[]; // Add fields to update interface
+}
+
+// Add the missing type exports
+export interface CreateProcedureData extends ProcedureInsert {}
+
+export interface UpdateProcedureData extends ProcedureUpdate {}
+
+export interface ProcedureFilters {
+  search?: string;
+  category?: string;
+  tags?: string[];
+  is_global?: boolean;
+  limit?: number;
+  offset?: number;
 }
 
 export interface ProcedureExecution {

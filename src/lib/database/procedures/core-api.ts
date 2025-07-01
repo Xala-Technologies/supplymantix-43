@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { CreateProcedureData, UpdateProcedureData, ProcedureFilters } from './types';
 
@@ -68,10 +67,14 @@ export const coreApi = {
       throw error;
     }
 
-    // Transform the data to match expected format
+    // Transform the data to match expected format and add missing properties
     const procedures = data?.map(procedure => ({
       ...procedure,
-      fields: procedure.procedure_fields || []
+      fields: (procedure.procedure_fields || []).map(field => ({
+        ...field,
+        procedure_id: procedure.id // Add the missing procedure_id
+      })),
+      executions_count: 0 // Add default executions_count
     })) || [];
 
     return {
@@ -116,7 +119,11 @@ export const coreApi = {
 
     return {
       ...data,
-      fields: data.procedure_fields || []
+      fields: (data.procedure_fields || []).map(field => ({
+        ...field,
+        procedure_id: data.id // Add the missing procedure_id
+      })),
+      executions_count: 0 // Add default executions_count
     };
   },
 
