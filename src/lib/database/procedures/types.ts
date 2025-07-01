@@ -8,15 +8,13 @@ export type ProcedureFieldType =
   | 'url'
   | 'phone'
   | 'select' 
-  | 'multi_select'
-  | 'multiselect' // Keep both for compatibility
+  | 'multiselect'
   | 'radio'
   | 'checkbox' 
   | 'date' 
   | 'time'
   | 'datetime'
-  | 'file_upload'
-  | 'file' // Keep both for compatibility
+  | 'file'
   | 'image'
   | 'signature'
   | 'rating'
