@@ -1,5 +1,4 @@
-
-import React from 'react';
+import React, { useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
@@ -32,6 +31,8 @@ export const FieldControls: React.FC<FieldControlsProps> = ({
   onSelect,
   onExpand
 }) => {
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   const handleLinkClick = () => {
     // Copy field link to clipboard or show field linking dialog
     navigator.clipboard.writeText(`Field: ${field.label} (ID: ${field.id})`);
@@ -40,10 +41,35 @@ export const FieldControls: React.FC<FieldControlsProps> = ({
 
   const handleAttachmentClick = () => {
     console.log('Attachment button clicked for field index:', index);
-    if (onAttachmentClick) {
-      onAttachmentClick(index);
-    } else {
-      console.warn('onAttachmentClick handler not provided');
+    // Trigger file input click
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
+    }
+  };
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file && onUpdate) {
+      console.log('File selected:', file.name);
+      
+      // Create file URL for preview
+      const fileUrl = URL.createObjectURL(file);
+      
+      // Update field with attachment
+      onUpdate(index, {
+        options: {
+          ...field.options,
+          attachedFile: {
+            name: file.name,
+            url: fileUrl,
+            type: file.type,
+            size: file.size
+          }
+        }
+      });
+      
+      // Clear the input
+      e.target.value = '';
     }
   };
 
@@ -94,11 +120,20 @@ export const FieldControls: React.FC<FieldControlsProps> = ({
 
   return (
     <div className="flex items-center gap-1">
+      {/* Hidden file input */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*,application/pdf,.doc,.docx,.txt"
+        onChange={handleFileUpload}
+        className="hidden"
+      />
+
       {/* Move Controls */}
       <Button
         variant="ghost"
         size="sm"
-        onClick={handleMoveUp}
+        onClick={() => onMove && onMove(index, 'up')}
         disabled={index === 0}
         className="h-8 w-8 p-0 text-gray-400 hover:text-gray-600"
         title="Move field up"
@@ -109,7 +144,7 @@ export const FieldControls: React.FC<FieldControlsProps> = ({
       <Button
         variant="ghost"
         size="sm"
-        onClick={handleMoveDown}
+        onClick={() => onMove && onMove(index, 'down')}
         disabled={index === fieldsLength - 1}
         className="h-8 w-8 p-0 text-gray-400 hover:text-gray-600"
         title="Move field down"
@@ -143,7 +178,7 @@ export const FieldControls: React.FC<FieldControlsProps> = ({
       <Button
         variant="ghost"
         size="sm"
-        onClick={handleDelete}
+        onClick={() => onDelete && onDelete(index)}
         className="h-8 w-8 p-0 text-gray-500 hover:text-red-600 hover:bg-red-50"
         title="Delete field"
       >
@@ -158,7 +193,7 @@ export const FieldControls: React.FC<FieldControlsProps> = ({
         <Switch
           id={`required-${field.id}`}
           checked={field.is_required}
-          onCheckedChange={handleRequiredToggle}
+          onCheckedChange={(checked) => onUpdate && onUpdate(index, { is_required: checked })}
         />
       </div>
 
@@ -182,13 +217,13 @@ export const FieldControls: React.FC<FieldControlsProps> = ({
           }}>
             Edit Field
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={handleDuplicate}>
+          <DropdownMenuItem onClick={() => onDuplicate && onDuplicate(index)}>
             <Copy className="h-4 w-4 mr-2" />
             Duplicate
           </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem 
-            onClick={handleDelete}
+            onClick={() => onDelete && onDelete(index)}
             className="text-red-600 focus:text-red-600"
           >
             <Trash2 className="h-4 w-4 mr-2" />
