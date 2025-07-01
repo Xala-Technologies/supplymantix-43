@@ -34,28 +34,32 @@ export const useProcedureDialogState = (procedure: any, open: boolean, onEdit: (
     try {
       console.log('Saving procedure changes:', editData);
       
+      // Prepare the update data with fields
+      const updateData = {
+        title: editData.title,
+        description: editData.description,
+        category: editData.category,
+        tags: editData.tags,
+        is_global: editData.is_global,
+        fields: editData.fields // Include fields in the update
+      };
+      
       const updatedProcedure = await updateProcedure.mutateAsync({
         id: procedure.id,
-        updates: {
-          title: editData.title,
-          description: editData.description,
-          category: editData.category,
-          tags: editData.tags,
-          is_global: editData.is_global
-        }
+        updates: updateData
       });
       
       setIsEditing(false);
       toast.success('Procedure updated successfully');
       
-      onEdit({
+      // Update the parent component with the complete updated data
+      const fullUpdatedProcedure = {
         ...procedure,
-        title: editData.title,
-        description: editData.description,
-        category: editData.category,
-        tags: editData.tags,
-        is_global: editData.is_global
-      });
+        ...updateData,
+        fields: editData.fields // Ensure fields are included
+      };
+      
+      onEdit(fullUpdatedProcedure);
     } catch (error) {
       console.error('Error saving procedure:', error);
       toast.error('Failed to save procedure changes');
@@ -125,7 +129,7 @@ export const useProcedureDialogState = (procedure: any, open: boolean, onEdit: (
     setEditData(prev => ({
       ...prev,
       fields: prev.fields.map((field: ProcedureField, i: number) => 
-        i === index ? { ...field, ...updates } : field
+        i === index ? { ...field, ...updates, updated_at: new Date().toISOString() } : field
       )
     }));
   };
@@ -144,8 +148,10 @@ export const useProcedureDialogState = (procedure: any, open: boolean, onEdit: (
     if (targetIndex >= 0 && targetIndex < fields.length) {
       [fields[index], fields[targetIndex]] = [fields[targetIndex], fields[index]];
       
+      // Update order_index for all fields
       fields.forEach((field, i) => {
         field.order_index = i;
+        field.updated_at = new Date().toISOString();
       });
       
       setEditData(prev => ({ ...prev, fields }));
