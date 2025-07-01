@@ -30,7 +30,7 @@ export interface ProcedureField {
   id: string;
   procedure_id: string;
   label: string;
-  field_type: ProcedureFieldType;
+  field_type: string; // Changed from ProcedureFieldType to string to match database
   is_required: boolean;
   order_index: number;
   options: Record<string, any>;

@@ -175,6 +175,7 @@ export const coreApi = {
       if (procedure.fields && procedure.fields.length > 0) {
         const fieldsToInsert = procedure.fields.map((field, index) => ({
           procedure_id: data.id,
+          tenant_id: userRecord.tenant_id, // Add missing tenant_id
           label: field.label || '',
           field_type: field.field_type || 'text',
           is_required: field.is_required || false,
@@ -246,8 +247,9 @@ export const coreApi = {
         if (updates.fields.length > 0) {
           const fieldsToInsert = updates.fields.map((field: any, index: number) => ({
             procedure_id: id,
+            tenant_id: userRecord.tenant_id, // Add missing tenant_id
             label: field.label || '',
-            field_type: field.field_type || 'text',
+            field_type: String(field.field_type || 'text'), // Ensure it's a string
             is_required: field.is_required || false,
             order_index: field.order_index !== undefined ? field.order_index : index,
             options: field.options || {}
