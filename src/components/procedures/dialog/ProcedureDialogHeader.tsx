@@ -1,26 +1,16 @@
 
 import React from 'react';
-import { DialogTitle } from '@/components/ui/dialog';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { PlayCircle, Globe, Edit, Save, X } from 'lucide-react';
-
-const CATEGORIES = [
-  'Inspection',
-  'Safety',
-  'Calibration', 
-  'Reactive Maintenance',
-  'Preventive Maintenance',
-  'Quality Control',
-  'Training',
-  'Other'
-];
+import { Badge } from '@/components/ui/badge';
+import { Edit2, Save, X, Loader2 } from 'lucide-react';
 
 interface ProcedureDialogHeaderProps {
   procedure: any;
   isEditing: boolean;
+  isSaving?: boolean;
   editData: any;
   onEditStart: () => void;
   onEditSave: () => void;
@@ -28,86 +18,154 @@ interface ProcedureDialogHeaderProps {
   onEditDataChange: (updates: any) => void;
 }
 
+const CATEGORIES = [
+  { value: 'Inspection', label: 'Inspection', color: 'bg-blue-500' },
+  { value: 'Safety', label: 'Safety', color: 'bg-red-500' },
+  { value: 'Calibration', label: 'Calibration', color: 'bg-purple-500' },
+  { value: 'Reactive Maintenance', label: 'Reactive Maintenance', color: 'bg-orange-500' },
+  { value: 'Preventive Maintenance', label: 'Preventive Maintenance', color: 'bg-green-500' },
+  { value: 'Quality Control', label: 'Quality Control', color: 'bg-indigo-500' },
+  { value: 'Training', label: 'Training', color: 'bg-yellow-500' },
+  { value: 'Other', label: 'Other', color: 'bg-gray-500' }
+];
+
 export const ProcedureDialogHeader: React.FC<ProcedureDialogHeaderProps> = ({
   procedure,
   isEditing,
+  isSaving = false,
   editData,
   onEditStart,
   onEditSave,
   onEditCancel,
   onEditDataChange
 }) => {
+  const getCategoryColor = (category: string) => {
+    const categoryData = CATEGORIES.find(cat => cat.value === category);
+    return categoryData?.color || 'bg-gray-500';
+  };
+
   return (
-    <>
-      <div className="flex items-center justify-between pr-8">
-        <div className="flex items-center gap-2">
-          <PlayCircle className="h-5 w-5 text-gray-600" />
-          {isEditing ? (
-            <Input
-              value={editData.title}
-              onChange={(e) => onEditDataChange({ title: e.target.value })}
-              className="text-lg font-semibold"
-              placeholder="Procedure title"
-            />
-          ) : (
-            <DialogTitle className="text-lg font-semibold">
-              {procedure.title}
-            </DialogTitle>
-          )}
-        </div>
-        <div className="flex gap-2">
+    <div className="space-y-4">
+      <div className="flex items-start justify-between">
+        <div className="flex-1 space-y-3">
           {isEditing ? (
             <>
-              <Button onClick={onEditSave} size="sm">
-                <Save className="h-4 w-4 mr-1" />
-                Save
-              </Button>
-              <Button onClick={onEditCancel} variant="outline" size="sm">
+              <Input
+                value={editData.title}
+                onChange={(e) => onEditDataChange({ title: e.target.value })}
+                placeholder="Procedure title"
+                className="text-xl font-semibold border-0 p-0 shadow-none focus-visible:ring-0"
+                disabled={isSaving}
+              />
+              <Textarea
+                value={editData.description}
+                onChange={(e) => onEditDataChange({ description: e.target.value })}
+                placeholder="Procedure description"
+                className="text-gray-600 border-0 p-0 shadow-none focus-visible:ring-0 resize-none"
+                rows={2}
+                disabled={isSaving}
+              />
+              <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-medium">Category:</span>
+                  <Select
+                    value={editData.category}
+                    onValueChange={(value) => onEditDataChange({ category: value })}
+                    disabled={isSaving}
+                  >
+                    <SelectTrigger className="w-48">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {CATEGORIES.map(category => (
+                        <SelectItem key={category.value} value={category.value}>
+                          <div className="flex items-center gap-2">
+                            <div className={`w-3 h-3 rounded-full ${category.color}`} />
+                            {category.label}
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </>
+          ) : (
+            <>
+              <h2 className="text-xl font-semibold text-gray-900">
+                {procedure.title}
+              </h2>
+              {procedure.description && (
+                <p className="text-gray-600">
+                  {procedure.description}
+                </p>
+              )}
+              <div className="flex items-center gap-4">
+                <Badge 
+                  variant="secondary" 
+                  className={`${getCategoryColor(procedure.category)} text-white`}
+                >
+                  {procedure.category}
+                </Badge>
+                {procedure.is_global && (
+                  <Badge variant="outline">Global</Badge>
+                )}
+                {procedure.tags && procedure.tags.length > 0 && (
+                  <div className="flex items-center gap-1">
+                    {procedure.tags.slice(0, 3).map((tag: string) => (
+                      <Badge key={tag} variant="outline" className="text-xs">
+                        {tag}
+                      </Badge>
+                    ))}
+                    {procedure.tags.length > 3 && (
+                      <Badge variant="outline" className="text-xs">
+                        +{procedure.tags.length - 3}
+                      </Badge>
+                    )}
+                  </div>
+                )}
+              </div>
+            </>
+          )}
+        </div>
+
+        <div className="flex items-center gap-2 ml-4">
+          {isEditing ? (
+            <>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={onEditCancel}
+                disabled={isSaving}
+              >
                 <X className="h-4 w-4 mr-1" />
                 Cancel
               </Button>
+              <Button
+                size="sm"
+                onClick={onEditSave}
+                disabled={isSaving || !editData.title?.trim()}
+              >
+                {isSaving ? (
+                  <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                ) : (
+                  <Save className="h-4 w-4 mr-1" />
+                )}
+                {isSaving ? 'Saving...' : 'Save'}
+              </Button>
             </>
           ) : (
-            <Button onClick={onEditStart} variant="outline" size="sm">
-              <Edit className="h-4 w-4 mr-1" />
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={onEditStart}
+            >
+              <Edit2 className="h-4 w-4 mr-1" />
               Edit
             </Button>
           )}
         </div>
       </div>
-      
-      <div className="flex items-center gap-2">
-        {isEditing ? (
-          <Select
-            value={editData.category}
-            onValueChange={(value) => onEditDataChange({ category: value })}
-          >
-            <SelectTrigger className="w-40">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {CATEGORIES.map(category => (
-                <SelectItem key={category} value={category}>
-                  {category}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        ) : (
-          <Badge variant="secondary">
-            {procedure.category || 'Other'}
-          </Badge>
-        )}
-        {(isEditing ? editData.is_global : procedure.is_global) && (
-          <Badge variant="outline" className="text-blue-600 border-blue-200">
-            <Globe className="h-3 w-3 mr-1" />
-            Global
-          </Badge>
-        )}
-        <span className="text-sm text-gray-500">
-          {(isEditing ? editData.fields : procedure.fields)?.length || 0} fields
-        </span>
-      </div>
-    </>
+    </div>
   );
 };

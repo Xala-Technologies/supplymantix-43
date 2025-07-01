@@ -29,6 +29,7 @@ export const ProcedureDetailDialog: React.FC<ProcedureDetailDialogProps> = ({
     editData,
     formData,
     newTag,
+    isSaving,
     setNewTag,
     handleEditStart,
     handleEditSave,
@@ -52,6 +53,7 @@ export const ProcedureDetailDialog: React.FC<ProcedureDetailDialogProps> = ({
           <ProcedureDialogHeader
             procedure={procedure}
             isEditing={isEditing}
+            isSaving={isSaving}
             editData={editData}
             onEditStart={handleEditStart}
             onEditSave={handleEditSave}
@@ -66,6 +68,7 @@ export const ProcedureDetailDialog: React.FC<ProcedureDetailDialogProps> = ({
           editData={editData}
           formData={formData}
           newTag={newTag}
+          disableAutoSave={true}
           onFieldChange={handleFieldChange}
           onEditDataChange={handleEditDataChange}
           onNewTagChange={setNewTag}

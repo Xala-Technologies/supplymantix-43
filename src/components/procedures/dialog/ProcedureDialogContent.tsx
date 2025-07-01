@@ -10,6 +10,7 @@ interface ProcedureDialogContentProps {
   editData: any;
   formData: Record<string, any>;
   newTag: string;
+  disableAutoSave?: boolean;
   onFieldChange: (fieldId: string, value: any) => void;
   onEditDataChange: (updates: any) => void;
   onNewTagChange: (value: string) => void;
@@ -27,6 +28,7 @@ export const ProcedureDialogContent: React.FC<ProcedureDialogContentProps> = ({
   editData,
   formData,
   newTag,
+  disableAutoSave = false,
   onFieldChange,
   onEditDataChange,
   onNewTagChange,
@@ -55,6 +57,7 @@ export const ProcedureDialogContent: React.FC<ProcedureDialogContentProps> = ({
             isEditing={isEditing}
             editData={editData}
             formData={formData}
+            disableAutoSave={disableAutoSave}
             onFieldChange={onFieldChange}
             onAddField={onAddField}
             onUpdateField={onUpdateField}

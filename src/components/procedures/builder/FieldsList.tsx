@@ -17,6 +17,7 @@ interface FieldsListProps {
   fieldValues?: Record<string, any>;
   onFieldValueChange?: (fieldId: string, value: any) => void;
   procedureId?: string;
+  disableAutoSave?: boolean; // Add flag to disable auto-save when in dialog mode
 }
 
 export const FieldsList: React.FC<FieldsListProps> = ({
@@ -31,7 +32,8 @@ export const FieldsList: React.FC<FieldsListProps> = ({
   isExecutionMode = false,
   fieldValues = {},
   onFieldValueChange,
-  procedureId
+  procedureId,
+  disableAutoSave = false
 }) => {
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
@@ -40,19 +42,30 @@ export const FieldsList: React.FC<FieldsListProps> = ({
   const [pendingUpdates, setPendingUpdates] = useState<Record<string, any>>({});
   const fileInputRefs = useRef<{ [key: number]: HTMLInputElement | null }>({});
   const previousFieldsLength = useRef(fields.length);
+  const saveTimeoutRef = useRef<NodeJS.Timeout>();
   
   const { mutate: updateProcedure } = useUpdateProcedure();
-  const debouncedUpdates = useDebounce(pendingUpdates, 500); // Reduced debounce time for faster saves
+  const debouncedUpdates = useDebounce(pendingUpdates, 1000);
 
-  // Auto-save when fields are added or when debounced updates occur
+  // Only auto-save if not disabled and not in execution mode
   useEffect(() => {
-    if (procedureId && !isExecutionMode) {
-      // Check if a new field was added
-      const fieldsAdded = fields.length > previousFieldsLength.current;
+    if (disableAutoSave || isExecutionMode || !procedureId) {
+      return;
+    }
+
+    // Clear any existing timeout
+    if (saveTimeoutRef.current) {
+      clearTimeout(saveTimeoutRef.current);
+    }
+
+    // Check if a new field was added
+    const fieldsAdded = fields.length > previousFieldsLength.current;
+    
+    if (fieldsAdded || Object.keys(debouncedUpdates).length > 0) {
+      console.log('Auto-saving procedure fields:', { fieldsAdded, debouncedUpdates });
       
-      if (fieldsAdded || Object.keys(debouncedUpdates).length > 0) {
-        console.log('Auto-saving procedure fields:', { fieldsAdded, debouncedUpdates });
-        
+      // Add a small delay to batch updates
+      saveTimeoutRef.current = setTimeout(() => {
         updateProcedure({
           id: procedureId,
           updates: { fields: fields }
@@ -60,44 +73,52 @@ export const FieldsList: React.FC<FieldsListProps> = ({
         
         // Clear pending updates after save
         setPendingUpdates({});
-      }
-      
-      // Update the previous length reference
-      previousFieldsLength.current = fields.length;
+      }, 300);
     }
-  }, [fields, debouncedUpdates, procedureId, isExecutionMode, updateProcedure]);
+    
+    // Update the previous length reference
+    previousFieldsLength.current = fields.length;
 
-  // Auto-save field values when they change (for execution mode)
-  useEffect(() => {
-    if (isExecutionMode && procedureId && Object.keys(debouncedUpdates).length > 0) {
-      console.log('Auto-saving execution values:', debouncedUpdates);
-      setPendingUpdates({});
-    }
-  }, [debouncedUpdates, isExecutionMode, procedureId]);
+    return () => {
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current);
+      }
+    };
+  }, [fields, debouncedUpdates, procedureId, isExecutionMode, updateProcedure, disableAutoSave]);
 
   const handleFieldValueChange = (fieldId: string, value: any) => {
     if (onFieldValueChange) {
       onFieldValueChange(fieldId, value);
     }
     
-    // Store pending update for auto-save
-    setPendingUpdates(prev => ({
-      ...prev,
-      [fieldId]: value
-    }));
+    // Store pending update for auto-save only if not disabled
+    if (!disableAutoSave) {
+      setPendingUpdates(prev => ({
+        ...prev,
+        [fieldId]: value
+      }));
+    }
   };
 
   const handleFieldUpdate = (index: number, updates: Partial<ProcedureField>) => {
+    console.log('Field update requested:', index, updates);
+    
     if (onFieldUpdate) {
       onFieldUpdate(index, updates);
     }
 
-    // Trigger immediate auto-save for field configuration changes
-    if (procedureId && !isExecutionMode) {
+    // Only trigger immediate auto-save for field configuration changes if not disabled
+    if (!disableAutoSave && procedureId && !isExecutionMode) {
       const updatedFields = [...fields];
       updatedFields[index] = { ...updatedFields[index], ...updates };
       
       console.log('Auto-saving field update:', updates);
+      
+      // Clear any existing timeout and save immediately for configuration changes
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current);
+      }
+      
       updateProcedure({
         id: procedureId,
         updates: { fields: updatedFields }
@@ -128,8 +149,8 @@ export const FieldsList: React.FC<FieldsListProps> = ({
     if (dragIndex !== dropIndex && onFieldReorder) {
       onFieldReorder(dragIndex, dropIndex);
       
-      // Auto-save reordered fields immediately
-      if (procedureId && !isExecutionMode) {
+      // Auto-save reordered fields immediately if not disabled
+      if (!disableAutoSave && procedureId && !isExecutionMode) {
         const reorderedFields = [...fields];
         const [movedField] = reorderedFields.splice(dragIndex, 1);
         reorderedFields.splice(dropIndex, 0, movedField);
