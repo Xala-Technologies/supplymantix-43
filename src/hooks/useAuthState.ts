@@ -12,12 +12,22 @@ export const useAuthState = () => {
   // Ref to track the current user ID to prevent unwanted switches
   const currentUserIdRef = useRef<string | null>(null);
   const isUnmountedRef = useRef(false);
+  const initializationTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     let mounted = true;
     isUnmountedRef.current = false;
     
     console.log('Setting up auth state listener...');
+    
+    // Set initialization timeout as fallback
+    initializationTimeoutRef.current = setTimeout(() => {
+      if (mounted && !isUnmountedRef.current && !initialized) {
+        console.log('Auth initialization timeout - forcing completion');
+        setLoading(false);
+        setInitialized(true);
+      }
+    }, 3000);
     
     // Get initial session first
     const getInitialSession = async () => {
@@ -28,16 +38,19 @@ export const useAuthState = () => {
         } else {
           console.log('Initial session:', session?.user?.email || 'No session');
           if (mounted && !isUnmountedRef.current) {
-            // Only update if this is a legitimate session change
             const newUserId = session?.user?.id || null;
-            if (newUserId !== currentUserIdRef.current) {
-              currentUserIdRef.current = newUserId;
-              setSession(session);
-              setUser(session?.user ?? null);
-              console.log('User set to:', session?.user?.email);
-            }
+            currentUserIdRef.current = newUserId;
+            setSession(session);
+            setUser(session?.user ?? null);
+            console.log('User set to:', session?.user?.email);
             setLoading(false);
             setInitialized(true);
+            
+            // Clear timeout since we completed successfully
+            if (initializationTimeoutRef.current) {
+              clearTimeout(initializationTimeoutRef.current);
+              initializationTimeoutRef.current = null;
+            }
           }
         }
       } catch (error) {
@@ -45,11 +58,17 @@ export const useAuthState = () => {
         if (mounted && !isUnmountedRef.current) {
           setLoading(false);
           setInitialized(true);
+          
+          // Clear timeout
+          if (initializationTimeoutRef.current) {
+            clearTimeout(initializationTimeoutRef.current);
+            initializationTimeoutRef.current = null;
+          }
         }
       }
     };
 
-    // Set up auth state listener with better session validation
+    // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         console.log('Auth state changed:', event, session?.user?.email || 'No session');
@@ -58,31 +77,6 @@ export const useAuthState = () => {
         if (!mounted || isUnmountedRef.current) {
           console.log('Ignoring auth change - component unmounted');
           return;
-        }
-
-        // Validate session integrity
-        if (session && session.user) {
-          try {
-            // Verify the session is still valid
-            const { data: { user: currentUser }, error } = await supabase.auth.getUser();
-            if (error || !currentUser || currentUser.id !== session.user.id) {
-              console.warn('Session validation failed, clearing auth state');
-              setSession(null);
-              setUser(null);
-              currentUserIdRef.current = null;
-              setLoading(false);
-              setInitialized(true);
-              return;
-            }
-          } catch (validationError) {
-            console.error('Session validation error:', validationError);
-            setSession(null);
-            setUser(null);
-            currentUserIdRef.current = null;
-            setLoading(false);
-            setInitialized(true);
-            return;
-          }
         }
 
         const newUserId = session?.user?.id || null;
@@ -108,6 +102,12 @@ export const useAuthState = () => {
         
         setLoading(false);
         setInitialized(true);
+        
+        // Clear timeout since auth state change completed
+        if (initializationTimeoutRef.current) {
+          clearTimeout(initializationTimeoutRef.current);
+          initializationTimeoutRef.current = null;
+        }
       }
     );
 
@@ -118,6 +118,12 @@ export const useAuthState = () => {
       isUnmountedRef.current = true;
       console.log('Cleaning up auth subscription');
       subscription.unsubscribe();
+      
+      // Clear timeout on cleanup
+      if (initializationTimeoutRef.current) {
+        clearTimeout(initializationTimeoutRef.current);
+        initializationTimeoutRef.current = null;
+      }
     };
   }, []);
 

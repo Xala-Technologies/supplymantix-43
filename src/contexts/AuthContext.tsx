@@ -63,13 +63,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const value: AuthContextType = useMemo(() => ({
     user,
     session,
-    loading: loading || !initialized,
+    loading: loading && !initialized, // Only show loading if not initialized
     signIn,
     signUp,
     signOut,
   }), [user, session, loading, initialized, signIn, signUp, signOut]);
 
-  console.log('AuthProvider - User:', user?.email, 'Loading:', loading, 'Initialized:', initialized, 'Session exists:', !!session);
+  console.log('AuthProvider - User:', user?.email || 'undefined', 'Loading:', loading && !initialized, 'Initialized:', initialized, 'Session exists:', !!session);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
