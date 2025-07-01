@@ -38,11 +38,14 @@ export const ProcedureCardView: React.FC<ProcedureCardViewProps> = ({
   getCategoryColor
 }) => {
   const getFieldsCount = (procedure: any) => {
-    // Handle both old and new procedure structures
-    if (procedure.fields && Array.isArray(procedure.fields)) {
+    // Handle both old and new procedure structures safely
+    if (Array.isArray(procedure.fields)) {
       return procedure.fields.length;
     }
-    if (procedure.steps && Array.isArray(procedure.steps)) {
+    if (Array.isArray(procedure.procedure_fields)) {
+      return procedure.procedure_fields.length;
+    }
+    if (Array.isArray(procedure.steps)) {
       return procedure.steps.length;
     }
     return 0;
@@ -51,6 +54,14 @@ export const ProcedureCardView: React.FC<ProcedureCardViewProps> = ({
   const getExecutionsCount = (procedure: any) => {
     return procedure.executions_count || procedure.execution_count || 0;
   };
+
+  if (!Array.isArray(procedures)) {
+    return (
+      <div className="text-center py-8">
+        <p className="text-gray-500">No procedures available</p>
+      </div>
+    );
+  }
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 p-6">
@@ -77,7 +88,7 @@ export const ProcedureCardView: React.FC<ProcedureCardViewProps> = ({
                     className="text-left w-full focus:outline-none"
                   >
                     <h3 className="font-semibold text-gray-900 text-sm leading-tight line-clamp-2 hover:text-blue-700 transition-colors">
-                      {procedure.title}
+                      {procedure.title || 'Untitled Procedure'}
                     </h3>
                   </button>
                 </div>
@@ -132,7 +143,7 @@ export const ProcedureCardView: React.FC<ProcedureCardViewProps> = ({
                 "text-xs font-medium border-0 px-2 py-0.5 rounded-md",
                 getCategoryColor(procedure.category || 'Other')
               )}>
-                {procedure.category}
+                {procedure.category || 'Other'}
               </Badge>
               {procedure.is_global && (
                 <Badge className="text-blue-700 bg-blue-50 border border-blue-200/50 text-xs font-medium px-2 py-0.5 rounded-md">
