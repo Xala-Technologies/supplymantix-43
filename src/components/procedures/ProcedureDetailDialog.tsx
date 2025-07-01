@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -14,12 +13,10 @@ import { Label } from '@/components/ui/label';
 import { 
   Globe, 
   CheckCircle, 
-  Activity, 
   Calendar,
   User,
   Tag,
   FileText,
-  Clock,
   PlayCircle,
   Edit,
   Save,
@@ -28,7 +25,6 @@ import {
   Trash2,
   GripVertical
 } from 'lucide-react';
-import { FieldTypeSelector } from './FieldTypeSelector';
 import { ProcedureField } from '@/lib/database/procedures/types';
 
 interface ProcedureDetailDialogProps {
@@ -511,125 +507,98 @@ export const ProcedureDetailDialog: React.FC<ProcedureDetailDialogProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-6xl max-h-[90vh] overflow-hidden flex flex-col bg-white">
-        <DialogHeader className="flex-shrink-0 bg-white border-b border-gray-100 p-4 -m-6 mb-0">
-          <div className="flex items-start justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gray-50 rounded-lg shadow-sm border border-gray-200 flex items-center justify-center">
-                <PlayCircle className="h-5 w-5 text-gray-600" />
-              </div>
-              <div className="flex-1">
-                {isEditing ? (
-                  <Input
-                    value={editData.title}
-                    onChange={(e) => setEditData(prev => ({ ...prev, title: e.target.value }))}
-                    className="text-lg font-bold mb-2 border-gray-200 focus:border-gray-400"
-                    placeholder="Procedure title"
-                  />
-                ) : (
-                  <DialogTitle className="text-lg font-bold text-gray-900 mb-1">
-                    {procedure.title}
-                  </DialogTitle>
-                )}
-                <div className="flex items-center gap-2 flex-wrap">
-                  {isEditing ? (
-                    <Select
-                      value={editData.category}
-                      onValueChange={(value) => setEditData(prev => ({ ...prev, category: value }))}
-                    >
-                      <SelectTrigger className="w-36 bg-white border-gray-200">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {CATEGORIES.map(category => (
-                          <SelectItem key={category} value={category}>
-                            {category}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  ) : (
-                    <Badge variant="secondary" className="bg-gray-100 text-gray-700">
-                      {procedure.category || 'Other'}
-                    </Badge>
-                  )}
-                  {(isEditing ? editData.is_global : procedure.is_global) && (
-                    <Badge variant="outline" className="text-blue-600 border-blue-200">
-                      <Globe className="h-3 w-3 mr-1" />
-                      Global
-                    </Badge>
-                  )}
-                  <div className="text-sm text-gray-500 bg-gray-50 px-2 py-0.5 rounded">
-                    {(isEditing ? editData.fields : procedure.fields)?.length || 0} fields
-                  </div>
-                </div>
-              </div>
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
+        <DialogHeader className="pb-2">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <PlayCircle className="h-5 w-5 text-gray-600" />
+              {isEditing ? (
+                <Input
+                  value={editData.title}
+                  onChange={(e) => setEditData(prev => ({ ...prev, title: e.target.value }))}
+                  className="text-lg font-semibold"
+                  placeholder="Procedure title"
+                />
+              ) : (
+                <DialogTitle className="text-lg font-semibold">
+                  {procedure.title}
+                </DialogTitle>
+              )}
             </div>
             <div className="flex gap-2">
               {isEditing ? (
                 <>
-                  <Button 
-                    onClick={handleEditSave} 
-                    size="sm" 
-                    className="bg-gray-900 hover:bg-gray-800 text-white"
-                  >
-                    <Save className="h-4 w-4 mr-2" />
-                    Save Changes
+                  <Button onClick={handleEditSave} size="sm">
+                    <Save className="h-4 w-4 mr-1" />
+                    Save
                   </Button>
-                  <Button 
-                    onClick={handleEditCancel} 
-                    variant="outline" 
-                    size="sm"
-                  >
-                    <X className="h-4 w-4 mr-2" />
+                  <Button onClick={handleEditCancel} variant="outline" size="sm">
+                    <X className="h-4 w-4 mr-1" />
                     Cancel
                   </Button>
                 </>
               ) : (
-                <Button 
-                  onClick={handleEditStart} 
-                  variant="outline" 
-                  size="sm"
-                >
-                  <Edit className="h-4 w-4 mr-2" />
-                  Edit Procedure
+                <Button onClick={handleEditStart} variant="outline" size="sm">
+                  <Edit className="h-4 w-4 mr-1" />
+                  Edit
                 </Button>
               )}
             </div>
+          </div>
+          
+          <div className="flex items-center gap-2">
+            {isEditing ? (
+              <Select
+                value={editData.category}
+                onValueChange={(value) => setEditData(prev => ({ ...prev, category: value }))}
+              >
+                <SelectTrigger className="w-40">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {CATEGORIES.map(category => (
+                    <SelectItem key={category} value={category}>
+                      {category}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            ) : (
+              <Badge variant="secondary">
+                {procedure.category || 'Other'}
+              </Badge>
+            )}
+            {(isEditing ? editData.is_global : procedure.is_global) && (
+              <Badge variant="outline" className="text-blue-600 border-blue-200">
+                <Globe className="h-3 w-3 mr-1" />
+                Global
+              </Badge>
+            )}
+            <span className="text-sm text-gray-500">
+              {(isEditing ? editData.fields : procedure.fields)?.length || 0} fields
+            </span>
           </div>
         </DialogHeader>
 
         <div className="flex-1 overflow-hidden">
           <Tabs defaultValue={isEditing ? "settings" : "fields"} className="h-full flex flex-col">
-            <TabsList className="grid w-full grid-cols-3 bg-gray-50 p-1 m-4 mb-0 rounded-lg">
-              <TabsTrigger 
-                value="fields" 
-                className="data-[state=active]:bg-white data-[state=active]:shadow-sm rounded-md"
-              >
-                {isEditing ? 'Edit Fields' : 'Fields & Content'}
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="fields">
+                {isEditing ? 'Edit Fields' : 'Fields'}
               </TabsTrigger>
-              <TabsTrigger 
-                value="settings" 
-                className="data-[state=active]:bg-white data-[state=active]:shadow-sm rounded-md"
-              >
-                {isEditing ? 'Edit Settings' : 'Details & Settings'}
-              </TabsTrigger>
-              <TabsTrigger 
-                value="history" 
-                className="data-[state=active]:bg-white data-[state=active]:shadow-sm rounded-md"
-              >
-                History & Analytics
+              <TabsTrigger value="settings">
+                Settings
               </TabsTrigger>
             </TabsList>
 
-            <div className="flex-1 overflow-y-auto px-4 pb-4">
-              <TabsContent value="fields" className="mt-4 space-y-3">
+            <div className="flex-1 overflow-y-auto p-4">
+              <TabsContent value="fields" className="space-y-3">
                 {isEditing ? (
                   <div className="space-y-3">
                     <div className="flex items-center justify-between">
-                      <h3 className="text-lg font-semibold text-gray-900">Procedure Fields</h3>
+                      <h3 className="font-semibold">Procedure Fields</h3>
                       <Button onClick={addField} size="sm">
-                        <Plus className="h-4 w-4 mr-2" />
+                        <Plus className="h-4 w-4 mr-1" />
                         Add Field
                       </Button>
                     </div>
@@ -643,11 +612,11 @@ export const ProcedureDetailDialog: React.FC<ProcedureDetailDialogProps> = ({
                     ) : (
                       <div className="text-center py-8">
                         <FileText className="h-10 w-10 text-gray-300 mx-auto mb-3" />
-                        <h3 className="text-lg font-medium text-gray-900 mb-2">No Fields Yet</h3>
+                        <h3 className="font-medium text-gray-900 mb-2">No Fields Yet</h3>
                         <p className="text-gray-500 mb-3">Add fields to build your procedure form.</p>
                         <Button onClick={addField} size="sm">
-                          <Plus className="h-4 w-4 mr-2" />
-                          Add Your First Field
+                          <Plus className="h-4 w-4 mr-1" />
+                          Add First Field
                         </Button>
                       </div>
                     )}
@@ -657,7 +626,7 @@ export const ProcedureDetailDialog: React.FC<ProcedureDetailDialogProps> = ({
                   procedure.fields && procedure.fields.length > 0 ? (
                     <div className="space-y-3">
                       {procedure.fields.map((field: any, index: number) => (
-                        <Card key={field.id || index} className="border border-gray-100 shadow-sm">
+                        <Card key={field.id || index}>
                           <CardContent className="p-3">
                             {renderField(field, index)}
                           </CardContent>
@@ -667,52 +636,47 @@ export const ProcedureDetailDialog: React.FC<ProcedureDetailDialogProps> = ({
                   ) : (
                     <div className="text-center py-8">
                       <FileText className="h-10 w-10 text-gray-300 mx-auto mb-3" />
-                      <h3 className="text-lg font-medium text-gray-900 mb-2">No Fields Configured</h3>
-                      <p className="text-gray-500">This procedure doesn't have any fields set up yet.</p>
+                      <h3 className="font-medium text-gray-900 mb-2">No Fields</h3>
+                      <p className="text-gray-500">This procedure doesn't have any fields yet.</p>
                     </div>
                   )
                 )}
               </TabsContent>
 
-              <TabsContent value="settings" className="mt-4 space-y-4">
+              <TabsContent value="settings" className="space-y-4">
                 {isEditing ? (
                   <div className="space-y-4">
-                    {/* Basic Information */}
                     <Card>
-                      <CardHeader className="pb-3">
-                        <CardTitle className="flex items-center gap-2 text-base">
-                          <FileText className="h-4 w-4" />
-                          Basic Information
-                        </CardTitle>
+                      <CardHeader>
+                        <CardTitle className="text-base">Basic Information</CardTitle>
                       </CardHeader>
                       <CardContent className="space-y-3">
                         <div>
-                          <Label className="text-sm font-medium">Title *</Label>
+                          <Label>Title *</Label>
                           <Input
                             value={editData.title}
                             onChange={(e) => setEditData(prev => ({ ...prev, title: e.target.value }))}
-                            placeholder="Enter procedure title"
-                            className="mt-1"
+                            placeholder="Procedure title"
                           />
                         </div>
                         
                         <div>
-                          <Label className="text-sm font-medium">Description</Label>
+                          <Label>Description</Label>
                           <Textarea
                             value={editData.description}
                             onChange={(e) => setEditData(prev => ({ ...prev, description: e.target.value }))}
-                            placeholder="Enter procedure description"
-                            className="mt-1 min-h-[80px]"
+                            placeholder="Procedure description"
+                            rows={3}
                           />
                         </div>
 
                         <div>
-                          <Label className="text-sm font-medium">Category</Label>
+                          <Label>Category</Label>
                           <Select
                             value={editData.category}
                             onValueChange={(value) => setEditData(prev => ({ ...prev, category: value }))}
                           >
-                            <SelectTrigger className="mt-1">
+                            <SelectTrigger>
                               <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
@@ -727,13 +691,9 @@ export const ProcedureDetailDialog: React.FC<ProcedureDetailDialogProps> = ({
                       </CardContent>
                     </Card>
 
-                    {/* Tags */}
                     <Card>
-                      <CardHeader className="pb-3">
-                        <CardTitle className="flex items-center gap-2 text-base">
-                          <Tag className="h-4 w-4" />
-                          Tags
-                        </CardTitle>
+                      <CardHeader>
+                        <CardTitle className="text-base">Tags</CardTitle>
                       </CardHeader>
                       <CardContent className="space-y-3">
                         <div className="flex flex-wrap gap-2">
@@ -764,19 +724,15 @@ export const ProcedureDetailDialog: React.FC<ProcedureDetailDialogProps> = ({
                       </CardContent>
                     </Card>
 
-                    {/* Global Setting */}
                     <Card>
-                      <CardHeader className="pb-3">
-                        <CardTitle className="flex items-center gap-2 text-base">
-                          <Globe className="h-4 w-4" />
-                          Visibility Settings
-                        </CardTitle>
+                      <CardHeader>
+                        <CardTitle className="text-base">Visibility</CardTitle>
                       </CardHeader>
                       <CardContent>
                         <div className="flex items-center justify-between">
                           <div>
-                            <Label className="font-medium">Global Procedure</Label>
-                            <p className="text-sm text-gray-600">Make this procedure available to all users across organizations</p>
+                            <Label>Global Procedure</Label>
+                            <p className="text-sm text-gray-600">Available to all users</p>
                           </div>
                           <Switch
                             checked={Boolean(editData.is_global)}
@@ -787,62 +743,30 @@ export const ProcedureDetailDialog: React.FC<ProcedureDetailDialogProps> = ({
                     </Card>
                   </div>
                 ) : (
-                  // View mode for settings
                   <div className="space-y-4">
-                    {/* Description */}
                     <Card>
                       <CardContent className="p-4">
-                        <h3 className="text-base font-semibold flex items-center gap-2 mb-3 text-gray-900">
-                          <FileText className="h-4 w-4" />
-                          Description
-                        </h3>
-                        <p className="text-gray-700 leading-relaxed bg-gray-50 p-3 rounded-lg">
+                        <h3 className="font-semibold mb-2">Description</h3>
+                        <p className="text-gray-700">
                           {procedure.description || 'No description provided'}
                         </p>
                       </CardContent>
                     </Card>
 
-                    <div className="grid grid-cols-1 gap-4">
-                      <Card>
-                        <CardContent className="p-4 text-center">
-                          <CheckCircle className="h-6 w-6 text-gray-400 mx-auto mb-2" />
-                          <div className="text-xl font-bold text-gray-900 mb-1">
-                            {procedure.fields?.length || 0}
-                          </div>
-                          <div className="text-sm text-gray-600">Fields</div>
-                        </CardContent>
-                      </Card>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-2 gap-4">
                       <Card>
                         <CardContent className="p-4">
-                          <h3 className="text-base font-semibold mb-3 text-gray-900">Procedure Information</h3>
-                          <div className="space-y-3">
+                          <h3 className="font-semibold mb-2">Information</h3>
+                          <div className="space-y-2 text-sm">
                             <div className="flex items-center gap-2">
                               <User className="h-4 w-4 text-gray-400" />
-                              <div>
-                                <span className="text-sm text-gray-500">Created by</span>
-                                <p className="text-sm font-medium text-gray-900">{procedure.created_by || 'Unknown'}</p>
-                              </div>
+                              <span>Created by {procedure.created_by || 'Unknown'}</span>
                             </div>
                             <div className="flex items-center gap-2">
                               <Calendar className="h-4 w-4 text-gray-400" />
-                              <div>
-                                <span className="text-sm text-gray-500">Created</span>
-                                <p className="text-sm font-medium text-gray-900">
-                                  {procedure.created_at ? formatDate(procedure.created_at) : 'Unknown'}
-                                </p>
-                              </div>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <Calendar className="h-4 w-4 text-gray-400" />
-                              <div>
-                                <span className="text-sm text-gray-500">Last updated</span>
-                                <p className="text-sm font-medium text-gray-900">
-                                  {procedure.updated_at ? formatDate(procedure.updated_at) : 'Unknown'}
-                                </p>
-                              </div>
+                              <span>
+                                {procedure.created_at ? formatDate(procedure.created_at) : 'Unknown'}
+                              </span>
                             </div>
                           </div>
                         </CardContent>
@@ -850,27 +774,17 @@ export const ProcedureDetailDialog: React.FC<ProcedureDetailDialogProps> = ({
 
                       <Card>
                         <CardContent className="p-4">
-                          <h3 className="text-base font-semibold mb-3 text-gray-900">Configuration</h3>
-                          <div className="space-y-3">
+                          <h3 className="font-semibold mb-2">Details</h3>
+                          <div className="space-y-2 text-sm">
                             <div className="flex items-center gap-2">
                               <Tag className="h-4 w-4 text-gray-400" />
-                              <div>
-                                <span className="text-sm text-gray-500">Category</span>
-                                <div className="mt-1">
-                                  <Badge variant="secondary">
-                                    {procedure.category || 'Other'}
-                                  </Badge>
-                                </div>
-                              </div>
+                              <Badge variant="secondary">
+                                {procedure.category || 'Other'}
+                              </Badge>
                             </div>
                             <div className="flex items-center gap-2">
-                              <Globe className="h-4 w-4 text-gray-400" />
-                              <div>
-                                <span className="text-sm text-gray-500">Scope</span>
-                                <p className="text-sm font-medium text-gray-900">
-                                  {procedure.is_global ? 'Global' : 'Local'}
-                                </p>
-                              </div>
+                              <CheckCircle className="h-4 w-4 text-gray-400" />
+                              <span>{procedure.fields?.length || 0} fields</span>
                             </div>
                           </div>
                         </CardContent>
@@ -878,18 +792,6 @@ export const ProcedureDetailDialog: React.FC<ProcedureDetailDialogProps> = ({
                     </div>
                   </div>
                 )}
-              </TabsContent>
-
-              <TabsContent value="history" className="mt-4">
-                <Card>
-                  <CardContent className="p-4">
-                    <div className="text-center py-8">
-                      <Activity className="h-10 w-10 text-gray-300 mx-auto mb-3" />
-                      <h3 className="text-lg font-medium text-gray-900 mb-2">No Execution History</h3>
-                      <p className="text-gray-500">This procedure hasn't been executed yet. History will appear here once it's used.</p>
-                    </div>
-                  </CardContent>
-                </Card>
               </TabsContent>
             </div>
           </Tabs>
