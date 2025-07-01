@@ -20,33 +20,45 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const { signIn, signUp, signOut } = useAuthActions();
   const queryClient = useQueryClient();
   const previousUserIdRef = useRef<string | null>(null);
+  const isProcessingUserChangeRef = useRef(false);
 
-  // Clear cache when user changes (including login/logout)
+  // Enhanced cache clearing when user changes with duplicate prevention
   useEffect(() => {
-    if (initialized) {
+    if (initialized && !isProcessingUserChangeRef.current) {
       const currentUserId = user?.id || null;
       const previousUserId = previousUserIdRef.current;
       
-      // If user has changed (login, logout, or user switch)
+      // Check if this is a legitimate user change
       if (currentUserId !== previousUserId) {
-        console.log('User changed from', previousUserId, 'to', currentUserId, '- clearing cache');
+        isProcessingUserChangeRef.current = true;
+        
+        console.log('User change detected:', {
+          from: previousUserId,
+          to: currentUserId,
+          userEmail: user?.email
+        });
         
         // Clear all queries to prevent data bleeding between users
         queryClient.clear();
+        queryClient.resetQueries();
         
         // Update the ref with the new user ID
         previousUserIdRef.current = currentUserId;
         
         // If we have a new user, invalidate all queries to force fresh data
         if (currentUserId) {
-          console.log('New user logged in, invalidating all queries');
+          console.log('New user session established, invalidating queries for:', user?.email);
           setTimeout(() => {
             queryClient.invalidateQueries();
-          }, 100);
+            isProcessingUserChangeRef.current = false;
+          }, 200);
+        } else {
+          console.log('User signed out, queries cleared');
+          isProcessingUserChangeRef.current = false;
         }
       }
     }
-  }, [user?.id, initialized, queryClient]);
+  }, [user?.id, initialized, queryClient, user?.email]);
 
   const value: AuthContextType = useMemo(() => ({
     user,
@@ -57,7 +69,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     signOut,
   }), [user, session, loading, initialized, signIn, signUp, signOut]);
 
-  console.log('AuthProvider - User:', user?.email, 'Loading:', loading, 'Initialized:', initialized, 'Session:', !!session);
+  console.log('AuthProvider - User:', user?.email, 'Loading:', loading, 'Initialized:', initialized, 'Session exists:', !!session);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

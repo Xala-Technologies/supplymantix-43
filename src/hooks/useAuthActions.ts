@@ -10,10 +10,16 @@ export const useAuthActions = () => {
   const signIn = async (email: string, password: string) => {
     setLoading(true);
     try {
-      console.log('Starting sign in process...');
+      console.log('Starting sign in process for:', email);
       
-      // Clear all cached data before signing in
-      await queryClient.clear();
+      // Clear all cached data before signing in to prevent data bleeding
+      queryClient.clear();
+      
+      // Sign out any existing session first to prevent session conflicts
+      await supabase.auth.signOut();
+      
+      // Small delay to ensure cleanup is complete
+      await new Promise(resolve => setTimeout(resolve, 100));
       
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
@@ -27,13 +33,20 @@ export const useAuthActions = () => {
       
       console.log('Sign in successful for user:', data.user?.email);
       
-      // Clear cache again and invalidate to ensure fresh data for the new user
-      await queryClient.clear();
+      // Verify the session is properly established
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      if (sessionError || !session) {
+        console.error('Session verification failed:', sessionError);
+        return { error: sessionError || new Error('Session not established') };
+      }
       
-      // Force a small delay to ensure auth state is updated before queries run
+      // Clear cache again and invalidate to ensure fresh data for the new user
+      queryClient.clear();
+      
+      // Force a delay to ensure auth state is fully updated
       setTimeout(() => {
         queryClient.invalidateQueries();
-      }, 200);
+      }, 300);
       
       return { data, error: null };
     } catch (error) {
@@ -47,6 +60,12 @@ export const useAuthActions = () => {
   const signUp = async (email: string, password: string, firstName?: string, lastName?: string, company?: string) => {
     setLoading(true);
     try {
+      console.log('Starting sign up process for:', email);
+      
+      // Clear any existing session to prevent conflicts
+      await supabase.auth.signOut();
+      queryClient.clear();
+      
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -80,9 +99,14 @@ export const useAuthActions = () => {
     try {
       console.log('Starting sign out process...');
       
-      // Clear all cached data before signing out
-      await queryClient.clear();
+      // Get current session info for logging
+      const { data: { session } } = await supabase.auth.getSession();
+      const currentUserEmail = session?.user?.email;
       
+      // Clear all cached data before signing out
+      queryClient.clear();
+      
+      // Sign out from Supabase
       const { error } = await supabase.auth.signOut();
       
       if (error) {
@@ -90,10 +114,14 @@ export const useAuthActions = () => {
         throw error;
       }
       
-      console.log('Sign out successful');
+      console.log('Sign out successful for user:', currentUserEmail);
       
-      // Clear cache again after signout to ensure no data remains
-      await queryClient.clear();
+      // Clear cache again after signout and reset all queries
+      queryClient.clear();
+      queryClient.resetQueries();
+      
+      // Small delay to ensure cleanup is complete
+      await new Promise(resolve => setTimeout(resolve, 100));
       
     } catch (error) {
       console.error('Sign out exception:', error);
