@@ -1,5 +1,6 @@
+
 import { supabase } from '@/integrations/supabase/client';
-import { CreateProcedureData, UpdateProcedureData, ProcedureFilters } from './types';
+import { CreateProcedureData, UpdateProcedureData, ProcedureFilters, ProcedureField, ProcedureFieldType } from './types';
 
 export const coreApi = {
   // Get procedures with enhanced filtering
@@ -72,8 +73,9 @@ export const coreApi = {
       ...procedure,
       fields: (procedure.procedure_fields || []).map(field => ({
         ...field,
-        procedure_id: procedure.id // Add the missing procedure_id
-      })),
+        procedure_id: procedure.id,
+        field_type: field.field_type as ProcedureFieldType // Cast to proper type
+      })) as ProcedureField[],
       executions_count: 0 // Add default executions_count
     })) || [];
 
@@ -121,8 +123,9 @@ export const coreApi = {
       ...data,
       fields: (data.procedure_fields || []).map(field => ({
         ...field,
-        procedure_id: data.id // Add the missing procedure_id
-      })),
+        procedure_id: data.id,
+        field_type: field.field_type as ProcedureFieldType // Cast to proper type
+      })) as ProcedureField[],
       executions_count: 0 // Add default executions_count
     };
   },
