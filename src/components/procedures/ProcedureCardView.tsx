@@ -13,7 +13,8 @@ import {
   Globe,
   Eye,
   PlayCircle,
-  Activity
+  Activity,
+  FileText
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -36,6 +37,21 @@ export const ProcedureCardView: React.FC<ProcedureCardViewProps> = ({
   onViewDetails,
   getCategoryColor
 }) => {
+  const getFieldsCount = (procedure: any) => {
+    // Handle both old and new procedure structures
+    if (procedure.fields && Array.isArray(procedure.fields)) {
+      return procedure.fields.length;
+    }
+    if (procedure.steps && Array.isArray(procedure.steps)) {
+      return procedure.steps.length;
+    }
+    return 0;
+  };
+
+  const getExecutionsCount = (procedure: any) => {
+    return procedure.executions_count || procedure.execution_count || 0;
+  };
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 p-6">
       {procedures.map((procedure) => (
@@ -53,7 +69,7 @@ export const ProcedureCardView: React.FC<ProcedureCardViewProps> = ({
             <div className="flex items-start justify-between mb-3">
               <div className="flex items-center gap-2 flex-1 min-w-0">
                 <div className="flex-shrink-0 w-7 h-7 bg-gradient-to-br from-blue-50 to-indigo-100 rounded-lg flex items-center justify-center">
-                  <PlayCircle className="h-3.5 w-3.5 text-blue-600" />
+                  <FileText className="h-3.5 w-3.5 text-blue-600" />
                 </div>
                 <div className="min-w-0 flex-1">
                   <button
@@ -130,11 +146,11 @@ export const ProcedureCardView: React.FC<ProcedureCardViewProps> = ({
             <div className="flex items-center justify-between text-xs text-gray-600 mb-3 flex-shrink-0">
               <div className="flex items-center gap-1">
                 <CheckCircle className="h-3 w-3 text-green-600" />
-                <span>{procedure.fields?.length || 0} fields</span>
+                <span>{getFieldsCount(procedure)} fields</span>
               </div>
               <div className="flex items-center gap-1">
                 <Activity className="h-3 w-3 text-blue-600" />
-                <span>{procedure.executions_count || 0} runs</span>
+                <span>{getExecutionsCount(procedure)} runs</span>
               </div>
             </div>
 
