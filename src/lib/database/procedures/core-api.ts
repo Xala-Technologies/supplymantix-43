@@ -74,9 +74,9 @@ export const coreApi = {
       fields: (procedure.procedure_fields || []).map(field => ({
         ...field,
         procedure_id: procedure.id,
-        field_type: field.field_type as ProcedureFieldType // Cast to proper type
+        field_type: field.field_type as ProcedureFieldType
       })) as ProcedureField[],
-      executions_count: 0 // Add default executions_count
+      executions_count: 0
     })) || [];
 
     return {
@@ -132,6 +132,8 @@ export const coreApi = {
 
   // Create procedure
   createProcedure: async (procedureData: CreateProcedureData) => {
+    console.log('Creating procedure with data:', procedureData);
+
     const { data: userData } = await supabase.auth.getUser();
     if (!userData.user) throw new Error("User not authenticated");
 
@@ -151,20 +153,34 @@ export const coreApi = {
       .insert({
         ...procedureInfo,
         tenant_id: userRecord.tenant_id,
-        created_by: userData.user.id
+        created_by: userData.user.id,
+        tags: procedureInfo.tags || [],
+        is_global: procedureInfo.is_global || false,
+        category: procedureInfo.category || 'Inspection'
       })
       .select()
       .single();
 
-    if (procedureError) throw procedureError;
+    if (procedureError) {
+      console.error('Error creating procedure:', procedureError);
+      throw procedureError;
+    }
+
+    console.log('Procedure created successfully:', procedure);
 
     // Create fields if provided
     if (fields && fields.length > 0) {
-      const fieldsToInsert = fields.map(field => ({
-        ...field,
+      const fieldsToInsert = fields.map((field, index) => ({
+        label: field.label,
+        field_type: field.field_type,
+        is_required: field.is_required || false,
+        order_index: field.order_index !== undefined ? field.order_index : index,
+        options: field.options || {},
         procedure_id: procedure.id,
         tenant_id: userRecord.tenant_id
       }));
+
+      console.log('Creating procedure fields:', fieldsToInsert);
 
       const { error: fieldsError } = await supabase
         .from('procedure_fields')
@@ -172,7 +188,10 @@ export const coreApi = {
 
       if (fieldsError) {
         console.error('Error creating procedure fields:', fieldsError);
+        throw fieldsError;
       }
+
+      console.log('Procedure fields created successfully');
     }
 
     return procedure;
@@ -180,6 +199,8 @@ export const coreApi = {
 
   // Update procedure
   updateProcedure: async (id: string, updates: UpdateProcedureData) => {
+    console.log('Updating procedure:', id, updates);
+
     const { data: userData } = await supabase.auth.getUser();
     if (!userData.user) throw new Error("User not authenticated");
 
@@ -205,24 +226,33 @@ export const coreApi = {
       .select()
       .single();
 
-    if (procedureError) throw procedureError;
+    if (procedureError) {
+      console.error('Error updating procedure:', procedureError);
+      throw procedureError;
+    }
 
     // Handle fields update if provided
     if (fields !== undefined) {
-      // Only delete and recreate if fields array is provided
+      console.log('Updating procedure fields:', fields);
+      
       // Delete existing fields
-      await supabase
+      const { error: deleteError } = await supabase
         .from('procedure_fields')
         .delete()
         .eq('procedure_id', id);
 
+      if (deleteError) {
+        console.error('Error deleting existing fields:', deleteError);
+        throw deleteError;
+      }
+
       // Insert new fields
       if (fields.length > 0) {
-        const fieldsToInsert = fields.map(field => ({
+        const fieldsToInsert = fields.map((field, index) => ({
           label: field.label,
           field_type: field.field_type,
-          is_required: field.is_required,
-          order_index: field.order_index,
+          is_required: field.is_required || false,
+          order_index: field.order_index !== undefined ? field.order_index : index,
           options: field.options || {},
           procedure_id: id,
           tenant_id: userRecord.tenant_id
@@ -233,9 +263,12 @@ export const coreApi = {
           .insert(fieldsToInsert);
 
         if (fieldsError) {
-          console.error('Error updating procedure fields:', fieldsError);
+          console.error('Error inserting new fields:', fieldsError);
+          throw fieldsError;
         }
       }
+
+      console.log('Procedure fields updated successfully');
     }
 
     return procedure;
@@ -272,6 +305,8 @@ export const coreApi = {
 
   // Duplicate procedure
   duplicateProcedure: async (id: string, newTitle?: string) => {
+    console.log('Duplicating procedure:', id);
+    
     const original = await coreApi.getProcedure(id);
     
     // Transform fields to the format expected by createProcedure
@@ -289,7 +324,7 @@ export const coreApi = {
       asset_type: original.asset_type,
       category: original.category,
       tags: original.tags,
-      is_global: false,
+      is_global: false, // Duplicates are not global by default
       template_data: original.template_data,
       steps: original.steps,
       estimated_duration: original.estimated_duration,
@@ -299,6 +334,7 @@ export const coreApi = {
       fields: transformedFields
     };
 
+    console.log('Creating duplicate with data:', duplicateData);
     return coreApi.createProcedure(duplicateData);
   }
 };

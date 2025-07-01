@@ -46,9 +46,9 @@ export const ProcedureCreationWizard: React.FC<ProcedureCreationWizardProps> = (
     title: '',
     description: '',
     category: 'Inspection',
-    tags: [],
+    tags: [] as string[],
     is_global: false,
-    fields: []
+    fields: [] as ProcedureField[]
   });
 
   const handleNext = () => {
@@ -77,9 +77,12 @@ export const ProcedureCreationWizard: React.FC<ProcedureCreationWizardProps> = (
   };
 
   const handleSave = (data: any) => {
+    console.log('Saving new procedure:', data);
     onSave(data);
     handleClose();
   };
+
+  const canProceed = step === 1 && formData.title.trim().length > 0;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -91,14 +94,17 @@ export const ProcedureCreationWizard: React.FC<ProcedureCreationWizardProps> = (
                 <FireExtinguisher className="h-10 w-10 text-white" />
               </div>
               <h2 className="text-2xl font-bold text-gray-900 mb-2">
-                Bring your new procedure to life
+                Create New Procedure
               </h2>
+              <p className="text-gray-600">
+                Let's set up the basic information for your procedure
+              </p>
             </div>
 
             <div className="space-y-6 text-left">
               <div>
                 <Label htmlFor="title" className="text-base font-medium text-gray-700 mb-2 block">
-                  Give it a name
+                  Procedure Name *
                 </Label>
                 <Input
                   id="title"
@@ -111,13 +117,13 @@ export const ProcedureCreationWizard: React.FC<ProcedureCreationWizardProps> = (
 
               <div>
                 <Label htmlFor="description" className="text-base font-medium text-gray-700 mb-2 block">
-                  Add a description <span className="text-sm text-gray-500 font-normal">(optional)</span>
+                  Description <span className="text-sm text-gray-500 font-normal">(optional)</span>
                 </Label>
                 <Textarea
                   id="description"
                   value={formData.description}
                   onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                  placeholder="Routine fire extinguisher inspection form to ensure operability."
+                  placeholder="Routine fire extinguisher inspection to ensure operability and compliance."
                   className="text-base py-3 px-4 border-2 border-gray-200 focus:border-blue-500 rounded-lg resize-none"
                   rows={4}
                 />
@@ -158,10 +164,10 @@ export const ProcedureCreationWizard: React.FC<ProcedureCreationWizardProps> = (
               </Button>
               <Button
                 onClick={handleNext}
-                disabled={!formData.title.trim()}
-                className="px-8 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg flex items-center gap-2"
+                disabled={!canProceed}
+                className="px-8 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Next
+                Continue
                 <ArrowRight className="h-4 w-4" />
               </Button>
             </div>

@@ -23,6 +23,7 @@ export const useProcedureDialogState = (procedure: any, open: boolean, onEdit: (
         fields: procedure.fields || []
       });
       setFormData({});
+      setIsEditing(false);
     }
   }, [procedure, open]);
 
@@ -34,7 +35,7 @@ export const useProcedureDialogState = (procedure: any, open: boolean, onEdit: (
     try {
       console.log('Saving procedure changes:', editData);
       
-      // Prepare the update data with fields
+      // Prepare the update data with properly formatted fields
       const updateData = {
         title: editData.title,
         description: editData.description,
@@ -62,7 +63,8 @@ export const useProcedureDialogState = (procedure: any, open: boolean, onEdit: (
       const fullUpdatedProcedure = {
         ...procedure,
         ...updateData,
-        fields: editData.fields
+        fields: editData.fields,
+        updated_at: new Date().toISOString()
       };
       
       onEdit(fullUpdatedProcedure);
@@ -73,6 +75,7 @@ export const useProcedureDialogState = (procedure: any, open: boolean, onEdit: (
   };
 
   const handleEditCancel = () => {
+    // Reset to original data
     setEditData({
       title: procedure.title || '',
       description: procedure.description || '',
@@ -143,7 +146,10 @@ export const useProcedureDialogState = (procedure: any, open: boolean, onEdit: (
   const removeField = (index: number) => {
     setEditData(prev => ({
       ...prev,
-      fields: prev.fields.filter((_: any, i: number) => i !== index)
+      fields: prev.fields.filter((_: any, i: number) => i !== index).map((field: ProcedureField, i: number) => ({
+        ...field,
+        order_index: i
+      }))
     }));
   };
 
