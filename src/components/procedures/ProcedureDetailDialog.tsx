@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
@@ -801,7 +800,7 @@ export const ProcedureDetailDialog: React.FC<ProcedureDetailDialogProps> = ({
                       </CardContent>
                     </Card>
 
-                    <div className="grid grid-cols-3 gap-6">
+                    <div className="grid grid-cols-1 gap-6">
                       <Card>
                         <CardContent className="p-6 text-center">
                           <CheckCircle className="h-8 w-8 text-gray-400 mx-auto mb-3" />
@@ -809,24 +808,6 @@ export const ProcedureDetailDialog: React.FC<ProcedureDetailDialogProps> = ({
                             {procedure.fields?.length || 0}
                           </div>
                           <div className="text-sm text-gray-600">Fields</div>
-                        </CardContent>
-                      </Card>
-                      <Card>
-                        <CardContent className="p-6 text-center">
-                          <Activity className="h-8 w-8 text-gray-400 mx-auto mb-3" />
-                          <div className="text-2xl font-bold text-gray-900 mb-1">
-                            {procedure.executions_count || 0}
-                          </div>
-                          <div className="text-sm text-gray-600">Executions</div>
-                        </CardContent>
-                      </Card>
-                      <Card>
-                        <CardContent className="p-6 text-center">
-                          <Clock className="h-8 w-8 text-gray-400 mx-auto mb-3" />
-                          <div className="text-2xl font-bold text-gray-900 mb-1">
-                            {procedure.estimated_duration || 30}
-                          </div>
-                          <div className="text-sm text-gray-600">Minutes</div>
                         </CardContent>
                       </Card>
                     </div>
