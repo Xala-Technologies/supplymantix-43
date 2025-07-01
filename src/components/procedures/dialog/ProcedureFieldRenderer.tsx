@@ -4,7 +4,8 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { FileText } from 'lucide-react';
+import { FileText, Paperclip, X } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 interface ProcedureFieldRendererProps {
   field: any;
@@ -21,9 +22,44 @@ export const ProcedureFieldRenderer: React.FC<ProcedureFieldRendererProps> = ({
 }) => {
   const fieldValue = value || field.options?.defaultValue || '';
 
+  const renderAttachedFile = () => {
+    if (!field.options?.attachedFile) return null;
+
+    const { attachedFile } = field.options;
+    return (
+      <div className="mt-3 p-3 bg-gray-50 rounded-lg border">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <Paperclip className="h-4 w-4 text-gray-500" />
+            <div>
+              <div className="text-sm font-medium text-gray-700">{attachedFile.name}</div>
+              <div className="text-xs text-gray-500">
+                {attachedFile.type} • {(attachedFile.size / 1024).toFixed(1)} KB
+              </div>
+            </div>
+          </div>
+          {attachedFile.type.startsWith('image/') && (
+            <img 
+              src={attachedFile.url} 
+              alt="Attachment preview" 
+              className="w-12 h-12 object-cover rounded border"
+            />
+          )}
+        </div>
+      </div>
+    );
+  };
+
+  const renderFieldWithAttachment = (fieldContent: React.ReactNode) => (
+    <div className="space-y-2">
+      {fieldContent}
+      {renderAttachedFile()}
+    </div>
+  );
+
   switch (field.field_type || field.type) {
     case 'text':
-      return (
+      return renderFieldWithAttachment(
         <div key={field.id || index} className="space-y-2">
           <label className="text-sm font-medium text-gray-700">
             {field.label || field.title}
@@ -41,7 +77,7 @@ export const ProcedureFieldRenderer: React.FC<ProcedureFieldRendererProps> = ({
       );
 
     case 'textarea':
-      return (
+      return renderFieldWithAttachment(
         <div key={field.id || index} className="space-y-2">
           <label className="text-sm font-medium text-gray-700">
             {field.label || field.title}
@@ -57,7 +93,7 @@ export const ProcedureFieldRenderer: React.FC<ProcedureFieldRendererProps> = ({
       );
 
     case 'checkbox':
-      return (
+      return renderFieldWithAttachment(
         <div key={field.id || index} className="space-y-2">
           <div className="flex items-center space-x-2">
             <Checkbox
@@ -78,7 +114,7 @@ export const ProcedureFieldRenderer: React.FC<ProcedureFieldRendererProps> = ({
 
     case 'select':
     case 'radio':
-      return (
+      return renderFieldWithAttachment(
         <div key={field.id || index} className="space-y-2">
           <label className="text-sm font-medium text-gray-700">
             {field.label || field.title}
@@ -121,7 +157,7 @@ export const ProcedureFieldRenderer: React.FC<ProcedureFieldRendererProps> = ({
       );
 
     case 'number':
-      return (
+      return renderFieldWithAttachment(
         <div key={field.id || index} className="space-y-2">
           <label className="text-sm font-medium text-gray-700">
             {field.label || field.title}
@@ -139,7 +175,7 @@ export const ProcedureFieldRenderer: React.FC<ProcedureFieldRendererProps> = ({
       );
 
     case 'date':
-      return (
+      return renderFieldWithAttachment(
         <div key={field.id || index} className="space-y-2">
           <label className="text-sm font-medium text-gray-700">
             {field.label || field.title}
@@ -154,7 +190,7 @@ export const ProcedureFieldRenderer: React.FC<ProcedureFieldRendererProps> = ({
       );
 
     case 'section':
-      return (
+      return renderFieldWithAttachment(
         <div key={field.id || index} className="py-3">
           <h3 className="text-lg font-semibold text-gray-900 border-b pb-1">
             {field.label || field.title}
@@ -166,7 +202,7 @@ export const ProcedureFieldRenderer: React.FC<ProcedureFieldRendererProps> = ({
       );
 
     case 'info':
-      return (
+      return renderFieldWithAttachment(
         <div key={field.id || index} className="bg-gray-50 p-3 rounded-lg border">
           <div className="flex items-start gap-2">
             <FileText className="h-4 w-4 text-gray-600 mt-0.5" />
@@ -181,7 +217,7 @@ export const ProcedureFieldRenderer: React.FC<ProcedureFieldRendererProps> = ({
       );
 
     default:
-      return (
+      return renderFieldWithAttachment(
         <div key={field.id || index} className="space-y-2">
           <label className="text-sm font-medium text-gray-700">
             {field.label || field.title}
