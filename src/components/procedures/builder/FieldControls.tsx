@@ -38,13 +38,67 @@ export const FieldControls: React.FC<FieldControlsProps> = ({
     console.log('Field link copied to clipboard');
   };
 
+  const handleAttachmentClick = () => {
+    console.log('Attachment button clicked for field index:', index);
+    if (onAttachmentClick) {
+      onAttachmentClick(index);
+    } else {
+      console.warn('onAttachmentClick handler not provided');
+    }
+  };
+
+  const handleMoveUp = () => {
+    console.log('Move up clicked for field index:', index);
+    if (onMove) {
+      onMove(index, 'up');
+    } else {
+      console.warn('onMove handler not provided');
+    }
+  };
+
+  const handleMoveDown = () => {
+    console.log('Move down clicked for field index:', index);
+    if (onMove) {
+      onMove(index, 'down');
+    } else {
+      console.warn('onMove handler not provided');
+    }
+  };
+
+  const handleDelete = () => {
+    console.log('Delete clicked for field index:', index);
+    if (onDelete) {
+      onDelete(index);
+    } else {
+      console.warn('onDelete handler not provided');
+    }
+  };
+
+  const handleDuplicate = () => {
+    console.log('Duplicate clicked for field index:', index);
+    if (onDuplicate) {
+      onDuplicate(index);
+    } else {
+      console.warn('onDuplicate handler not provided');
+    }
+  };
+
+  const handleRequiredToggle = (checked: boolean) => {
+    console.log('Required toggle changed for field index:', index, 'to:', checked);
+    if (onUpdate) {
+      onUpdate(index, { is_required: checked });
+    } else {
+      console.warn('onUpdate handler not provided');
+    }
+  };
+
   return (
     <div className="flex items-center gap-1">
       {/* Move Controls */}
       <Button
         variant="ghost"
         size="sm"
-        onClick={() => onMove && onMove(index, 'up')}
+        onClick={handleMoveUp}
         disabled={index === 0}
         className="h-8 w-8 p-0 text-gray-400 hover:text-gray-600"
         title="Move field up"
@@ -55,7 +109,7 @@ export const FieldControls: React.FC<FieldControlsProps> = ({
       <Button
         variant="ghost"
         size="sm"
-        onClick={() => onMove && onMove(index, 'down')}
+        onClick={handleMoveDown}
         disabled={index === fieldsLength - 1}
         className="h-8 w-8 p-0 text-gray-400 hover:text-gray-600"
         title="Move field down"
@@ -78,7 +132,7 @@ export const FieldControls: React.FC<FieldControlsProps> = ({
       <Button
         variant="ghost"
         size="sm"
-        onClick={() => onAttachmentClick(index)}
+        onClick={handleAttachmentClick}
         className="h-8 w-8 p-0 text-gray-500 hover:text-gray-600 hover:bg-gray-50"
         title="Add attachment"
       >
@@ -89,7 +143,7 @@ export const FieldControls: React.FC<FieldControlsProps> = ({
       <Button
         variant="ghost"
         size="sm"
-        onClick={() => onDelete && onDelete(index)}
+        onClick={handleDelete}
         className="h-8 w-8 p-0 text-gray-500 hover:text-red-600 hover:bg-red-50"
         title="Delete field"
       >
@@ -104,7 +158,7 @@ export const FieldControls: React.FC<FieldControlsProps> = ({
         <Switch
           id={`required-${field.id}`}
           checked={field.is_required}
-          onCheckedChange={(checked) => onUpdate && onUpdate(index, { is_required: checked })}
+          onCheckedChange={handleRequiredToggle}
         />
       </div>
 
@@ -122,18 +176,19 @@ export const FieldControls: React.FC<FieldControlsProps> = ({
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-48 bg-white border border-gray-200 shadow-lg z-50">
           <DropdownMenuItem onClick={() => {
+            console.log('Edit field clicked for index:', index);
             onSelect(index);
             onExpand(index);
           }}>
             Edit Field
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => onDuplicate && onDuplicate(index)}>
+          <DropdownMenuItem onClick={handleDuplicate}>
             <Copy className="h-4 w-4 mr-2" />
             Duplicate
           </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem 
-            onClick={() => onDelete && onDelete(index)}
+            onClick={handleDelete}
             className="text-red-600 focus:text-red-600"
           >
             <Trash2 className="h-4 w-4 mr-2" />
