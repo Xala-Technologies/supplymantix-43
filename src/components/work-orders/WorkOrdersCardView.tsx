@@ -24,6 +24,11 @@ export const WorkOrdersCardView = ({
   };
 
   const getAssetName = (workOrder: WorkOrder): string => {
+    // Check if we have asset data from the database join (assets object from DB)
+    if (workOrder.assets && typeof workOrder.assets === 'object' && 'name' in workOrder.assets) {
+      return workOrder.assets.name;
+    }
+    
     // Check if we have asset data from the database join (asset object)
     if (workOrder.asset && typeof workOrder.asset === 'object' && 'name' in workOrder.asset) {
       return workOrder.asset.name;
