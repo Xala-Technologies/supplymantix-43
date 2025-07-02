@@ -28,9 +28,10 @@ export const WorkOrdersCardView = ({
       return workOrder.asset.name;
     }
     
-    // Fallback to asset field if it's a string
-    if (workOrder.asset && typeof workOrder.asset === 'string') {
-      return workOrder.asset;
+    // If we have asset_id but no asset object, we'll need to find the asset name
+    // This would happen if the join didn't work or asset was deleted
+    if (workOrder.asset_id && typeof workOrder.asset_id === 'string') {
+      return `Asset ID: ${workOrder.asset_id.slice(-4)}`;
     }
     
     return 'No Asset';
@@ -42,9 +43,9 @@ export const WorkOrdersCardView = ({
       return workOrder.location.name;
     }
     
-    // Fallback if location is a string
-    if (typeof workOrder.location === 'string') {
-      return workOrder.location;
+    // If we have location_id but no location object
+    if (workOrder.location_id && typeof workOrder.location_id === 'string') {
+      return `Location ID: ${workOrder.location_id.slice(-4)}`;
     }
     
     return 'No Location';

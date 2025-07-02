@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -20,7 +21,6 @@ import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { WorkOrder } from "@/types/workOrder";
 import { WorkOrderFormFields } from "./form-sections/WorkOrderFormFields";
-import { getAssignee, getLocationId, getAssetId } from "./form-sections/WorkOrderFormHelpers";
 import { processWorkOrderSubmission } from "./form-sections/WorkOrderFormLogic";
 
 const workOrderSchema = z.object({
@@ -82,13 +82,34 @@ export const NewWorkOrderDialog = ({
     },
   });
 
+  // Helper functions to extract IDs
+  const getAssetId = (asset: WorkOrder['asset']): string => {
+    if (!asset) return "";
+    if (typeof asset === "string") return asset;
+    if (typeof asset === "object" && 'id' in asset && typeof asset.id === 'string') return asset.id;
+    return "";
+  };
+
+  const getLocationId = (location: WorkOrder['location']): string => {
+    if (!location) return "";
+    if (typeof location === "string") return location;
+    if (typeof location === "object" && 'id' in location && typeof location.id === 'string') return location.id;
+    return "";
+  };
+
+  const getAssignee = (assignedTo: WorkOrder['assignedTo']): string => {
+    if (!assignedTo) return "";
+    if (Array.isArray(assignedTo)) return assignedTo[0] || "";
+    if (typeof assignedTo === "string") return assignedTo;
+    return "";
+  };
+
   // Reset form when workOrder changes or dialog opens
   useEffect(() => {
     if (open) {
       if (workOrder) {
         console.log("Setting form data for editing work order:", workOrder);
         
-        // Pre-populate form for editing - use IDs for asset and location
         const tagsString = workOrder.tags && Array.isArray(workOrder.tags) 
           ? workOrder.tags.join(', ') 
           : '';
