@@ -6,8 +6,9 @@ export const getAssignee = (assignedTo: WorkOrder['assignedTo']): string => {
   if (Array.isArray(assignedTo)) return assignedTo[0] || "";
   if (typeof assignedTo === "string") return assignedTo;
   // Handle object type with email property
-  if (typeof assignedTo === "object" && assignedTo && 'email' in assignedTo && typeof assignedTo.email === 'string') {
-    return assignedTo.email;
+  if (typeof assignedTo === "object" && assignedTo !== null && 'email' in assignedTo) {
+    const assignedToObj = assignedTo as { email?: string };
+    return assignedToObj.email || "";
   }
   return "";
 };
@@ -15,8 +16,9 @@ export const getAssignee = (assignedTo: WorkOrder['assignedTo']): string => {
 export const getLocationName = (location: WorkOrder['location']): string => {
   if (!location) return "";
   if (typeof location === "string") return location;
-  if (typeof location === "object" && location && 'name' in location && typeof location.name === 'string') {
-    return location.name;
+  if (typeof location === "object" && location !== null && 'name' in location) {
+    const locationObj = location as { name?: string };
+    return locationObj.name || "";
   }
   return "";
 };
@@ -24,24 +26,27 @@ export const getLocationName = (location: WorkOrder['location']): string => {
 export const getAssetName = (asset: WorkOrder['asset']): string => {
   if (!asset) return "";
   if (typeof asset === "string") return asset;
-  if (typeof asset === "object" && asset && 'name' in asset && typeof asset.name === 'string') {
-    return asset.name;
+  if (typeof asset === "object" && asset !== null && 'name' in asset) {
+    const assetObj = asset as { name?: string };
+    return assetObj.name || "";
   }
   return "";
 };
 
 export const getAssetId = (asset: WorkOrder['asset']): string => {
   if (!asset) return "";
-  if (typeof asset === "object" && asset && 'id' in asset && typeof asset.id === 'string') {
-    return asset.id;
+  if (typeof asset === "object" && asset !== null && 'id' in asset) {
+    const assetObj = asset as { id?: string };
+    return assetObj.id || "";
   }
   return "";
 };
 
 export const getLocationId = (location: WorkOrder['location']): string => {
   if (!location) return "";
-  if (typeof location === "object" && location && 'id' in location && typeof location.id === 'string') {
-    return location.id;
+  if (typeof location === "object" && location !== null && 'id' in location) {
+    const locationObj = location as { id?: string };
+    return locationObj.id || "";
   }
   return "";
 };
