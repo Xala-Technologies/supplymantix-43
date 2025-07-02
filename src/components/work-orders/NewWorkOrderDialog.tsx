@@ -100,10 +100,10 @@ export const NewWorkOrderDialog = ({
         console.log("Extracted asset ID:", assetId);
         console.log("Extracted location ID:", locationId);
 
-        const formData = {
+        const formData: WorkOrderFormData = {
           title: workOrder.title || "",
           description: workOrder.description || "",
-          priority: workOrder.priority || "medium",
+          priority: (workOrder.priority as "low" | "medium" | "high" | "urgent") || "medium",
           assignedTo: getAssignee(workOrder.assignedTo),
           asset: assetId || "",
           location: locationId || "",
