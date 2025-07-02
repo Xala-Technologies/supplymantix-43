@@ -97,14 +97,15 @@ export const NewWorkOrderDialog = ({
           description: workOrder.description || "",
           priority: workOrder.priority || "medium",
           assignedTo: getAssignee(workOrder.assignedTo),
-          asset: getAssetId(workOrder.asset, workOrder.asset_id) || "", // Pass fallback asset_id
-          location: getLocationId(workOrder.location, workOrder.location_id) || "", // Pass fallback location_id
+          asset: getAssetId(workOrder.asset, workOrder.asset_id, workOrder) || "", // Pass full workOrder object
+          location: getLocationId(workOrder.location, workOrder.location_id, workOrder) || "", // Pass full workOrder object
           category: workOrder.category || "maintenance",
           tags: tagsString,
           dueDate: workOrder.due_date ? new Date(workOrder.due_date) : undefined,
         };
 
         console.log("Setting form data for editing:", formData);
+        console.log("Work order data:", workOrder);
         form.reset(formData);
       } else {
         // Reset form for new work order
