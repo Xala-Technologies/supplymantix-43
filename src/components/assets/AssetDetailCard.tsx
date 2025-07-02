@@ -161,6 +161,11 @@ export const AssetDetailCard = ({ asset, onEdit, onDelete }: AssetDetailCardProp
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   };
 
+  // Determine which identification type is available
+  const hasQrCode = qrCodeDataUrl && asset.specifications['QR Code'] !== 'N/A';
+  const hasBarcode = barcodeDataUrl && asset.specifications['Barcode'] !== 'N/A';
+  const hasIdentification = hasQrCode || hasBarcode;
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -316,18 +321,18 @@ export const AssetDetailCard = ({ asset, onEdit, onDelete }: AssetDetailCardProp
               </CardContent>
             </Card>
 
-            {/* QR Code and Barcode Display */}
-            {(qrCodeDataUrl || barcodeDataUrl) && (
+            {/* QR Code/Barcode Display */}
+            {hasIdentification && (
               <Card className="md:col-span-2">
                 <CardHeader>
                   <CardTitle className="text-lg flex items-center gap-2">
                     <QrCode className="w-5 h-5" />
-                    Asset Identification
+                    QR Code/Barcode
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {qrCodeDataUrl && (
+                  <div className="flex justify-center">
+                    {hasQrCode && (
                       <div className="text-center">
                         <p className="text-sm font-medium text-gray-700 mb-2">QR Code</p>
                         <div className="w-24 h-24 bg-white rounded border mx-auto flex items-center justify-center">
@@ -341,10 +346,10 @@ export const AssetDetailCard = ({ asset, onEdit, onDelete }: AssetDetailCardProp
                       </div>
                     )}
                     
-                    {barcodeDataUrl && (
+                    {hasBarcode && (
                       <div className="text-center">
                         <p className="text-sm font-medium text-gray-700 mb-2">Barcode</p>
-                        <div className="w-full h-16 bg-white rounded border flex items-center justify-center">
+                        <div className="w-full max-w-sm h-16 bg-white rounded border flex items-center justify-center">
                           <img 
                             src={barcodeDataUrl} 
                             alt="Barcode" 
