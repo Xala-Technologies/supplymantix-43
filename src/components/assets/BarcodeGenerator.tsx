@@ -1,10 +1,11 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { QrCode, Barcode, Keyboard } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import QRCode from 'qrcode';
 
 interface BarcodeGeneratorProps {
   qrCode?: string;
@@ -19,7 +20,49 @@ export const BarcodeGenerator: React.FC<BarcodeGeneratorProps> = ({
   onQrCodeChange,
   onBarcodeChange
 }) => {
-  const [manualInput, setManualInput] = useState(false);
+  const [qrCodeDataUrl, setQrCodeDataUrl] = useState<string>('');
+  const [barcodeDataUrl, setBarcodeDataUrl] = useState<string>('');
+
+  // Generate QR Code image when qrCode value changes
+  useEffect(() => {
+    if (qrCode) {
+      QRCode.toDataURL(qrCode, { width: 96, margin: 1 })
+        .then(url => setQrCodeDataUrl(url))
+        .catch(err => console.error('Error generating QR code:', err));
+    } else {
+      setQrCodeDataUrl('');
+    }
+  }, [qrCode]);
+
+  // Generate simple barcode representation
+  useEffect(() => {
+    if (barcode) {
+      // Create a simple barcode representation using canvas
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+        canvas.width = 200;
+        canvas.height = 60;
+        ctx.fillStyle = 'white';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = 'black';
+        
+        // Generate simple bars based on barcode digits
+        const barWidth = 2;
+        let x = 10;
+        for (let i = 0; i < barcode.length; i++) {
+          const digit = parseInt(barcode[i]) || 0;
+          const height = 30 + (digit * 2);
+          ctx.fillRect(x, 10, barWidth, height);
+          x += barWidth + 1;
+        }
+        
+        setBarcodeDataUrl(canvas.toDataURL());
+      }
+    } else {
+      setBarcodeDataUrl('');
+    }
+  }, [barcode]);
 
   const generateQrCode = () => {
     const code = `ASSET-${Date.now()}`;
@@ -54,8 +97,16 @@ export const BarcodeGenerator: React.FC<BarcodeGeneratorProps> = ({
           </div>
           {qrCode && (
             <div className="p-2 border rounded-lg text-center">
-              <div className="w-24 h-24 bg-gray-100 rounded border-2 border-dashed border-gray-300 mx-auto flex items-center justify-center">
-                <QrCode className="h-8 w-8 text-gray-400" />
+              <div className="w-24 h-24 bg-white rounded border mx-auto flex items-center justify-center">
+                {qrCodeDataUrl ? (
+                  <img 
+                    src={qrCodeDataUrl} 
+                    alt="QR Code" 
+                    className="w-full h-full object-contain"
+                  />
+                ) : (
+                  <QrCode className="h-8 w-8 text-gray-400" />
+                )}
               </div>
               <p className="text-xs text-gray-500 mt-1">QR Code Preview</p>
             </div>
@@ -82,8 +133,16 @@ export const BarcodeGenerator: React.FC<BarcodeGeneratorProps> = ({
           </div>
           {barcode && (
             <div className="p-2 border rounded-lg text-center">
-              <div className="w-full h-12 bg-gray-100 rounded border-2 border-dashed border-gray-300 flex items-center justify-center">
-                <Barcode className="h-6 w-6 text-gray-400" />
+              <div className="w-full h-12 bg-white rounded border flex items-center justify-center">
+                {barcodeDataUrl ? (
+                  <img 
+                    src={barcodeDataUrl} 
+                    alt="Barcode" 
+                    className="h-full object-contain"
+                  />
+                ) : (
+                  <Barcode className="h-6 w-6 text-gray-400" />
+                )}
               </div>
               <p className="text-xs text-gray-500 mt-1">Barcode Preview</p>
             </div>
