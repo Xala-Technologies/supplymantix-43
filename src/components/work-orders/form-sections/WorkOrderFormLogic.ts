@@ -54,14 +54,24 @@ export const processWorkOrderSubmission = async (
     throw new Error("User data not found");
   }
 
-  // Find actual IDs for location and asset
-  const selectedLocation = locations?.find(loc => 
-    loc.name === data.location || loc.id === data.location
-  );
-  
-  const selectedAsset = assets?.find(asset => 
-    asset.name === data.asset || asset.id === data.asset
-  );
+  // For asset and location, the data.asset and data.location are already IDs
+  // So we just need to validate they exist
+  let selectedAssetId = null;
+  let selectedLocationId = null;
+
+  if (data.asset) {
+    const selectedAsset = assets?.find(asset => asset.id === data.asset);
+    if (selectedAsset) {
+      selectedAssetId = selectedAsset.id;
+    }
+  }
+
+  if (data.location) {
+    const selectedLocation = locations?.find(location => location.id === data.location);
+    if (selectedLocation) {
+      selectedLocationId = selectedLocation.id;
+    }
+  }
 
   // Find actual user ID for assignee
   const selectedUser = users?.find(user => 
@@ -80,8 +90,8 @@ export const processWorkOrderSubmission = async (
     description: data.description || "",
     due_date: data.dueDate?.toISOString(),
     assigned_to: selectedUser?.id || null,
-    asset_id: selectedAsset?.id || null,
-    location_id: selectedLocation?.id || null,
+    asset_id: selectedAssetId,
+    location_id: selectedLocationId,
     tenant_id: userData.tenant_id,
     status: "open" as const,
     priority: data.priority,

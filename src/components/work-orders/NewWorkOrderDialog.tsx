@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -20,7 +21,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { WorkOrder } from "@/types/workOrder";
 import { WorkOrderFormFields } from "./form-sections/WorkOrderFormFields";
-import { getAssignee, getLocationName, getAssetName } from "./form-sections/WorkOrderFormHelpers";
+import { getAssignee, getLocationId, getAssetId } from "./form-sections/WorkOrderFormHelpers";
 import { processWorkOrderSubmission } from "./form-sections/WorkOrderFormLogic";
 
 const workOrderSchema = z.object({
@@ -86,7 +87,7 @@ export const NewWorkOrderDialog = ({
   useEffect(() => {
     if (open) {
       if (workOrder) {
-        // Pre-populate form for editing
+        // Pre-populate form for editing - use IDs for asset and location
         const tagsString = workOrder.tags && Array.isArray(workOrder.tags) 
           ? workOrder.tags.join(', ') 
           : '';
@@ -96,8 +97,8 @@ export const NewWorkOrderDialog = ({
           description: workOrder.description || "",
           priority: workOrder.priority || "medium",
           assignedTo: getAssignee(workOrder.assignedTo),
-          asset: getAssetName(workOrder.asset),
-          location: getLocationName(workOrder.location),
+          asset: getAssetId(workOrder.asset) || "", // Use asset ID instead of name
+          location: getLocationId(workOrder.location) || "", // Use location ID instead of name
           category: workOrder.category || "maintenance",
           tags: tagsString,
           dueDate: workOrder.due_date ? new Date(workOrder.due_date) : undefined,
@@ -117,7 +118,7 @@ export const NewWorkOrderDialog = ({
         });
       }
     }
-  }, [workOrder, open, form]);
+  }, [workOrder, open, form, assets, locations]);
 
   const onSubmit = async (data: WorkOrderFormData) => {
     try {
@@ -130,8 +131,8 @@ export const NewWorkOrderDialog = ({
         priority: data.priority,
         dueDate: data.dueDate,
         assignedTo: data.assignedTo || "",
-        asset: data.asset || "",
-        location: data.location || "",
+        asset: data.asset || "", // This is already an ID now
+        location: data.location || "", // This is already an ID now
         category: data.category,
         tags: data.tags || "",
       };

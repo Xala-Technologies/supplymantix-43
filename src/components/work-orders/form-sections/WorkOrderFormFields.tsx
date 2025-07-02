@@ -204,7 +204,7 @@ export const WorkOrderFormFields = ({ form, users, assets, locations }: WorkOrde
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {/* Asset */}
+        {/* Asset - Updated to use asset ID */}
         <div className="space-y-2">
           <Label className="text-sm font-medium">Asset</Label>
           <Select
@@ -216,7 +216,7 @@ export const WorkOrderFormFields = ({ form, users, assets, locations }: WorkOrde
             </SelectTrigger>
             <SelectContent>
               {assets?.map((asset) => (
-                <SelectItem key={asset.id} value={asset.name}>
+                <SelectItem key={asset.id} value={asset.id}>
                   {asset.name}
                 </SelectItem>
               ))}
@@ -224,7 +224,7 @@ export const WorkOrderFormFields = ({ form, users, assets, locations }: WorkOrde
           </Select>
         </div>
 
-        {/* Location */}
+        {/* Location - Updated to use location ID */}
         <div className="space-y-2">
           <Label className="text-sm font-medium">Location</Label>
           <Select
@@ -236,7 +236,7 @@ export const WorkOrderFormFields = ({ form, users, assets, locations }: WorkOrde
             </SelectTrigger>
             <SelectContent>
               {locations?.map((location) => (
-                <SelectItem key={location.id} value={location.name}>
+                <SelectItem key={location.id} value={location.id}>
                   {location.name}
                 </SelectItem>
               ))}
