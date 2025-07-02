@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, FormProvider } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import {
@@ -235,33 +235,35 @@ export const NewWorkOrderDialog = ({
           </DialogTitle>
         </DialogHeader>
         
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-          <WorkOrderFormFields 
-            form={form}
-            users={users}
-            assets={assets}
-            locations={locations}
-          />
+        <FormProvider {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <WorkOrderFormFields 
+              form={form}
+              users={users}
+              assets={assets}
+              locations={locations}
+            />
 
-          <DialogFooter className="gap-2 pt-4">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={handleClose}
-              disabled={isSubmitting}
-              className="border-slate-300 text-slate-700 hover:bg-slate-50"
-            >
-              Cancel
-            </Button>
-            <Button 
-              type="submit" 
-              disabled={isSubmitting}
-              className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm"
-            >
-              {isSubmitting ? (isEditMode ? "Updating..." : "Creating...") : (isEditMode ? "Update Work Order" : "Create Work Order")}
-            </Button>
-          </DialogFooter>
-        </form>
+            <DialogFooter className="gap-2 pt-4">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleClose}
+                disabled={isSubmitting}
+                className="border-slate-300 text-slate-700 hover:bg-slate-50"
+              >
+                Cancel
+              </Button>
+              <Button 
+                type="submit" 
+                disabled={isSubmitting}
+                className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm"
+              >
+                {isSubmitting ? (isEditMode ? "Updating..." : "Creating...") : (isEditMode ? "Update Work Order" : "Create Work Order")}
+              </Button>
+            </DialogFooter>
+          </form>
+        </FormProvider>
       </DialogContent>
     </Dialog>
   );
