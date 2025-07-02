@@ -137,7 +137,20 @@ export const NewWorkOrderDialog = ({
       
       console.log("Form submission data:", data);
 
-      const workOrderData = await processWorkOrderSubmission(data, users, assets, locations);
+      // Ensure we have the required fields with proper values
+      const formattedData = {
+        title: data.title || "",
+        description: data.description || "",
+        priority: data.priority,
+        dueDate: data.dueDate,
+        assignedTo: data.assignedTo || "",
+        asset: data.asset || "",
+        location: data.location || "",
+        category: data.category || "maintenance",
+        tags: data.tags || "",
+      };
+
+      const workOrderData = await processWorkOrderSubmission(formattedData, users, assets, locations);
       console.log("Processed work order data:", workOrderData);
 
       if (isEditMode && workOrder) {
