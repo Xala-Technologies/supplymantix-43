@@ -63,6 +63,11 @@ export const processWorkOrderSubmission = async (
     formData.tags.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0) : 
     [];
 
+  // Process form values - convert "none" and "unassigned" to null
+  const processedAssignedTo = formData.assignedTo === "unassigned" ? null : formData.assignedTo;
+  const processedAsset = formData.asset === "none" ? null : formData.asset;
+  const processedLocation = formData.location === "none" ? null : formData.location;
+
   // Prepare work order data
   const workOrderData: Tables["work_orders"]["Insert"] = {
     title: formData.title,
@@ -72,9 +77,9 @@ export const processWorkOrderSubmission = async (
     category: formData.category || "maintenance",
     tags: tagsArray,
     due_date: formData.dueDate ? formData.dueDate.toISOString() : null,
-    assigned_to: formData.assignedTo || null,
-    asset_id: formData.asset || null,
-    location_id: formData.location || null,
+    assigned_to: processedAssignedTo || null,
+    asset_id: processedAsset || null,
+    location_id: processedLocation || null,
     tenant_id: userRecord.tenant_id,
   };
 
