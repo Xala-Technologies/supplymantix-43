@@ -94,12 +94,10 @@ export const NewWorkOrderDialog = ({
           ? workOrder.tags.join(', ') 
           : '';
 
-        // Extract asset ID - prioritize asset_id field, then check asset/assets object
+        // Extract asset ID - prioritize asset_id field, then check asset object
         let assetId = "";
         if (workOrder.asset_id) {
           assetId = workOrder.asset_id;
-        } else if (workOrder.assets && typeof workOrder.assets === 'object' && 'id' in workOrder.assets) {
-          assetId = workOrder.assets.id;
         } else if (workOrder.asset && typeof workOrder.asset === 'object' && 'id' in workOrder.asset) {
           assetId = workOrder.asset.id;
         }
