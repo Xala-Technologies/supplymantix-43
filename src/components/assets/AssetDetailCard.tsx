@@ -3,11 +3,12 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { MapPin, Calendar, Wrench, AlertTriangle, FileText, BarChart3, Settings, Edit, Trash2, Download, Upload, Plus } from "lucide-react";
+import { MapPin, Calendar, Wrench, AlertTriangle, FileText, BarChart3, Settings, Edit, Trash2, Download, Upload, Plus, QrCode, Barcode } from "lucide-react";
 import { toast } from "sonner";
 import { useAssetDocuments, useDeleteAssetDocument } from "@/hooks/useAssetDocuments";
 import { AssetDocumentUpload } from "./AssetDocumentUpload";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import QRCode from 'qrcode';
 
 interface AssetDetailCardProps {
   asset: {
@@ -35,8 +36,51 @@ interface AssetDetailCardProps {
 
 export const AssetDetailCard = ({ asset, onEdit, onDelete }: AssetDetailCardProps) => {
   const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
+  const [qrCodeDataUrl, setQrCodeDataUrl] = useState<string>('');
+  const [barcodeDataUrl, setBarcodeDataUrl] = useState<string>('');
   const { data: documents = [], isLoading: documentsLoading, refetch: refetchDocuments } = useAssetDocuments(asset.id);
   const deleteDocumentMutation = useDeleteAssetDocument();
+
+  // Generate QR Code image when asset has QR code
+  useEffect(() => {
+    const qrCode = asset.specifications['QR Code'];
+    if (qrCode && qrCode !== 'N/A') {
+      QRCode.toDataURL(qrCode, { width: 96, margin: 1 })
+        .then(url => setQrCodeDataUrl(url))
+        .catch(err => console.error('Error generating QR code:', err));
+    } else {
+      setQrCodeDataUrl('');
+    }
+  }, [asset.specifications]);
+
+  // Generate simple barcode representation
+  useEffect(() => {
+    const barcode = asset.specifications['Barcode'];
+    if (barcode && barcode !== 'N/A') {
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+        canvas.width = 200;
+        canvas.height = 60;
+        ctx.fillStyle = 'white';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = 'black';
+        
+        const barWidth = 2;
+        let x = 10;
+        for (let i = 0; i < barcode.length; i++) {
+          const digit = parseInt(barcode[i]) || 0;
+          const height = 30 + (digit * 2);
+          ctx.fillRect(x, 10, barWidth, height);
+          x += barWidth + 1;
+        }
+        
+        setBarcodeDataUrl(canvas.toDataURL());
+      }
+    } else {
+      setBarcodeDataUrl('');
+    }
+  }, [asset.specifications]);
 
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
@@ -271,6 +315,49 @@ export const AssetDetailCard = ({ asset, onEdit, onDelete }: AssetDetailCardProp
                 ))}
               </CardContent>
             </Card>
+
+            {/* QR Code and Barcode Display */}
+            {(qrCodeDataUrl || barcodeDataUrl) && (
+              <Card className="md:col-span-2">
+                <CardHeader>
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <QrCode className="w-5 h-5" />
+                    Asset Identification
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {qrCodeDataUrl && (
+                      <div className="text-center">
+                        <p className="text-sm font-medium text-gray-700 mb-2">QR Code</p>
+                        <div className="w-24 h-24 bg-white rounded border mx-auto flex items-center justify-center">
+                          <img 
+                            src={qrCodeDataUrl} 
+                            alt="QR Code" 
+                            className="w-full h-full object-contain"
+                          />
+                        </div>
+                        <p className="text-xs text-gray-500 mt-2">{asset.specifications['QR Code']}</p>
+                      </div>
+                    )}
+                    
+                    {barcodeDataUrl && (
+                      <div className="text-center">
+                        <p className="text-sm font-medium text-gray-700 mb-2">Barcode</p>
+                        <div className="w-full h-16 bg-white rounded border flex items-center justify-center">
+                          <img 
+                            src={barcodeDataUrl} 
+                            alt="Barcode" 
+                            className="h-full object-contain"
+                          />
+                        </div>
+                        <p className="text-xs text-gray-500 mt-2">{asset.specifications['Barcode']}</p>
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
           </div>
         </TabsContent>
         
