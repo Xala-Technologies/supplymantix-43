@@ -7,7 +7,7 @@ import { Clock, Users, MapPin, AlertTriangle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { WorkOrder } from '@/types/workOrder';
 import { getStatusColor, getPriorityColor, formatDueDate } from '@/services/workOrderService';
-import { getAssetName, getLocationName } from '@/utils/assetUtils';
+import { getAssetName, getLocationName } from './form-sections/WorkOrderFormHelpers';
 
 interface WorkOrdersCardViewProps {
   workOrders: WorkOrder[];
@@ -62,7 +62,7 @@ export const WorkOrdersCardView = ({
                     {workOrder.title}
                   </h3>
                   <p className="text-sm text-gray-600">
-                    {getAssetName(workOrder.asset)} • #{workOrder.id.slice(-4)}
+                    {getAssetName(workOrder.asset) || 'No Asset'} • #{workOrder.id.slice(-4)}
                   </p>
                 </div>
 
@@ -86,7 +86,7 @@ export const WorkOrdersCardView = ({
                   
                   <div className="flex items-center gap-2 text-sm text-gray-600">
                     <MapPin className="w-4 h-4 text-gray-400" />
-                    <span className="truncate">{getLocationName(workOrder.location)}</span>
+                    <span className="truncate">{getLocationName(workOrder.location) || 'No Location'}</span>
                   </div>
                 </div>
 
