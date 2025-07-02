@@ -196,6 +196,7 @@ export const NewWorkOrderDialog = ({
         });
         toast.success("Work order updated successfully!");
       } else {
+        console.log("Creating new work order with data:", workOrderData);
         await createWorkOrder.mutateAsync(workOrderData);
         toast.success("Work order created successfully!");
       }
