@@ -87,25 +87,32 @@ export const NewWorkOrderDialog = ({
   useEffect(() => {
     if (open) {
       if (workOrder) {
+        console.log("Setting form data for editing work order:", workOrder);
+        
         // Pre-populate form for editing - use IDs for asset and location
         const tagsString = workOrder.tags && Array.isArray(workOrder.tags) 
           ? workOrder.tags.join(', ') 
           : '';
+
+        const assetId = getAssetId(workOrder.asset, workOrder.asset_id, workOrder);
+        const locationId = getLocationId(workOrder.location, workOrder.location_id, workOrder);
+        
+        console.log("Extracted asset ID:", assetId);
+        console.log("Extracted location ID:", locationId);
 
         const formData = {
           title: workOrder.title || "",
           description: workOrder.description || "",
           priority: workOrder.priority || "medium",
           assignedTo: getAssignee(workOrder.assignedTo),
-          asset: getAssetId(workOrder.asset, workOrder.asset_id, workOrder) || "", // Pass full workOrder object
-          location: getLocationId(workOrder.location, workOrder.location_id, workOrder) || "", // Pass full workOrder object
+          asset: assetId || "",
+          location: locationId || "",
           category: workOrder.category || "maintenance",
           tags: tagsString,
           dueDate: workOrder.due_date ? new Date(workOrder.due_date) : undefined,
         };
 
         console.log("Setting form data for editing:", formData);
-        console.log("Work order data:", workOrder);
         form.reset(formData);
       } else {
         // Reset form for new work order
@@ -128,24 +135,14 @@ export const NewWorkOrderDialog = ({
     try {
       setIsSubmitting(true);
       
-      // Ensure all required fields are properly typed
-      const formData = {
-        title: data.title,
-        description: data.description || "",
-        priority: data.priority,
-        dueDate: data.dueDate,
-        assignedTo: data.assignedTo || "",
-        asset: data.asset || "", // This is already an ID now
-        location: data.location || "", // This is already an ID now
-        category: data.category,
-        tags: data.tags || "",
-      };
+      console.log("Form submission data:", data);
 
-      console.log("Submitting form data:", formData);
-
-      const workOrderData = await processWorkOrderSubmission(formData, users, assets, locations);
+      const workOrderData = await processWorkOrderSubmission(data, users, assets, locations);
+      console.log("Processed work order data:", workOrderData);
 
       if (isEditMode && workOrder) {
+        console.log("Updating work order:", workOrder.id, "with data:", workOrderData);
+        
         // For updates, we need to pass { id, updates } structure
         await updateWorkOrder.mutateAsync({
           id: workOrder.id,
@@ -157,7 +154,7 @@ export const NewWorkOrderDialog = ({
         toast.success("Work order created successfully!");
       }
 
-      // Invalidate and refetch work orders data to show new work order immediately
+      // Invalidate and refetch work orders data to show changes immediately
       await queryClient.invalidateQueries({ queryKey: ["work-orders"] });
       await queryClient.invalidateQueries({ queryKey: ["work-orders-integration"] });
       

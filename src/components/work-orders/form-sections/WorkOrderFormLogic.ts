@@ -37,6 +37,8 @@ export const processWorkOrderSubmission = async (
   assets?: Asset[],
   locations?: Location[]
 ) => {
+  console.log("processWorkOrderSubmission - Input data:", data);
+  
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) {
     toast.error("Please log in to manage work orders");
@@ -54,22 +56,39 @@ export const processWorkOrderSubmission = async (
     throw new Error("User data not found");
   }
 
-  // For asset and location, the data.asset and data.location are already IDs
-  // So we just need to validate they exist
+  // For asset and location, the data.asset and data.location should already be IDs
   let selectedAssetId = null;
   let selectedLocationId = null;
 
   if (data.asset) {
-    const selectedAsset = assets?.find(asset => asset.id === data.asset);
-    if (selectedAsset) {
-      selectedAssetId = selectedAsset.id;
+    console.log("Processing asset:", data.asset);
+    // Check if it's already an ID (UUID format)
+    if (data.asset.length === 36 && data.asset.includes('-')) {
+      selectedAssetId = data.asset;
+      console.log("Asset is already an ID:", selectedAssetId);
+    } else {
+      // Try to find by name
+      const selectedAsset = assets?.find(asset => asset.name === data.asset);
+      if (selectedAsset) {
+        selectedAssetId = selectedAsset.id;
+        console.log("Found asset by name:", selectedAsset);
+      }
     }
   }
 
   if (data.location) {
-    const selectedLocation = locations?.find(location => location.id === data.location);
-    if (selectedLocation) {
-      selectedLocationId = selectedLocation.id;
+    console.log("Processing location:", data.location);
+    // Check if it's already an ID (UUID format)
+    if (data.location.length === 36 && data.location.includes('-')) {
+      selectedLocationId = data.location;
+      console.log("Location is already an ID:", selectedLocationId);
+    } else {
+      // Try to find by name
+      const selectedLocation = locations?.find(location => location.name === data.location);
+      if (selectedLocation) {
+        selectedLocationId = selectedLocation.id;
+        console.log("Found location by name:", selectedLocation);
+      }
     }
   }
 
@@ -85,7 +104,7 @@ export const processWorkOrderSubmission = async (
     ? data.tags.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0)
     : [];
   
-  return {
+  const result = {
     title: data.title,
     description: data.description || "",
     due_date: data.dueDate?.toISOString(),
@@ -99,4 +118,7 @@ export const processWorkOrderSubmission = async (
     tags: tagsArray,
     requester_id: user.id,
   };
+  
+  console.log("processWorkOrderSubmission - Final result:", result);
+  return result;
 };
