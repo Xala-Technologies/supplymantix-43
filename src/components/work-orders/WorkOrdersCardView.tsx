@@ -7,7 +7,6 @@ import { Clock, Users, MapPin, AlertTriangle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { WorkOrder } from '@/types/workOrder';
 import { getStatusColor, getPriorityColor, formatDueDate } from '@/services/workOrderService';
-import { getAssetName, getLocationName } from './form-sections/WorkOrderFormHelpers';
 
 interface WorkOrdersCardViewProps {
   workOrders: WorkOrder[];
@@ -22,6 +21,39 @@ export const WorkOrdersCardView = ({
 }: WorkOrdersCardViewProps) => {
   const getInitials = (name: string) => {
     return name.split(' ').map(n => n[0]).join('').toUpperCase();
+  };
+
+  const getAssetName = (workOrder: WorkOrder): string => {
+    // Check if we have asset data from the database join
+    if (workOrder.assets && typeof workOrder.assets === 'object' && 'name' in workOrder.assets) {
+      return workOrder.assets.name;
+    }
+    
+    // Fallback to asset field if it's a string
+    if (workOrder.asset && typeof workOrder.asset === 'string') {
+      return workOrder.asset;
+    }
+    
+    // Check if asset is an object with name property
+    if (workOrder.asset && typeof workOrder.asset === 'object' && 'name' in workOrder.asset) {
+      return workOrder.asset.name;
+    }
+    
+    return 'No Asset';
+  };
+
+  const getLocationName = (workOrder: WorkOrder): string => {
+    // Check if we have location data from the database join
+    if (workOrder.location && typeof workOrder.location === 'object' && 'name' in workOrder.location) {
+      return workOrder.location.name;
+    }
+    
+    // Fallback if location is a string
+    if (typeof workOrder.location === 'string') {
+      return workOrder.location;
+    }
+    
+    return 'No Location';
   };
 
   return (
@@ -62,7 +94,7 @@ export const WorkOrdersCardView = ({
                     {workOrder.title}
                   </h3>
                   <p className="text-sm text-gray-600">
-                    {getAssetName(workOrder.asset) || 'No Asset'} • #{workOrder.id.slice(-4)}
+                    {getAssetName(workOrder)} • #{workOrder.id.slice(-4)}
                   </p>
                 </div>
 
@@ -86,7 +118,7 @@ export const WorkOrdersCardView = ({
                   
                   <div className="flex items-center gap-2 text-sm text-gray-600">
                     <MapPin className="w-4 h-4 text-gray-400" />
-                    <span className="truncate">{getLocationName(workOrder.location) || 'No Location'}</span>
+                    <span className="truncate">{getLocationName(workOrder)}</span>
                   </div>
                 </div>
 

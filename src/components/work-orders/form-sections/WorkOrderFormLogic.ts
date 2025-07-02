@@ -56,40 +56,20 @@ export const processWorkOrderSubmission = async (
     throw new Error("User data not found");
   }
 
-  // For asset and location, the data.asset and data.location should already be IDs
+  // For asset - data.asset should be the asset ID
   let selectedAssetId = null;
-  let selectedLocationId = null;
-
-  if (data.asset) {
-    console.log("Processing asset:", data.asset);
-    // Check if it's already an ID (UUID format)
-    if (data.asset.length === 36 && data.asset.includes('-')) {
-      selectedAssetId = data.asset;
-      console.log("Asset is already an ID:", selectedAssetId);
-    } else {
-      // Try to find by name
-      const selectedAsset = assets?.find(asset => asset.name === data.asset);
-      if (selectedAsset) {
-        selectedAssetId = selectedAsset.id;
-        console.log("Found asset by name:", selectedAsset);
-      }
-    }
+  if (data.asset && data.asset.trim() !== "") {
+    // The form already sends the asset ID, so we can use it directly
+    selectedAssetId = data.asset;
+    console.log("Using asset ID:", selectedAssetId);
   }
 
-  if (data.location) {
-    console.log("Processing location:", data.location);
-    // Check if it's already an ID (UUID format)
-    if (data.location.length === 36 && data.location.includes('-')) {
-      selectedLocationId = data.location;
-      console.log("Location is already an ID:", selectedLocationId);
-    } else {
-      // Try to find by name
-      const selectedLocation = locations?.find(location => location.name === data.location);
-      if (selectedLocation) {
-        selectedLocationId = selectedLocation.id;
-        console.log("Found location by name:", selectedLocation);
-      }
-    }
+  // For location - data.location should be the location ID  
+  let selectedLocationId = null;
+  if (data.location && data.location.trim() !== "") {
+    // The form already sends the location ID, so we can use it directly
+    selectedLocationId = data.location;
+    console.log("Using location ID:", selectedLocationId);
   }
 
   // Find actual user ID for assignee

@@ -94,8 +94,21 @@ export const NewWorkOrderDialog = ({
           ? workOrder.tags.join(', ') 
           : '';
 
-        const assetId = getAssetId(workOrder.asset, workOrder.asset_id, workOrder);
-        const locationId = getLocationId(workOrder.location, workOrder.location_id, workOrder);
+        // Extract asset ID - prioritize asset_id field, then check assets object
+        let assetId = "";
+        if (workOrder.asset_id) {
+          assetId = workOrder.asset_id;
+        } else if (workOrder.assets && typeof workOrder.assets === 'object' && 'id' in workOrder.assets) {
+          assetId = workOrder.assets.id;
+        }
+
+        // Extract location ID - prioritize location_id field, then check location object  
+        let locationId = "";
+        if (workOrder.location_id) {
+          locationId = workOrder.location_id;
+        } else if (workOrder.location && typeof workOrder.location === 'object' && 'id' in workOrder.location) {
+          locationId = workOrder.location.id;
+        }
         
         console.log("Extracted asset ID:", assetId);
         console.log("Extracted location ID:", locationId);
@@ -105,8 +118,8 @@ export const NewWorkOrderDialog = ({
           description: workOrder.description || "",
           priority: (workOrder.priority as "low" | "medium" | "high" | "urgent") || "medium",
           assignedTo: getAssignee(workOrder.assignedTo),
-          asset: assetId || "",
-          location: locationId || "",
+          asset: assetId,
+          location: locationId,
           category: workOrder.category || "maintenance",
           tags: tagsString,
           dueDate: workOrder.due_date ? new Date(workOrder.due_date) : undefined,
@@ -129,7 +142,7 @@ export const NewWorkOrderDialog = ({
         });
       }
     }
-  }, [workOrder, open, form, assets, locations]);
+  }, [workOrder, open, form]);
 
   const onSubmit = async (data: WorkOrderFormData) => {
     try {
