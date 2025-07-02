@@ -1,5 +1,6 @@
 
 import type { Database } from "@/integrations/supabase/types";
+import { supabase } from "@/integrations/supabase/client";
 
 type Tables = Database["public"]["Tables"];
 
@@ -41,6 +42,22 @@ export const processWorkOrderSubmission = async (
 ): Promise<Tables["work_orders"]["Insert"]> => {
   console.log("Processing form data:", formData);
 
+  // Get current user's tenant_id
+  const { data: userData, error: userError } = await supabase.auth.getUser();
+  if (userError || !userData.user) {
+    throw new Error("User not authenticated");
+  }
+
+  const { data: userRecord, error: userRecordError } = await supabase
+    .from("users")
+    .select("tenant_id")
+    .eq("id", userData.user.id)
+    .single();
+
+  if (userRecordError || !userRecord) {
+    throw new Error("Failed to get user tenant information");
+  }
+
   // Convert tags string to array
   const tagsArray = formData.tags ? 
     formData.tags.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0) : 
@@ -58,6 +75,7 @@ export const processWorkOrderSubmission = async (
     assigned_to: formData.assignedTo || null,
     asset_id: formData.asset || null,
     location_id: formData.location || null,
+    tenant_id: userRecord.tenant_id,
   };
 
   console.log("Processed work order data:", workOrderData);
