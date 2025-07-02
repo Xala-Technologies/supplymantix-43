@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/integrations/supabase/types";
 
@@ -46,12 +45,12 @@ export const workOrdersApi = {
 
     console.log('User tenant_id:', userData.tenant_id);
 
-    // Fetch work orders with proper joins
+    // Fetch work orders with proper joins - alias assets as asset
     const { data, error } = await supabase
       .from("work_orders")
       .select(`
         *,
-        assets(id, name, location),
+        asset:assets(id, name, location),
         assigned_user:users!work_orders_assigned_to_fkey(id, email, first_name, last_name),
         location:locations(id, name)
       `)
