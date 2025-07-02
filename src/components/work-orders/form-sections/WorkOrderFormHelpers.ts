@@ -33,20 +33,26 @@ export const getAssetName = (asset: WorkOrder['asset']): string => {
   return "";
 };
 
-export const getAssetId = (asset: WorkOrder['asset']): string => {
-  if (!asset) return "";
-  if (typeof asset === "object" && asset !== null && 'id' in asset) {
+export const getAssetId = (asset: WorkOrder['asset'], fallbackAssetId?: string): string => {
+  // First try to get ID from asset object
+  if (asset && typeof asset === "object" && asset !== null && 'id' in asset) {
     const assetObj = asset as { id?: string };
     return assetObj.id || "";
   }
-  return "";
+  // If asset is a string, it might be the ID itself
+  if (typeof asset === "string") return asset;
+  // Use fallback asset_id if available
+  return fallbackAssetId || "";
 };
 
-export const getLocationId = (location: WorkOrder['location']): string => {
-  if (!location) return "";
-  if (typeof location === "object" && location !== null && 'id' in location) {
+export const getLocationId = (location: WorkOrder['location'], fallbackLocationId?: string): string => {
+  // First try to get ID from location object
+  if (location && typeof location === "object" && location !== null && 'id' in location) {
     const locationObj = location as { id?: string };
     return locationObj.id || "";
   }
-  return "";
+  // If location is a string, it might be the ID itself
+  if (typeof location === "string") return location;
+  // Use fallback location_id if available
+  return fallbackLocationId || "";
 };

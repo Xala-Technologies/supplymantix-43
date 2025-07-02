@@ -92,17 +92,20 @@ export const NewWorkOrderDialog = ({
           ? workOrder.tags.join(', ') 
           : '';
 
-        form.reset({
+        const formData = {
           title: workOrder.title || "",
           description: workOrder.description || "",
           priority: workOrder.priority || "medium",
           assignedTo: getAssignee(workOrder.assignedTo),
-          asset: getAssetId(workOrder.asset) || "", // Use asset ID instead of name
-          location: getLocationId(workOrder.location) || "", // Use location ID instead of name
+          asset: getAssetId(workOrder.asset, workOrder.asset_id) || "", // Pass fallback asset_id
+          location: getLocationId(workOrder.location, workOrder.location_id) || "", // Pass fallback location_id
           category: workOrder.category || "maintenance",
           tags: tagsString,
           dueDate: workOrder.due_date ? new Date(workOrder.due_date) : undefined,
-        });
+        };
+
+        console.log("Setting form data for editing:", formData);
+        form.reset(formData);
       } else {
         // Reset form for new work order
         form.reset({
@@ -136,6 +139,8 @@ export const NewWorkOrderDialog = ({
         category: data.category,
         tags: data.tags || "",
       };
+
+      console.log("Submitting form data:", formData);
 
       const workOrderData = await processWorkOrderSubmission(formData, users, assets, locations);
 
