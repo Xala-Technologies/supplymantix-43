@@ -129,7 +129,7 @@ export const ProcedureDialogHeader: React.FC<ProcedureDialogHeaderProps> = ({
           )}
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
           {isEditing ? (
             <>
               <Button
@@ -137,6 +137,7 @@ export const ProcedureDialogHeader: React.FC<ProcedureDialogHeaderProps> = ({
                 size="sm"
                 onClick={onEditCancel}
                 disabled={isSaving}
+                className="mr-2"
               >
                 <X className="h-4 w-4 mr-2" />
                 Cancel

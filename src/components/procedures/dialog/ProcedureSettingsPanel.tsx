@@ -1,25 +1,11 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { User, Calendar, Tag, CheckCircle, X } from 'lucide-react';
-
-const CATEGORIES = [
-  'Inspection',
-  'Safety',
-  'Calibration', 
-  'Reactive Maintenance',
-  'Preventive Maintenance',
-  'Quality Control',
-  'Training',
-  'Other'
-];
 
 interface ProcedureSettingsPanelProps {
   procedure: any;
@@ -53,51 +39,6 @@ export const ProcedureSettingsPanel: React.FC<ProcedureSettingsPanelProps> = ({
   if (isEditing) {
     return (
       <div className="space-y-4">
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Basic Information</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <div>
-              <Label>Title *</Label>
-              <Input
-                value={editData.title}
-                onChange={(e) => onEditDataChange({ title: e.target.value })}
-                placeholder="Procedure title"
-              />
-            </div>
-            
-            <div>
-              <Label>Description</Label>
-              <Textarea
-                value={editData.description}
-                onChange={(e) => onEditDataChange({ description: e.target.value })}
-                placeholder="Procedure description"
-                rows={3}
-              />
-            </div>
-
-            <div>
-              <Label>Category</Label>
-              <Select
-                value={editData.category}
-                onValueChange={(value) => onEditDataChange({ category: value })}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {CATEGORIES.map(category => (
-                    <SelectItem key={category} value={category}>
-                      {category}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </CardContent>
-        </Card>
-
         <Card>
           <CardHeader>
             <CardTitle className="text-base">Tags</CardTitle>
@@ -154,15 +95,6 @@ export const ProcedureSettingsPanel: React.FC<ProcedureSettingsPanelProps> = ({
 
   return (
     <div className="space-y-4">
-      <Card>
-        <CardContent className="p-4">
-          <h3 className="font-semibold mb-2">Description</h3>
-          <p className="text-gray-700">
-            {procedure.description || 'No description provided'}
-          </p>
-        </CardContent>
-      </Card>
-
       <div className="grid grid-cols-2 gap-4">
         <Card>
           <CardContent className="p-4">
@@ -200,6 +132,21 @@ export const ProcedureSettingsPanel: React.FC<ProcedureSettingsPanelProps> = ({
           </CardContent>
         </Card>
       </div>
+
+      {procedure.tags && procedure.tags.length > 0 && (
+        <Card>
+          <CardContent className="p-4">
+            <h3 className="font-semibold mb-2">Tags</h3>
+            <div className="flex flex-wrap gap-2">
+              {procedure.tags.map((tag: string, index: number) => (
+                <Badge key={index} variant="outline" className="text-xs">
+                  {tag}
+                </Badge>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 };
