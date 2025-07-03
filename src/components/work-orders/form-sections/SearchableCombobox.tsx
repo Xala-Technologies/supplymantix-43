@@ -65,19 +65,16 @@ export const SearchableCombobox = ({
       </PopoverTrigger>
       <PopoverContent className="w-full p-0 shadow-lg border border-gray-200" align="start">
         <Command className="rounded-lg">
-          <div className="flex items-center border-b border-gray-100 px-3">
-            <Search className="h-4 w-4 text-gray-400 mr-2" />
-            <CommandInput 
-              placeholder={searchPlaceholder}
-              value={searchValue}
-              onValueChange={setSearchValue}
-              className="flex h-11 w-full rounded-md bg-transparent py-3 text-sm outline-none placeholder:text-gray-400 disabled:cursor-not-allowed disabled:opacity-50 border-none focus:ring-0"
-            />
-          </div>
+          <CommandInput 
+            placeholder={searchPlaceholder}
+            value={searchValue}
+            onValueChange={setSearchValue}
+            className="flex h-11 w-full rounded-md bg-transparent py-3 px-3 text-sm outline-none placeholder:text-gray-400 disabled:cursor-not-allowed disabled:opacity-50 border-none focus:ring-0"
+          />
           <CommandList>
-            {filteredOptions.length > 0 ? (
-              <CommandGroup>
-                {/* None/Unassigned option */}
+            <CommandGroup>
+              {/* None/Unassigned option - only show if no search or "none" matches search */}
+              {(!searchValue.trim() || "none".toLowerCase().includes(searchValue.toLowerCase())) && (
                 <CommandItem
                   value="none"
                   onSelect={() => {
@@ -94,43 +91,43 @@ export const SearchableCombobox = ({
                   />
                   None
                 </CommandItem>
-                
-                {/* Filtered existing options */}
-                {filteredOptions.map((option) => (
-                  <CommandItem
-                    key={option.id}
-                    value={option.id}
-                    onSelect={(currentValue) => {
-                      onSelect(currentValue === value ? "" : currentValue);
-                      setOpen(false);
-                      setSearchValue("");
-                    }}
-                  >
-                    <Check
-                      className={cn(
-                        "mr-2 h-4 w-4",
-                        value === option.id ? "opacity-100" : "opacity-0"
-                      )}
-                    />
-                    {option.label || option.name}
-                  </CommandItem>
-                ))}
-              </CommandGroup>
-            ) : (
-              /* No results found - show create option */
+              )}
+              
+              {/* Filtered existing options */}
+              {filteredOptions.map((option) => (
+                <CommandItem
+                  key={option.id}
+                  value={option.id}
+                  onSelect={(currentValue) => {
+                    onSelect(currentValue === value ? "" : currentValue);
+                    setOpen(false);
+                    setSearchValue("");
+                  }}
+                >
+                  <Check
+                    className={cn(
+                      "mr-2 h-4 w-4",
+                      value === option.id ? "opacity-100" : "opacity-0"
+                    )}
+                  />
+                  {option.label || option.name}
+                </CommandItem>
+              ))}
+            </CommandGroup>
+            
+            {/* Show create option only when no matches found and search has value */}
+            {filteredOptions.length === 0 && searchValue.trim() && onCreateNew && (
               <CommandEmpty>
                 <div className="flex flex-col items-center gap-2 py-6">
                   <p className="text-sm text-muted-foreground">{emptyText}</p>
-                  {onCreateNew && searchValue.trim() && (
-                    <Button
-                      size="sm"
-                      onClick={handleCreateNew}
-                      className="h-8"
-                    >
-                      <Plus className="h-3 w-3 mr-1" />
-                      {createText} "{searchValue.trim()}"
-                    </Button>
-                  )}
+                  <Button
+                    size="sm"
+                    onClick={handleCreateNew}
+                    className="h-8"
+                  >
+                    <Plus className="h-3 w-3 mr-1" />
+                    {createText} "{searchValue.trim()}"
+                  </Button>
                 </div>
               </CommandEmpty>
             )}
