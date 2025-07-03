@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { 
@@ -49,20 +48,23 @@ export const InventoryStats = ({
   ];
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-      {stats.map((stat) => (
-        <Card key={stat.name}>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">{stat.name}</p>
-                <p className="text-2xl font-bold text-gray-900">{stat.value}</p>
-              </div>
-              <stat.icon className={`h-8 w-8 ${stat.color}`} />
-            </div>
-          </CardContent>
-        </Card>
-      ))}
+    <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+      <div className="bg-white rounded-lg shadow p-6 flex flex-col items-center">
+        <span className="text-gray-500 text-xs mb-1">Total Parts</span>
+        <span className="text-2xl font-bold text-gray-900">{totalItems}</span>
+      </div>
+      <div className="bg-white rounded-lg shadow p-6 flex flex-col items-center">
+        <span className="text-gray-500 text-xs mb-1">Low Stock Parts</span>
+        <span className="text-2xl font-bold text-yellow-600">{lowStockItems}</span>
+      </div>
+      <div className="bg-white rounded-lg shadow p-6 flex flex-col items-center">
+        <span className="text-gray-500 text-xs mb-1">Total Value</span>
+        <span className="text-2xl font-bold text-green-700">${totalValue.toLocaleString()}</span>
+      </div>
+      <div className="bg-white rounded-lg shadow p-6 flex flex-col items-center">
+        <span className="text-gray-500 text-xs mb-1">Categories</span>
+        <span className="text-2xl font-bold text-blue-700">{categories}</span>
+      </div>
     </div>
   );
 };

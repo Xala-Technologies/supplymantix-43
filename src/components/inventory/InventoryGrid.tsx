@@ -72,8 +72,8 @@ export const InventoryGrid = ({
     return (
       <div className="text-center py-12">
         <Package className="mx-auto h-12 w-12 text-gray-400" />
-        <h3 className="mt-2 text-sm font-medium text-gray-900">No inventory items</h3>
-        <p className="mt-1 text-sm text-gray-500">Get started by adding a new inventory item.</p>
+        <h3 className="mt-2 text-sm font-medium text-gray-900">No parts in inventory</h3>
+        <p className="mt-1 text-sm text-gray-500">Get started by adding a new part.</p>
       </div>
     );
   }
@@ -152,7 +152,7 @@ export const InventoryGrid = ({
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Inventory Item</AlertDialogTitle>
+            <AlertDialogTitle>Delete Part</AlertDialogTitle>
             <AlertDialogDescription>
               Are you sure you want to delete "{itemToDelete?.name}"? This action can be undone within 10 seconds.
             </AlertDialogDescription>

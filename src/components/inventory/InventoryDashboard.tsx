@@ -2,7 +2,6 @@ import { useState } from "react";
 import { InventoryHeader } from "./InventoryHeader";
 import { InventoryStats } from "./InventoryStats";
 import { InventoryGrid } from "./InventoryGrid";
-import { InventoryForm } from "./InventoryForm";
 import { InventoryDetailCard } from "./InventoryDetailCard";
 import { DataLoadingManager } from "@/components/ui/DataLoadingManager";
 import { useInventoryEnhanced } from '@/hooks/useInventoryEnhanced';
@@ -13,7 +12,7 @@ import { useUndoDelete } from "@/hooks/useUndoDelete";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 
-interface InventoryItem {
+interface Part {
   id: string;
   name: string;
   sku: string;
@@ -27,7 +26,7 @@ interface InventoryItem {
   status: string;
 }
 
-const mapToInventoryItem = (item: InventoryItemWithStats): InventoryItem => ({
+const mapToPart = (item: InventoryItemWithStats): Part => ({
   id: item.id,
   name: item.name,
   sku: item.sku,
@@ -41,11 +40,11 @@ const mapToInventoryItem = (item: InventoryItemWithStats): InventoryItem => ({
   status: item.is_low_stock ? 'low_stock' : item.quantity === 0 ? 'out_of_stock' : 'in_stock',
 });
 
-export const InventoryDashboard = () => {
+export const PartsInventoryDashboard = () => {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [locationFilter, setLocationFilter] = useState<string>("all");
-  const [selectedItem, setSelectedItem] = useState<InventoryItemWithStats | null>(null);
+  const [selectedPart, setSelectedPart] = useState<InventoryItemWithStats | null>(null);
   const [showCreateForm, setShowCreateForm] = useState(false);
 
   const navigate = useNavigate();
@@ -65,50 +64,50 @@ export const InventoryDashboard = () => {
   const { addUndoItem } = useUndoDelete();
 
   // Safely access inventory data with fallbacks
-  const rawItems = inventoryData?.items || [];
-  const items = rawItems.map(mapToInventoryItem);
-  const totalItems = items.length;
-  const lowStockItems = rawItems.filter(item => item.is_low_stock).length;
-  const totalValue = rawItems.reduce((sum, item) => sum + (item.total_value || 0), 0);
-  const categories = new Set(rawItems.map(item => item.location || 'Unknown')).size;
+  const rawParts = inventoryData?.items || [];
+  const parts = rawParts.map(mapToPart);
+  const totalParts = parts.length;
+  const lowStockParts = rawParts.filter(item => item.is_low_stock).length;
+  const totalValue = rawParts.reduce((sum, item) => sum + (item.total_value || 0), 0);
+  const categories = new Set(rawParts.map(item => item.location || 'Unknown')).size;
 
   // Get unique locations for filter
-  const locations = Array.from(new Set(rawItems.map(item => item.location).filter(Boolean)));
+  const locations = Array.from(new Set(rawParts.map(item => item.location).filter(Boolean)));
 
-  const handleCreateItem = () => {
+  const handleCreatePart = () => {
     navigate('/dashboard/inventory/new');
   };
 
-  const handleViewItem = (item: InventoryItemWithStats) => {
-    console.log('Viewing item:', item);
-    setSelectedItem(item);
+  const handleViewPart = (part: InventoryItemWithStats) => {
+    console.log('Viewing part:', part);
+    setSelectedPart(part);
   };
 
-  const handleDeleteItem = async (item: InventoryItemWithStats) => {
-    console.log('Deleting item:', item);
+  const handleDeletePart = async (part: InventoryItemWithStats) => {
+    console.log('Deleting part:', part);
     
     try {
       const itemToRestore = {
-        name: item.name,
-        description: item.description,
-        sku: item.sku,
-        location: item.location,
-        quantity: item.quantity,
-        min_quantity: item.min_quantity,
-        unit_cost: item.unit_cost,
+        name: part.name,
+        description: part.description,
+        sku: part.sku,
+        location: part.location,
+        quantity: part.quantity,
+        min_quantity: part.min_quantity,
+        unit_cost: part.unit_cost,
       };
 
-      await deleteMutation.mutateAsync(item.id);
+      await deleteMutation.mutateAsync(part.id);
 
       addUndoItem(
-        item.id,
+        part.id,
         itemToRestore,
         async () => {
-          console.log('Restoring item:', itemToRestore);
+          console.log('Restoring part:', itemToRestore);
           await createMutation.mutateAsync(itemToRestore);
           await refetch();
         },
-        item.name
+        part.name
       );
     } catch (error) {
       console.error('Delete error:', error);
@@ -129,7 +128,7 @@ export const InventoryDashboard = () => {
   const handleExportData = async () => {
     console.log('Exporting inventory data');
     try {
-      await exportMutation.mutateAsync(rawItems);
+      await exportMutation.mutateAsync(rawParts);
     } catch (error) {
       console.error('Export error:', error);
     }
@@ -147,7 +146,7 @@ export const InventoryDashboard = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       <InventoryHeader
-        onCreateItem={handleCreateItem}
+        onCreateItem={handleCreatePart}
         searchQuery={search}
         onSearchChange={setSearch}
         onRefresh={handleRefresh}
@@ -156,16 +155,16 @@ export const InventoryDashboard = () => {
         statusFilter={statusFilter}
         locationFilter={locationFilter}
         locations={locations}
-        totalItems={totalItems}
-        lowStockCount={lowStockItems}
+        totalItems={totalParts}
+        lowStockCount={lowStockParts}
         isLoading={isLoading}
         isExporting={exportMutation.isPending}
       />
       
       <div className="p-6">
         <InventoryStats
-          totalItems={totalItems}
-          lowStockItems={lowStockItems}
+          totalItems={totalParts}
+          lowStockItems={lowStockParts}
           totalValue={totalValue}
           categories={categories}
         />
@@ -174,40 +173,40 @@ export const InventoryDashboard = () => {
           isLoading={isLoading}
           error={error}
           onRetry={refetch}
-          loadingText="Loading inventory items..."
-          errorText="Failed to load inventory data"
+          loadingText="Loading parts..."
+          errorText="Failed to load parts inventory"
         >
           <InventoryGrid
-            items={items}
-            onViewItem={(item) => navigate(`/dashboard/inventory/${item.id}`)}
-            onDeleteItem={(item) => handleDeleteItem(rawItems.find(i => i.id === item.id) as InventoryItemWithStats)}
+            items={parts}
+            onViewItem={(part) => navigate(`/dashboard/inventory/${part.id}`)}
+            onDeleteItem={(part) => handleDeletePart(rawParts.find(i => i.id === part.id) as InventoryItemWithStats)}
           />
         </DataLoadingManager>
       </div>
 
-      {selectedItem && (
+      {selectedPart && (
         <InventoryDetailCard
           item={{
-            id: selectedItem.id,
-            name: selectedItem.name,
-            sku: selectedItem.sku,
-            description: selectedItem.description,
-            quantity: selectedItem.quantity,
-            minQuantity: selectedItem.min_quantity,
-            unitCost: selectedItem.unit_cost,
-            totalValue: selectedItem.total_value,
-            location: selectedItem.location,
-            category: selectedItem.location || 'General',
-            status: selectedItem.is_low_stock ? 'low_stock' : selectedItem.quantity === 0 ? 'out_of_stock' : 'in_stock',
+            id: selectedPart.id,
+            name: selectedPart.name,
+            sku: selectedPart.sku,
+            description: selectedPart.description,
+            quantity: selectedPart.quantity,
+            minQuantity: selectedPart.min_quantity,
+            unitCost: selectedPart.unit_cost,
+            totalValue: selectedPart.total_value,
+            location: selectedPart.location,
+            category: selectedPart.location || 'General',
+            status: selectedPart.is_low_stock ? 'low_stock' : selectedPart.quantity === 0 ? 'out_of_stock' : 'in_stock',
             supplier: 'N/A',
             partNumber: 'N/A',
             lastOrdered: 'N/A',
             leadTime: 'N/A',
-            reorderPoint: selectedItem.min_quantity,
-            maxStock: selectedItem.min_quantity * 3,
+            reorderPoint: selectedPart.min_quantity,
+            maxStock: selectedPart.min_quantity * 3,
             transactions: []
           }}
-          onClose={() => setSelectedItem(null)}
+          onClose={() => setSelectedPart(null)}
         />
       )}
     </div>

@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -47,9 +46,9 @@ export const InventoryHeader = ({
     <div className="bg-white border-b border-gray-200 px-6 py-4">
       <div className="flex items-center justify-between mb-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Inventory Management</h1>
+          <h1 className="text-2xl font-bold text-gray-900">Parts Inventory Dashboard</h1>
           <p className="text-gray-600 text-sm mt-1">
-            {totalItems} items total • {lowStockCount} low stock alerts
+            {totalItems} parts total • {lowStockCount} low stock alerts
           </p>
         </div>
         
@@ -87,7 +86,7 @@ export const InventoryHeader = ({
           
           <Button onClick={onCreateItem}>
             <Plus className="h-4 w-4 mr-2" />
-            Add Item
+            Add Part
           </Button>
         </div>
       </div>
@@ -96,7 +95,7 @@ export const InventoryHeader = ({
         <div className="relative flex-1 min-w-[300px]">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
           <Input
-            placeholder="Search by name, SKU, or description..."
+            placeholder="Search parts by name, SKU, or description..."
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
             className="pl-10"
