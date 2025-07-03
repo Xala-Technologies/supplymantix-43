@@ -4,16 +4,13 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { CalendarIcon, Paperclip, Plus, X, Search } from "lucide-react";
-import { format } from "date-fns";
-import { cn } from "@/lib/utils";
+import { Paperclip, Plus, Search } from "lucide-react";
 import { UseFormReturn } from "react-hook-form";
-import { Badge } from "@/components/ui/badge";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { ProcedureSelectionDialog } from "../ProcedureSelectionDialog";
 import { useNavigate } from "react-router-dom";
+import { TitleField } from "../form-fields/TitleField";
+import { PriorityField } from "../form-fields/PriorityField";
+import { DateFields } from "../form-fields/DateFields";
 
 interface Asset {
   id: string;
