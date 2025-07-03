@@ -47,7 +47,7 @@ export function SidebarNavigation() {
                         relative group h-9 px-3 rounded-xl transition-all duration-200 ease-in-out m-0
                         overflow-hidden
                         ${isActive 
-                          ? 'bg-gradient-to-r from-blue-500 via-purple-600 to-indigo-600 text-white shadow-lg shadow-blue-500/25' 
+                          ? 'bg-gradient-to-r from-blue-500 via-purple-600 to-indigo-600 text-white shadow-lg shadow-blue-500/25 hover:text-white' 
                           : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900 active:bg-gray-100'
                         }
                         ${isCollapsed ? 'w-9 justify-center' : 'w-full'}
