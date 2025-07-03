@@ -1,8 +1,10 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Plus, X } from 'lucide-react';
 import { ProcedureField } from '@/lib/database/procedures-enhanced';
 
 interface ChoiceOptionsProps {
@@ -16,13 +18,31 @@ export const ChoiceOptions: React.FC<ChoiceOptionsProps> = ({
   index,
   onUpdate
 }) => {
-  const handleChoicesUpdate = (choicesText: string) => {
-    const choices = choicesText.split('\n').filter(choice => choice.trim() !== '');
+  const [newChoice, setNewChoice] = useState('');
+  const choices = field.options?.choices || [];
+
+  const addChoice = () => {
+    if (!newChoice.trim()) return;
+    
+    const updatedChoices = [...choices, newChoice.trim()];
     if (onUpdate) {
       onUpdate(index, {
         options: {
           ...field.options,
-          choices
+          choices: updatedChoices
+        }
+      });
+    }
+    setNewChoice('');
+  };
+
+  const removeChoice = (choiceIndex: number) => {
+    const updatedChoices = choices.filter((_, i) => i !== choiceIndex);
+    if (onUpdate) {
+      onUpdate(index, {
+        options: {
+          ...field.options,
+          choices: updatedChoices
         }
       });
     }
@@ -31,28 +51,72 @@ export const ChoiceOptions: React.FC<ChoiceOptionsProps> = ({
   const getOptionsLabel = () => {
     switch (field.field_type) {
       case 'select':
-        return 'Dropdown Options (one per line)';
+        return 'Dropdown Options';
       case 'multiselect':
-        return 'Checklist Options (one per line)';
+        return 'Checklist Options';
       case 'radio':
-        return 'Multiple Choice Options (one per line)';
+        return 'Multiple Choice Options';
       default:
-        return 'Options (one per line)';
+        return 'Options';
     }
   };
 
   return (
     <div className="mb-4">
-      <Label className="text-sm font-medium mb-2 block">{getOptionsLabel()}</Label>
-      <Textarea
-        value={field.options?.choices?.join('\n') || ''}
-        onChange={(e) => handleChoicesUpdate(e.target.value)}
-        placeholder="Option 1&#10;Option 2&#10;Option 3"
-        rows={4}
-        className="resize-none text-sm"
-      />
+      <div className="flex items-center justify-between mb-2">
+        <Label className="text-sm font-medium">{getOptionsLabel()}</Label>
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={addChoice}
+          disabled={!newChoice.trim()}
+          className="h-8"
+        >
+          <Plus className="h-3 w-3 mr-1" />
+          Add Option
+        </Button>
+      </div>
+      
+      <div className="space-y-2">
+        {choices.map((choice: string, choiceIndex: number) => (
+          <div key={choiceIndex} className="flex items-center gap-2 p-3 border rounded-lg bg-white">
+            <Input
+              value={choice}
+              readOnly
+              className="flex-1 border-none bg-transparent p-0 focus-visible:ring-0"
+            />
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={() => removeChoice(choiceIndex)}
+              className="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
+        ))}
+        
+        <div className="flex items-center gap-2">
+          <Input
+            value={newChoice}
+            onChange={(e) => setNewChoice(e.target.value)}
+            placeholder="Add new option"
+            className="flex-1"
+            onKeyPress={(e) => e.key === 'Enter' && addChoice()}
+          />
+        </div>
+        
+        {choices.length === 0 && (
+          <p className="text-sm text-gray-500 text-center py-4 border-2 border-dashed rounded">
+            Click "Add Option" to create choices for this field
+          </p>
+        )}
+      </div>
+
       {field.field_type === 'multiselect' && (
-        <div className="mt-2 flex items-center space-x-2">
+        <div className="mt-3 flex items-center space-x-2">
           <Checkbox
             id={`allow-other-${index}`}
             checked={field.options?.allowOther || false}
