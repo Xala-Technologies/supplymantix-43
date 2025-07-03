@@ -48,7 +48,7 @@ export function SidebarNavigation() {
                         overflow-hidden
                         ${isActive 
                           ? 'bg-gradient-to-r from-blue-500 via-purple-600 to-indigo-600 text-white shadow-lg shadow-blue-500/25' 
-                          : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900 active:bg-gray-100'
+                          : 'text-gray-700 hover:bg-gray-50 hover:text-white active:bg-gray-100'
                         }
                         ${isCollapsed ? 'w-9 justify-center' : 'w-full'}
                       `}
@@ -62,7 +62,7 @@ export function SidebarNavigation() {
                           w-5 h-5 rounded-lg flex items-center justify-center transition-all duration-200 ease-in-out
                           ${isActive 
                             ? 'bg-white/20 text-white shadow-sm' 
-                            : 'bg-transparent text-gray-600 group-hover:text-gray-700'
+                            : 'bg-transparent text-gray-600 group-hover:text-white'
                           }
                         `}>
                           <Icon className="w-4 h-4" />
