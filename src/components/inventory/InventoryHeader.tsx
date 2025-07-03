@@ -137,39 +137,39 @@ export const InventoryHeader = ({
                 ))}
               </SelectContent>
             </Select>
+
+            {/* View Toggle */}
+            {onViewModeChange && (
+              <div className="flex items-center gap-1 p-1 bg-gray-100 rounded-lg">
+                <Button
+                  size="sm"
+                  variant={viewMode === 'grid' ? 'default' : 'ghost'}
+                  onClick={() => onViewModeChange('grid')}
+                  className={`px-3 py-1.5 text-xs ${
+                    viewMode === 'grid' 
+                      ? 'bg-white shadow-sm text-gray-900' 
+                      : 'text-gray-600 hover:text-gray-900'
+                  }`}
+                >
+                  <Grid3X3 className="h-3.5 w-3.5 mr-1.5" />
+                  Cards
+                </Button>
+                <Button
+                  size="sm"
+                  variant={viewMode === 'list' ? 'default' : 'ghost'}
+                  onClick={() => onViewModeChange('list')}
+                  className={`px-3 py-1.5 text-xs ${
+                    viewMode === 'list' 
+                      ? 'bg-white shadow-sm text-gray-900' 
+                      : 'text-gray-600 hover:text-gray-900'
+                  }`}
+                >
+                  <List className="h-3.5 w-3.5 mr-1.5" />
+                  List
+                </Button>
+              </div>
+            )}
           </>
-        )}
-        
-        {/* View Toggle */}
-        {onViewModeChange && (
-          <div className="flex items-center gap-1 p-1 bg-gray-100 rounded-lg">
-            <Button
-              size="sm"
-              variant={viewMode === 'grid' ? 'default' : 'ghost'}
-              onClick={() => onViewModeChange('grid')}
-              className={`px-3 py-1.5 text-xs ${
-                viewMode === 'grid' 
-                  ? 'bg-white shadow-sm text-gray-900' 
-                  : 'text-gray-600 hover:text-gray-900'
-              }`}
-            >
-              <Grid3X3 className="h-3.5 w-3.5 mr-1.5" />
-              Cards
-            </Button>
-            <Button
-              size="sm"
-              variant={viewMode === 'list' ? 'default' : 'ghost'}
-              onClick={() => onViewModeChange('list')}
-              className={`px-3 py-1.5 text-xs ${
-                viewMode === 'list' 
-                  ? 'bg-white shadow-sm text-gray-900' 
-                  : 'text-gray-600 hover:text-gray-900'
-              }`}
-            >
-              <List className="h-3.5 w-3.5 mr-1.5" />
-              List
-            </Button>
-          </div>
         )}
       </div>
     </div>
