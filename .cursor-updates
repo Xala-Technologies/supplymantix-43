@@ -2,3 +2,4 @@
 - Refactored AdvancedPartForm to match AssetForm design and UX: react-hook-form, Card sections, selects, uploads, barcode generator, and consistent UI. 
 - AdvancedPartForm now actually creates a new part in the backend using useCreatePart, making new parts visible in the inventory dashboard. 
 - Unified all inventory and part logic/UI under 'Parts Inventory'. Updated dashboard, grid, stats, and all UI text to use 'Part' and 'Parts Inventory'. No more 'Inventory Item' in UI. Lint run confirms no new errors from this refactor. 
+- Major refactor: renamed all inventory_items references to parts_items, updated all code and form logic, and created migration for table rename. AdvancedPartForm now creates new parts in parts_items and they appear in dashboard. 

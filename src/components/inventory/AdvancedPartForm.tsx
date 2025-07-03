@@ -15,7 +15,7 @@ import { useLocations } from "@/hooks/useLocations";
 import { useAssetTypes } from "@/hooks/useAssetTypes";
 import { useAssets } from "@/hooks/useAssets";
 import type { Part as BasePart } from "@/hooks/useParts";
-import { useCreatePart } from "@/hooks/useParts";
+import { useCreateInventoryItem } from "@/hooks/useInventoryMutations";
 
 interface AdvancedPartFormProps {
   onSuccess: () => void;
@@ -62,7 +62,7 @@ export const AdvancedPartForm: React.FC<AdvancedPartFormProps> = ({ onSuccess, p
   const { data: locations = [] } = useLocations();
   const { data: assetTypes = [] } = useAssetTypes();
   const { data: assets = [] } = useAssets();
-  const createPart = useCreatePart();
+  const createPart = useCreateInventoryItem();
 
   const [documents, setDocuments] = useState<{ name: string; url: string; size: number }[]>(part?.documents || []);
   const [imageUrl, setImageUrl] = useState<string>(part?.picture_url || "");
@@ -101,12 +101,12 @@ export const AdvancedPartForm: React.FC<AdvancedPartFormProps> = ({ onSuccess, p
     // Clean up the data to convert empty strings to null for optional fields
     const cleanedData = {
       name: data.name,
-      description: data.description || undefined,
-      unit_cost: data.unit_cost || undefined,
-      // Only include fields that exist in the Part type for the mutation
-      part_number: undefined, // Not in form, but required by Part type as optional
-      vendor_id: data.vendor || undefined,
-      // created_at, updated_at, id, tenant_id are handled by backend
+      description: data.description || '',
+      sku: '',
+      location: data.location || '',
+      quantity: data.quantity || 0,
+      min_quantity: data.min_quantity || 0,
+      unit_cost: data.unit_cost || 0,
     };
     try {
       await createPart.mutateAsync(cleanedData);

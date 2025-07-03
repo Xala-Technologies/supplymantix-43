@@ -150,7 +150,7 @@ export const purchaseOrdersApi = {
       console.log("Creating line item:", item);
       const lineItemData = {
         purchase_order_id: po.id,
-        inventory_item_id: item.inventory_item_id,
+        parts_item_id: item.parts_item_id,
         quantity: item.quantity,
         unit_price: item.unit_price,
       };
@@ -212,7 +212,7 @@ export const purchaseOrdersApi = {
           .from("purchase_order_line_items")
           .insert({
             purchase_order_id: id,
-            inventory_item_id: item.inventory_item_id,
+            parts_item_id: item.parts_item_id,
             quantity: item.quantity,
             unit_price: item.unit_price,
           });
@@ -238,7 +238,7 @@ export const purchaseOrdersApi = {
       .from("purchase_order_line_items")
       .select(`
         *,
-        inventory_items (
+        parts_items (
           id,
           name,
           sku,
