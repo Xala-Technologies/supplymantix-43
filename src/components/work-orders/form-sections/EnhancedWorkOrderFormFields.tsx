@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -13,6 +13,7 @@ import { PriorityField } from "../form-fields/PriorityField";
 import { DateFields } from "../form-fields/DateFields";
 import { ImageUploadSection } from "./ImageUploadSection";
 import { ProcedureCard } from "./ProcedureCard";
+import { ProcedureSelectionDialogEnhanced } from "./ProcedureSelectionDialogEnhanced";
 
 interface Asset {
   id: string;
@@ -82,19 +83,26 @@ export const EnhancedWorkOrderFormFields = ({
     }
   ];
 
+  // Handle return from procedures page
+  useEffect(() => {
+    const handleReturnFromProcedures = () => {
+      const returnAction = localStorage.getItem('workOrderReturnAction');
+      if (returnAction === 'procedure-created') {
+        localStorage.removeItem('workOrderReturnAction');
+        localStorage.removeItem('workOrderReturnPath');
+        // Refresh the procedure dialog to show newly created procedures
+        setShowProcedureDialog(true);
+      }
+    };
+
+    handleReturnFromProcedures();
+  }, []);
+
   const handleProcedureSelect = (procedure: any) => {
-    const existingProcedure = mockProcedures.find(p => p.id === procedure.id);
-    if (existingProcedure && !selectedProcedures.find(p => p.id === procedure.id)) {
-      setSelectedProcedures(prev => [...prev, existingProcedure]);
+    if (!selectedProcedures.find(p => p.id === procedure.id)) {
+      setSelectedProcedures(prev => [...prev, procedure]);
     }
     setShowProcedureDialog(false);
-  };
-
-  const handleAddProcedure = () => {
-    // For demo purposes, add the mock procedure
-    if (!selectedProcedures.find(p => p.id === "1")) {
-      setSelectedProcedures(prev => [...prev, mockProcedures[0]]);
-    }
   };
 
   const removeProcedure = (procedureId: string) => {
@@ -182,7 +190,7 @@ export const EnhancedWorkOrderFormFields = ({
             <Button
               type="button"
               variant="ghost"
-              onClick={handleAddProcedure}
+              onClick={() => setShowProcedureDialog(true)}
               className="w-full justify-start text-blue-600 hover:text-blue-700 hover:bg-blue-50 border border-dashed border-blue-200 hover:border-blue-300 transition-colors"
             >
               <Plus className="h-4 w-4 mr-2" />
@@ -206,23 +214,15 @@ export const EnhancedWorkOrderFormFields = ({
                   Create or attach new Form, Procedure or Checklist
                 </p>
               </div>
-              <div className="flex flex-col sm:flex-row gap-2 justify-center">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={handleAddProcedure}
-                  className="border-blue-200 text-blue-600 hover:bg-blue-50"
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add Procedure
-                </Button>
+              <div className="flex justify-center">
                 <Button
                   type="button"
                   variant="outline"
                   onClick={() => setShowProcedureDialog(true)}
-                  className="border-gray-200 text-gray-600 hover:bg-gray-50"
+                  className="border-blue-200 text-blue-600 hover:bg-blue-50"
                 >
-                  Browse Templates
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Procedure
                 </Button>
               </div>
             </div>
@@ -507,11 +507,11 @@ export const EnhancedWorkOrderFormFields = ({
         </div>
       </div>
 
-      {/* Procedure Selection Dialog */}
-      <ProcedureSelectionDialog
+      {/* Enhanced Procedure Selection Dialog */}
+      <ProcedureSelectionDialogEnhanced
         open={showProcedureDialog}
         onOpenChange={setShowProcedureDialog}
-        onSelect={handleProcedureSelect}
+        onSelectProcedure={handleProcedureSelect}
         selectedProcedures={selectedProcedures}
       />
     </div>
