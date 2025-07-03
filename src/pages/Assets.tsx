@@ -2,6 +2,7 @@ import { DashboardLayout } from "@/components/Layout/DashboardLayout";
 import { StandardPageLayout, StandardPageHeader, StandardPageFilters, StandardPageContent } from "@/components/Layout/StandardPageLayout";
 import { AssetsHeader } from "@/components/assets/AssetsHeader";
 import { AssetsGrid } from "@/components/assets/AssetsGrid";
+import { AssetsList } from "@/components/assets/AssetsList";
 import { AssetDetailCard } from "@/components/assets/AssetDetailCard";
 import { AssetForm } from "@/components/assets/AssetForm";
 import { useState } from "react";
@@ -47,11 +48,13 @@ interface DetailAsset {
 }
 
 type ViewMode = 'grid' | 'detail' | 'create' | 'edit';
+type AssetsViewMode = 'grid' | 'list';
 
 export default function Assets() {
   const { user, loading: authLoading } = useAuth();
   const [selectedAsset, setSelectedAsset] = useState<DatabaseAsset | null>(null);
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
+  const [assetsViewMode, setAssetsViewMode] = useState<AssetsViewMode>('grid');
   const [filters, setFilters] = useState({
     search: "",
     status: [] as string[],
@@ -323,19 +326,29 @@ export default function Assets() {
                 onFiltersChange={handleFiltersChange}
                 onCreateAsset={handleCreateAsset}
                 assets={assets}
+                viewMode={assetsViewMode}
+                onViewModeChange={setAssetsViewMode}
               />
             </StandardPageFilters>
             
             <StandardPageContent>
-              <AssetsGrid
-                assets={uiAssets}
-                selectedAssetId={selectedAsset?.id || null}
-                onSelectAsset={handleSelectAsset}
-                onCreateAsset={handleCreateAsset}
-                onEditAsset={handleEditAsset}
-                onDeleteAsset={handleDeleteAsset}
-                isLoading={isLoading}
-              />
+              {assetsViewMode === 'grid' ? (
+                <AssetsGrid
+                  assets={uiAssets}
+                  selectedAssetId={selectedAsset?.id || null}
+                  onSelectAsset={handleSelectAsset}
+                  onCreateAsset={handleCreateAsset}
+                  onEditAsset={handleEditAsset}
+                  onDeleteAsset={handleDeleteAsset}
+                  isLoading={isLoading}
+                />
+              ) : (
+                <AssetsList
+                  assets={uiAssets}
+                  selectedAssetId={selectedAsset?.id || null}
+                  onSelectAsset={handleSelectAsset}
+                />
+              )}
             </StandardPageContent>
           </>
         )}

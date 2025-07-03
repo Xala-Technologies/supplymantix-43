@@ -2,18 +2,22 @@ import React from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, Download, Upload } from "lucide-react";
+import { Search, Download, Upload, Grid3X3, List } from "lucide-react";
 import { toast } from "sonner";
 import { exportAssetsToCSV, importAssetsFromCSV } from "@/utils/assetsImportExport";
 interface AssetsHeaderProps {
   onFiltersChange: (filters: any) => void;
   onCreateAsset: () => void;
   assets?: any[]; // Add assets prop for export
+  viewMode?: 'grid' | 'list';
+  onViewModeChange?: (mode: 'grid' | 'list') => void;
 }
 export const AssetsHeader = ({
   onFiltersChange,
   onCreateAsset,
-  assets = []
+  assets = [],
+  viewMode = 'grid',
+  onViewModeChange
 }: AssetsHeaderProps) => {
   const [searchQuery, setSearchQuery] = React.useState("");
   const [statusFilter, setStatusFilter] = React.useState("all");
@@ -113,7 +117,29 @@ export const AssetsHeader = ({
           </Select>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
+          {/* View Toggle */}
+          {onViewModeChange && (
+            <div className="flex items-center border border-gray-200 rounded-lg p-1">
+              <Button
+                variant={viewMode === 'grid' ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => onViewModeChange('grid')}
+                className="h-7 px-3"
+              >
+                <Grid3X3 className="h-4 w-4" />
+              </Button>
+              <Button
+                variant={viewMode === 'list' ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => onViewModeChange('list')}
+                className="h-7 px-3"
+              >
+                <List className="h-4 w-4" />
+              </Button>
+            </div>
+          )}
+
           <Button variant="outline" size="sm" onClick={handleImport}>
             <Upload className="h-4 w-4 mr-2" />
             Import
