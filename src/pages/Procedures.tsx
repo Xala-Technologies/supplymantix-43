@@ -53,14 +53,14 @@ const Procedures = () => {
 
   const { categories, getCategoryColor } = useProcedureUtils();
 
-  // Safe data processing with comprehensive error handling
+  // Safe data processing with comprehensive error handling and sorting by updated_at
   const procedures = React.useMemo(() => {
     if (!proceduresData?.procedures) {
       return [];
     }
     
     try {
-      return proceduresData.procedures.map((proc: any) => {
+      const processedProcedures = proceduresData.procedures.map((proc: any) => {
         // Ensure all required properties exist with safe defaults
         return {
           ...proc,
@@ -71,8 +71,16 @@ const Procedures = () => {
           category: proc.category || 'Other',
           is_global: Boolean(proc.is_global),
           title: proc.title || 'Untitled Procedure',
-          description: proc.description || ''
+          description: proc.description || '',
+          updated_at: proc.updated_at || proc.created_at || new Date().toISOString()
         };
+      });
+
+      // Sort by updated_at descending (most recently updated first)
+      return processedProcedures.sort((a, b) => {
+        const dateA = new Date(a.updated_at);
+        const dateB = new Date(b.updated_at);
+        return dateB.getTime() - dateA.getTime();
       });
     } catch (processingError) {
       console.error('Error processing procedures data:', processingError);
