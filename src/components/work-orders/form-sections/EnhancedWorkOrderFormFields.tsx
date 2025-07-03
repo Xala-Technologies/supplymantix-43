@@ -96,7 +96,18 @@ export const EnhancedWorkOrderFormFields = ({
       
       {/* Description */}
       <div className="space-y-2">
-        <FormLabel className="text-sm font-medium text-gray-700">Description</FormLabel>
+        <div className="flex items-center justify-between">
+          <FormLabel className="text-sm font-medium text-gray-700">Description</FormLabel>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="text-blue-600 border-blue-200 hover:bg-blue-50"
+          >
+            <Camera className="h-4 w-4 mr-2" />
+            Take Photo
+          </Button>
+        </div>
         <FormField
           control={form.control}
           name="description"
@@ -365,37 +376,23 @@ export const EnhancedWorkOrderFormFields = ({
 
       {/* Files */}
       <div className="space-y-2">
-        <FormLabel className="text-sm font-medium text-gray-700">Files</FormLabel>
-        <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 hover:border-blue-400 transition-colors">
-          <div className="text-center space-y-3">
-            <div className="flex justify-center space-x-4">
-              <Camera className="h-8 w-8 text-gray-400" />
-              <Upload className="h-8 w-8 text-gray-400" />
-            </div>
+        <FormLabel className="text-sm font-medium text-gray-700">Attach Files</FormLabel>
+        <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 hover:border-blue-400 transition-colors bg-gray-50">
+          <div className="text-center space-y-2">
+            <Upload className="h-6 w-6 text-gray-400 mx-auto" />
             <div>
               <p className="text-sm text-gray-600 mb-2">
                 Drag and drop files here, or click to browse
               </p>
-              <div className="flex justify-center space-x-2">
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  className="text-blue-600 border-blue-200 hover:bg-blue-50"
-                >
-                  <Camera className="h-4 w-4 mr-2" />
-                  Take Photo
-                </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  className="text-blue-600 border-blue-200 hover:bg-blue-50"
-                >
-                  <Paperclip className="h-4 w-4 mr-2" />
-                  Attach Files
-                </Button>
-              </div>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="text-blue-600 border-blue-200 hover:bg-blue-50"
+              >
+                <Paperclip className="h-4 w-4 mr-2" />
+                Choose Files
+              </Button>
             </div>
           </div>
         </div>

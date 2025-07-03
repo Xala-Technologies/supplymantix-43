@@ -249,15 +249,15 @@ export const NewWorkOrderDialog = ({
           {children}
         </DialogTrigger>
       )}
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="text-xl font-semibold text-slate-900">
+      <DialogContent className="max-w-4xl max-h-[95vh] overflow-y-auto bg-white border-0 shadow-2xl">
+        <DialogHeader className="border-b border-gray-100 pb-4 mb-6 bg-white">
+          <DialogTitle className="text-xl font-semibold text-gray-900">
             {isEditMode ? 'Edit Work Order' : 'New Work Order'}
           </DialogTitle>
         </DialogHeader>
         
         <FormProvider {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 bg-white p-1">
             <EnhancedWorkOrderFormFields 
               form={form}
               users={users}
@@ -266,13 +266,13 @@ export const NewWorkOrderDialog = ({
               onDialogClose={handleClose}
             />
 
-            <DialogFooter className="gap-2 pt-4 border-t">
+            <DialogFooter className="gap-2 pt-6 border-t border-gray-100 bg-white mt-6">
               <Button
                 type="button"
                 variant="outline"
                 onClick={handleClose}
                 disabled={isSubmitting}
-                className="border-slate-300 text-slate-700 hover:bg-slate-50"
+                className="border-gray-300 text-gray-700 hover:bg-gray-50 bg-white"
               >
                 Cancel
               </Button>
