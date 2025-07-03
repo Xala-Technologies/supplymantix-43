@@ -4,13 +4,14 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { Paperclip, Plus, X, Search, Camera, Upload } from "lucide-react";
+import { Paperclip, Plus, X, Search, Camera, Upload, FileImage } from "lucide-react";
 import { UseFormReturn } from "react-hook-form";
 import { ProcedureSelectionDialog } from "../ProcedureSelectionDialog";
 import { useNavigate } from "react-router-dom";
 import { TitleField } from "../form-fields/TitleField";
 import { PriorityField } from "../form-fields/PriorityField";
 import { DateFields } from "../form-fields/DateFields";
+import { ImageUploadSection } from "./ImageUploadSection";
 
 interface Asset {
   id: string;
@@ -96,18 +97,7 @@ export const EnhancedWorkOrderFormFields = ({
       
       {/* Description */}
       <div className="space-y-2">
-        <div className="flex items-center justify-between">
-          <FormLabel className="text-sm font-medium text-gray-700">Description</FormLabel>
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            className="text-blue-600 border-blue-200 hover:bg-blue-50"
-          >
-            <Camera className="h-4 w-4 mr-2" />
-            Take Photo
-          </Button>
-        </div>
+        <FormLabel className="text-sm font-medium text-gray-700">Description</FormLabel>
         <FormField
           control={form.control}
           name="description"
@@ -374,28 +364,20 @@ export const EnhancedWorkOrderFormFields = ({
 
       <PriorityField form={form} />
 
-      {/* Files */}
-      <div className="space-y-2">
-        <FormLabel className="text-sm font-medium text-gray-700">Attach Files</FormLabel>
-        <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 hover:border-blue-400 transition-colors bg-gray-50">
-          <div className="text-center space-y-2">
-            <Upload className="h-6 w-6 text-gray-400 mx-auto" />
-            <div>
-              <p className="text-sm text-gray-600 mb-2">
-                Drag and drop files here, or click to browse
-              </p>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                className="text-blue-600 border-blue-200 hover:bg-blue-50"
-              >
-                <Paperclip className="h-4 w-4 mr-2" />
-                Choose Files
-              </Button>
-            </div>
-          </div>
-        </div>
+      {/* Enhanced File Upload Section */}
+      <div className="space-y-3">
+        <FormLabel className="text-sm font-medium text-gray-700">
+          <FileImage className="h-4 w-4 inline mr-2" />
+          Photos & Attachments
+        </FormLabel>
+        <ImageUploadSection
+          onFilesChange={(files) => {
+            // Update form with uploaded files
+            form.setValue('attachments', files);
+          }}
+          maxFiles={20}
+          maxFileSize={25}
+        />
       </div>
 
       {/* Parts */}
