@@ -170,18 +170,27 @@ export const ProcedureCard = ({ procedure, onEdit, onDelete, onPreview }: Proced
                             )}
                           </div>
                           
-                          {(field.field_type === 'checkbox' || field.type === 'checkbox') && field.options && (
-                            <div className="space-y-2 mt-2">
-                              {(field.options.choices || field.options || []).map((option, optionIndex) => (
-                                <label key={optionIndex} className="flex items-center gap-2 text-sm text-gray-600">
-                                  <input 
-                                    type="checkbox" 
-                                    disabled 
-                                    className="rounded border-gray-300"
-                                  />
-                                  {option}
-                                </label>
-                              ))}
+          {(field.field_type === 'checkbox' || field.type === 'checkbox') && field.options && (
+            <div className="space-y-2 mt-2">
+              {Array.isArray(field.options.choices) ? field.options.choices.map((option, optionIndex) => (
+                <label key={optionIndex} className="flex items-center gap-2 text-sm text-gray-600">
+                  <input 
+                    type="checkbox" 
+                    disabled 
+                    className="rounded border-gray-300"
+                  />
+                  {option}
+                </label>
+              )) : Array.isArray(field.options) ? field.options.map((option, optionIndex) => (
+                <label key={optionIndex} className="flex items-center gap-2 text-sm text-gray-600">
+                  <input 
+                    type="checkbox" 
+                    disabled 
+                    className="rounded border-gray-300"
+                  />
+                  {option}
+                </label>
+              )) : null}
                             </div>
                           )}
                           
