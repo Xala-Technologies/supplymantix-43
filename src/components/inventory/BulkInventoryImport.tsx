@@ -1,4 +1,3 @@
-
 import { useState, useRef } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -12,6 +11,17 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 interface BulkInventoryImportProps {
   onSuccess?: () => void;
 }
+
+type InventoryImportItem = {
+  name: string;
+  description?: string;
+  sku?: string;
+  location?: string;
+  quantity: number;
+  min_quantity: number;
+  unit_cost: number;
+  lineNumber: number;
+};
 
 export const BulkInventoryImport = ({ onSuccess }: BulkInventoryImportProps) => {
   const [open, setOpen] = useState(false);
@@ -47,13 +57,13 @@ export const BulkInventoryImport = ({ onSuccess }: BulkInventoryImportProps) => 
     toast.success('Template downloaded successfully');
   };
   
-  const parseCSV = (text: string) => {
+  const parseCSV = (text: string): InventoryImportItem[] => {
     const lines = text.trim().split('\n');
     const headers = lines[0].split(',').map(h => h.trim().toLowerCase());
     
     return lines.slice(1).map((line, index) => {
       const values = line.split(',').map(v => v.trim());
-      const item: any = {};
+      const item: Partial<InventoryImportItem> = {};
       
       headers.forEach((header, i) => {
         const value = values[i] || '';
@@ -61,21 +71,21 @@ export const BulkInventoryImport = ({ onSuccess }: BulkInventoryImportProps) => 
         switch (header) {
           case 'quantity':
           case 'min_quantity':
-            item[header] = parseInt(value) || 0;
+            (item as Partial<InventoryImportItem>)[header] = parseInt(value) || 0;
             break;
           case 'unit_cost':
-            item[header] = parseFloat(value) || 0;
+            (item as Partial<InventoryImportItem>)[header] = parseFloat(value) || 0;
             break;
           default:
-            item[header] = value;
+            (item as Partial<InventoryImportItem>)[header] = value;
         }
       });
       
-      return { ...item, lineNumber: index + 2 }; // +2 for header and 0-based index
+      return { ...item, lineNumber: index + 2 } as InventoryImportItem; // +2 for header and 0-based index
     });
   };
   
-  const validateItem = (item: any) => {
+  const validateItem = (item: InventoryImportItem) => {
     const errors: string[] = [];
     
     if (!item.name || item.name.trim() === '') {

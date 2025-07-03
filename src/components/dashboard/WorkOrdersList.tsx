@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -83,7 +82,7 @@ export const WorkOrdersList = ({
 
   // Filter and sort work orders
   const filteredAndSortedWorkOrders = React.useMemo(() => {
-    let filtered = workOrders.filter(wo => {
+    const filtered = workOrders.filter(wo => {
       const matchesSearch = wo.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                            wo.description?.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesStatus = statusFilter === 'all' || wo.status === statusFilter;
@@ -93,35 +92,53 @@ export const WorkOrdersList = ({
     });
 
     return filtered.sort((a, b) => {
-      let aValue, bValue;
-      
       switch (sortBy) {
-        case 'due_date':
-          aValue = new Date(a.dueDate || a.due_date || '').getTime();
-          bValue = new Date(b.dueDate || b.due_date || '').getTime();
-          break;
-        case 'priority':
+        case 'due_date': {
+          const aValue = new Date(a.dueDate || a.due_date || '').getTime();
+          const bValue = new Date(b.dueDate || b.due_date || '').getTime();
+          if (sortOrder === 'asc') {
+            return aValue > bValue ? 1 : -1;
+          } else {
+            return aValue < bValue ? 1 : -1;
+          }
+        }
+        case 'priority': {
           const priorityOrder = { high: 3, medium: 2, low: 1 };
-          aValue = priorityOrder[a.priority];
-          bValue = priorityOrder[b.priority];
-          break;
-        case 'status':
-          aValue = a.status;
-          bValue = b.status;
-          break;
-        case 'title':
-          aValue = a.title.toLowerCase();
-          bValue = b.title.toLowerCase();
-          break;
-        default:
-          aValue = new Date(a.createdAt || a.created_at || '').getTime();
-          bValue = new Date(b.createdAt || b.created_at || '').getTime();
-      }
-      
-      if (sortOrder === 'asc') {
-        return aValue > bValue ? 1 : -1;
-      } else {
-        return aValue < bValue ? 1 : -1;
+          const aValue = priorityOrder[a.priority];
+          const bValue = priorityOrder[b.priority];
+          if (sortOrder === 'asc') {
+            return aValue > bValue ? 1 : -1;
+          } else {
+            return aValue < bValue ? 1 : -1;
+          }
+        }
+        case 'status': {
+          const aValue = a.status;
+          const bValue = b.status;
+          if (sortOrder === 'asc') {
+            return aValue > bValue ? 1 : -1;
+          } else {
+            return aValue < bValue ? 1 : -1;
+          }
+        }
+        case 'title': {
+          const aValue = a.title.toLowerCase();
+          const bValue = b.title.toLowerCase();
+          if (sortOrder === 'asc') {
+            return aValue > bValue ? 1 : -1;
+          } else {
+            return aValue < bValue ? 1 : -1;
+          }
+        }
+        default: {
+          const aValue = new Date(a.createdAt || a.created_at || '').getTime();
+          const bValue = new Date(b.createdAt || b.created_at || '').getTime();
+          if (sortOrder === 'asc') {
+            return aValue > bValue ? 1 : -1;
+          } else {
+            return aValue < bValue ? 1 : -1;
+          }
+        }
       }
     });
   }, [workOrders, searchTerm, statusFilter, priorityFilter, sortBy, sortOrder]);

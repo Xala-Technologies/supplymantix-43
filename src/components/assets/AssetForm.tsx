@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
@@ -14,7 +13,7 @@ import type { Asset, AssetInsert, AssetUpdate } from "@/hooks/useAssets";
 import { useVendors } from "@/hooks/useVendors";
 import { useAssetTypes } from "@/hooks/useAssetTypes";
 import { useTeams } from "@/hooks/useTeams";
-import { useParts } from "@/hooks/useParts";
+import { useParts, type Part } from "@/hooks/useParts";
 import { AssetImageUpload } from "./AssetImageUpload";
 import { AssetDocumentUpload } from "./AssetDocumentUpload";
 import { BarcodeGenerator } from "./BarcodeGenerator";
@@ -44,7 +43,7 @@ interface AssetFormData {
   barcode?: string;
   asset_type?: string;
   vendor?: string;
-  parts?: any[];
+  parts?: Part[];
   parent_asset_id?: string;
 }
 
@@ -94,7 +93,7 @@ export const AssetForm = ({
   isLoading = false, 
   mode 
 }: AssetFormProps) => {
-  const [documents, setDocuments] = useState<any[]>(initialData?.parts || []);
+  const [documents, setDocuments] = useState<Part[]>(initialData?.parts || []);
   
   // Fetch supporting data
   const { data: vendors = [] } = useVendors();

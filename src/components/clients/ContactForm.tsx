@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
@@ -8,7 +7,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-interface ContactFormData {
+export interface ContactFormData {
   name: string;
   role?: string;
   phone?: string;

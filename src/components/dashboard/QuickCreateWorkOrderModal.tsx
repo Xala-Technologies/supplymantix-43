@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -12,10 +11,27 @@ import { CalendarIcon, X } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 
+export type QuickWorkOrderInput = {
+  title: string;
+  description: string;
+  priority: 'low' | 'medium' | 'high';
+  category: string;
+  status: string;
+  assignedTo: string[];
+  dueDate?: string;
+  location: string;
+  assetName: string;
+  asset: {
+    id: string;
+    name: string;
+    status: string;
+  };
+};
+
 interface QuickCreateWorkOrderModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (data: any) => void;
+  onSubmit: (data: QuickWorkOrderInput) => void;
   isLoading?: boolean;
 }
 
@@ -31,7 +47,7 @@ export const QuickCreateWorkOrderModal = ({
     priority: 'medium',
     category: 'maintenance',
     status: 'open',
-    assignedTo: '',
+    assignedTo: [],
     dueDate: undefined as Date | undefined,
     location: '',
     assetName: ''
@@ -42,7 +58,6 @@ export const QuickCreateWorkOrderModal = ({
     onSubmit({
       ...formData,
       dueDate: formData.dueDate?.toISOString(),
-      assignedTo: formData.assignedTo ? [formData.assignedTo] : [],
       asset: {
         id: 'temp-' + Date.now(),
         name: formData.assetName || 'General Asset',
@@ -58,7 +73,7 @@ export const QuickCreateWorkOrderModal = ({
       priority: 'medium',
       category: 'maintenance',
       status: 'open',
-      assignedTo: '',
+      assignedTo: [],
       dueDate: undefined,
       location: '',
       assetName: ''
@@ -191,8 +206,8 @@ export const QuickCreateWorkOrderModal = ({
               <Label htmlFor="assignedTo">Assigned To</Label>
               <Input
                 id="assignedTo"
-                value={formData.assignedTo}
-                onChange={(e) => setFormData(prev => ({ ...prev, assignedTo: e.target.value }))}
+                value={formData.assignedTo[0] || ''}
+                onChange={(e) => setFormData(prev => ({ ...prev, assignedTo: [e.target.value] }))}
                 placeholder="Technician name"
               />
             </div>

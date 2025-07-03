@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -18,9 +17,24 @@ interface MeterQuickActionsProps {
   onCreateMeter: () => void;
 }
 
+// Define Meter type locally since it is not exported from useMeters
+type Meter = {
+  id: string;
+  name: string;
+  type: string;
+  unit: string;
+  status: string;
+  location?: string;
+  asset_name?: string;
+  target_min?: number;
+  target_max?: number;
+  last_reading_at?: string;
+  reading_frequency?: string;
+};
+
 export const MeterQuickActions = ({ onCreateMeter }: MeterQuickActionsProps) => {
   const [showQuickReading, setShowQuickReading] = useState(false);
-  const [selectedMeter, setSelectedMeter] = useState<any>(null);
+  const [selectedMeter, setSelectedMeter] = useState<Meter | null>(null);
   
   const { data: meters } = useMeters();
 
@@ -41,7 +55,7 @@ export const MeterQuickActions = ({ onCreateMeter }: MeterQuickActionsProps) => 
     }
   }) || [];
 
-  const handleQuickReading = (meter: any) => {
+  const handleQuickReading = (meter: Meter) => {
     setSelectedMeter(meter);
     setShowQuickReading(true);
   };

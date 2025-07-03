@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -33,14 +32,12 @@ interface InventoryItem {
 interface InventoryGridProps {
   items: InventoryItem[];
   onViewItem: (item: InventoryItem) => void;
-  onEditItem: (item: InventoryItem) => void;
   onDeleteItem?: (item: InventoryItem) => void;
 }
 
 export const InventoryGrid = ({ 
   items, 
   onViewItem, 
-  onEditItem,
   onDeleteItem
 }: InventoryGridProps) => {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);

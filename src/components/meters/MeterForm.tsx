@@ -9,9 +9,24 @@ import { X } from "lucide-react";
 import { BasicInfoSection } from "./form-sections/BasicInfoSection";
 import { LocationAssetSection } from "./form-sections/LocationAssetSection";
 import { TargetRangeSection } from "./form-sections/TargetRangeSection";
+
 interface MeterFormProps {
   onClose: () => void;
 }
+
+// Define MeterInsert type locally since it is not exported
+type MeterInsert = {
+  name: string;
+  type: string;
+  unit: string;
+  description: string | null;
+  location: string | null;
+  asset_id: string | null;
+  reading_frequency: string;
+  target_min: number | null;
+  target_max: number | null;
+};
+
 export const MeterForm = ({
   onClose
 }: MeterFormProps) => {
@@ -49,7 +64,7 @@ export const MeterForm = ({
     e.preventDefault();
     if (!validateForm()) return;
     try {
-      const meterData = {
+      const meterData: MeterInsert = {
         name: formData.name.trim(),
         type: formData.type,
         unit: formData.unit.trim(),
@@ -59,7 +74,7 @@ export const MeterForm = ({
         reading_frequency: formData.reading_frequency,
         target_min: formData.target_min ? Number(formData.target_min) : null,
         target_max: formData.target_max ? Number(formData.target_max) : null
-      } as any;
+      };
       await createMeter.mutateAsync(meterData);
       onClose();
     } catch (error) {

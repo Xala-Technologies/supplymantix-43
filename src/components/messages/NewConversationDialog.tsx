@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import {
   Dialog,
@@ -13,6 +12,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Search, Users, MessageSquare, Loader2 } from "lucide-react";
 import { useCreateConversation } from "@/hooks/useMessages";
+import type { Conversation } from "./ChatWindow";
 
 interface User {
   id: string;
@@ -24,7 +24,7 @@ interface User {
 interface NewConversationDialogProps {
   isOpen: boolean;
   onClose: () => void;
-  onConversationCreated: (conversation: any) => void;
+  onConversationCreated: (conversation: Conversation) => void;
   users: User[];
 }
 

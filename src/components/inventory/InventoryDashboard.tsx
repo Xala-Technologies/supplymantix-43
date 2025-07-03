@@ -5,36 +5,50 @@ import { InventoryGrid } from "./InventoryGrid";
 import { InventoryForm } from "./InventoryForm";
 import { InventoryDetailCard } from "./InventoryDetailCard";
 import { DataLoadingManager } from "@/components/ui/DataLoadingManager";
-import { useInventoryEnhanced } from "@/hooks/useInventoryEnhanced";
+import { useInventoryEnhanced } from '@/hooks/useInventoryEnhanced';
+import type { InventoryItemWithStats } from '@/lib/database/inventory-enhanced';
 import { useExportInventory } from "@/hooks/useInventoryExport";
 import { useDeleteInventoryItem, useCreateInventoryItem } from "@/hooks/useInventoryMutations";
 import { useUndoDelete } from "@/hooks/useUndoDelete";
 import { toast } from "sonner";
-import type { InventoryItemWithStats } from "@/lib/database/inventory-enhanced";
+import { useNavigate } from "react-router-dom";
 
-// Map database type to component type
-const mapInventoryItem = (item: InventoryItemWithStats) => ({
+interface InventoryItem {
+  id: string;
+  name: string;
+  sku: string;
+  description: string;
+  quantity: number;
+  minQuantity: number;
+  unitCost: number;
+  totalValue: number;
+  location: string;
+  category: string;
+  status: string;
+}
+
+const mapToInventoryItem = (item: InventoryItemWithStats): InventoryItem => ({
   id: item.id,
   name: item.name,
-  sku: item.sku || '',
-  description: item.description || '',
+  sku: item.sku,
+  description: item.description,
   quantity: item.quantity,
-  minQuantity: item.min_quantity || 0,
-  unitCost: item.unit_cost || 0,
-  totalValue: item.total_value || 0,
-  location: item.location || '',
+  minQuantity: item.min_quantity,
+  unitCost: item.unit_cost,
+  totalValue: item.total_value,
+  location: item.location,
   category: item.location || 'General',
-  status: item.is_low_stock ? 'low_stock' : item.quantity === 0 ? 'out_of_stock' : 'in_stock'
+  status: item.is_low_stock ? 'low_stock' : item.quantity === 0 ? 'out_of_stock' : 'in_stock',
 });
 
 export const InventoryDashboard = () => {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [locationFilter, setLocationFilter] = useState<string>("all");
-  const [selectedItem, setSelectedItem] = useState<any>(null);
+  const [selectedItem, setSelectedItem] = useState<InventoryItemWithStats | null>(null);
   const [showCreateForm, setShowCreateForm] = useState(false);
-  const [showEditForm, setShowEditForm] = useState(false);
-  const [editingItem, setEditingItem] = useState<any>(null);
+
+  const navigate = useNavigate();
 
   // Enhanced inventory query with robust loading
   const { data: inventoryData, isLoading, error, refetch } = useInventoryEnhanced({
@@ -52,7 +66,7 @@ export const InventoryDashboard = () => {
 
   // Safely access inventory data with fallbacks
   const rawItems = inventoryData?.items || [];
-  const items = rawItems.map(mapInventoryItem);
+  const items = rawItems.map(mapToInventoryItem);
   const totalItems = items.length;
   const lowStockItems = rawItems.filter(item => item.is_low_stock).length;
   const totalValue = rawItems.reduce((sum, item) => sum + (item.total_value || 0), 0);
@@ -62,22 +76,15 @@ export const InventoryDashboard = () => {
   const locations = Array.from(new Set(rawItems.map(item => item.location).filter(Boolean)));
 
   const handleCreateItem = () => {
-    console.log('Creating new inventory item');
-    setShowCreateForm(true);
+    navigate('/dashboard/inventory/new');
   };
 
-  const handleViewItem = (item: any) => {
+  const handleViewItem = (item: InventoryItemWithStats) => {
     console.log('Viewing item:', item);
     setSelectedItem(item);
   };
 
-  const handleEditItem = (item: any) => {
-    console.log('Editing item:', item);
-    setEditingItem(item);
-    setShowEditForm(true);
-  };
-
-  const handleDeleteItem = async (item: any) => {
+  const handleDeleteItem = async (item: InventoryItemWithStats) => {
     console.log('Deleting item:', item);
     
     try {
@@ -87,8 +94,8 @@ export const InventoryDashboard = () => {
         sku: item.sku,
         location: item.location,
         quantity: item.quantity,
-        min_quantity: item.minQuantity,
-        unit_cost: item.unitCost,
+        min_quantity: item.min_quantity,
+        unit_cost: item.unit_cost,
       };
 
       await deleteMutation.mutateAsync(item.id);
@@ -137,13 +144,6 @@ export const InventoryDashboard = () => {
     }
   };
 
-  const handleFormSuccess = () => {
-    setShowCreateForm(false);
-    setShowEditForm(false);
-    setEditingItem(null);
-    refetch();
-  };
-
   return (
     <div className="min-h-screen bg-gray-50">
       <InventoryHeader
@@ -179,46 +179,35 @@ export const InventoryDashboard = () => {
         >
           <InventoryGrid
             items={items}
-            onViewItem={handleViewItem}
-            onEditItem={handleEditItem}
-            onDeleteItem={handleDeleteItem}
+            onViewItem={(item) => navigate(`/dashboard/inventory/${item.id}`)}
+            onDeleteItem={(item) => handleDeleteItem(rawItems.find(i => i.id === item.id) as InventoryItemWithStats)}
           />
         </DataLoadingManager>
       </div>
 
-      <InventoryForm
-        mode="create"
-        onSuccess={handleFormSuccess}
-        open={showCreateForm}
-        onOpenChange={setShowCreateForm}
-      />
-
-      <InventoryForm
-        mode="edit"
-        item={editingItem}
-        onSuccess={handleFormSuccess}
-        open={showEditForm}
-        onOpenChange={setShowEditForm}
-      />
-
       {selectedItem && (
         <InventoryDetailCard
           item={{
-            ...selectedItem,
+            id: selectedItem.id,
+            name: selectedItem.name,
+            sku: selectedItem.sku,
+            description: selectedItem.description,
+            quantity: selectedItem.quantity,
+            minQuantity: selectedItem.min_quantity,
+            unitCost: selectedItem.unit_cost,
+            totalValue: selectedItem.total_value,
+            location: selectedItem.location,
+            category: selectedItem.location || 'General',
+            status: selectedItem.is_low_stock ? 'low_stock' : selectedItem.quantity === 0 ? 'out_of_stock' : 'in_stock',
             supplier: 'N/A',
             partNumber: 'N/A',
             lastOrdered: 'N/A',
             leadTime: 'N/A',
-            reorderPoint: selectedItem.minQuantity,
-            maxStock: selectedItem.minQuantity * 3,
+            reorderPoint: selectedItem.min_quantity,
+            maxStock: selectedItem.min_quantity * 3,
             transactions: []
           }}
           onClose={() => setSelectedItem(null)}
-          onEdit={() => {
-            setEditingItem(selectedItem);
-            setSelectedItem(null);
-            setShowEditForm(true);
-          }}
         />
       )}
     </div>

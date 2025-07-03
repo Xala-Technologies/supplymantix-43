@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -7,8 +6,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Building2, Phone, Mail, MapPin, Edit, Plus, Trash2, User } from "lucide-react";
 import type { Client } from "@/hooks/useClients";
 import type { ClientContact } from "@/hooks/useClientContacts";
-import { useClientContacts, useCreateClientContact, useDeleteClientContact } from "@/hooks/useClientContacts";
+import { useClientContacts, useCreateClientContact, useDeleteClientContact, type ClientContactInsert } from "@/hooks/useClientContacts";
 import { ContactForm } from "./ContactForm";
+import type { ContactFormData } from "./ContactForm";
 import { toast } from "sonner";
 
 interface ClientDetailProps {
@@ -36,12 +36,13 @@ export const ClientDetail = ({ client, onEdit, onBack }: ClientDetailProps) => {
   const createContact = useCreateClientContact();
   const deleteContact = useDeleteClientContact();
 
-  const handleCreateContact = async (contactData: any) => {
+  const handleCreateContact = async (formData: ContactFormData) => {
+    const contactData: Omit<ClientContactInsert, 'tenant_id'> = {
+      ...formData,
+      client_id: client.id,
+    };
     try {
-      await createContact.mutateAsync({
-        ...contactData,
-        client_id: client.id,
-      });
+      await createContact.mutateAsync(contactData);
       setShowContactForm(false);
       refetchContacts();
       toast.success("Contact created successfully");

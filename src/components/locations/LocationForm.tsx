@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -242,7 +241,7 @@ export const LocationForm = ({ location, parentLocation, onClose }: LocationForm
 };
 
 // Helper function to check if a location is a descendant of another
-function isDescendant(locationId: string, ancestorId: string | undefined, locations: any[]): boolean {
+function isDescendant(locationId: string, ancestorId: string | undefined, locations: Location[]): boolean {
   if (!ancestorId) return false;
   
   const location = locations.find(loc => loc.id === locationId);

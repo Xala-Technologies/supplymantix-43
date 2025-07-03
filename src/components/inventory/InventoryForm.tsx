@@ -297,20 +297,16 @@ export const InventoryForm = ({
     </form>
   );
 
-  // If no trigger is provided, render as controlled dialog
-  if (!trigger) {
+  if (trigger) {
+    // Dialog/modal usage
     return (
       <Dialog open={open} onOpenChange={handleOpenChange}>
-        <DialogContent className="max-w-md">
+        <DialogTrigger asChild>{trigger}</DialogTrigger>
+        <DialogContent className="max-w-lg">
           <DialogHeader>
-            <DialogTitle>
-              {mode === 'edit' ? 'Edit Inventory Item' : 'Add New Inventory Item'}
-            </DialogTitle>
+            <DialogTitle>{mode === 'edit' ? 'Edit Inventory Item' : 'Add Inventory Item'}</DialogTitle>
             <DialogDescription>
-              {mode === 'edit' 
-                ? 'Update the details of your inventory item.' 
-                : 'Enter the details for your new inventory item.'
-              }
+              {mode === 'edit' ? 'Update the details for this inventory item.' : 'Fill in the details to add a new inventory item.'}
             </DialogDescription>
           </DialogHeader>
           {formContent}
@@ -318,32 +314,11 @@ export const InventoryForm = ({
       </Dialog>
     );
   }
-
-  // Render with trigger
+  // Standalone page usage
   return (
-    <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogTrigger asChild>
-        {trigger || (
-          <Button className="flex items-center gap-2">
-            {mode === 'edit' ? <Edit className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
-            {mode === 'edit' ? 'Edit Item' : 'Add Item'}
-          </Button>
-        )}
-      </DialogTrigger>
-      <DialogContent className="max-w-md">
-        <DialogHeader>
-          <DialogTitle>
-            {mode === 'edit' ? 'Edit Inventory Item' : 'Add New Inventory Item'}
-          </DialogTitle>
-          <DialogDescription>
-            {mode === 'edit' 
-              ? 'Update the details of your inventory item.' 
-              : 'Enter the details for your new inventory item.'
-            }
-          </DialogDescription>
-        </DialogHeader>
-        {formContent}
-      </DialogContent>
-    </Dialog>
+    <div className="max-w-lg mx-auto bg-white p-8 rounded-lg shadow">
+      <h2 className="text-2xl font-bold mb-4">{mode === 'edit' ? 'Edit Inventory Item' : 'Add Inventory Item'}</h2>
+      {formContent}
+    </div>
   );
 };

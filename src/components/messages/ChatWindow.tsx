@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -39,8 +38,20 @@ const mockMessages = [
   }
 ];
 
+export interface Participant {
+  id: string;
+  name: string;
+}
+
+export interface Conversation {
+  id: string;
+  title: string;
+  participants: Participant[];
+  workOrderId?: string;
+}
+
 interface ChatWindowProps {
-  conversation: any;
+  conversation: Conversation;
   onClose?: () => void;
 }
 
@@ -117,7 +128,7 @@ export const ChatWindow = ({ conversation, onClose }: ChatWindowProps) => {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="flex -space-x-2">
-              {conversation.participants.slice(0, 3).map((participant: any, index: number) => (
+              {conversation.participants.slice(0, 3).map((participant, index) => (
                 <Avatar key={participant.id} className="w-10 h-10 border-2 border-white shadow-sm">
                   <AvatarFallback className={`text-xs font-medium ${
                     index === 0 
@@ -136,7 +147,7 @@ export const ChatWindow = ({ conversation, onClose }: ChatWindowProps) => {
                 {conversation.title}
               </CardTitle>
               <div className="text-sm text-gray-500">
-                {conversation.participants.map((p: any) => p.name).join(', ')}
+                {conversation.participants.map((p) => p.name).join(', ')}
               </div>
             </div>
           </div>

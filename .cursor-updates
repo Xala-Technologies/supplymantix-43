@@ -1,0 +1,1 @@
+- Removed all edit inventory item logic and UI from InventoryDashboard and InventoryGrid. Editing is now only possible via the dedicated part detail page. 

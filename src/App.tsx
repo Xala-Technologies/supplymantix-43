@@ -28,6 +28,8 @@ import InviteAccept from "@/pages/InviteAccept";
 import Clients from "@/pages/Clients";
 import Vendors from "@/pages/Vendors";
 import NotFound from "@/pages/NotFound";
+import InventoryNew from "@/pages/InventoryNew";
+import InventoryDetail from "@/pages/InventoryDetail";
 
 // Create a single query client instance
 const queryClient = new QueryClient({
@@ -79,6 +81,16 @@ function App() {
               <Route path="/dashboard/inventory" element={
                 <ProtectedRoute>
                   <Inventory />
+                </ProtectedRoute>
+              } />
+              <Route path="/dashboard/inventory/new" element={
+                <ProtectedRoute>
+                  <InventoryNew />
+                </ProtectedRoute>
+              } />
+              <Route path="/dashboard/inventory/:id" element={
+                <ProtectedRoute>
+                  <InventoryDetail />
                 </ProtectedRoute>
               } />
               <Route path="/dashboard/inventory-enhanced" element={

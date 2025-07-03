@@ -1,7 +1,6 @@
-
 import React, { useState } from 'react';
 import { WorkOrdersList } from './WorkOrdersList';
-import { QuickCreateWorkOrderModal } from './QuickCreateWorkOrderModal';
+import { QuickCreateWorkOrderModal, type QuickWorkOrderInput } from './QuickCreateWorkOrderModal';
 import { WorkOrderDetailCard } from '@/components/work-orders/WorkOrderDetailCard';
 import { WorkOrder } from '@/types/workOrder';
 import { Button } from '@/components/ui/button';
@@ -9,7 +8,7 @@ import { ChevronLeft } from 'lucide-react';
 
 interface WorkOrdersDashboardProps {
   workOrders: WorkOrder[];
-  onCreateWorkOrder: (data: any) => void;
+  onCreateWorkOrder: (data: QuickWorkOrderInput) => void;
   isCreateLoading?: boolean;
 }
 
@@ -34,7 +33,7 @@ export const WorkOrdersDashboard = ({
     setSelectedWorkOrderId(null);
   };
 
-  const handleCreateSubmit = async (data: any) => {
+  const handleCreateSubmit = async (data: QuickWorkOrderInput) => {
     try {
       await onCreateWorkOrder(data);
       setIsCreateModalOpen(false);

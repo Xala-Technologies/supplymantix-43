@@ -5,11 +5,22 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Search, Download, Upload } from "lucide-react";
 import { toast } from "sonner";
 import { exportAssetsToCSV, importAssetsFromCSV } from "@/utils/assetsImportExport";
+import { type Asset } from "@/hooks/useAssets";
+
+type Filters = {
+  search: string;
+  status: string[];
+  category: string[];
+  location: string[];
+  criticality: string[];
+};
+
 interface AssetsHeaderProps {
-  onFiltersChange: (filters: any) => void;
+  onFiltersChange: (filters: Filters) => void;
   onCreateAsset: () => void;
-  assets?: any[]; // Add assets prop for export
+  assets?: Asset[];
 }
+
 export const AssetsHeader = ({
   onFiltersChange,
   onCreateAsset,

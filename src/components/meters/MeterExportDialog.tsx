@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -13,6 +12,20 @@ interface MeterExportDialogProps {
   onClose: () => void;
   selectedMeters?: string[];
 }
+
+// Define Meter type locally since it is not exported
+type Meter = {
+  id: string;
+  name: string;
+  type: string;
+  unit: string;
+  status: string;
+  location?: string;
+  asset_name?: string;
+  target_min?: number;
+  target_max?: number;
+  last_reading_at?: string;
+};
 
 export const MeterExportDialog = ({ open, onClose, selectedMeters }: MeterExportDialogProps) => {
   const [exportFormat, setExportFormat] = useState("csv");
