@@ -5,7 +5,7 @@ import { purchaseOrdersApi } from "@/lib/database/purchase-orders";
 import { toast } from "sonner";
 import type { Database } from "@/integrations/supabase/types";
 
-type InventoryItem = Database["public"]["Tables"]["inventory_items"]["Row"];
+type InventoryItem = Database["public"]["Tables"]["parts_items"]["Row"];
 
 export const useCheckOrCreateLowStockPO = () => {
   const queryClient = useQueryClient();

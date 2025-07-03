@@ -3,9 +3,9 @@ import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/integrations/supabase/types";
 
 type Tables = Database["public"]["Tables"];
-type InventoryItem = Tables["inventory_items"]["Row"];
-type InventoryItemInsert = Tables["inventory_items"]["Insert"];
-type InventoryItemUpdate = Tables["inventory_items"]["Update"];
+type InventoryItem = Tables["parts_items"]["Row"];
+type InventoryItemInsert = Tables["parts_items"]["Insert"];
+type InventoryItemUpdate = Tables["parts_items"]["Update"];
 
 export interface InventoryItemWithStats extends InventoryItem {
   is_low_stock: boolean;
@@ -40,7 +40,7 @@ export const inventoryEnhancedApi = {
     console.log('Fetching inventory items...');
     
     const { data, error } = await supabase
-      .from("inventory_items")
+      .from("parts_items")
       .select("*")
       .order("created_at", { ascending: false });
     
@@ -66,7 +66,7 @@ export const inventoryEnhancedApi = {
     console.log('Searching inventory with params:', params);
     
     let query = supabase
-      .from("inventory_items")
+      .from("parts_items")
       .select("*", { count: 'exact' });
 
     // Apply search filter
@@ -138,7 +138,7 @@ export const inventoryEnhancedApi = {
     console.log('Creating inventory item:', item);
     
     const { data, error } = await supabase
-      .from("inventory_items")
+      .from("parts_items")
       .insert(item)
       .select()
       .single();
@@ -156,7 +156,7 @@ export const inventoryEnhancedApi = {
     console.log('Updating inventory item:', id, updates);
     
     const { data, error } = await supabase
-      .from("inventory_items")
+      .from("parts_items")
       .update({
         ...updates,
         updated_at: new Date().toISOString()
@@ -178,7 +178,7 @@ export const inventoryEnhancedApi = {
     console.log('Deleting inventory item:', id);
     
     const { error } = await supabase
-      .from("inventory_items")
+      .from("parts_items")
       .delete()
       .eq("id", id);
     
@@ -194,7 +194,7 @@ export const inventoryEnhancedApi = {
     console.log('Fetching low stock alerts...');
     
     const { data, error } = await supabase
-      .from("inventory_items")
+      .from("parts_items")
       .select("id, name, sku, quantity, min_quantity, location")
       .not("min_quantity", "is", null)
       .gt("min_quantity", 0)
@@ -227,7 +227,7 @@ export const inventoryEnhancedApi = {
     console.log('Adding stock:', inventoryId, quantity, note);
     
     const { data: item, error: fetchError } = await supabase
-      .from("inventory_items")
+      .from("parts_items")
       .select("quantity")
       .eq("id", inventoryId)
       .single();
@@ -237,7 +237,7 @@ export const inventoryEnhancedApi = {
     const newQuantity = (item.quantity || 0) + quantity;
     
     const { error: updateError } = await supabase
-      .from("inventory_items")
+      .from("parts_items")
       .update({ 
         quantity: newQuantity,
         updated_at: new Date().toISOString()
@@ -251,7 +251,7 @@ export const inventoryEnhancedApi = {
     console.log('Removing stock:', inventoryId, quantity, note);
     
     const { data: item, error: fetchError } = await supabase
-      .from("inventory_items")
+      .from("parts_items")
       .select("quantity")
       .eq("id", inventoryId)
       .single();
@@ -266,7 +266,7 @@ export const inventoryEnhancedApi = {
     const newQuantity = Math.max(0, currentQuantity - quantity);
     
     const { error: updateError } = await supabase
-      .from("inventory_items")
+      .from("parts_items")
       .update({ 
         quantity: newQuantity,
         updated_at: new Date().toISOString()
@@ -280,7 +280,7 @@ export const inventoryEnhancedApi = {
     console.log('Adjusting stock:', inventoryId, newQuantity, note);
     
     const { error } = await supabase
-      .from("inventory_items")
+      .from("parts_items")
       .update({ 
         quantity: Math.max(0, newQuantity),
         updated_at: new Date().toISOString()

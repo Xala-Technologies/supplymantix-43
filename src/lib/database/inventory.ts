@@ -15,7 +15,7 @@ export const inventoryApi = {
     if (!userRecord) throw new Error("User record not found");
 
     const { data, error } = await supabase
-      .from("inventory_items")
+      .from("parts_items")
       .select("*")
       .eq("tenant_id", userRecord.tenant_id);
 
@@ -36,7 +36,7 @@ export const inventoryApi = {
     if (!userRecord) throw new Error("User record not found");
 
     const { data, error } = await supabase
-      .from("inventory_items")
+      .from("parts_items")
       .insert({ ...item, tenant_id: userRecord.tenant_id })
       .select()
       .single();
@@ -47,7 +47,7 @@ export const inventoryApi = {
 
   updateInventoryItem: async (id: string, updates: any) => {
     const { data, error } = await supabase
-      .from("inventory_items")
+      .from("parts_items")
       .update(updates)
       .eq("id", id)
       .select()
@@ -59,7 +59,7 @@ export const inventoryApi = {
 
   deleteInventoryItem: async (id: string) => {
     const { error } = await supabase
-      .from("inventory_items")
+      .from("parts_items")
       .delete()
       .eq("id", id);
 
