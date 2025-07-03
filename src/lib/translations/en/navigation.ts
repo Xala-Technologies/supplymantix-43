@@ -8,7 +8,7 @@ export const navigation = {
   "nav.purchaseOrders": "Purchase Orders",
   "nav.requests": "Requests",
   "nav.assets": "Assets",
-  "nav.inventory": "Inventory",
+  "nav.inventory": "Parts Inventory",
   "nav.meters": "Meters",
   "nav.locations": "Locations",
   "nav.categories": "Categories",
