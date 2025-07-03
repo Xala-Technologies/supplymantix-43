@@ -861,56 +861,6 @@ export type Database = {
         }
         Relationships: []
       }
-      inventory_items: {
-        Row: {
-          created_at: string | null
-          description: string | null
-          id: string
-          location: string | null
-          min_quantity: number | null
-          name: string
-          quantity: number
-          sku: string | null
-          tenant_id: string
-          unit_cost: number | null
-          updated_at: string | null
-        }
-        Insert: {
-          created_at?: string | null
-          description?: string | null
-          id?: string
-          location?: string | null
-          min_quantity?: number | null
-          name: string
-          quantity?: number
-          sku?: string | null
-          tenant_id: string
-          unit_cost?: number | null
-          updated_at?: string | null
-        }
-        Update: {
-          created_at?: string | null
-          description?: string | null
-          id?: string
-          location?: string | null
-          min_quantity?: number | null
-          name?: string
-          quantity?: number
-          sku?: string | null
-          tenant_id?: string
-          unit_cost?: number | null
-          updated_at?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "inventory_items_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "tenants"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       invoices: {
         Row: {
           amount_due: number
@@ -1601,6 +1551,56 @@ export type Database = {
           },
         ]
       }
+      parts_items: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          id: string
+          location: string | null
+          min_quantity: number | null
+          name: string
+          quantity: number
+          sku: string | null
+          tenant_id: string
+          unit_cost: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          location?: string | null
+          min_quantity?: number | null
+          name: string
+          quantity?: number
+          sku?: string | null
+          tenant_id: string
+          unit_cost?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          location?: string | null
+          min_quantity?: number | null
+          name?: string
+          quantity?: number
+          sku?: string | null
+          tenant_id?: string
+          unit_cost?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inventory_items_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       procedure_executions: {
         Row: {
           answers: Json | null
@@ -1992,7 +1992,7 @@ export type Database = {
             foreignKeyName: "purchase_order_line_items_inventory_item_id_fkey"
             columns: ["inventory_item_id"]
             isOneToOne: false
-            referencedRelation: "inventory_items"
+            referencedRelation: "parts_items"
             referencedColumns: ["id"]
           },
           {
@@ -2748,7 +2748,7 @@ export type Database = {
             foreignKeyName: "work_order_parts_used_inventory_item_id_fkey"
             columns: ["inventory_item_id"]
             isOneToOne: false
-            referencedRelation: "inventory_items"
+            referencedRelation: "parts_items"
             referencedColumns: ["id"]
           },
           {
