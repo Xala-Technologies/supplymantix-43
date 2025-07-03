@@ -1553,43 +1553,70 @@ export type Database = {
       }
       parts_items: {
         Row: {
+          area: string | null
+          assets: Json | null
+          barcode: string | null
           created_at: string | null
           description: string | null
+          documents: Json | null
           id: string
           location: string | null
           min_quantity: number | null
           name: string
+          part_type: string | null
+          picture_url: string | null
+          qr_code: string | null
           quantity: number
           sku: string | null
+          teams_in_charge: string[] | null
           tenant_id: string
           unit_cost: number | null
           updated_at: string | null
+          vendor_id: string | null
         }
         Insert: {
+          area?: string | null
+          assets?: Json | null
+          barcode?: string | null
           created_at?: string | null
           description?: string | null
+          documents?: Json | null
           id?: string
           location?: string | null
           min_quantity?: number | null
           name: string
+          part_type?: string | null
+          picture_url?: string | null
+          qr_code?: string | null
           quantity?: number
           sku?: string | null
+          teams_in_charge?: string[] | null
           tenant_id: string
           unit_cost?: number | null
           updated_at?: string | null
+          vendor_id?: string | null
         }
         Update: {
+          area?: string | null
+          assets?: Json | null
+          barcode?: string | null
           created_at?: string | null
           description?: string | null
+          documents?: Json | null
           id?: string
           location?: string | null
           min_quantity?: number | null
           name?: string
+          part_type?: string | null
+          picture_url?: string | null
+          qr_code?: string | null
           quantity?: number
           sku?: string | null
+          teams_in_charge?: string[] | null
           tenant_id?: string
           unit_cost?: number | null
           updated_at?: string | null
+          vendor_id?: string | null
         }
         Relationships: [
           {
