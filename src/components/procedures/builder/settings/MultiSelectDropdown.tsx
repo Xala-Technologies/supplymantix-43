@@ -61,48 +61,47 @@ export const MultiSelectDropdown: React.FC<MultiSelectDropdownProps> = ({
     <div className="space-y-3">
       <label className="block text-sm font-medium text-gray-900">{label}</label>
       
-      {/* Selected items display */}
-      {selectedNames.length > 0 && (
-        <div className="flex flex-wrap gap-2">
-          {selectedNames.map((name, index) => {
-            const item = items.find(item => item.name === name);
-            if (!item) return null;
-            
-            return (
-              <Badge 
-                key={index} 
-                variant="secondary" 
-                className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100 transition-colors"
-              >
-                <span className="text-sm font-medium">{name}</span>
-                <button
-                  type="button"
-                  onClick={() => onRemove(item.id)}
-                  className="ml-1 hover:bg-blue-200 rounded-full p-0.5 transition-colors"
-                >
-                  <X className="h-3 w-3" />
-                </button>
-              </Badge>
-            );
-          })}
-        </div>
-      )}
-
-      {/* Dropdown trigger */}
+      {/* Dropdown trigger with selected items inline */}
       <Popover open={isOpen} onOpenChange={setIsOpen}>
         <PopoverTrigger asChild>
           <Button
             variant="outline"
-            className="w-full justify-between text-left font-normal h-11 px-4 border-gray-200 hover:border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all"
+            className="w-full justify-between text-left font-normal h-auto min-h-11 px-4 py-3 border-gray-200 hover:border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all"
             type="button"
           >
-            <span className={selectedNames.length > 0 ? 'text-gray-900' : 'text-gray-500'}>
-              {selectedNames.length > 0 
-                ? `${selectedNames.length} selected`
-                : placeholder
-              }
-            </span>
-            <ChevronDown className="h-4 w-4 text-gray-400" />
+            <div className="flex flex-wrap items-center gap-2 flex-1">
+              {selectedNames.length > 0 ? (
+                <>
+                  {selectedNames.map((name, index) => {
+                    const item = items.find(item => item.name === name);
+                    if (!item) return null;
+                    
+                    return (
+                      <Badge 
+                        key={index} 
+                        variant="secondary" 
+                        className="flex items-center gap-1.5 px-2 py-1 bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100 transition-colors"
+                      >
+                        <span className="text-xs font-medium">{name}</span>
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onRemove(item.id);
+                          }}
+                          className="ml-1 hover:bg-blue-200 rounded-full p-0.5 transition-colors"
+                        >
+                          <X className="h-2.5 w-2.5" />
+                        </button>
+                      </Badge>
+                    );
+                  })}
+                </>
+              ) : (
+                <span className="text-gray-500">{placeholder}</span>
+              )}
+            </div>
+            <ChevronDown className="h-4 w-4 text-gray-400 ml-2 flex-shrink-0" />
           </Button>
         </PopoverTrigger>
         
