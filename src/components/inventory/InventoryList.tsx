@@ -1,213 +1,158 @@
-
+import React from "react";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
-import { Package, MapPin, DollarSign, AlertTriangle } from "lucide-react";
+import { MapPin, Edit, Trash2, MoreHorizontal, Eye, Package } from "lucide-react";
 
 interface InventoryItem {
   id: string;
   name: string;
   sku: string;
   description: string;
-  category: string;
   quantity: number;
   minQuantity: number;
   unitCost: number;
   totalValue: number;
   location: string;
+  category: string;
   status: string;
 }
 
 interface InventoryListProps {
   items: InventoryItem[];
-  selectedItemId: string | null;
-  onSelectItem: (id: string) => void;
+  onViewItem: (item: InventoryItem) => void;
+  onEditItem: (item: InventoryItem) => void;
+  onDeleteItem: (item: InventoryItem) => void;
 }
 
-export const InventoryList = ({ items, selectedItemId, onSelectItem }: InventoryListProps) => {
-  const getStatusColor = (status: string, quantity: number, minQuantity: number) => {
-    if (status === 'Out of Stock' || quantity === 0) {
-      return 'bg-red-100 text-red-800 border-red-200';
-    } else if (status === 'Low Stock' || quantity <= minQuantity) {
-      return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-    } else if (status === 'On Order') {
-      return 'bg-blue-100 text-blue-800 border-blue-200';
-    } else {
-      return 'bg-green-100 text-green-800 border-green-200';
-    }
-  };
-
-  const getCategoryIcon = (category: string) => {
-    switch (category.toLowerCase()) {
-      case 'filters':
-        return '🔧';
-      case 'safety equipment':
-        return '🛡️';
-      case 'electrical':
-        return '⚡';
-      case 'mechanical':
-        return '⚙️';
-      case 'consumables':
-        return '📦';
+export const InventoryList = ({ 
+  items, 
+  onViewItem,
+  onEditItem,
+  onDeleteItem 
+}: InventoryListProps) => {
+  const getStatusColor = (status: string) => {
+    switch (status.toLowerCase()) {
+      case 'in_stock':
+        return 'bg-green-100 text-green-800 border-green-200';
+      case 'low_stock':
+        return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+      case 'out_of_stock':
+        return 'bg-red-100 text-red-800 border-red-200';
       default:
-        return '📋';
+        return 'bg-gray-100 text-gray-800 border-gray-200';
     }
   };
-
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD'
-    }).format(amount);
-  };
-
-  const lowStockItems = items.filter(item => item.quantity <= item.minQuantity);
-  const normalStockItems = items.filter(item => item.quantity > item.minQuantity);
 
   return (
-    <div className="w-full md:w-80 lg:w-96 xl:w-[28rem] bg-white border-r border-gray-200 flex flex-col h-full">
+    <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
       {/* Header */}
-      <div className="p-4 border-b border-gray-100">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-semibold text-gray-900">
-            Inventory ({items.length})
-          </h3>
-          <div className="flex items-center space-x-2 text-xs text-gray-600">
-            <span>Sort: Name A-Z</span>
-            <button className="text-gray-400 hover:text-gray-600">↻</button>
-          </div>
+      <div className="px-6 py-4 bg-gray-50 border-b border-gray-200">
+        <div className="flex items-center justify-between text-sm font-medium text-gray-600">
+          <div className="flex-1">Item</div>
+          <div className="hidden md:block w-24 text-center">Status</div>
+          <div className="hidden md:block w-32 text-center">Location</div>
+          <div className="hidden md:block w-24 text-center">Quantity</div>
+          <div className="hidden md:block w-24 text-center">Value</div>
+          <div className="w-24 text-center">Actions</div>
         </div>
-        
-        {lowStockItems.length > 0 && (
-          <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-            <div className="flex items-center gap-2 text-yellow-800">
-              <AlertTriangle className="w-4 h-4" />
-              <span className="text-sm font-medium">{lowStockItems.length} items need attention</span>
-            </div>
-          </div>
-        )}
       </div>
-      
-      {/* Scrollable content */}
-      <div className="flex-1 overflow-y-auto">
-        {/* Low Stock Items */}
-        {lowStockItems.length > 0 && (
-          <div className="p-4">
-            <h4 className="text-sm font-medium text-red-700 mb-3 flex items-center gap-2">
-              <AlertTriangle className="w-4 h-4" />
-              Low Stock ({lowStockItems.length})
-            </h4>
-            <div className="space-y-3">
-              {lowStockItems.map((item) => (
-                <div
-                  key={item.id}
-                  className={cn(
-                    "p-4 rounded-lg border-2 cursor-pointer transition-all duration-200 hover:shadow-md bg-red-50 border-red-200",
-                    selectedItemId === item.id && "border-red-400 shadow-sm"
-                  )}
-                  onClick={() => onSelectItem(item.id)}
-                >
-                  <div className="flex items-start gap-3">
-                    <div className="w-10 h-10 bg-gradient-to-br from-red-50 to-red-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                      <span className="text-lg">{getCategoryIcon(item.category)}</span>
-                    </div>
-                    
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-start justify-between mb-2">
-                        <div>
-                          <h4 className="text-sm font-semibold text-gray-900 leading-tight line-clamp-2">
-                            {item.name}
-                          </h4>
-                          <span className="text-xs text-gray-600">SKU: {item.sku}</span>
-                        </div>
-                      </div>
-                      
-                      <div className="flex flex-col gap-2 mb-3">
-                        <Badge className={cn("text-xs w-fit border", getStatusColor(item.status, item.quantity, item.minQuantity))}>
-                          {item.status}
-                        </Badge>
-                        <div className="flex items-center gap-1 text-xs text-gray-500">
-                          <MapPin className="w-3 h-3 flex-shrink-0" />
-                          <span className="truncate">{item.location}</span>
-                        </div>
-                      </div>
-                      
-                      <div className="space-y-1">
-                        <div className="flex items-center justify-between text-xs">
-                          <span className="text-gray-500">Quantity:</span>
-                          <span className="font-medium text-red-700">{item.quantity} / {item.minQuantity} min</span>
-                        </div>
-                        <div className="flex items-center justify-between text-xs">
-                          <span className="text-gray-500">Value:</span>
-                          <span className="font-medium">{formatCurrency(item.totalValue)}</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
 
-        {/* Normal Stock Items */}
-        <div className="p-4">
-          <h4 className="text-sm font-medium text-gray-700 mb-3 flex items-center gap-2">
-            <Package className="w-4 h-4" />
-            In Stock ({normalStockItems.length})
-          </h4>
-          <div className="space-y-3">
-            {normalStockItems.map((item) => (
-              <div
-                key={item.id}
-                className={cn(
-                  "p-4 rounded-lg border-2 cursor-pointer transition-all duration-200 hover:shadow-md",
-                  selectedItemId === item.id 
-                    ? "bg-blue-50 border-blue-300 shadow-sm" 
-                    : "bg-white border-gray-200 hover:border-gray-300"
-                )}
-                onClick={() => onSelectItem(item.id)}
-              >
-                <div className="flex items-start gap-3">
-                  <div className="w-10 h-10 bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <span className="text-lg">{getCategoryIcon(item.category)}</span>
+      {/* List Items */}
+      <div className="divide-y divide-gray-100">
+        {items.map((item) => (
+          <div 
+            key={item.id} 
+            className="px-6 py-4 transition-colors hover:bg-gray-50"
+          >
+            <div className="flex items-center justify-between">
+              {/* Item Info */}
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-3 mb-1">
+                  <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <Package className="w-4 h-4 text-blue-600" />
                   </div>
-                  
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-start justify-between mb-2">
-                      <div>
-                        <h4 className="text-sm font-semibold text-gray-900 leading-tight line-clamp-2">
-                          {item.name}
-                        </h4>
-                        <span className="text-xs text-gray-600">SKU: {item.sku}</span>
-                      </div>
-                    </div>
-                    
-                    <div className="flex flex-col gap-2 mb-3">
-                      <Badge className={cn("text-xs w-fit border", getStatusColor(item.status, item.quantity, item.minQuantity))}>
-                        {item.status}
-                      </Badge>
-                      <div className="flex items-center gap-1 text-xs text-gray-500">
-                        <MapPin className="w-3 h-3 flex-shrink-0" />
-                        <span className="truncate">{item.location}</span>
-                      </div>
-                    </div>
-                    
-                    <div className="space-y-1">
-                      <div className="flex items-center justify-between text-xs">
-                        <span className="text-gray-500">Quantity:</span>
-                        <span className="font-medium">{item.quantity}</span>
-                      </div>
-                      <div className="flex items-center justify-between text-xs">
-                        <span className="text-gray-500">Value:</span>
-                        <span className="font-medium">{formatCurrency(item.totalValue)}</span>
-                      </div>
-                    </div>
+                  <div>
+                    <button
+                      onClick={() => onViewItem(item)}
+                      className="font-semibold text-gray-900 hover:text-blue-600 transition-colors flex items-center gap-2 group"
+                    >
+                      {item.name}
+                      <Eye className="h-3.5 w-3.5 opacity-0 group-hover:opacity-100 transition-opacity" />
+                    </button>
+                    <p className="text-sm text-gray-500">SKU: {item.sku}</p>
                   </div>
                 </div>
               </div>
-            ))}
+
+              {/* Status - Hidden on mobile */}
+              <div className="hidden md:flex w-24 justify-center">
+                <Badge className={cn("text-xs border", getStatusColor(item.status))}>
+                  {item.status.replace('_', ' ')}
+                </Badge>
+              </div>
+
+              {/* Location - Hidden on mobile */}
+              <div className="hidden md:flex w-32 justify-center">
+                <div className="flex items-center gap-1 text-sm text-gray-500">
+                  <MapPin className="h-3 w-3" />
+                  <span className="truncate">{item.location}</span>
+                </div>
+              </div>
+
+              {/* Quantity - Hidden on mobile */}
+              <div className="hidden md:flex w-24 justify-center">
+                <span className="text-sm text-gray-900 font-medium">{item.quantity}</span>
+              </div>
+
+              {/* Value - Hidden on mobile */}
+              <div className="hidden md:flex w-24 justify-center">
+                <span className="text-sm text-gray-900 font-medium">${item.totalValue.toFixed(2)}</span>
+              </div>
+
+              {/* Actions */}
+              <div className="flex items-center gap-2 w-24 justify-center">
+                <Button
+                  size="sm"
+                  onClick={() => onViewItem(item)}
+                  className="bg-blue-600 hover:bg-blue-700 text-xs px-2"
+                >
+                  <Eye className="h-3 w-3" />
+                </Button>
+                
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className="h-8 w-8 p-0"
+                    >
+                      <MoreHorizontal className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="bg-white border shadow-lg">
+                    <DropdownMenuItem onClick={() => onViewItem(item)}>
+                      <Eye className="h-4 w-4 mr-2" />
+                      View Details
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => onEditItem(item)}>
+                      <Edit className="h-4 w-4 mr-2" />
+                      Edit
+                    </DropdownMenuItem>
+                    <DropdownMenuItem 
+                      onClick={() => onDeleteItem(item)}
+                      className="text-red-600"
+                    >
+                      <Trash2 className="h-4 w-4 mr-2" />
+                      Delete
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+            </div>
           </div>
-        </div>
+        ))}
       </div>
     </div>
   );

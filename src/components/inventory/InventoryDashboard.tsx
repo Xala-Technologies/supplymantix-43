@@ -2,6 +2,7 @@ import { useState } from "react";
 import { InventoryHeader } from "./InventoryHeader";
 import { InventoryStats } from "./InventoryStats";
 import { InventoryGrid } from "./InventoryGrid";
+import { InventoryList } from "./InventoryList";
 import { InventoryForm } from "./InventoryForm";
 import { InventoryDetailCard } from "./InventoryDetailCard";
 import { DataLoadingManager } from "@/components/ui/DataLoadingManager";
@@ -35,6 +36,7 @@ export const InventoryDashboard = () => {
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [showEditForm, setShowEditForm] = useState(false);
   const [editingItem, setEditingItem] = useState<any>(null);
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
   // Enhanced inventory query with robust loading
   const { data: inventoryData, isLoading, error, refetch } = useInventoryEnhanced({
@@ -160,6 +162,8 @@ export const InventoryDashboard = () => {
         lowStockCount={lowStockItems}
         isLoading={isLoading}
         isExporting={exportMutation.isPending}
+        viewMode={viewMode}
+        onViewModeChange={setViewMode}
       />
       
       <div className="p-6">
@@ -177,12 +181,21 @@ export const InventoryDashboard = () => {
           loadingText="Loading inventory items..."
           errorText="Failed to load inventory data"
         >
-          <InventoryGrid
-            items={items}
-            onViewItem={handleViewItem}
-            onEditItem={handleEditItem}
-            onDeleteItem={handleDeleteItem}
-          />
+          {viewMode === 'grid' ? (
+            <InventoryGrid
+              items={items}
+              onViewItem={handleViewItem}
+              onEditItem={handleEditItem}
+              onDeleteItem={handleDeleteItem}
+            />
+          ) : (
+            <InventoryList
+              items={items}
+              onViewItem={handleViewItem}
+              onEditItem={handleEditItem}
+              onDeleteItem={handleDeleteItem}
+            />
+          )}
         </DataLoadingManager>
       </div>
 
