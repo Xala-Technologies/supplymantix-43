@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { CheckCircle2, Eye, Edit, Trash2, FileText, Clock } from "lucide-react";
+import { ProcedureFieldRenderer } from "@/components/procedures/dialog/ProcedureFieldRenderer";
 
 interface ProcedureItem {
   id: string;
@@ -37,6 +38,7 @@ interface ProcedureCardProps {
 
 export const ProcedureCard = ({ procedure, onEdit, onDelete, onPreview }: ProcedureCardProps) => {
   const [showPreview, setShowPreview] = useState(false);
+  const [fieldValues, setFieldValues] = useState<Record<string, any>>({});
 
   const handlePreview = () => {
     setShowPreview(true);
@@ -51,6 +53,13 @@ export const ProcedureCard = ({ procedure, onEdit, onDelete, onPreview }: Proced
       return `${hours}h ${mins}m`;
     }
     return `${mins}m`;
+  };
+
+  const handleFieldChange = (fieldId: string, value: any) => {
+    setFieldValues(prev => ({
+      ...prev,
+      [fieldId]: value
+    }));
   };
 
   return (
@@ -169,61 +178,16 @@ export const ProcedureCard = ({ procedure, onEdit, onDelete, onPreview }: Proced
                               </Badge>
                             )}
                           </div>
-                          
-          {(field.field_type === 'checkbox' || field.type === 'checkbox') && field.options && (
-            <div className="space-y-2 mt-2">
-              {Array.isArray(field.options.choices) ? field.options.choices.map((option, optionIndex) => (
-                <label key={optionIndex} className="flex items-center gap-2 text-sm text-gray-600">
-                  <input 
-                    type="checkbox" 
-                    disabled 
-                    className="rounded border-gray-300"
-                  />
-                  {option}
-                </label>
-              )) : Array.isArray(field.options) ? field.options.map((option, optionIndex) => (
-                <label key={optionIndex} className="flex items-center gap-2 text-sm text-gray-600">
-                  <input 
-                    type="checkbox" 
-                    disabled 
-                    className="rounded border-gray-300"
-                  />
-                  {option}
-                </label>
-              )) : null}
-                            </div>
-                          )}
-                          
-                          {(field.field_type === 'text' || field.type === 'text') && (
-                            <div className="mt-2">
-                              <input 
-                                type="text" 
-                                disabled 
-                                placeholder="Text input"
-                                className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm bg-gray-50"
-                              />
-                            </div>
-                          )}
-                          
-                          {(field.field_type === 'number' || field.type === 'number') && (
-                            <div className="mt-2">
-                              <input 
-                                type="number" 
-                                disabled 
-                                placeholder="Number input"
-                                className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm bg-gray-50"
-                              />
-                            </div>
-                          )}
-                          
-                          {(field.field_type === 'file' || field.type === 'file') && (
-                            <div className="mt-2">
-                              <div className="border-2 border-dashed border-gray-300 rounded-lg p-3 text-center bg-gray-50">
-                                <FileText className="h-6 w-6 text-gray-400 mx-auto mb-1" />
-                                <p className="text-xs text-gray-500">File upload area</p>
-                              </div>
-                            </div>
-                          )}
+                           
+                           {/* Use the comprehensive field renderer for all field types */}
+                           <div className="mt-2">
+                             <ProcedureFieldRenderer
+                               field={field}
+                               index={index}
+                               value={fieldValues[field.id] || ''}
+                               onChange={handleFieldChange}
+                             />
+                           </div>
                         </div>
                       </div>
                     </div>
