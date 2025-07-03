@@ -73,7 +73,10 @@ export const SearchableCombobox = ({
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-full p-0 shadow-lg border border-gray-200" align="start">
-        <Command className="rounded-lg">
+        <Command 
+          className="rounded-lg"
+          shouldFilter={false}
+        >
           <CommandInput 
             placeholder={searchPlaceholder}
             value={searchValue}
