@@ -37,10 +37,19 @@ export const SearchableCombobox = ({
 
   const selectedOption = options.find(option => option.id === value);
 
-  const filteredOptions = options.filter(option =>
-    option.name.toLowerCase().includes(searchValue.toLowerCase()) ||
-    option.label?.toLowerCase().includes(searchValue.toLowerCase())
-  );
+  // Enhanced filtering - case insensitive, searches name and label
+  const filteredOptions = searchValue.trim() 
+    ? options.filter(option => {
+        const searchTerm = searchValue.toLowerCase().trim();
+        const optionName = (option.name || '').toLowerCase();
+        const optionLabel = (option.label || '').toLowerCase();
+        
+        return optionName.includes(searchTerm) || 
+               optionLabel.includes(searchTerm) ||
+               optionName.startsWith(searchTerm) ||
+               optionLabel.startsWith(searchTerm);
+      })
+    : options; // Show all options when no search term
 
   const handleCreateNew = () => {
     if (onCreateNew && searchValue.trim()) {
