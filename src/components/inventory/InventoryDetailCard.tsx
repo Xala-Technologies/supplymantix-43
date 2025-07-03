@@ -1,4 +1,3 @@
-
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -8,6 +7,12 @@ import { Package, DollarSign, MapPin, Edit, ShoppingCart, AlertTriangle, CheckCi
 import { cn } from "@/lib/utils";
 import { ReorderDialog } from "./ReorderDialog";
 import { useInventoryEnhanced } from "@/hooks/useInventoryEnhanced";
+import { useAssets } from "@/hooks/useAssets";
+import { useVendors } from "@/hooks/useVendors";
+import { useLocations } from "@/hooks/useLocations";
+import { useTeams } from "@/hooks/useTeams";
+import QRCode from "qrcode";
+import { useEffect, useState } from "react";
 
 interface InventoryDetailCardProps {
   item: {
@@ -34,6 +39,18 @@ interface InventoryDetailCardProps {
       quantity: number;
       reason: string;
     }>;
+    qr_code: string;
+    barcode: string;
+    picture_url: string;
+    assets: Array<string>;
+    teams: Array<string>;
+    vendor: string;
+    part_type: string;
+    area: string;
+    documents: Array<{
+      name: string;
+      url: string;
+    }>;
   };
   onClose?: () => void;
   onEdit?: () => void;
@@ -42,6 +59,10 @@ interface InventoryDetailCardProps {
 export const InventoryDetailCard = ({ item, onClose, onEdit }: InventoryDetailCardProps) => {
   // Get all inventory items for reorder functionality
   const { data: inventoryData } = useInventoryEnhanced();
+  const { data: assets = [] } = useAssets();
+  const { data: vendors = [] } = useVendors();
+  const { data: locations = [] } = useLocations();
+  const { data: teams = [] } = useTeams();
 
   // Convert current item to the format expected by ReorderDialog
   const currentItemForReorder = {
@@ -59,6 +80,44 @@ export const InventoryDetailCard = ({ item, onClose, onEdit }: InventoryDetailCa
     is_low_stock: item.quantity <= item.minQuantity,
     needs_reorder: item.quantity <= item.minQuantity * 1.5,
     total_value: item.quantity * item.unitCost,
+    part_number: item.partNumber || null,
+    vendor_id: item.vendor || null,
+    qr_code: item.qr_code || null,
+    barcode: item.barcode || null,
+    picture_url: item.picture_url || null,
+    assets: item.assets || [],
+    teams: item.teams || [],
+    part_type: item.part_type || null,
+    area: item.area || null,
+    documents: item.documents || null,
+  };
+
+  // QR code rendering
+  const [qrCodeDataUrl, setQrCodeDataUrl] = useState<string>("");
+  useEffect(() => {
+    if (item.qr_code) {
+      QRCode.toDataURL(item.qr_code, { width: 96, margin: 1 })
+        .then(url => setQrCodeDataUrl(url))
+        .catch(() => setQrCodeDataUrl(""));
+    } else {
+      setQrCodeDataUrl("");
+    }
+  }, [item.qr_code]);
+
+  // Helper functions to get names
+  const getAssetNames = () => {
+    if (!item.assets || item.assets.length === 0) return "N/A";
+    return item.assets
+      .map(id => assets.find(a => a.id === id)?.name || id)
+      .join(", ");
+  };
+  const getVendorName = () => vendors.find(v => v.id === item.vendor)?.name || item.vendor || "N/A";
+  const getLocationName = () => locations.find(l => l.id === item.location)?.name || item.location || "N/A";
+  const getTeamNames = () => {
+    if (!item.teams || item.teams.length === 0) return "N/A";
+    return item.teams
+      .map(id => teams.find(t => t.id === id)?.name || id)
+      .join(", ");
   };
 
   const getStatusConfig = (status: string, quantity: number, minQuantity: number) => {
@@ -300,6 +359,71 @@ export const InventoryDetailCard = ({ item, onClose, onEdit }: InventoryDetailCa
                 </div>
               </div>
             </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* New: Identification & Attachments */}
+      <Card>
+        <CardContent className="p-4">
+          <h3 className="font-semibold text-gray-900 mb-3">Identification</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <div className="flex flex-col gap-2">
+                <span className="text-gray-600">QR Code</span>
+                {qrCodeDataUrl ? (
+                  <img src={qrCodeDataUrl} alt="QR Code" className="h-20 w-20 object-contain border rounded" />
+                ) : (
+                  <span className="text-gray-400">N/A</span>
+                )}
+              </div>
+            </div>
+            {item.barcode && (
+              <div>
+                <span className="text-gray-600">Barcode</span>
+                <div className="mt-1">
+                  <img src={item.barcode} alt="Barcode" className="h-20 w-20 object-contain border rounded" />
+                </div>
+              </div>
+            )}
+            {item.picture_url && (
+              <div>
+                <span className="text-gray-600">Image</span>
+                <div className="mt-1">
+                  <img src={item.picture_url} alt="Part" className="h-20 w-20 object-cover border rounded" />
+                </div>
+              </div>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+      <Card>
+        <CardContent className="p-4">
+          <h3 className="font-semibold text-gray-900 mb-3">Associations</h3>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <div><b>Assets</b><br />{getAssetNames()}</div>
+              <div><b>Vendor</b><br />{getVendorName()}</div>
+              <div><b>Area</b><br />{item.area || "N/A"}</div>
+            </div>
+            <div>
+              <div><b>Teams</b><br />{getTeamNames()}</div>
+              <div><b>Location</b><br />{getLocationName()}</div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+      {item.documents && item.documents.length > 0 && (
+        <Card>
+          <CardContent className="p-4">
+            <h3 className="font-semibold text-gray-900 mb-3">Documents</h3>
+            <ul className="list-disc pl-5">
+              {item.documents.map((doc, idx) => (
+                <li key={idx}>
+                  <a href={doc.url} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">{doc.name}</a>
+                </li>
+              ))}
+            </ul>
           </CardContent>
         </Card>
       )}

@@ -3,3 +3,7 @@
 - AdvancedPartForm now actually creates a new part in the backend using useCreatePart, making new parts visible in the inventory dashboard. 
 - Unified all inventory and part logic/UI under 'Parts Inventory'. Updated dashboard, grid, stats, and all UI text to use 'Part' and 'Parts Inventory'. No more 'Inventory Item' in UI. Lint run confirms no new errors from this refactor. 
 - Major refactor: renamed all inventory_items references to parts_items, updated all code and form logic, and created migration for table rename. AdvancedPartForm now creates new parts in parts_items and they appear in dashboard. 
+- Migration created: add all needed fields to parts_items (qr_code, barcode, picture_url, location, quantity, min_quantity, assets, teams, vendor_id, part_type, area, documents) and foreign key for vendor_id. Enables full part detail and selection of related entities. 
+- Fixed Radix Select usage in AdvancedPartForm to use only single-select (string) values, removed 'multiple' prop, and ensured correct label properties for all select dropdowns. Project builds successfully and linter errors in this file are resolved. 
+- Added mock team to useTeams hook so the teams dropdown always has an option until a real team is created. Includes a TODO to remove when real data exists. 
+- InventoryDetailCard now displays real names for assets, vendor, location, and teams using hooks, and renders the QR code visually using the QRCode library. Fixed linter error by ensuring all required fields are present in currentItemForReorder. Project builds successfully. 

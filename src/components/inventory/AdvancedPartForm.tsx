@@ -15,7 +15,7 @@ import { useLocations } from "@/hooks/useLocations";
 import { useAssetTypes } from "@/hooks/useAssetTypes";
 import { useAssets } from "@/hooks/useAssets";
 import type { Part as BasePart } from "@/hooks/useParts";
-import { useCreateInventoryItem } from "@/hooks/useInventoryMutations";
+import { useCreateInventoryItem, useUpdateInventoryItem } from "@/hooks/useInventoryMutations";
 
 interface AdvancedPartFormProps {
   onSuccess: () => void;
@@ -63,6 +63,7 @@ export const AdvancedPartForm: React.FC<AdvancedPartFormProps> = ({ onSuccess, p
   const { data: assetTypes = [] } = useAssetTypes();
   const { data: assets = [] } = useAssets();
   const createPart = useCreateInventoryItem();
+  const updatePart = useUpdateInventoryItem();
 
   const [documents, setDocuments] = useState<{ name: string; url: string; size: number }[]>(part?.documents || []);
   const [imageUrl, setImageUrl] = useState<string>(part?.picture_url || "");
@@ -87,8 +88,8 @@ export const AdvancedPartForm: React.FC<AdvancedPartFormProps> = ({ onSuccess, p
       area: part?.area || "",
       quantity: part?.quantity || undefined,
       min_quantity: part?.min_quantity || undefined,
-      assets: part?.assets || [],
-      teams: part?.teams || [],
+      assets: part?.assets ? part.assets[0] : "",
+      teams: part?.teams ? part.teams[0] : "",
       vendor: part?.vendor || "",
       picture_url: part?.picture_url || "",
       documents: part?.documents || [],
@@ -102,18 +103,30 @@ export const AdvancedPartForm: React.FC<AdvancedPartFormProps> = ({ onSuccess, p
     const cleanedData = {
       name: data.name,
       description: data.description || '',
-      sku: '',
+      unit_cost: data.unit_cost || 0,
+      qr_code: data.qr_code || '',
+      barcode: data.barcode || '',
+      picture_url: data.picture_url || '',
       location: data.location || '',
       quantity: data.quantity || 0,
       min_quantity: data.min_quantity || 0,
-      unit_cost: data.unit_cost || 0,
+      assets: data.assets ? [data.assets] : null,
+      teams: data.teams ? [data.teams] : null,
+      vendor_id: data.vendor || null,
+      part_type: data.part_type || '',
+      area: data.area || '',
+      documents: data.documents && data.documents.length > 0 ? data.documents : null,
     };
     try {
-      await createPart.mutateAsync(cleanedData);
+      if (part && part.id) {
+        await updatePart.mutateAsync({ id: part.id, updates: cleanedData });
+      } else {
+        await createPart.mutateAsync(cleanedData);
+      }
       onSuccess();
     } catch (error) {
       // TODO: Show error to user
-      console.error('Failed to create part:', error);
+      console.error('Failed to save part:', error);
     }
   };
 
@@ -177,7 +190,7 @@ export const AdvancedPartForm: React.FC<AdvancedPartFormProps> = ({ onSuccess, p
               <div className="space-y-2">
                 <Label htmlFor="part_type">Part Type</Label>
                 <Select
-                  value={watchedValues.part_type}
+                  value={watchedValues.part_type || ""}
                   onValueChange={(value) => setValue("part_type", value)}
                 >
                   <SelectTrigger>
@@ -195,7 +208,7 @@ export const AdvancedPartForm: React.FC<AdvancedPartFormProps> = ({ onSuccess, p
               <div className="space-y-2">
                 <Label htmlFor="location">Location</Label>
                 <Select
-                  value={watchedValues.location}
+                  value={watchedValues.location || ""}
                   onValueChange={(value) => setValue("location", value)}
                 >
                   <SelectTrigger>
@@ -203,7 +216,7 @@ export const AdvancedPartForm: React.FC<AdvancedPartFormProps> = ({ onSuccess, p
                   </SelectTrigger>
                   <SelectContent>
                     {locations.map((loc) => (
-                      <SelectItem key={loc.id} value={loc.name}>
+                      <SelectItem key={loc.id} value={loc.id}>
                         {loc.name}
                       </SelectItem>
                     ))}
@@ -252,8 +265,8 @@ export const AdvancedPartForm: React.FC<AdvancedPartFormProps> = ({ onSuccess, p
               <div className="space-y-2">
                 <Label htmlFor="assets">Assets</Label>
                 <Select
-                  value={watchedValues.assets?.[0] || ""}
-                  onValueChange={(value) => setValue("assets", value ? [value] : [])}
+                  value={watchedValues.assets || ""}
+                  onValueChange={(value) => setValue("assets", value)}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Select asset" />
@@ -261,17 +274,18 @@ export const AdvancedPartForm: React.FC<AdvancedPartFormProps> = ({ onSuccess, p
                   <SelectContent>
                     {assets.map((asset) => (
                       <SelectItem key={asset.id} value={asset.id}>
-                        {asset.name}
+                        {asset.name ?? asset.asset_tag ?? asset.id}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
+                {/* TODO: Replace with multi-select component for assets */}
               </div>
               <div className="space-y-2">
-                <Label htmlFor="teams">Teams in Charge</Label>
+                <Label htmlFor="teams">Teams</Label>
                 <Select
-                  value={watchedValues.teams?.[0] || ""}
-                  onValueChange={(value) => setValue("teams", value ? [value] : [])}
+                  value={watchedValues.teams || ""}
+                  onValueChange={(value) => setValue("teams", value)}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Select team" />
@@ -284,11 +298,12 @@ export const AdvancedPartForm: React.FC<AdvancedPartFormProps> = ({ onSuccess, p
                     ))}
                   </SelectContent>
                 </Select>
+                {/* TODO: Replace with multi-select component for teams */}
               </div>
               <div className="space-y-2">
                 <Label htmlFor="vendor">Vendor</Label>
                 <Select
-                  value={watchedValues.vendor}
+                  value={watchedValues.vendor || ""}
                   onValueChange={(value) => setValue("vendor", value)}
                 >
                   <SelectTrigger>

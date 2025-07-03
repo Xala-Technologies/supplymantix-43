@@ -863,47 +863,80 @@ export type Database = {
       }
       parts_items: {
         Row: {
-          created_at: string | null
-          description: string | null
-          id: string
-          name: string
-          part_number: string | null
-          tenant_id: string
-          unit_cost: number | null
-          updated_at: string | null
-          vendor_id: string | null
+          created_at: string | null;
+          description: string | null;
+          id: string;
+          name: string;
+          part_number: string | null;
+          tenant_id: string;
+          unit_cost: number | null;
+          updated_at: string | null;
+          vendor_id: string | null;
+          qr_code: string | null;
+          barcode: string | null;
+          picture_url: string | null;
+          location: string | null;
+          quantity: number | null;
+          min_quantity: number | null;
+          assets: string[] | null;
+          teams: string[] | null;
+          part_type: string | null;
+          area: string | null;
+          documents: any | null;
         }
         Insert: {
-          created_at?: string | null
-          description?: string | null
-          id?: string
-          name: string
-          part_number?: string | null
-          tenant_id: string
-          unit_cost?: number | null
-          updated_at?: string | null
-          vendor_id?: string | null
+          created_at?: string | null;
+          description?: string | null;
+          id?: string;
+          name: string;
+          part_number?: string | null;
+          tenant_id: string;
+          unit_cost?: number | null;
+          updated_at?: string | null;
+          vendor_id?: string | null;
+          qr_code?: string | null;
+          barcode?: string | null;
+          picture_url?: string | null;
+          location?: string | null;
+          quantity?: number | null;
+          min_quantity?: number | null;
+          assets?: string[] | null;
+          teams?: string[] | null;
+          part_type?: string | null;
+          area?: string | null;
+          documents?: any | null;
         }
         Update: {
-          created_at?: string | null
-          description?: string | null
-          id?: string
-          name?: string
-          part_number?: string | null
-          tenant_id?: string
-          unit_cost?: number | null
-          updated_at?: string | null
-          vendor_id?: string | null
+          created_at?: string | null;
+          description?: string | null;
+          id?: string;
+          name?: string;
+          part_number?: string | null;
+          tenant_id?: string;
+          unit_cost?: number | null;
+          updated_at?: string | null;
+          vendor_id?: string | null;
+          qr_code?: string | null;
+          barcode?: string | null;
+          picture_url?: string | null;
+          location?: string | null;
+          quantity?: number | null;
+          min_quantity?: number | null;
+          assets?: string[] | null;
+          teams?: string[] | null;
+          part_type?: string | null;
+          area?: string | null;
+          documents?: any | null;
         }
         Relationships: [
           {
-            foreignKeyName: "parts_items_vendor_id_fkey"
-            columns: ["vendor_id"]
-            isOneToOne: false
-            referencedRelation: "vendors"
-            referencedColumns: ["id"]
+            foreignKeyName: "parts_items_vendor_id_fkey";
+            columns: ["vendor_id"];
+            isOneToOne: false;
+            referencedRelation: "vendors";
+            referencedColumns: ["id"];
           },
-        ]
+        ];
       }
       procedure_executions: {
         Row: {

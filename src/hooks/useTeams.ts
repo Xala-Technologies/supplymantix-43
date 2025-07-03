@@ -1,4 +1,3 @@
-
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -38,6 +37,20 @@ export const useTeams = () => {
       if (error) {
         console.error("Error fetching teams:", error);
         throw error;
+      }
+
+      // If no teams exist, return a mock team for development/demo
+      if (!data || data.length === 0) {
+        return [
+          {
+            id: "mock-team-1",
+            tenant_id: userRecord.tenant_id,
+            name: "Mock Team",
+            description: "Dette er et mock team. Opprett et ekte team for å erstatte denne.",
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+          },
+        ]; // TODO: Remove mock team when real teams are created
       }
 
       console.log('Teams fetched:', data);

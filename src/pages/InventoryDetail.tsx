@@ -34,6 +34,15 @@ export default function InventoryDetail() {
     maxStock: item.min_quantity * 3,
     transactions: [],
     status: item.is_low_stock ? 'low_stock' : item.quantity === 0 ? 'out_of_stock' : 'in_stock',
+    qr_code: item.qr_code || '',
+    barcode: item.barcode || '',
+    picture_url: item.picture_url || '',
+    assets: item.assets || [],
+    teams: item.teams || [],
+    vendor: item.vendor_id || '',
+    part_type: item.part_type || '',
+    area: item.area || '',
+    documents: item.documents || [],
   });
 
   return (

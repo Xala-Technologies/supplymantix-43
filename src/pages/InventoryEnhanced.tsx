@@ -1,7 +1,6 @@
-
 import { DashboardLayout } from "@/components/Layout/DashboardLayout";
 import { StandardPageLayout, StandardPageHeader, StandardPageContent } from "@/components/Layout/StandardPageLayout";
-import { InventoryDashboard } from "@/components/inventory/InventoryDashboard";
+import { PartsInventoryDashboard } from "@/components/inventory/InventoryDashboard";
 import { Package } from "lucide-react";
 
 export default function InventoryEnhanced() {
@@ -19,7 +18,7 @@ export default function InventoryEnhanced() {
         />
         
         <StandardPageContent>
-          <InventoryDashboard />
+          <PartsInventoryDashboard />
         </StandardPageContent>
       </StandardPageLayout>
     </DashboardLayout>
