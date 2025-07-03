@@ -16,7 +16,15 @@ interface ProcedureItem {
     required?: boolean;
     options?: string[];
   }>;
+  fields?: Array<{
+    id: string;
+    label: string;
+    field_type: string;
+    is_required?: boolean;
+    options?: any;
+  }>;
   estimatedDuration?: number;
+  estimated_duration?: number;
   category?: string;
 }
 
@@ -68,13 +76,13 @@ export const ProcedureCard = ({ procedure, onEdit, onDelete, onPreview }: Proced
               )}
               
               <div className="flex items-center gap-4 text-xs text-gray-500">
-                {procedure.steps && (
+                {(procedure.fields || procedure.steps) && (
                   <div className="flex items-center gap-1">
                     <FileText className="h-3 w-3" />
-                    <span>{procedure.steps.length} steps</span>
+                    <span>{(procedure.fields || procedure.steps).length} fields</span>
                   </div>
                 )}
-                {procedure.estimatedDuration && (
+                {(procedure.estimated_duration || procedure.estimatedDuration) && (
                   <div className="flex items-center gap-1">
                     <Clock className="h-3 w-3" />
                     <span>{formatDuration(procedure.estimatedDuration)}</span>
@@ -140,12 +148,12 @@ export const ProcedureCard = ({ procedure, onEdit, onDelete, onPreview }: Proced
               </div>
             )}
             
-            {procedure.steps && procedure.steps.length > 0 && (
+            {(procedure.fields || procedure.steps) && (procedure.fields || procedure.steps).length > 0 && (
               <div>
-                <h4 className="text-sm font-medium text-gray-900 mb-3">Steps</h4>
+                <h4 className="text-sm font-medium text-gray-900 mb-3">Fields</h4>
                 <div className="space-y-3">
-                  {procedure.steps.map((step, index) => (
-                    <div key={step.id} className="border border-gray-200 rounded-lg p-4">
+                  {(procedure.fields || procedure.steps).map((field, index) => (
+                    <div key={field.id} className="border border-gray-200 rounded-lg p-4">
                       <div className="flex items-start gap-3">
                         <div className="flex-shrink-0 w-6 h-6 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-xs font-medium">
                           {index + 1}
@@ -153,18 +161,18 @@ export const ProcedureCard = ({ procedure, onEdit, onDelete, onPreview }: Proced
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 mb-1">
                             <h5 className="text-sm font-medium text-gray-900">
-                              {step.title}
+                              {field.label || field.title}
                             </h5>
-                            {step.required && (
+                            {(field.is_required || field.required) && (
                               <Badge variant="outline" className="text-xs">
                                 Required
                               </Badge>
                             )}
                           </div>
                           
-                          {step.type === 'checkbox' && step.options && (
+                          {(field.field_type === 'checkbox' || field.type === 'checkbox') && field.options && (
                             <div className="space-y-2 mt-2">
-                              {step.options.map((option, optionIndex) => (
+                              {(field.options.choices || field.options || []).map((option, optionIndex) => (
                                 <label key={optionIndex} className="flex items-center gap-2 text-sm text-gray-600">
                                   <input 
                                     type="checkbox" 
@@ -177,7 +185,7 @@ export const ProcedureCard = ({ procedure, onEdit, onDelete, onPreview }: Proced
                             </div>
                           )}
                           
-                          {step.type === 'text' && (
+                          {(field.field_type === 'text' || field.type === 'text') && (
                             <div className="mt-2">
                               <input 
                                 type="text" 
@@ -188,7 +196,7 @@ export const ProcedureCard = ({ procedure, onEdit, onDelete, onPreview }: Proced
                             </div>
                           )}
                           
-                          {step.type === 'number' && (
+                          {(field.field_type === 'number' || field.type === 'number') && (
                             <div className="mt-2">
                               <input 
                                 type="number" 
@@ -199,7 +207,7 @@ export const ProcedureCard = ({ procedure, onEdit, onDelete, onPreview }: Proced
                             </div>
                           )}
                           
-                          {step.type === 'file' && (
+                          {(field.field_type === 'file' || field.type === 'file') && (
                             <div className="mt-2">
                               <div className="border-2 border-dashed border-gray-300 rounded-lg p-3 text-center bg-gray-50">
                                 <FileText className="h-6 w-6 text-gray-400 mx-auto mb-1" />
