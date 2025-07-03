@@ -1,10 +1,9 @@
 import { useState } from "react";
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { Paperclip, Plus, Search } from "lucide-react";
+import { Paperclip, Plus, X, Search } from "lucide-react";
 import { UseFormReturn } from "react-hook-form";
 import { ProcedureSelectionDialog } from "../ProcedureSelectionDialog";
 import { useNavigate } from "react-router-dom";
@@ -48,10 +47,6 @@ export const EnhancedWorkOrderFormFields = ({
   const navigate = useNavigate();
   const [showProcedureDialog, setShowProcedureDialog] = useState(false);
   const [selectedProcedures, setSelectedProcedures] = useState<string[]>([]);
-  const [attachedFiles, setAttachedFiles] = useState<string[]>([]);
-  const [selectedParts, setSelectedParts] = useState<string[]>([]);
-  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
-  const [selectedVendors, setSelectedVendors] = useState<string[]>([]);
   const [assetSearch, setAssetSearch] = useState("");
   const [partsSearch, setPartsSearch] = useState("");
   const [categoriesSearch, setCategoriesSearch] = useState("");
@@ -96,23 +91,54 @@ export const EnhancedWorkOrderFormFields = ({
 
   return (
     <div className="space-y-6">
-      {/* Title Field */}
-      <FormField
-        control={form.control}
-        name="title"
-        render={({ field }) => (
-          <FormItem>
-            <FormControl>
-              <Input 
-                placeholder="What needs to be done?" 
-                className="text-lg font-medium border-0 border-b border-gray-200 rounded-none px-0 focus:border-blue-500"
-                {...field} 
-              />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
+      <TitleField form={form} />
+      
+      {/* Procedure Section */}
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <FormLabel className="text-sm font-medium text-gray-700">Procedure</FormLabel>
+        </div>
+        
+        <div className="border border-gray-200 rounded-lg p-4">
+          <div className="flex items-center justify-center mb-4">
+            <div className="text-blue-500">📋</div>
+          </div>
+          <p className="text-sm text-gray-600 text-center mb-4">
+            Create or attach new Form, Procedure or Checklist
+          </p>
+          <div className="flex justify-center">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => setShowProcedureDialog(true)}
+              className="border-blue-200 text-blue-600 hover:bg-blue-50"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Add Procedure
+            </Button>
+          </div>
+          
+          {/* Selected Procedures */}
+          {selectedProcedures.length > 0 && (
+            <div className="mt-4 space-y-2">
+              {selectedProcedures.map((procedureId) => (
+                <div key={procedureId} className="flex items-center justify-between bg-gray-50 p-2 rounded">
+                  <span className="text-sm">Procedure {procedureId}</span>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => removeProcedure(procedureId)}
+                  >
+                    <X className="h-3 w-3" />
+                  </Button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
 
       {/* Location */}
       <div className="space-y-2">
@@ -183,74 +209,6 @@ export const EnhancedWorkOrderFormFields = ({
             </FormItem>
           )}
         />
-      </div>
-
-      {/* Description */}
-      <div className="space-y-2">
-        <FormLabel className="text-sm font-medium text-gray-700">Description</FormLabel>
-        <FormField
-          control={form.control}
-          name="description"
-          render={({ field }) => (
-            <FormItem>
-              <FormControl>
-                <Textarea 
-                  placeholder="Add a description"
-                  className="min-h-[80px] resize-none"
-                  {...field} 
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-      </div>
-
-      {/* Procedure Section */}
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <FormLabel className="text-sm font-medium text-gray-700">Procedure</FormLabel>
-        </div>
-        
-        <div className="border border-gray-200 rounded-lg p-4">
-          <div className="flex items-center justify-center mb-4">
-            <div className="text-blue-500">📋</div>
-          </div>
-          <p className="text-sm text-gray-600 text-center mb-4">
-            Create or attach new Form, Procedure or Checklist
-          </p>
-          <div className="flex justify-center">
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={() => setShowProcedureDialog(true)}
-              className="border-blue-200 text-blue-600 hover:bg-blue-50"
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              Add Procedure
-            </Button>
-          </div>
-          
-          {/* Selected Procedures */}
-          {selectedProcedures.length > 0 && (
-            <div className="mt-4 space-y-2">
-              {selectedProcedures.map((procedureId) => (
-                <div key={procedureId} className="flex items-center justify-between bg-gray-50 p-2 rounded">
-                  <span className="text-sm">Procedure {procedureId}</span>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => removeProcedure(procedureId)}
-                  >
-                    <X className="h-3 w-3" />
-                  </Button>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
       </div>
 
       {/* Assign to */}
@@ -325,84 +283,7 @@ export const EnhancedWorkOrderFormFields = ({
         </div>
       </div>
 
-      {/* Due Date */}
-      <div className="space-y-2">
-        <FormLabel className="text-sm font-medium text-gray-700">Due Date</FormLabel>
-        <FormField
-          control={form.control}
-          name="dueDate"
-          render={({ field }) => (
-            <FormItem>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <FormControl>
-                    <Button
-                      variant="outline"
-                      className={cn(
-                        "w-full justify-start text-left font-normal",
-                        !field.value && "text-muted-foreground"
-                      )}
-                    >
-                      <CalendarIcon className="mr-2 h-4 w-4" />
-                      {field.value ? format(field.value, "MM/dd/yyyy") : "mm/dd/yyyy"}
-                    </Button>
-                  </FormControl>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={field.value}
-                    onSelect={field.onChange}
-                    disabled={(date) => date < new Date()}
-                    initialFocus
-                    className="pointer-events-auto"
-                  />
-                </PopoverContent>
-              </Popover>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-      </div>
-
-      {/* Start Date */}
-      <div className="space-y-2">
-        <FormLabel className="text-sm font-medium text-gray-700">Start Date</FormLabel>
-        <FormField
-          control={form.control}
-          name="startDate"
-          render={({ field }) => (
-            <FormItem>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <FormControl>
-                    <Button
-                      variant="outline"
-                      className={cn(
-                        "w-full justify-start text-left font-normal",
-                        !field.value && "text-muted-foreground"
-                      )}
-                    >
-                      <CalendarIcon className="mr-2 h-4 w-4" />
-                      {field.value ? format(field.value, "MM/dd/yyyy") : "mm/dd/yyyy"}
-                    </Button>
-                  </FormControl>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={field.value}
-                    onSelect={field.onChange}
-                    initialFocus
-                    className="pointer-events-auto"
-                  />
-                </PopoverContent>
-              </Popover>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-      </div>
+      <DateFields form={form} />
 
       {/* Recurrence */}
       <div className="grid grid-cols-2 gap-4">
@@ -458,43 +339,7 @@ export const EnhancedWorkOrderFormFields = ({
         </div>
       </div>
 
-      {/* Priority */}
-      <div className="space-y-2">
-        <FormLabel className="text-sm font-medium text-gray-700">Priority</FormLabel>
-        <FormField
-          control={form.control}
-          name="priority"
-          render={({ field }) => (
-            <FormItem>
-              <FormControl>
-                <RadioGroup
-                  onValueChange={field.onChange}
-                  value={field.value}
-                  className="flex space-x-4"
-                >
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="none" id="none" />
-                    <label htmlFor="none" className="text-sm">None</label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="low" id="low" />
-                    <label htmlFor="low" className="text-sm">Low</label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="medium" id="medium" />
-                    <label htmlFor="medium" className="text-sm">Medium</label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="high" id="high" />
-                    <label htmlFor="high" className="text-sm">High</label>
-                  </div>
-                </RadioGroup>
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-      </div>
+      <PriorityField form={form} />
 
       {/* Files */}
       <div className="space-y-2">
