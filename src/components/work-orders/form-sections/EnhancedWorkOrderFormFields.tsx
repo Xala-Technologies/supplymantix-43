@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { Paperclip, Plus, X, Search, Camera, Upload, FileImage } from "lucide-react";
+import { Paperclip, Plus, X, Search, Camera, Upload, FileImage, Eye, Edit, Trash2 } from "lucide-react";
 import { UseFormReturn } from "react-hook-form";
 import { ProcedureSelectionDialog } from "../ProcedureSelectionDialog";
 import { useNavigate } from "react-router-dom";
@@ -12,6 +12,7 @@ import { TitleField } from "../form-fields/TitleField";
 import { PriorityField } from "../form-fields/PriorityField";
 import { DateFields } from "../form-fields/DateFields";
 import { ImageUploadSection } from "./ImageUploadSection";
+import { ProcedureCard } from "./ProcedureCard";
 
 interface Asset {
   id: string;
@@ -48,19 +49,61 @@ export const EnhancedWorkOrderFormFields = ({
 }: EnhancedWorkOrderFormFieldsProps) => {
   const navigate = useNavigate();
   const [showProcedureDialog, setShowProcedureDialog] = useState(false);
-  const [selectedProcedures, setSelectedProcedures] = useState<string[]>([]);
+  const [selectedProcedures, setSelectedProcedures] = useState<any[]>([]);
   const [assetSearch, setAssetSearch] = useState("");
   const [partsSearch, setPartsSearch] = useState("");
   const [categoriesSearch, setCategoriesSearch] = useState("");
   const [vendorsSearch, setVendorsSearch] = useState("");
 
+  // Mock procedure data based on the reference images
+  const mockProcedures = [
+    {
+      id: "1",
+      title: "Første procedure",
+      description: "Important checkboxes and greetings procedure",
+      category: "Maintenance",
+      estimatedDuration: 15,
+      steps: [
+        {
+          id: "1",
+          title: "Viktige checkboxes",
+          type: "checkbox",
+          required: true,
+          options: ["A", "B", "C"]
+        },
+        {
+          id: "2", 
+          title: "Greetings",
+          type: "checkbox",
+          required: false,
+          options: ["Hi", "Hey", "Hei", "Salam"]
+        }
+      ]
+    }
+  ];
+
   const handleProcedureSelect = (procedure: any) => {
-    setSelectedProcedures(prev => [...prev, procedure.id]);
+    const existingProcedure = mockProcedures.find(p => p.id === procedure.id);
+    if (existingProcedure && !selectedProcedures.find(p => p.id === procedure.id)) {
+      setSelectedProcedures(prev => [...prev, existingProcedure]);
+    }
     setShowProcedureDialog(false);
   };
 
+  const handleAddProcedure = () => {
+    // For demo purposes, add the mock procedure
+    if (!selectedProcedures.find(p => p.id === "1")) {
+      setSelectedProcedures(prev => [...prev, mockProcedures[0]]);
+    }
+  };
+
   const removeProcedure = (procedureId: string) => {
-    setSelectedProcedures(prev => prev.filter(id => id !== procedureId));
+    setSelectedProcedures(prev => prev.filter(p => p.id !== procedureId));
+  };
+
+  const handleEditProcedure = (procedure: any) => {
+    // Implementation for editing procedure
+    console.log("Edit procedure:", procedure);
   };
 
   const handleCreateAndReturn = (type: 'asset' | 'parts' | 'categories' | 'vendors', searchValue: string) => {
@@ -116,51 +159,75 @@ export const EnhancedWorkOrderFormFields = ({
         />
       </div>
       
-      {/* Procedure Section */}
+      {/* Enhanced Procedure Section */}
       <div className="space-y-4">
         <div className="flex items-center justify-between">
-          <FormLabel className="text-sm font-medium text-gray-700">Procedure</FormLabel>
+          <FormLabel className="text-lg font-semibold text-gray-900">Procedure</FormLabel>
         </div>
         
-        <div className="border border-gray-200 rounded-lg p-4">
-          <div className="flex items-center justify-center mb-4">
-            <div className="text-blue-500">📋</div>
-          </div>
-          <p className="text-sm text-gray-600 text-center mb-4">
-            Create or attach new Form, Procedure or Checklist
-          </p>
-          <div className="flex justify-center">
+        {/* Selected Procedures */}
+        {selectedProcedures.length > 0 ? (
+          <div className="space-y-3">
+            {selectedProcedures.map((procedure) => (
+              <ProcedureCard
+                key={procedure.id}
+                procedure={procedure}
+                onEdit={handleEditProcedure}
+                onDelete={removeProcedure}
+                onPreview={(proc) => console.log("Preview:", proc)}
+              />
+            ))}
+            
+            {/* Add Another Procedure Button */}
             <Button
               type="button"
-              variant="outline"
-              size="sm"
-              onClick={() => setShowProcedureDialog(true)}
-              className="border-blue-200 text-blue-600 hover:bg-blue-50"
+              variant="ghost"
+              onClick={handleAddProcedure}
+              className="w-full justify-start text-blue-600 hover:text-blue-700 hover:bg-blue-50 border border-dashed border-blue-200 hover:border-blue-300 transition-colors"
             >
               <Plus className="h-4 w-4 mr-2" />
-              Add Procedure
+              Add Another Procedure
             </Button>
           </div>
-          
-          {/* Selected Procedures */}
-          {selectedProcedures.length > 0 && (
-            <div className="mt-4 space-y-2">
-              {selectedProcedures.map((procedureId) => (
-                <div key={procedureId} className="flex items-center justify-between bg-gray-50 p-2 rounded">
-                  <span className="text-sm">Procedure {procedureId}</span>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => removeProcedure(procedureId)}
-                  >
-                    <X className="h-3 w-3" />
-                  </Button>
+        ) : (
+          /* Empty State */
+          <div className="border border-gray-200 rounded-lg p-6">
+            <div className="text-center space-y-4">
+              <div className="flex justify-center">
+                <div className="p-3 bg-blue-50 rounded-full">
+                  <div className="text-2xl">📋</div>
                 </div>
-              ))}
+              </div>
+              <div>
+                <h3 className="text-lg font-medium text-gray-900 mb-1">
+                  No procedures added
+                </h3>
+                <p className="text-sm text-gray-600 mb-4">
+                  Create or attach new Form, Procedure or Checklist
+                </p>
+              </div>
+              <div className="flex flex-col sm:flex-row gap-2 justify-center">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handleAddProcedure}
+                  className="border-blue-200 text-blue-600 hover:bg-blue-50"
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Procedure
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setShowProcedureDialog(true)}
+                  className="border-gray-200 text-gray-600 hover:bg-gray-50"
+                >
+                  Browse Templates
+                </Button>
+              </div>
             </div>
-          )}
-        </div>
+          </div>
+        )}
       </div>
 
       {/* Location */}
