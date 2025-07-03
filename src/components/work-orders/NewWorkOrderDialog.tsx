@@ -281,7 +281,7 @@ export const NewWorkOrderDialog = ({
                 disabled={isSubmitting}
                 className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm"
               >
-                {isSubmitting ? "Creating..." : "Create"}
+                {isSubmitting ? (isEditMode ? "Updating..." : "Creating...") : (isEditMode ? "Update Work Order" : "Create Work Order")}
               </Button>
             </DialogFooter>
           </form>

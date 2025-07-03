@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { Paperclip, Plus, X, Search } from "lucide-react";
+import { Paperclip, Plus, X, Search, Camera, Upload } from "lucide-react";
 import { UseFormReturn } from "react-hook-form";
 import { ProcedureSelectionDialog } from "../ProcedureSelectionDialog";
 import { useNavigate } from "react-router-dom";
@@ -92,6 +93,27 @@ export const EnhancedWorkOrderFormFields = ({
   return (
     <div className="space-y-6">
       <TitleField form={form} />
+      
+      {/* Description */}
+      <div className="space-y-2">
+        <FormLabel className="text-sm font-medium text-gray-700">Description</FormLabel>
+        <FormField
+          control={form.control}
+          name="description"
+          render={({ field }) => (
+            <FormItem>
+              <FormControl>
+                <Textarea 
+                  placeholder="Describe the work to be performed..."
+                  className="min-h-[80px] resize-none"
+                  {...field} 
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      </div>
       
       {/* Procedure Section */}
       <div className="space-y-4">
@@ -344,14 +366,39 @@ export const EnhancedWorkOrderFormFields = ({
       {/* Files */}
       <div className="space-y-2">
         <FormLabel className="text-sm font-medium text-gray-700">Files</FormLabel>
-        <Button
-          type="button"
-          variant="outline"
-          className="w-full justify-center border-dashed text-blue-600"
-        >
-          <Paperclip className="h-4 w-4 mr-2" />
-          Attach files
-        </Button>
+        <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 hover:border-blue-400 transition-colors">
+          <div className="text-center space-y-3">
+            <div className="flex justify-center space-x-4">
+              <Camera className="h-8 w-8 text-gray-400" />
+              <Upload className="h-8 w-8 text-gray-400" />
+            </div>
+            <div>
+              <p className="text-sm text-gray-600 mb-2">
+                Drag and drop files here, or click to browse
+              </p>
+              <div className="flex justify-center space-x-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="text-blue-600 border-blue-200 hover:bg-blue-50"
+                >
+                  <Camera className="h-4 w-4 mr-2" />
+                  Take Photo
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="text-blue-600 border-blue-200 hover:bg-blue-50"
+                >
+                  <Paperclip className="h-4 w-4 mr-2" />
+                  Attach Files
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Parts */}
