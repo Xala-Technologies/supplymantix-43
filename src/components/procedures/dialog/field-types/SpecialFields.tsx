@@ -128,16 +128,29 @@ export const InspectionField: React.FC<SpecialFieldProps> = ({ field, index, val
 };
 
 export const SectionField: React.FC<SpecialFieldProps> = ({ field, index }) => {
+  const isCard = field.options?.style === 'card';
+  const description = field.options?.description || field.description;
+  
+  const content = (
+    <div key={field.id || index} className={isCard ? "p-4" : "py-6"}>
+      <h3 className={`text-xl font-semibold text-gray-900 ${isCard ? 'mb-3' : 'border-b border-gray-200 pb-3'}`}>
+        {field.label || field.title}
+      </h3>
+      {description && (
+        <p className="text-sm text-gray-600 mt-2">{description}</p>
+      )}
+    </div>
+  );
+
   return (
     <FieldWrapper field={field} index={index}>
-      <div key={field.id || index} className="py-6">
-        <h3 className="text-xl font-semibold text-gray-900 border-b border-gray-200 pb-3">
-          {field.label || field.title}
-        </h3>
-        {field.description && (
-          <p className="text-sm text-gray-600 mt-2">{field.description}</p>
-        )}
-      </div>
+      {isCard ? (
+        <div className="bg-gray-50 border border-gray-200 rounded-lg">
+          {content}
+        </div>
+      ) : (
+        content
+      )}
     </FieldWrapper>
   );
 };

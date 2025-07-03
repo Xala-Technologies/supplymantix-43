@@ -38,11 +38,47 @@ export const useProcedureFieldOperations = ({
   };
 
   const addHeading = () => {
-    addField('section');
+    const newField: ProcedureField = {
+      id: crypto.randomUUID(),
+      procedure_id: '',
+      label: 'Heading',
+      field_type: 'info',
+      is_required: false,
+      order_index: formData.fields.length,
+      options: {
+        style: 'heading',
+        size: 'large'
+      },
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    };
+    setFormData(prev => ({
+      ...prev,
+      fields: [...prev.fields, newField]
+    }));
+    setSelectedFieldIndex(formData.fields.length);
   };
 
   const addSection = () => {
-    addField('section');
+    const newField: ProcedureField = {
+      id: crypto.randomUUID(),
+      procedure_id: '',
+      label: 'Section',
+      field_type: 'section',
+      is_required: false,
+      order_index: formData.fields.length,
+      options: {
+        collapsible: false,
+        description: ''
+      },
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    };
+    setFormData(prev => ({
+      ...prev,
+      fields: [...prev.fields, newField]
+    }));
+    setSelectedFieldIndex(formData.fields.length);
   };
 
   const updateField = (index: number, field: Partial<ProcedureField>) => {

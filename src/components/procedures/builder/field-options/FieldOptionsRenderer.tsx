@@ -8,6 +8,7 @@ import { RatingOptions } from './RatingOptions';
 import { FileOptions } from './FileOptions';
 import { DateOptions } from './DateOptions';
 import { TextOptions } from './TextOptions';
+import { SectionOptions } from './SectionOptions';
 
 interface FieldOptionsRendererProps {
   field: ProcedureField;
@@ -43,6 +44,9 @@ export const FieldOptionsRenderer: React.FC<FieldOptionsRendererProps> = ({
     case 'date':
     case 'datetime':
       return <DateOptions field={field} index={index} onUpdate={onUpdate} />;
+
+    case 'section':
+      return <SectionOptions field={field} index={index} onUpdate={onUpdate} />;
 
     case 'info':
     case 'text':

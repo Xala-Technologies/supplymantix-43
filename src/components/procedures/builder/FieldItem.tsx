@@ -77,6 +77,7 @@ export const FieldItem: React.FC<FieldItemProps> = ({
       'multiselect': '☰',
       'file': '📎',
       'section': '━',
+      'info': 'H',
       'inspection': '🔍'
     };
     return icons[type] || '•';
@@ -92,7 +93,8 @@ export const FieldItem: React.FC<FieldItemProps> = ({
       'multiselect': 'bg-purple-100 text-purple-600',
       'inspection': 'bg-cyan-100 text-cyan-600',
       'file': 'bg-gray-100 text-gray-600',
-      'section': 'bg-gray-100 text-gray-600'
+      'section': 'bg-slate-100 text-slate-600',
+      'info': 'bg-indigo-100 text-indigo-600'
     };
     return colors[type] || 'bg-gray-100 text-gray-600';
   };

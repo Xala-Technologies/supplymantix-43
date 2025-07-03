@@ -37,10 +37,10 @@ export const AddItemSidebar: React.FC<AddItemSidebarProps> = ({
         <div className="flex flex-col items-center">
           <Button
             onClick={onAddHeading}
-            className="w-16 h-16 rounded-full bg-blue-100 hover:bg-blue-200 border-2 border-blue-300 mb-2"
+            className="w-16 h-16 rounded-full bg-indigo-100 hover:bg-indigo-200 border-2 border-indigo-300 mb-2"
             variant="ghost"
           >
-            <Type className="h-8 w-8 text-blue-600" />
+            <Type className="h-8 w-8 text-indigo-600" />
           </Button>
           <span className="text-sm font-medium text-gray-700">Heading</span>
         </div>
@@ -49,10 +49,10 @@ export const AddItemSidebar: React.FC<AddItemSidebarProps> = ({
         <div className="flex flex-col items-center">
           <Button
             onClick={onAddSection}
-            className="w-16 h-16 rounded-full bg-blue-100 hover:bg-blue-200 border-2 border-blue-300 mb-2"
+            className="w-16 h-16 rounded-full bg-slate-100 hover:bg-slate-200 border-2 border-slate-300 mb-2"
             variant="ghost"
           >
-            <div className="w-8 h-6 bg-blue-600 rounded"></div>
+            <div className="w-8 h-6 bg-slate-600 rounded"></div>
           </Button>
           <span className="text-sm font-medium text-gray-700">Section</span>
         </div>
