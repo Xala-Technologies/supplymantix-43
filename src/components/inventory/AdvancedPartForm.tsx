@@ -1,91 +1,341 @@
-import React from "react";
+import React, { useState } from "react";
+import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { AssetImageUpload } from "@/components/assets/AssetImageUpload";
+import { AssetDocumentUpload } from "@/components/assets/AssetDocumentUpload";
+import { BarcodeGenerator } from "@/components/assets/BarcodeGenerator";
+import { useVendors } from "@/hooks/useVendors";
+import { useTeams } from "@/hooks/useTeams";
+import { useLocations } from "@/hooks/useLocations";
+import { useAssetTypes } from "@/hooks/useAssetTypes";
+import { useAssets } from "@/hooks/useAssets";
+import type { Part as BasePart } from "@/hooks/useParts";
 
 interface AdvancedPartFormProps {
   onSuccess: () => void;
-  part?: any; // For edit mode, can be typed later
+  part?: Partial<Part>; // For edit mode
+}
+
+// Extend Part type for form usage
+interface Part extends BasePart {
+  documents?: { name: string; url: string; size: number }[];
+  picture_url?: string;
+  qr_code?: string;
+  barcode?: string;
+  part_type?: string;
+  area?: string;
+  min_quantity?: number;
+  assets?: string[];
+  teams?: string[];
+  vendor?: string;
+  location?: string;
+  quantity?: number;
+}
+
+interface PartFormData {
+  name: string;
+  description?: string;
+  unit_cost?: number;
+  barcode?: string;
+  qr_code?: string;
+  part_type?: string;
+  location?: string;
+  area?: string;
+  quantity?: number;
+  min_quantity?: number;
+  assets?: string[];
+  teams?: string[];
+  vendor?: string;
+  picture_url?: string;
+  documents?: { name: string; url: string; size: number }[];
 }
 
 export const AdvancedPartForm: React.FC<AdvancedPartFormProps> = ({ onSuccess, part }) => {
-  // Placeholder state for all fields
-  // In a real implementation, use react-hook-form or Formik for validation and state
+  const { data: vendors = [] } = useVendors();
+  const { data: teams = [] } = useTeams();
+  const { data: locations = [] } = useLocations();
+  const { data: assetTypes = [] } = useAssetTypes();
+  const { data: assets = [] } = useAssets();
+
+  const [documents, setDocuments] = useState<{ name: string; url: string; size: number }[]>(part?.documents || []);
+  const [imageUrl, setImageUrl] = useState<string>(part?.picture_url || "");
+  const [qrCode, setQrCode] = useState<string>(part?.qr_code || "");
+  const [barcode, setBarcode] = useState<string>(part?.barcode || "");
+
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    watch,
+    formState: { errors }
+  } = useForm<PartFormData>({
+    defaultValues: {
+      name: part?.name || "",
+      description: part?.description || "",
+      unit_cost: part?.unit_cost || undefined,
+      barcode: part?.barcode || "",
+      qr_code: part?.qr_code || "",
+      part_type: part?.part_type || "",
+      location: part?.location || "",
+      area: part?.area || "",
+      quantity: part?.quantity || undefined,
+      min_quantity: part?.min_quantity || undefined,
+      assets: part?.assets || [],
+      teams: part?.teams || [],
+      vendor: part?.vendor || "",
+      picture_url: part?.picture_url || "",
+      documents: part?.documents || [],
+    }
+  });
+
+  const watchedValues = watch();
+
+  const handleFormSubmit = (data: PartFormData) => {
+    // Clean up the data to convert empty strings to null for optional fields
+    const cleanedData = {
+      ...data,
+      picture_url: imageUrl || undefined,
+      barcode,
+      qr_code: qrCode,
+      documents,
+      part_type: data.part_type === "" ? undefined : data.part_type,
+      location: data.location === "" ? undefined : data.location,
+      area: data.area === "" ? undefined : data.area,
+      vendor: data.vendor === "" ? undefined : data.vendor,
+    };
+    // TODO: Call backend mutation here
+    onSuccess();
+  };
+
   return (
-    <form className="max-w-2xl mx-auto bg-white p-8 rounded-lg shadow space-y-6">
-      <h2 className="text-2xl font-bold mb-4">{part ? 'Edit Part' : 'New Part'}</h2>
-      <div>
-        <Label htmlFor="name">Part Name</Label>
-        <Input id="name" placeholder="Enter Part Name" defaultValue={part?.name} required />
-      </div>
-      <div>
-        <Label>Pictures</Label>
-        <div className="border-2 border-dashed border-blue-200 rounded-lg p-6 text-center text-blue-500 bg-blue-50 cursor-pointer">
-          <span className="block mb-2">Add or drag pictures</span>
-          <span className="text-xs text-gray-400">(Not implemented)</span>
+    <div className="w-full max-w-4xl mx-auto space-y-6">
+      <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
+        {/* Basic Information */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Basic Information</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="name">Part Name *</Label>
+                <Input
+                  id="name"
+                  {...register("name", { required: "Part name is required" })}
+                  className={errors.name && "border-red-500"}
+                />
+                {errors.name && (
+                  <p className="text-sm text-red-500">{errors.name.message}</p>
+                )}
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="unit_cost">Unit Cost</Label>
+                <Input
+                  id="unit_cost"
+                  type="number"
+                  step="0.01"
+                  min={0}
+                  {...register("unit_cost", { valueAsNumber: true })}
+                  placeholder="0.00"
+                />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="description">Description</Label>
+              <Textarea
+                id="description"
+                {...register("description")}
+                rows={3}
+                placeholder="Enter part description..."
+              />
+            </div>
+            <AssetImageUpload
+              currentImageUrl={imageUrl}
+              onImageUploaded={(url) => { setImageUrl(url); setValue("picture_url", url); }}
+              onImageRemoved={() => { setImageUrl(""); setValue("picture_url", ""); }}
+            />
+          </CardContent>
+        </Card>
+
+        {/* Part Details */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Part Details</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="part_type">Part Type</Label>
+                <Select
+                  value={watchedValues.part_type}
+                  onValueChange={(value) => setValue("part_type", value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select part type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {assetTypes.map((type) => (
+                      <SelectItem key={type.id} value={type.name}>
+                        {type.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="location">Location</Label>
+                <Select
+                  value={watchedValues.location}
+                  onValueChange={(value) => setValue("location", value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select location" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {locations.map((loc) => (
+                      <SelectItem key={loc.id} value={loc.name}>
+                        {loc.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="area">Area</Label>
+                <Input
+                  id="area"
+                  {...register("area")}
+                  placeholder="e.g., Storage Room"
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="quantity">Units in Stock</Label>
+                <Input
+                  id="quantity"
+                  type="number"
+                  min={0}
+                  {...register("quantity", { valueAsNumber: true })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="min_quantity">Minimum in Stock</Label>
+                <Input
+                  id="min_quantity"
+                  type="number"
+                  min={0}
+                  {...register("min_quantity", { valueAsNumber: true })}
+                />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Classification & Associations */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Associations</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="assets">Assets</Label>
+                <Select
+                  value={watchedValues.assets?.[0] || ""}
+                  onValueChange={(value) => setValue("assets", value ? [value] : [])}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select asset" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {assets.map((asset) => (
+                      <SelectItem key={asset.id} value={asset.id}>
+                        {asset.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="teams">Teams in Charge</Label>
+                <Select
+                  value={watchedValues.teams?.[0] || ""}
+                  onValueChange={(value) => setValue("teams", value ? [value] : [])}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select team" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {teams.map((team) => (
+                      <SelectItem key={team.id} value={team.id}>
+                        {team.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="vendor">Vendor</Label>
+                <Select
+                  value={watchedValues.vendor}
+                  onValueChange={(value) => setValue("vendor", value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select vendor" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {vendors.map((vendor) => (
+                      <SelectItem key={vendor.id} value={vendor.id}>
+                        {vendor.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Barcode/QR Code */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Identification</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <BarcodeGenerator
+              qrCode={qrCode}
+              barcode={barcode}
+              onQrCodeChange={(val) => { setQrCode(val); setValue("qr_code", val); }}
+              onBarcodeChange={(val) => { setBarcode(val); setValue("barcode", val); }}
+            />
+          </CardContent>
+        </Card>
+
+        {/* Attachments */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Attachments</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <AssetDocumentUpload
+              documents={documents}
+              onDocumentsChanged={setDocuments}
+            />
+          </CardContent>
+        </Card>
+
+        {/* Actions */}
+        <div className="flex justify-end gap-3 pt-4">
+          <Button type="button" variant="outline" onClick={onSuccess}>Cancel</Button>
+          <Button type="submit" className="bg-blue-600 hover:bg-blue-700">{part ? 'Save' : 'Create'}</Button>
         </div>
-      </div>
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <Label htmlFor="unit_cost">Unit Cost</Label>
-          <Input id="unit_cost" type="number" min={0} step={0.01} placeholder="0" defaultValue={part?.unit_cost} />
-        </div>
-        <div>
-          <Label htmlFor="barcode">QR Code/Barcode</Label>
-          <Input id="barcode" placeholder="QR Code/Barcode" defaultValue={part?.barcode} />
-          <span className="text-xs text-blue-600 cursor-pointer">or Generate Code</span>
-        </div>
-      </div>
-      <div>
-        <Label htmlFor="description">Description</Label>
-        <Textarea id="description" placeholder="Add a description" defaultValue={part?.description} />
-      </div>
-      <div>
-        <Label htmlFor="part_types">Part Types</Label>
-        <Input id="part_types" placeholder="Start typing..." />
-      </div>
-      <div className="grid grid-cols-4 gap-4 items-end">
-        <div className="col-span-2">
-          <Label htmlFor="location">Location</Label>
-          <Input id="location" placeholder="General" defaultValue={part?.location} />
-        </div>
-        <div>
-          <Label htmlFor="area">Area</Label>
-          <Input id="area" placeholder="" />
-        </div>
-        <div>
-          <Label htmlFor="units_in_stock">Units in Stock</Label>
-          <Input id="units_in_stock" type="number" min={0} defaultValue={part?.quantity} />
-        </div>
-        <div>
-          <Label htmlFor="min_in_stock">Minimum in Stock</Label>
-          <Input id="min_in_stock" type="number" min={0} defaultValue={part?.min_quantity} />
-        </div>
-        <div className="col-span-4">
-          <span className="text-xs text-blue-600 cursor-pointer">+ Add location</span>
-        </div>
-      </div>
-      <div>
-        <Label htmlFor="assets">Assets</Label>
-        <Input id="assets" placeholder="Start typing..." />
-      </div>
-      <div>
-        <Label htmlFor="teams">Teams in Charge</Label>
-        <Input id="teams" placeholder="Start typing..." />
-      </div>
-      <div>
-        <Label htmlFor="vendors">Vendors</Label>
-        <Input id="vendors" placeholder="Start typing..." />
-      </div>
-      <div>
-        <Label htmlFor="files">Files</Label>
-        <Button variant="outline" type="button">Attach files</Button>
-      </div>
-      <div className="flex justify-end gap-3 pt-4">
-        <Button type="button" variant="outline" onClick={onSuccess}>Cancel</Button>
-        <Button type="submit" className="bg-blue-600 hover:bg-blue-700">{part ? 'Save' : 'Create'}</Button>
-      </div>
-    </form>
+      </form>
+    </div>
   );
 }; 
