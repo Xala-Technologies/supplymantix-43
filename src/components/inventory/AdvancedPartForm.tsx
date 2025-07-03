@@ -15,6 +15,7 @@ import { useLocations } from "@/hooks/useLocations";
 import { useAssetTypes } from "@/hooks/useAssetTypes";
 import { useAssets } from "@/hooks/useAssets";
 import type { Part as BasePart } from "@/hooks/useParts";
+import { useCreatePart } from "@/hooks/useParts";
 
 interface AdvancedPartFormProps {
   onSuccess: () => void;
@@ -61,6 +62,7 @@ export const AdvancedPartForm: React.FC<AdvancedPartFormProps> = ({ onSuccess, p
   const { data: locations = [] } = useLocations();
   const { data: assetTypes = [] } = useAssetTypes();
   const { data: assets = [] } = useAssets();
+  const createPart = useCreatePart();
 
   const [documents, setDocuments] = useState<{ name: string; url: string; size: number }[]>(part?.documents || []);
   const [imageUrl, setImageUrl] = useState<string>(part?.picture_url || "");
@@ -95,21 +97,24 @@ export const AdvancedPartForm: React.FC<AdvancedPartFormProps> = ({ onSuccess, p
 
   const watchedValues = watch();
 
-  const handleFormSubmit = (data: PartFormData) => {
+  const handleFormSubmit = async (data: PartFormData) => {
     // Clean up the data to convert empty strings to null for optional fields
     const cleanedData = {
-      ...data,
-      picture_url: imageUrl || undefined,
-      barcode,
-      qr_code: qrCode,
-      documents,
-      part_type: data.part_type === "" ? undefined : data.part_type,
-      location: data.location === "" ? undefined : data.location,
-      area: data.area === "" ? undefined : data.area,
-      vendor: data.vendor === "" ? undefined : data.vendor,
+      name: data.name,
+      description: data.description || undefined,
+      unit_cost: data.unit_cost || undefined,
+      // Only include fields that exist in the Part type for the mutation
+      part_number: undefined, // Not in form, but required by Part type as optional
+      vendor_id: data.vendor || undefined,
+      // created_at, updated_at, id, tenant_id are handled by backend
     };
-    // TODO: Call backend mutation here
-    onSuccess();
+    try {
+      await createPart.mutateAsync(cleanedData);
+      onSuccess();
+    } catch (error) {
+      // TODO: Show error to user
+      console.error('Failed to create part:', error);
+    }
   };
 
   return (
