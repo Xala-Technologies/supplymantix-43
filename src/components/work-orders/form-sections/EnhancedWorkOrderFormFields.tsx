@@ -4,7 +4,9 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { Paperclip, Plus, X, Search, Camera, Upload, FileImage, Eye, Edit, Trash2 } from "lucide-react";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
+import { Paperclip, Plus, X, Search, Camera, Upload, FileImage, Eye, Edit, Trash2, Check, ChevronsUpDown } from "lucide-react";
 import { UseFormReturn } from "react-hook-form";
 import { ProcedureSelectionDialog } from "../ProcedureSelectionDialog";
 import { useNavigate } from "react-router-dom";
@@ -14,6 +16,9 @@ import { DateFields } from "../form-fields/DateFields";
 import { ImageUploadSection } from "./ImageUploadSection";
 import { ProcedureCard } from "./ProcedureCard";
 import { ProcedureSelectionDialogEnhanced } from "./ProcedureSelectionDialogEnhanced";
+import { cn } from "@/lib/utils";
+
+import { SearchableCombobox } from "./SearchableCombobox";
 
 interface Asset {
   id: string;
@@ -24,6 +29,7 @@ interface Asset {
 interface Location {
   id: string;
   name: string;
+  description?: string;
 }
 
 interface User {
@@ -33,11 +39,33 @@ interface User {
   last_name?: string;
 }
 
+interface InventoryItem {
+  id: string;
+  name: string;
+  sku?: string;
+  quantity?: number;
+}
+
+interface Category {
+  id: string;
+  name: string;
+  description?: string;
+}
+
+interface Vendor {
+  id: string;
+  name: string;
+  email?: string;
+}
+
 interface EnhancedWorkOrderFormFieldsProps {
   form: UseFormReturn<any>;
   users?: User[];
   assets?: Asset[];
   locations?: Location[];
+  inventory?: InventoryItem[];
+  categories?: Category[];
+  vendors?: Vendor[];
   onDialogClose?: () => void;
 }
 
@@ -46,6 +74,9 @@ export const EnhancedWorkOrderFormFields = ({
   users = [], 
   assets = [], 
   locations = [],
+  inventory = [],
+  categories = [],
+  vendors = [],
   onDialogClose
 }: EnhancedWorkOrderFormFieldsProps) => {
   const navigate = useNavigate();
@@ -114,7 +145,7 @@ export const EnhancedWorkOrderFormFields = ({
     console.log("Edit procedure:", procedure);
   };
 
-  const handleCreateAndReturn = (type: 'asset' | 'parts' | 'categories' | 'vendors', searchValue: string) => {
+  const handleCreateAndReturn = (type: 'asset' | 'parts' | 'categories' | 'vendors' | 'location', searchValue: string) => {
     // Store the search value and return path in localStorage
     localStorage.setItem('workOrderReturnData', JSON.stringify({
       formData: form.getValues(),
@@ -138,6 +169,9 @@ export const EnhancedWorkOrderFormFields = ({
         break;
       case 'vendors':
         navigate('/dashboard/vendors');
+        break;
+      case 'location':
+        navigate('/dashboard/locations');
         break;
     }
   };
@@ -238,21 +272,22 @@ export const EnhancedWorkOrderFormFields = ({
           name="location"
           render={({ field }) => (
             <FormItem>
-              <Select onValueChange={field.onChange} value={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Start typing..." />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  <SelectItem value="none">No Location</SelectItem>
-                  {locations.map((location) => (
-                    <SelectItem key={location.id} value={location.id}>
-                      {location.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <FormControl>
+                <SearchableCombobox
+                  value={field.value}
+                  onSelect={field.onChange}
+                  placeholder="Select location..."
+                  searchPlaceholder="Search locations..."
+                  emptyText="No locations found."
+                  createText="Create location"
+                  onCreateNew={(searchValue) => handleCreateAndReturn('location', searchValue)}
+                  options={locations.map(location => ({
+                    id: location.id,
+                    name: location.name,
+                    label: location.description ? `${location.name} - ${location.description}` : location.name
+                  }))}
+                />
+              </FormControl>
               <FormMessage />
             </FormItem>
           )}
@@ -267,34 +302,22 @@ export const EnhancedWorkOrderFormFields = ({
           name="asset"
           render={({ field }) => (
             <FormItem>
-              <div className="space-y-2">
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                  <Select onValueChange={field.onChange} value={field.value}>
-                    <FormControl>
-                      <SelectTrigger className="pl-10">
-                        <SelectValue placeholder="Start typing..." />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="none">No Asset</SelectItem>
-                      {assets.map((asset) => (
-                        <SelectItem key={asset.id} value={asset.id}>
-                          {asset.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <Button
-                  type="button"
-                  variant="link"
-                  className="text-blue-600 text-sm p-0 h-auto"
-                  onClick={() => handleCreateAndReturn('asset', assetSearch)}
-                >
-                  + Add multiple assets
-                </Button>
-              </div>
+              <FormControl>
+                <SearchableCombobox
+                  value={field.value}
+                  onSelect={field.onChange}
+                  placeholder="Select asset..."
+                  searchPlaceholder="Search assets..."
+                  emptyText="No assets found."
+                  createText="Create asset"
+                  onCreateNew={(searchValue) => handleCreateAndReturn('asset', searchValue)}
+                  options={assets.map(asset => ({
+                    id: asset.id,
+                    name: asset.name,
+                    label: asset.location ? `${asset.name} - ${asset.location}` : asset.name
+                  }))}
+                />
+              </FormControl>
               <FormMessage />
             </FormItem>
           )}
@@ -309,24 +332,27 @@ export const EnhancedWorkOrderFormFields = ({
           name="assignedTo"
           render={({ field }) => (
             <FormItem>
-              <Select onValueChange={field.onChange} value={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Type name, email or phone number" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  <SelectItem value="unassigned">Unassigned</SelectItem>
-                  {users.map((user) => (
-                    <SelectItem key={user.id} value={user.id}>
-                      {user.first_name && user.last_name 
+              <FormControl>
+                <SearchableCombobox
+                  value={field.value}
+                  onSelect={field.onChange}
+                  placeholder="Type name, email or phone number..."
+                  searchPlaceholder="Search users..."
+                  emptyText="No users found."
+                  options={[
+                    { id: "unassigned", name: "Unassigned" },
+                    ...users.map(user => ({
+                      id: user.id,
+                      name: user.first_name && user.last_name 
                         ? `${user.first_name} ${user.last_name}`
+                        : user.email,
+                      label: user.first_name && user.last_name 
+                        ? `${user.first_name} ${user.last_name} (${user.email})`
                         : user.email
-                      }
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                    }))
+                  ]}
+                />
+              </FormControl>
               <FormMessage />
             </FormItem>
           )}
@@ -450,61 +476,91 @@ export const EnhancedWorkOrderFormFields = ({
       {/* Parts */}
       <div className="space-y-2">
         <FormLabel className="text-sm font-medium text-gray-700">Parts</FormLabel>
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-          <Input 
-            placeholder="Start typing..." 
-            className="pl-10"
-            value={partsSearch}
-            onChange={(e) => setPartsSearch(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' && partsSearch.trim()) {
-                e.preventDefault();
-                handleCreateAndReturn('parts', partsSearch);
-              }
-            }}
-          />
-        </div>
+        <FormField
+          control={form.control}
+          name="parts"
+          render={({ field }) => (
+            <FormItem>
+              <FormControl>
+                <SearchableCombobox
+                  value={field.value}
+                  onSelect={field.onChange}
+                  placeholder="Select parts from inventory..."
+                  searchPlaceholder="Search inventory parts..."
+                  emptyText="No parts found in inventory."
+                  createText="Create part"
+                  onCreateNew={(searchValue) => handleCreateAndReturn('parts', searchValue)}
+                  options={inventory.map(item => ({
+                    id: item.id,
+                    name: item.name,
+                    label: item.sku ? `${item.name} (${item.sku}) - Qty: ${item.quantity || 0}` : `${item.name} - Qty: ${item.quantity || 0}`
+                  }))}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
       </div>
 
       {/* Categories */}
       <div className="space-y-2">
         <FormLabel className="text-sm font-medium text-gray-700">Categories</FormLabel>
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-          <Input 
-            placeholder="Start typing..." 
-            className="pl-10"
-            value={categoriesSearch}
-            onChange={(e) => setCategoriesSearch(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' && categoriesSearch.trim()) {
-                e.preventDefault();
-                handleCreateAndReturn('categories', categoriesSearch);
-              }
-            }}
-          />
-        </div>
+        <FormField
+          control={form.control}
+          name="categories"
+          render={({ field }) => (
+            <FormItem>
+              <FormControl>
+                <SearchableCombobox
+                  value={field.value}
+                  onSelect={field.onChange}
+                  placeholder="Select category..."
+                  searchPlaceholder="Search categories..."
+                  emptyText="No categories found."
+                  createText="Create category"
+                  onCreateNew={(searchValue) => handleCreateAndReturn('categories', searchValue)}
+                  options={categories.map(category => ({
+                    id: category.id,
+                    name: category.name,
+                    label: category.description ? `${category.name} - ${category.description}` : category.name
+                  }))}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
       </div>
 
       {/* Vendors */}
       <div className="space-y-2">
         <FormLabel className="text-sm font-medium text-gray-700">Vendors</FormLabel>
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-          <Input 
-            placeholder="Start typing..." 
-            className="pl-10"
-            value={vendorsSearch}
-            onChange={(e) => setVendorsSearch(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' && vendorsSearch.trim()) {
-                e.preventDefault();
-                handleCreateAndReturn('vendors', vendorsSearch);
-              }
-            }}
-          />
-        </div>
+        <FormField
+          control={form.control}
+          name="vendors"
+          render={({ field }) => (
+            <FormItem>
+              <FormControl>
+                <SearchableCombobox
+                  value={field.value}
+                  onSelect={field.onChange}
+                  placeholder="Select vendor..."
+                  searchPlaceholder="Search vendors..."
+                  emptyText="No vendors found."
+                  createText="Create vendor"
+                  onCreateNew={(searchValue) => handleCreateAndReturn('vendors', searchValue)}
+                  options={vendors.map(vendor => ({
+                    id: vendor.id,
+                    name: vendor.name,
+                    label: vendor.email ? `${vendor.name} (${vendor.email})` : vendor.name
+                  }))}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
       </div>
 
       {/* Enhanced Procedure Selection Dialog */}
