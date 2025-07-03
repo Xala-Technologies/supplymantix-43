@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
-import { Check, ChevronsUpDown, Plus } from "lucide-react";
+import { Check, ChevronsUpDown, Plus, Search } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface SearchableComboboxProps {
@@ -63,13 +63,17 @@ export const SearchableCombobox = ({
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-full p-0" align="start">
-        <Command>
-          <CommandInput 
-            placeholder={searchPlaceholder}
-            value={searchValue}
-            onValueChange={setSearchValue}
-          />
+      <PopoverContent className="w-full p-0 shadow-lg border border-gray-200" align="start">
+        <Command className="rounded-lg">
+          <div className="flex items-center border-b border-gray-100 px-3">
+            <Search className="h-4 w-4 text-gray-400 mr-2" />
+            <CommandInput 
+              placeholder={searchPlaceholder}
+              value={searchValue}
+              onValueChange={setSearchValue}
+              className="flex h-11 w-full rounded-md bg-transparent py-3 text-sm outline-none placeholder:text-gray-400 disabled:cursor-not-allowed disabled:opacity-50 border-none focus:ring-0"
+            />
+          </div>
           <CommandList>
             <CommandEmpty>
               <div className="flex flex-col items-center gap-2 py-6">
