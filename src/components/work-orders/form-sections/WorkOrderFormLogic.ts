@@ -7,13 +7,18 @@ type Tables = Database["public"]["Tables"];
 interface FormData {
   title: string;
   description?: string;
-  priority: "low" | "medium" | "high" | "urgent";
+  priority: "none" | "low" | "medium" | "high";
   dueDate?: Date;
+  startDate?: Date;
   assignedTo?: string;
   asset?: string;
   location?: string;
   category?: string;
   tags?: string;
+  estimatedHours?: string;
+  estimatedMinutes?: string;
+  recurrence?: string;
+  workType?: string;
 }
 
 interface User {
@@ -68,15 +73,19 @@ export const processWorkOrderSubmission = async (
   const processedAsset = formData.asset === "none" ? null : formData.asset;
   const processedLocation = formData.location === "none" ? null : formData.location;
 
+  // Convert priority "none" to "low" for database compatibility
+  const dbPriority = formData.priority === "none" ? "low" : formData.priority as "low" | "medium" | "high";
+
   // Prepare work order data
   const workOrderData: Tables["work_orders"]["Insert"] = {
     title: formData.title,
     description: formData.description || "",
-    priority: formData.priority,
+    priority: dbPriority,
     status: "open",
     category: formData.category || "maintenance",
     tags: tagsArray,
     due_date: formData.dueDate ? formData.dueDate.toISOString() : null,
+    start_date: formData.startDate ? formData.startDate.toISOString() : null,
     assigned_to: processedAssignedTo || null,
     asset_id: processedAsset || null,
     location_id: processedLocation || null,

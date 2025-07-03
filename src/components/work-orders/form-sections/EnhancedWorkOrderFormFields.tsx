@@ -11,7 +11,9 @@ import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { UseFormReturn } from "react-hook-form";
 import { Badge } from "@/components/ui/badge";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { ProcedureSelectionDialog } from "../ProcedureSelectionDialog";
+import { useNavigate } from "react-router-dom";
 
 interface Asset {
   id: string;
@@ -36,20 +38,27 @@ interface EnhancedWorkOrderFormFieldsProps {
   users?: User[];
   assets?: Asset[];
   locations?: Location[];
+  onDialogClose?: () => void;
 }
 
 export const EnhancedWorkOrderFormFields = ({ 
   form, 
   users = [], 
   assets = [], 
-  locations = [] 
+  locations = [],
+  onDialogClose
 }: EnhancedWorkOrderFormFieldsProps) => {
+  const navigate = useNavigate();
   const [showProcedureDialog, setShowProcedureDialog] = useState(false);
   const [selectedProcedures, setSelectedProcedures] = useState<string[]>([]);
   const [attachedFiles, setAttachedFiles] = useState<string[]>([]);
   const [selectedParts, setSelectedParts] = useState<string[]>([]);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [selectedVendors, setSelectedVendors] = useState<string[]>([]);
+  const [assetSearch, setAssetSearch] = useState("");
+  const [partsSearch, setPartsSearch] = useState("");
+  const [categoriesSearch, setCategoriesSearch] = useState("");
+  const [vendorsSearch, setVendorsSearch] = useState("");
 
   const handleProcedureSelect = (procedure: any) => {
     setSelectedProcedures(prev => [...prev, procedure.id]);
@@ -58,6 +67,34 @@ export const EnhancedWorkOrderFormFields = ({
 
   const removeProcedure = (procedureId: string) => {
     setSelectedProcedures(prev => prev.filter(id => id !== procedureId));
+  };
+
+  const handleCreateAndReturn = (type: 'asset' | 'parts' | 'categories' | 'vendors', searchValue: string) => {
+    // Store the search value and return path in localStorage
+    localStorage.setItem('workOrderReturnData', JSON.stringify({
+      formData: form.getValues(),
+      searchValue,
+      fieldType: type
+    }));
+    
+    // Close the current dialog
+    onDialogClose?.();
+    
+    // Navigate to the appropriate page
+    switch (type) {
+      case 'asset':
+        navigate('/dashboard/assets');
+        break;
+      case 'parts':
+        navigate('/dashboard/inventory');
+        break;
+      case 'categories':
+        navigate('/dashboard/categories');
+        break;
+      case 'vendors':
+        navigate('/dashboard/vendors');
+        break;
+    }
   };
 
   return (
@@ -70,7 +107,7 @@ export const EnhancedWorkOrderFormFields = ({
           <FormItem>
             <FormControl>
               <Input 
-                placeholder="Start typing..." 
+                placeholder="What needs to be done?" 
                 className="text-lg font-medium border-0 border-b border-gray-200 rounded-none px-0 focus:border-blue-500"
                 {...field} 
               />
@@ -79,6 +116,77 @@ export const EnhancedWorkOrderFormFields = ({
           </FormItem>
         )}
       />
+
+      {/* Location */}
+      <div className="space-y-2">
+        <FormLabel className="text-sm font-medium text-gray-700">Location</FormLabel>
+        <FormField
+          control={form.control}
+          name="location"
+          render={({ field }) => (
+            <FormItem>
+              <Select onValueChange={field.onChange} value={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Start typing..." />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  <SelectItem value="none">No Location</SelectItem>
+                  {locations.map((location) => (
+                    <SelectItem key={location.id} value={location.id}>
+                      {location.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      </div>
+
+      {/* Asset */}
+      <div className="space-y-2">
+        <FormLabel className="text-sm font-medium text-gray-700">Asset</FormLabel>
+        <FormField
+          control={form.control}
+          name="asset"
+          render={({ field }) => (
+            <FormItem>
+              <div className="space-y-2">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <FormControl>
+                      <SelectTrigger className="pl-10">
+                        <SelectValue placeholder="Start typing..." />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="none">No Asset</SelectItem>
+                      {assets.map((asset) => (
+                        <SelectItem key={asset.id} value={asset.id}>
+                          {asset.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <Button
+                  type="button"
+                  variant="link"
+                  className="text-blue-600 text-sm p-0 h-auto"
+                  onClick={() => handleCreateAndReturn('asset', assetSearch)}
+                >
+                  + Add multiple assets
+                </Button>
+              </div>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      </div>
 
       {/* Description */}
       <div className="space-y-2">
@@ -148,202 +256,319 @@ export const EnhancedWorkOrderFormFields = ({
         </div>
       </div>
 
-      {/* Two Column Layout */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Left Column */}
-        <div className="space-y-6">
-          {/* Assign To */}
-          <div className="space-y-2">
-            <FormLabel className="text-sm font-medium text-gray-700">Assign to</FormLabel>
-            <FormField
-              control={form.control}
-              name="assignedTo"
-              render={({ field }) => (
-                <FormItem>
-                  <Select onValueChange={field.onChange} value={field.value}>
-                    <FormControl>
-                      <SelectTrigger className="flex items-center gap-2">
-                        <div className="flex items-center gap-2 flex-1">
-                          <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center text-white text-xs">
-                            {field.value ? 'ZB' : '👤'}
-                          </div>
-                          <SelectValue placeholder="Select assignee" />
-                        </div>
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="unassigned">Unassigned</SelectItem>
-                      {users.map((user) => (
-                        <SelectItem key={user.id} value={user.id}>
-                          <div className="flex items-center gap-2">
-                            <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center text-white text-xs">
-                              {user.first_name?.[0] || user.email[0].toUpperCase()}
-                            </div>
-                            {user.first_name && user.last_name 
-                              ? `${user.first_name} ${user.last_name}`
-                              : user.email
-                            }
-                          </div>
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
+      {/* Assign to */}
+      <div className="space-y-2">
+        <FormLabel className="text-sm font-medium text-gray-700">Assign to</FormLabel>
+        <FormField
+          control={form.control}
+          name="assignedTo"
+          render={({ field }) => (
+            <FormItem>
+              <Select onValueChange={field.onChange} value={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Type name, email or phone number" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  <SelectItem value="unassigned">Unassigned</SelectItem>
+                  {users.map((user) => (
+                    <SelectItem key={user.id} value={user.id}>
+                      {user.first_name && user.last_name 
+                        ? `${user.first_name} ${user.last_name}`
+                        : user.email
+                      }
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      </div>
 
-          {/* Due Date */}
-          <div className="space-y-2">
-            <FormLabel className="text-sm font-medium text-gray-700">Due Date & Schedule</FormLabel>
+      {/* Estimated Time */}
+      <div className="grid grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <FormLabel className="text-sm font-medium text-gray-700">Estimated Time</FormLabel>
+          <div className="space-y-1">
+            <FormLabel className="text-xs text-gray-500">Hours</FormLabel>
             <FormField
               control={form.control}
-              name="dueDate"
+              name="estimatedHours"
               render={({ field }) => (
                 <FormItem>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <FormControl>
-                        <Button
-                          variant="outline"
-                          className={cn(
-                            "w-full justify-start text-left font-normal",
-                            !field.value && "text-muted-foreground"
-                          )}
-                        >
-                          <CalendarIcon className="mr-2 h-4 w-4" />
-                          {field.value ? format(field.value, "MM/dd/yyyy") : "mm/dd/yyyy"}
-                        </Button>
-                      </FormControl>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <Calendar
-                        mode="single"
-                        selected={field.value}
-                        onSelect={field.onChange}
-                        disabled={(date) => date < new Date()}
-                        initialFocus
-                        className="pointer-events-auto"
-                      />
-                    </PopoverContent>
-                  </Popover>
-                  <Button
-                    type="button"
-                    variant="link"
-                    className="text-blue-600 text-sm p-0 h-auto"
-                  >
-                    Add repeating schedule
-                  </Button>
+                  <FormControl>
+                    <Input type="number" placeholder="1" {...field} />
+                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
           </div>
         </div>
-
-        {/* Right Column */}
-        <div className="space-y-6">
-          {/* Location */}
-          <div className="space-y-2">
-            <FormLabel className="text-sm font-medium text-gray-700">Location</FormLabel>
+        <div className="space-y-2">
+          <FormLabel className="text-sm font-medium text-gray-700">&nbsp;</FormLabel>
+          <div className="space-y-1">
+            <FormLabel className="text-xs text-gray-500">Minutes</FormLabel>
             <FormField
               control={form.control}
-              name="location"
+              name="estimatedMinutes"
               render={({ field }) => (
                 <FormItem>
-                  <Select onValueChange={field.onChange} value={field.value}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select location" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="none">No Location</SelectItem>
-                      {locations.map((location) => (
-                        <SelectItem key={location.id} value={location.id}>
-                          {location.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <FormControl>
+                    <Input type="number" placeholder="0" {...field} />
+                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
           </div>
+        </div>
+      </div>
 
-          {/* Asset */}
-          <div className="space-y-2">
-            <FormLabel className="text-sm font-medium text-gray-700">Asset</FormLabel>
-            <FormField
-              control={form.control}
-              name="asset"
-              render={({ field }) => (
-                <FormItem>
-                  <div className="relative">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                    <Select onValueChange={field.onChange} value={field.value}>
-                      <FormControl>
-                        <SelectTrigger className="pl-10">
-                          <SelectValue placeholder="Start typing..." />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="none">No Asset</SelectItem>
-                        {assets.map((asset) => (
-                          <SelectItem key={asset.id} value={asset.id}>
-                            {asset.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+      {/* Due Date */}
+      <div className="space-y-2">
+        <FormLabel className="text-sm font-medium text-gray-700">Due Date</FormLabel>
+        <FormField
+          control={form.control}
+          name="dueDate"
+          render={({ field }) => (
+            <FormItem>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <FormControl>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        "w-full justify-start text-left font-normal",
+                        !field.value && "text-muted-foreground"
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {field.value ? format(field.value, "MM/dd/yyyy") : "mm/dd/yyyy"}
+                    </Button>
+                  </FormControl>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={field.value}
+                    onSelect={field.onChange}
+                    disabled={(date) => date < new Date()}
+                    initialFocus
+                    className="pointer-events-auto"
+                  />
+                </PopoverContent>
+              </Popover>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      </div>
+
+      {/* Start Date */}
+      <div className="space-y-2">
+        <FormLabel className="text-sm font-medium text-gray-700">Start Date</FormLabel>
+        <FormField
+          control={form.control}
+          name="startDate"
+          render={({ field }) => (
+            <FormItem>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <FormControl>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        "w-full justify-start text-left font-normal",
+                        !field.value && "text-muted-foreground"
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {field.value ? format(field.value, "MM/dd/yyyy") : "mm/dd/yyyy"}
+                    </Button>
+                  </FormControl>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={field.value}
+                    onSelect={field.onChange}
+                    initialFocus
+                    className="pointer-events-auto"
+                  />
+                </PopoverContent>
+              </Popover>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      </div>
+
+      {/* Recurrence */}
+      <div className="grid grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <FormLabel className="text-sm font-medium text-gray-700">Recurrence</FormLabel>
+          <FormField
+            control={form.control}
+            name="recurrence"
+            render={({ field }) => (
+              <FormItem>
+                <Select onValueChange={field.onChange} value={field.value} defaultValue="none">
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Does not repeat" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="none">Does not repeat</SelectItem>
+                    <SelectItem value="daily">Daily</SelectItem>
+                    <SelectItem value="weekly">Weekly</SelectItem>
+                    <SelectItem value="monthly">Monthly</SelectItem>
+                    <SelectItem value="yearly">Yearly</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+        <div className="space-y-2">
+          <FormLabel className="text-sm font-medium text-gray-700">Work Type</FormLabel>
+          <FormField
+            control={form.control}
+            name="workType"
+            render={({ field }) => (
+              <FormItem>
+                <Select onValueChange={field.onChange} value={field.value} defaultValue="reactive">
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Reactive" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="reactive">Reactive</SelectItem>
+                    <SelectItem value="preventive">Preventive</SelectItem>
+                    <SelectItem value="predictive">Predictive</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+      </div>
+
+      {/* Priority */}
+      <div className="space-y-2">
+        <FormLabel className="text-sm font-medium text-gray-700">Priority</FormLabel>
+        <FormField
+          control={form.control}
+          name="priority"
+          render={({ field }) => (
+            <FormItem>
+              <FormControl>
+                <RadioGroup
+                  onValueChange={field.onChange}
+                  value={field.value}
+                  className="flex space-x-4"
+                >
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="none" id="none" />
+                    <label htmlFor="none" className="text-sm">None</label>
                   </div>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="low" id="low" />
+                    <label htmlFor="low" className="text-sm">Low</label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="medium" id="medium" />
+                    <label htmlFor="medium" className="text-sm">Medium</label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="high" id="high" />
+                    <label htmlFor="high" className="text-sm">High</label>
+                  </div>
+                </RadioGroup>
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      </div>
 
-          {/* Files */}
-          <div className="space-y-2">
-            <FormLabel className="text-sm font-medium text-gray-700">Files</FormLabel>
-            <Button
-              type="button"
-              variant="outline"
-              className="w-full justify-center border-dashed"
-            >
-              <Paperclip className="h-4 w-4 mr-2" />
-              Attach files
-            </Button>
-          </div>
+      {/* Files */}
+      <div className="space-y-2">
+        <FormLabel className="text-sm font-medium text-gray-700">Files</FormLabel>
+        <Button
+          type="button"
+          variant="outline"
+          className="w-full justify-center border-dashed text-blue-600"
+        >
+          <Paperclip className="h-4 w-4 mr-2" />
+          Attach files
+        </Button>
+      </div>
 
-          {/* Parts */}
-          <div className="space-y-2">
-            <FormLabel className="text-sm font-medium text-gray-700">Parts</FormLabel>
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-              <Input placeholder="Start typing..." className="pl-10" />
-            </div>
-          </div>
+      {/* Parts */}
+      <div className="space-y-2">
+        <FormLabel className="text-sm font-medium text-gray-700">Parts</FormLabel>
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+          <Input 
+            placeholder="Start typing..." 
+            className="pl-10"
+            value={partsSearch}
+            onChange={(e) => setPartsSearch(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && partsSearch.trim()) {
+                e.preventDefault();
+                handleCreateAndReturn('parts', partsSearch);
+              }
+            }}
+          />
+        </div>
+      </div>
 
-          {/* Categories */}
-          <div className="space-y-2">
-            <FormLabel className="text-sm font-medium text-gray-700">Categories</FormLabel>
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-              <Input placeholder="Start typing..." className="pl-10" />
-            </div>
-          </div>
+      {/* Categories */}
+      <div className="space-y-2">
+        <FormLabel className="text-sm font-medium text-gray-700">Categories</FormLabel>
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+          <Input 
+            placeholder="Start typing..." 
+            className="pl-10"
+            value={categoriesSearch}
+            onChange={(e) => setCategoriesSearch(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && categoriesSearch.trim()) {
+                e.preventDefault();
+                handleCreateAndReturn('categories', categoriesSearch);
+              }
+            }}
+          />
+        </div>
+      </div>
 
-          {/* Vendors */}
-          <div className="space-y-2">
-            <FormLabel className="text-sm font-medium text-gray-700">Vendors</FormLabel>
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-              <Input placeholder="Start typing..." className="pl-10" />
-            </div>
-          </div>
+      {/* Vendors */}
+      <div className="space-y-2">
+        <FormLabel className="text-sm font-medium text-gray-700">Vendors</FormLabel>
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+          <Input 
+            placeholder="Start typing..." 
+            className="pl-10"
+            value={vendorsSearch}
+            onChange={(e) => setVendorsSearch(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && vendorsSearch.trim()) {
+                e.preventDefault();
+                handleCreateAndReturn('vendors', vendorsSearch);
+              }
+            }}
+          />
         </div>
       </div>
 

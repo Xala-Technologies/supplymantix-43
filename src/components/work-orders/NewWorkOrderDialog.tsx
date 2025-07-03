@@ -26,13 +26,18 @@ import { processWorkOrderSubmission } from "./form-sections/WorkOrderFormLogic";
 const workOrderSchema = z.object({
   title: z.string().min(1, "Title is required"),
   description: z.string().optional(),
-  priority: z.enum(["low", "medium", "high", "urgent"]),
+  priority: z.enum(["none", "low", "medium", "high"]),
   dueDate: z.date().optional(),
+  startDate: z.date().optional(),
   assignedTo: z.string().optional(),
   asset: z.string().optional(),
   location: z.string().optional(),
   category: z.string().default("maintenance"),
   tags: z.string().optional(),
+  estimatedHours: z.string().optional(),
+  estimatedMinutes: z.string().optional(),
+  recurrence: z.string().optional(),
+  workType: z.string().optional(),
 });
 
 type WorkOrderFormData = z.infer<typeof workOrderSchema>;
@@ -43,6 +48,7 @@ interface NewWorkOrderDialogProps {
   children?: React.ReactNode;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
+  returnData?: any;
 }
 
 export const NewWorkOrderDialog = ({ 
@@ -50,7 +56,8 @@ export const NewWorkOrderDialog = ({
   onSuccess,
   children,
   open: controlledOpen,
-  onOpenChange: controlledOnOpenChange
+  onOpenChange: controlledOnOpenChange,
+  returnData
 }: NewWorkOrderDialogProps) => {
   const [internalOpen, setInternalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -73,12 +80,16 @@ export const NewWorkOrderDialog = ({
     defaultValues: {
       title: "",
       description: "",
-      priority: "medium",
+      priority: "none",
       assignedTo: "",
       asset: "",
       location: "",
       category: "maintenance",
       tags: "",
+      estimatedHours: "",
+      estimatedMinutes: "",
+      recurrence: "none",
+      workType: "reactive",
     },
   });
 
@@ -136,13 +147,18 @@ export const NewWorkOrderDialog = ({
         const formData: WorkOrderFormData = {
           title: workOrder.title || "",
           description: workOrder.description || "",
-          priority: (workOrder.priority as "low" | "medium" | "high" | "urgent") || "medium",
+          priority: (workOrder.priority as "none" | "low" | "medium" | "high") || "none",
           assignedTo: getAssignee(workOrder.assignedTo),
           asset: assetId,
           location: locationId,
           category: workOrder.category || "maintenance",
           tags: tagsString,
           dueDate: workOrder.due_date ? new Date(workOrder.due_date) : undefined,
+          startDate: workOrder.start_date ? new Date(workOrder.start_date) : undefined,
+          estimatedHours: "",
+          estimatedMinutes: "",
+          recurrence: "none",
+          workType: "reactive",
         };
 
         console.log("Setting form data for editing:", formData);
@@ -152,13 +168,18 @@ export const NewWorkOrderDialog = ({
         form.reset({
           title: "",
           description: "",
-          priority: "medium",
+          priority: "none",
           assignedTo: "",
           asset: "",
           location: "",
           category: "maintenance",
           tags: "",
           dueDate: undefined,
+          startDate: undefined,
+          estimatedHours: "",
+          estimatedMinutes: "",
+          recurrence: "none",
+          workType: "reactive",
         });
       }
     }
@@ -242,6 +263,7 @@ export const NewWorkOrderDialog = ({
               users={users}
               assets={assets}
               locations={locations}
+              onDialogClose={handleClose}
             />
 
             <DialogFooter className="gap-2 pt-4 border-t">
