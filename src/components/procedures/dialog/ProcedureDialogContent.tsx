@@ -40,45 +40,53 @@ export const ProcedureDialogContent: React.FC<ProcedureDialogContentProps> = ({
   onRemoveField
 }) => {
   return (
-    <Tabs defaultValue={isEditing ? "settings" : "fields"} className="flex-1 flex flex-col min-h-0">
-      <TabsList className="flex-shrink-0 grid w-full grid-cols-2">
-        <TabsTrigger value="fields">
-          {isEditing ? 'Edit Fields' : 'Fields'}
-        </TabsTrigger>
-        <TabsTrigger value="settings">
-          Settings
-        </TabsTrigger>
-      </TabsList>
+    <div className="h-full flex flex-col">
+      <Tabs defaultValue={isEditing ? "settings" : "fields"} className="h-full flex flex-col">
+        <div className="flex-shrink-0 px-6 py-3 border-b border-gray-100 bg-gray-50/50">
+          <TabsList className="grid w-full max-w-sm grid-cols-2 h-9">
+            <TabsTrigger value="fields" className="text-sm">
+              {isEditing ? 'Edit Fields' : 'Fields'}
+            </TabsTrigger>
+            <TabsTrigger value="settings" className="text-sm">
+              Settings
+            </TabsTrigger>
+          </TabsList>
+        </div>
 
-      <div className="flex-1 min-h-0">
-        <TabsContent value="fields" className="h-full p-4 overflow-y-auto space-y-3 mt-0">
-          <ProcedureFieldsTab
-            procedure={procedure}
-            isEditing={isEditing}
-            editData={editData}
-            formData={formData}
-            disableAutoSave={disableAutoSave}
-            onFieldChange={onFieldChange}
-            onAddField={onAddField}
-            onUpdateField={onUpdateField}
-            onMoveField={onMoveField}
-            onRemoveField={onRemoveField}
-          />
-        </TabsContent>
+        <div className="flex-1 min-h-0 overflow-hidden">
+          <TabsContent value="fields" className="h-full m-0 p-0">
+            <div className="h-full overflow-y-auto p-6">
+              <ProcedureFieldsTab
+                procedure={procedure}
+                isEditing={isEditing}
+                editData={editData}
+                formData={formData}
+                disableAutoSave={disableAutoSave}
+                onFieldChange={onFieldChange}
+                onAddField={onAddField}
+                onUpdateField={onUpdateField}
+                onMoveField={onMoveField}
+                onRemoveField={onRemoveField}
+              />
+            </div>
+          </TabsContent>
 
-        <TabsContent value="settings" className="h-full p-4 overflow-y-auto mt-0">
-          <ProcedureSettingsPanel
-            procedure={procedure}
-            isEditing={isEditing}
-            editData={editData}
-            newTag={newTag}
-            onEditDataChange={onEditDataChange}
-            onNewTagChange={onNewTagChange}
-            onAddTag={onAddTag}
-            onRemoveTag={onRemoveTag}
-          />
-        </TabsContent>
-      </div>
-    </Tabs>
+          <TabsContent value="settings" className="h-full m-0 p-0">
+            <div className="h-full overflow-y-auto p-6">
+              <ProcedureSettingsPanel
+                procedure={procedure}
+                isEditing={isEditing}
+                editData={editData}
+                newTag={newTag}
+                onEditDataChange={onEditDataChange}
+                onNewTagChange={onNewTagChange}
+                onAddTag={onAddTag}
+                onRemoveTag={onRemoveTag}
+              />
+            </div>
+          </TabsContent>
+        </div>
+      </Tabs>
+    </div>
   );
 };
