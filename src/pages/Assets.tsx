@@ -6,7 +6,7 @@ import { AssetsList } from "@/components/assets/AssetsList";
 import { AssetDetailCard } from "@/components/assets/AssetDetailCard";
 import { AssetForm } from "@/components/assets/AssetForm";
 import { useState } from "react";
-import { ChevronLeft, Plus } from "lucide-react";
+import { ChevronLeft, Plus, Upload, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAssets, useCreateAsset, useUpdateAsset, useDeleteAsset, type Asset as DatabaseAsset } from "@/hooks/useAssets";
 import { useAuth } from "@/contexts/AuthContext";
@@ -315,10 +315,55 @@ export default function Assets() {
               title="Assets"
               description="Manage and track your organization's physical assets and equipment"
             >
-              <Button onClick={handleCreateAsset} className="bg-blue-600 hover:bg-blue-700 shadow-sm">
-                <Plus className="h-4 w-4 mr-2" />
-                New Asset
-              </Button>
+              <div className="flex items-center gap-2">
+                <Button variant="outline" size="sm" onClick={() => {
+                  const input = document.createElement('input');
+                  input.type = 'file';
+                  input.accept = '.csv';
+                  input.onchange = async (e) => {
+                    const file = (e.target as HTMLInputElement).files?.[0];
+                    if (file) {
+                      try {
+                        const { importAssetsFromCSV } = await import("@/utils/assetsImportExport");
+                        toast.loading(`Importing ${file.name}...`);
+                        const importedAssets = await importAssetsFromCSV(file);
+                        console.log('Imported assets:', importedAssets);
+                        toast.success(`Successfully imported ${importedAssets.length} assets`);
+                      } catch (error) {
+                        console.error('Import failed:', error);
+                        toast.error('Failed to import assets');
+                      }
+                    }
+                  };
+                  input.click();
+                }}>
+                  <Upload className="h-4 w-4 mr-2" />
+                  Import
+                </Button>
+                
+                <Button variant="outline" size="sm" onClick={() => {
+                  if (assets.length === 0) {
+                    toast.error('No assets to export');
+                    return;
+                  }
+                  try {
+                    const { exportAssetsToCSV } = require("@/utils/assetsImportExport");
+                    exportAssetsToCSV(assets);
+                    toast.success(`Exported ${assets.length} assets to CSV`);
+                  } catch (error) {
+                    console.error('Export failed:', error);
+                    toast.error('Failed to export assets');
+                  }
+                }}>
+                  <Download className="h-4 w-4 mr-2" />
+                  Export
+                </Button>
+
+                <Button onClick={handleCreateAsset} className="bg-blue-600 hover:bg-blue-700 shadow-sm">
+                  <Plus className="h-4 w-4 mr-2" />
+                  New Asset
+                </Button>
+              </div>
             </StandardPageHeader>
 
             <StandardPageFilters>
@@ -347,6 +392,8 @@ export default function Assets() {
                   assets={uiAssets}
                   selectedAssetId={selectedAsset?.id || null}
                   onSelectAsset={handleSelectAsset}
+                  onEditAsset={handleEditAsset}
+                  onDeleteAsset={handleDeleteAsset}
                 />
               )}
             </StandardPageContent>

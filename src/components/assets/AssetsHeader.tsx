@@ -120,35 +120,35 @@ export const AssetsHeader = ({
         <div className="flex items-center gap-3">
           {/* View Toggle */}
           {onViewModeChange && (
-            <div className="flex items-center border border-gray-200 rounded-lg p-1">
+            <div className="flex items-center gap-1 p-1 bg-gray-100 rounded-lg">
               <Button
-                variant={viewMode === 'grid' ? 'default' : 'ghost'}
                 size="sm"
+                variant={viewMode === 'grid' ? 'default' : 'ghost'}
                 onClick={() => onViewModeChange('grid')}
-                className="h-7 px-3"
+                className={`px-3 py-1.5 text-xs ${
+                  viewMode === 'grid' 
+                    ? 'bg-white shadow-sm text-gray-900' 
+                    : 'text-gray-600 hover:text-gray-900'
+                }`}
               >
-                <Grid3X3 className="h-4 w-4" />
+                <Grid3X3 className="h-3.5 w-3.5 mr-1.5" />
+                Cards
               </Button>
               <Button
-                variant={viewMode === 'list' ? 'default' : 'ghost'}
                 size="sm"
+                variant={viewMode === 'list' ? 'default' : 'ghost'}
                 onClick={() => onViewModeChange('list')}
-                className="h-7 px-3"
+                className={`px-3 py-1.5 text-xs ${
+                  viewMode === 'list' 
+                    ? 'bg-white shadow-sm text-gray-900' 
+                    : 'text-gray-600 hover:text-gray-900'
+                }`}
               >
-                <List className="h-4 w-4" />
+                <List className="h-3.5 w-3.5 mr-1.5" />
+                List
               </Button>
             </div>
           )}
-
-          <Button variant="outline" size="sm" onClick={handleImport}>
-            <Upload className="h-4 w-4 mr-2" />
-            Import
-          </Button>
-          
-          <Button variant="outline" size="sm" onClick={handleExport}>
-            <Download className="h-4 w-4 mr-2" />
-            Export
-          </Button>
         </div>
       </div>
     </div>;

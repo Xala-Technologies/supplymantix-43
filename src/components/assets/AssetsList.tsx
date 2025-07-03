@@ -1,7 +1,10 @@
 
+import React from "react";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
-import { MapPin, Calendar, Wrench, AlertTriangle } from "lucide-react";
+import { MapPin, Calendar, Wrench, Edit, Trash2, MoreHorizontal, Eye, Package } from "lucide-react";
 
 interface Asset {
   id: string;
@@ -20,18 +23,26 @@ interface AssetsListProps {
   assets: Asset[];
   selectedAssetId: string | null;
   onSelectAsset: (id: string) => void;
+  onEditAsset?: (asset: Asset) => void;
+  onDeleteAsset?: (asset: Asset) => void;
 }
 
-export const AssetsList = ({ assets, selectedAssetId, onSelectAsset }: AssetsListProps) => {
+export const AssetsList = ({ 
+  assets, 
+  selectedAssetId, 
+  onSelectAsset,
+  onEditAsset,
+  onDeleteAsset 
+}: AssetsListProps) => {
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
-      case 'online':
+      case 'active':
         return 'bg-green-100 text-green-800 border-green-200';
-      case 'offline':
-        return 'bg-red-100 text-red-800 border-red-200';
       case 'maintenance':
         return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-      case 'out of service':
+      case 'out_of_service':
+        return 'bg-red-100 text-red-800 border-red-200';
+      case 'retired':
         return 'bg-gray-100 text-gray-800 border-gray-200';
       default:
         return 'bg-gray-100 text-gray-800 border-gray-200';
@@ -51,110 +62,151 @@ export const AssetsList = ({ assets, selectedAssetId, onSelectAsset }: AssetsLis
     }
   };
 
-  const getCategoryIcon = (category: string) => {
-    switch (category.toLowerCase()) {
-      case 'production equipment':
-        return '🏭';
-      case 'material handling':
-        return '📦';
-      case 'hvac':
-        return '❄️';
-      case 'electrical':
-        return '⚡';
-      case 'safety':
-        return '🛡️';
-      default:
-        return '🔧';
-    }
-  };
-
   return (
-    <div className="w-full md:w-80 lg:w-96 xl:w-[28rem] bg-white border-r border-gray-200 flex flex-col h-full">
+    <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
       {/* Header */}
-      <div className="p-4 border-b border-gray-100">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-semibold text-gray-900">
-            Assets ({assets.length})
-          </h3>
-          <div className="flex items-center space-x-2 text-xs text-gray-600">
-            <span>Sort: Name A-Z</span>
-            <button className="text-gray-400 hover:text-gray-600">↻</button>
-          </div>
+      <div className="px-6 py-4 bg-gray-50 border-b border-gray-200">
+        <div className="flex items-center justify-between text-sm font-medium text-gray-600">
+          <div className="flex-1">Asset</div>
+          <div className="hidden md:block w-24 text-center">Status</div>
+          <div className="hidden md:block w-32 text-center">Location</div>
+          <div className="hidden md:block w-24 text-center">Next PM</div>
+          <div className="hidden md:block w-20 text-center">WOs</div>
+          <div className="w-24 text-center">Actions</div>
         </div>
       </div>
-      
-      {/* Scrollable content */}
-      <div className="flex-1 overflow-y-auto">
-        <div className="p-4 space-y-3">
-          {assets.map((asset) => (
-            <div
-              key={asset.id}
-              className={cn(
-                "p-4 rounded-lg border-2 cursor-pointer transition-all duration-200 hover:shadow-md",
-                selectedAssetId === asset.id 
-                  ? "bg-blue-50 border-blue-300 shadow-sm" 
-                  : "bg-white border-gray-200 hover:border-gray-300"
-              )}
-              onClick={() => onSelectAsset(asset.id)}
-            >
-              <div className="flex items-start gap-3">
-                {/* Icon */}
-                <div className="w-10 h-10 bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                  <span className="text-lg">{getCategoryIcon(asset.category)}</span>
-                </div>
-                
-                <div className="flex-1 min-w-0">
-                  {/* Title and Criticality */}
-                  <div className="flex items-start justify-between mb-2">
-                    <div>
-                      <h4 className="text-sm font-semibold text-gray-900 leading-tight">
-                        {asset.name}
-                      </h4>
-                      <span className="text-xs text-gray-600">#{asset.tag}</span>
-                    </div>
-                    <div className={cn("w-3 h-3 rounded-full flex-shrink-0", getCriticalityColor(asset.criticality))} />
+
+      {/* List Items */}
+      <div className="divide-y divide-gray-100">
+        {assets.map((asset) => (
+          <div 
+            key={asset.id} 
+            className={cn(
+              "px-6 py-4 transition-colors cursor-pointer",
+              selectedAssetId === asset.id ? "bg-blue-50" : "hover:bg-gray-50"
+            )}
+            onClick={() => onSelectAsset(asset.id)}
+          >
+            <div className="flex items-center justify-between">
+              {/* Asset Info */}
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-3 mb-1">
+                  <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <Package className="w-4 h-4 text-blue-600" />
                   </div>
-                  
-                  {/* Status and Category */}
-                  <div className="flex flex-col gap-2 mb-3">
-                    <Badge className={cn("text-xs w-fit border", getStatusColor(asset.status))}>
-                      {asset.status}
-                    </Badge>
-                    <div className="flex items-center gap-1 text-xs text-gray-500">
-                      <MapPin className="w-3 h-3 flex-shrink-0" />
-                      <span className="truncate">{asset.location}</span>
-                    </div>
+                  <div>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onSelectAsset(asset.id);
+                      }}
+                      className="font-semibold text-gray-900 hover:text-blue-600 transition-colors flex items-center gap-2 group"
+                    >
+                      {asset.name}
+                      <Eye className="h-3.5 w-3.5 opacity-0 group-hover:opacity-100 transition-opacity" />
+                    </button>
+                    <p className="text-sm text-gray-500">#{asset.tag}</p>
                   </div>
-                  
-                  {/* Metrics */}
-                  <div className="space-y-1">
-                    <div className="flex items-center justify-between text-xs">
-                      <div className="flex items-center gap-1 text-gray-500">
-                        <Calendar className="w-3 h-3" />
-                        <span>Next PM:</span>
-                      </div>
-                      <span className="text-gray-700 font-medium">{asset.nextMaintenance}</span>
-                    </div>
-                    <div className="flex items-center justify-between text-xs">
-                      <div className="flex items-center gap-1 text-gray-500">
-                        <Wrench className="w-3 h-3" />
-                        <span>Open WOs:</span>
-                      </div>
-                      <span className="text-gray-700 font-medium">{asset.workOrders}</span>
-                    </div>
-                    <div className="flex items-center justify-between text-xs">
-                      <div className="flex items-center gap-1 text-gray-500">
-                        <AlertTriangle className="w-3 h-3" />
-                        <span>Downtime:</span>
-                      </div>
-                      <span className="text-gray-700 font-medium">{asset.totalDowntime}</span>
-                    </div>
-                  </div>
+                  <div className={cn("w-2 h-2 rounded-full flex-shrink-0 ml-2", getCriticalityColor(asset.criticality))} />
                 </div>
               </div>
+
+              {/* Status - Hidden on mobile */}
+              <div className="hidden md:flex w-24 justify-center">
+                <Badge className={cn("text-xs border", getStatusColor(asset.status))}>
+                  {asset.status.replace('_', ' ')}
+                </Badge>
+              </div>
+
+              {/* Location - Hidden on mobile */}
+              <div className="hidden md:flex w-32 justify-center">
+                <div className="flex items-center gap-1 text-sm text-gray-500">
+                  <MapPin className="h-3 w-3" />
+                  <span className="truncate">{asset.location}</span>
+                </div>
+              </div>
+
+              {/* Next PM - Hidden on mobile */}
+              <div className="hidden md:flex w-24 justify-center">
+                <div className="flex items-center gap-1 text-sm text-gray-500">
+                  <Calendar className="h-3 w-3" />
+                  <span>{asset.nextMaintenance}</span>
+                </div>
+              </div>
+
+              {/* Work Orders - Hidden on mobile */}
+              <div className="hidden md:flex w-20 justify-center">
+                <div className="flex items-center gap-1 text-sm text-gray-500">
+                  <Wrench className="h-3 w-3" />
+                  <span>{asset.workOrders}</span>
+                </div>
+              </div>
+
+              {/* Actions */}
+              <div className="flex items-center gap-2 w-24 justify-center">
+                <Button
+                  size="sm"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onSelectAsset(asset.id);
+                  }}
+                  className="bg-blue-600 hover:bg-blue-700 text-xs px-2"
+                >
+                  <Eye className="h-3 w-3" />
+                </Button>
+                
+                {(onEditAsset || onDeleteAsset) && (
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="h-8 w-8 p-0"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <MoreHorizontal className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="bg-white border shadow-lg">
+                      <DropdownMenuItem 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onSelectAsset(asset.id);
+                        }}
+                      >
+                        <Eye className="h-4 w-4 mr-2" />
+                        View Details
+                      </DropdownMenuItem>
+                      {onEditAsset && (
+                        <DropdownMenuItem 
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onEditAsset(asset);
+                          }}
+                        >
+                          <Edit className="h-4 w-4 mr-2" />
+                          Edit
+                        </DropdownMenuItem>
+                      )}
+                      {onDeleteAsset && (
+                        <DropdownMenuItem 
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onDeleteAsset(asset);
+                          }}
+                          className="text-red-600"
+                        >
+                          <Trash2 className="h-4 w-4 mr-2" />
+                          Delete
+                        </DropdownMenuItem>
+                      )}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                )}
+              </div>
             </div>
-          ))}
-        </div>
+          </div>
+        ))}
       </div>
     </div>
   );
