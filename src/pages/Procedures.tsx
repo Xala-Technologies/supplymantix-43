@@ -166,11 +166,11 @@ const Procedures = () => {
               description={`${procedures.length} ${procedures.length === 1 ? 'procedure' : 'procedures'} available`}
             >
               <div className="flex items-center gap-3">
-                <Button variant="outline">
+                <Button variant="outline" className="bg-white hover:bg-gray-50 border-gray-200">
                   <Download className="h-4 w-4 mr-2" />
                   Export
                 </Button>
-                <Button onClick={() => setShowNewProcedureModal(true)}>
+                <Button onClick={() => setShowNewProcedureModal(true)} className="bg-blue-600 hover:bg-blue-700 shadow-sm">
                   <Plus className="h-4 w-4 mr-2" />
                   New Procedure
                 </Button>
@@ -199,23 +199,25 @@ const Procedures = () => {
 
             <StandardPageContent>
               {procedures.length === 0 ? (
-                <div className="text-center py-16">
-                  <div className="text-gray-400 mb-6">
-                    <FileText className="h-20 w-20 mx-auto" />
+                <div className="h-full flex items-center justify-center">
+                  <div className="text-center py-16">
+                    <div className="text-gray-400 mb-6">
+                      <FileText className="h-20 w-20 mx-auto" />
+                    </div>
+                    <h3 className="text-xl font-semibold text-gray-900 mb-3">No procedures found</h3>
+                    <p className="text-gray-600 mb-8 max-w-md mx-auto">
+                      {searchTerm || selectedCategory !== 'all' || showGlobalOnly
+                        ? "No procedures match your current filters. Try adjusting your search criteria."
+                        : "Get started by creating your first procedure template."
+                      }
+                    </p>
+                    {!searchTerm && selectedCategory === 'all' && !showGlobalOnly && (
+                      <Button onClick={() => setShowNewProcedureModal(true)} className="bg-blue-600 hover:bg-blue-700">
+                        <Plus className="h-4 w-4 mr-2" />
+                        Create Your First Procedure
+                      </Button>
+                    )}
                   </div>
-                  <h3 className="text-xl font-semibold text-gray-900 mb-3">No procedures found</h3>
-                  <p className="text-gray-600 mb-8 max-w-md mx-auto">
-                    {searchTerm || selectedCategory !== 'all' || showGlobalOnly
-                      ? "No procedures match your current filters. Try adjusting your search criteria."
-                      : "Get started by creating your first procedure template."
-                    }
-                  </p>
-                  {!searchTerm && selectedCategory === 'all' && !showGlobalOnly && (
-                    <Button onClick={() => setShowNewProcedureModal(true)}>
-                      <Plus className="h-4 w-4 mr-2" />
-                      Create Your First Procedure
-                    </Button>
-                  )}
                 </div>
               ) : viewMode === 'card' ? (
                 <ErrorBoundary fallback={<div className="text-center py-8 text-red-600">Error loading procedure cards</div>}>
