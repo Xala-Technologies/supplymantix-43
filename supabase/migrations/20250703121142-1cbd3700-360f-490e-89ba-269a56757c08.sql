@@ -4,7 +4,7 @@ ADD COLUMN IF NOT EXISTS qr_code TEXT,
 ADD COLUMN IF NOT EXISTS barcode TEXT,
 ADD COLUMN IF NOT EXISTS picture_url TEXT, -- using picture_url instead of 'bilde' for consistency
 ADD COLUMN IF NOT EXISTS assets JSONB DEFAULT '[]'::jsonb,
-ADD COLUMN IF NOT EXISTS teams_in_charge TEXT[],
+ADD COLUMN IF NOT EXISTS teams TEXT[],
 ADD COLUMN IF NOT EXISTS vendor_id UUID,
 ADD COLUMN IF NOT EXISTS part_type TEXT DEFAULT 'standard',
 ADD COLUMN IF NOT EXISTS area TEXT,

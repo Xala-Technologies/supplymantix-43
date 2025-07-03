@@ -56,6 +56,17 @@ export const InventoryDetailCard = ({ item, onClose, onEdit }: InventoryDetailCa
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
     description: item.description,
+    // Add new required fields with defaults
+    qr_code: null,
+    barcode: null,
+    picture_url: null,
+    assets: [],
+    teams: [],
+    teams_in_charge: [], // Keep for type compatibility
+    vendor_id: null,
+    part_type: 'standard',
+    area: null,
+    documents: [],
     is_low_stock: item.quantity <= item.minQuantity,
     needs_reorder: item.quantity <= item.minQuantity * 1.5,
     total_value: item.quantity * item.unitCost,

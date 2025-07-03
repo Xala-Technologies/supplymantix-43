@@ -53,6 +53,16 @@ export const inventoryEnhancedApi = {
     
     const items = (data || []).map(item => ({
       ...item,
+      // Ensure all new fields have default values
+      qr_code: item.qr_code || null,
+      barcode: item.barcode || null,
+      picture_url: item.picture_url || null,
+      assets: item.assets || [],
+      teams: (item as any).teams || [],
+      vendor_id: item.vendor_id || null,
+      part_type: item.part_type || 'standard',
+      area: item.area || null,
+      documents: item.documents || [],
       is_low_stock: (item.quantity || 0) <= (item.min_quantity || 0),
       needs_reorder: (item.quantity || 0) <= (item.min_quantity || 0) * 1.5,
       total_value: (item.quantity || 0) * (item.unit_cost || 0),
@@ -108,6 +118,16 @@ export const inventoryEnhancedApi = {
     
     const items = (data || []).map(item => ({
       ...item,
+      // Ensure all new fields have default values
+      qr_code: item.qr_code || null,
+      barcode: item.barcode || null,
+      picture_url: item.picture_url || null,
+      assets: item.assets || [],
+      teams: (item as any).teams || [],
+      vendor_id: item.vendor_id || null,
+      part_type: item.part_type || 'standard',
+      area: item.area || null,
+      documents: item.documents || [],
       is_low_stock: (item.quantity || 0) <= (item.min_quantity || 0),
       needs_reorder: (item.quantity || 0) <= (item.min_quantity || 0) * 1.5,
       total_value: (item.quantity || 0) * (item.unit_cost || 0),
