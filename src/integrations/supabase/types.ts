@@ -1568,6 +1568,7 @@ export type Database = {
           qr_code: string | null
           quantity: number
           sku: string | null
+          teams: string[] | null
           teams_in_charge: string[] | null
           tenant_id: string
           unit_cost: number | null
@@ -1590,6 +1591,7 @@ export type Database = {
           qr_code?: string | null
           quantity?: number
           sku?: string | null
+          teams?: string[] | null
           teams_in_charge?: string[] | null
           tenant_id: string
           unit_cost?: number | null
@@ -1612,6 +1614,7 @@ export type Database = {
           qr_code?: string | null
           quantity?: number
           sku?: string | null
+          teams?: string[] | null
           teams_in_charge?: string[] | null
           tenant_id?: string
           unit_cost?: number | null

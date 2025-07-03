@@ -1,0 +1,1 @@
+ALTER TABLE public.parts_items ADD COLUMN IF NOT EXISTS teams text[];
