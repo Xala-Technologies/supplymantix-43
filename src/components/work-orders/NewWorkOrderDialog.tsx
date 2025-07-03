@@ -20,7 +20,7 @@ import { useUsers } from "@/hooks/useUsers";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { WorkOrder } from "@/types/workOrder";
-import { WorkOrderFormFields } from "./form-sections/WorkOrderFormFields";
+import { EnhancedWorkOrderFormFields } from "./form-sections/EnhancedWorkOrderFormFields";
 import { processWorkOrderSubmission } from "./form-sections/WorkOrderFormLogic";
 
 const workOrderSchema = z.object({
@@ -228,23 +228,23 @@ export const NewWorkOrderDialog = ({
           {children}
         </DialogTrigger>
       )}
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-xl font-semibold text-slate-900">
-            {isEditMode ? 'Edit Work Order' : 'Create New Work Order'}
+            {isEditMode ? 'Edit Work Order' : 'New Work Order'}
           </DialogTitle>
         </DialogHeader>
         
         <FormProvider {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            <WorkOrderFormFields 
+            <EnhancedWorkOrderFormFields 
               form={form}
               users={users}
               assets={assets}
               locations={locations}
             />
 
-            <DialogFooter className="gap-2 pt-4">
+            <DialogFooter className="gap-2 pt-4 border-t">
               <Button
                 type="button"
                 variant="outline"
@@ -259,7 +259,7 @@ export const NewWorkOrderDialog = ({
                 disabled={isSubmitting}
                 className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm"
               >
-                {isSubmitting ? (isEditMode ? "Updating..." : "Creating...") : (isEditMode ? "Update Work Order" : "Create Work Order")}
+                {isSubmitting ? "Creating..." : "Create"}
               </Button>
             </DialogFooter>
           </form>
