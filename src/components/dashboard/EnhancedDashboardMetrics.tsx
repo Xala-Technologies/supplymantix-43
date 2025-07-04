@@ -22,8 +22,6 @@ export const EnhancedDashboardMetrics = ({
 }: EnhancedDashboardMetricsProps) => {
   const { data: metrics, isLoading } = useDashboardMetrics();
 
-  console.log('EnhancedDashboardMetrics rendering, isLoading:', isLoading, 'metrics:', metrics);
-
   if (isLoading) {
     return (
       <div className="space-y-6">

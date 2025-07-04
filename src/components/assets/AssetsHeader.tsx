@@ -43,9 +43,7 @@ export const AssetsHeader = ({
         try {
           toast.loading(`Importing ${file.name}...`);
           const importedAssets = await importAssetsFromCSV(file);
-          console.log('Imported assets:', importedAssets);
           toast.success(`Successfully imported ${importedAssets.length} assets`);
-          // TODO: Integrate with asset creation API
         } catch (error) {
           console.error('Import failed:', error);
           toast.error('Failed to import assets');

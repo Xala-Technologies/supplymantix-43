@@ -68,7 +68,6 @@ export const InventoryForm = ({
   // Reset form when item changes (for edit mode)
   useEffect(() => {
     if (item && mode === 'edit') {
-      console.log('InventoryForm: Resetting form for edit mode with item:', item);
       reset({
         name: item.name || '',
         description: item.description || '',
@@ -79,7 +78,6 @@ export const InventoryForm = ({
         unit_cost: item.unit_cost || 0,
       });
     } else if (mode === 'create') {
-      console.log('InventoryForm: Resetting form for create mode');
       reset({
         name: '',
         description: '',
@@ -94,11 +92,7 @@ export const InventoryForm = ({
 
   const onSubmit = async (data: InventoryFormData) => {
     try {
-      console.log('InventoryForm: Form submission started with data:', data);
-      console.log('InventoryForm: Mode:', mode, 'Item:', item);
-      
       if (mode === 'edit' && item) {
-        console.log('InventoryForm: Updating item:', item.id);
         await updateMutation.mutateAsync({
           id: item.id,
           updates: {
@@ -111,9 +105,7 @@ export const InventoryForm = ({
             unit_cost: Number(data.unit_cost) || 0,
           }
         });
-        console.log('InventoryForm: Update successful');
       } else {
-        console.log('InventoryForm: Creating new item');
         const result = await createMutation.mutateAsync({
           name: data.name,
           description: data.description || '',
@@ -123,7 +115,6 @@ export const InventoryForm = ({
           min_quantity: Number(data.min_quantity) || 0,
           unit_cost: Number(data.unit_cost) || 0,
         });
-        console.log('InventoryForm: Create successful, result:', result);
       }
       
       // Close dialog and reset form
@@ -142,11 +133,8 @@ export const InventoryForm = ({
       
       // Call success callback
       if (onSuccess) {
-        console.log('InventoryForm: Calling onSuccess callback');
         await onSuccess();
       }
-      
-      console.log('InventoryForm: Form submission completed successfully');
       
     } catch (error) {
       console.error('InventoryForm: Error saving inventory item:', error);
@@ -157,7 +145,6 @@ export const InventoryForm = ({
   const isSubmitting = createMutation.isPending || updateMutation.isPending;
 
   const handleOpenChange = (newOpen: boolean) => {
-    console.log('InventoryForm: Dialog open change:', newOpen);
     setOpen(newOpen);
     if (!newOpen && mode === 'create') {
       // Reset form when closing dialog in create mode
@@ -175,7 +162,6 @@ export const InventoryForm = ({
 
   // Watch all form values for debugging
   const watchedValues = watch();
-  console.log('InventoryForm: Current form values:', watchedValues);
 
   const formContent = (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">

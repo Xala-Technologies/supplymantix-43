@@ -142,8 +142,6 @@ export const AssetForm = ({
   const watchedValues = watch();
 
   const handleFormSubmit = (data: AssetFormData) => {
-    console.log('Submitting asset data:', data);
-    
     // Clean up the data to convert empty strings to null for UUID fields
     const cleanedData = {
       ...data,

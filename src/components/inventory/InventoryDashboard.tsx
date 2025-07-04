@@ -64,23 +64,19 @@ export const InventoryDashboard = () => {
   const locations = Array.from(new Set(rawItems.map(item => item.location).filter(Boolean)));
 
   const handleCreateItem = () => {
-    console.log('Creating new inventory item');
     setShowCreateForm(true);
   };
 
   const handleViewItem = (item: any) => {
-    console.log('Viewing item:', item);
     setSelectedItem(item);
   };
 
   const handleEditItem = (item: any) => {
-    console.log('Editing item:', item);
     setEditingItem(item);
     setShowEditForm(true);
   };
 
   const handleDeleteItem = async (item: any) => {
-    console.log('Deleting item:', item);
     
     try {
       const itemToRestore = {
@@ -99,7 +95,6 @@ export const InventoryDashboard = () => {
         item.id,
         itemToRestore,
         async () => {
-          console.log('Restoring item:', itemToRestore);
           await createMutation.mutateAsync(itemToRestore);
           await refetch();
         },
@@ -111,7 +106,6 @@ export const InventoryDashboard = () => {
   };
 
   const handleRefresh = async () => {
-    console.log('Refreshing inventory data');
     try {
       await refetch();
       toast.success("Inventory data refreshed");
@@ -122,7 +116,6 @@ export const InventoryDashboard = () => {
   };
 
   const handleExportData = async () => {
-    console.log('Exporting inventory data');
     try {
       await exportMutation.mutateAsync(rawItems);
     } catch (error) {
@@ -131,7 +124,6 @@ export const InventoryDashboard = () => {
   };
 
   const handleFilterChange = (type: string, value: string) => {
-    console.log(`Filter change - ${type}:`, value);
     if (type === 'status') {
       setStatusFilter(value);
     } else if (type === 'location') {

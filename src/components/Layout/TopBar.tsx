@@ -24,9 +24,7 @@ export const TopBar = () => {
   const handleLogout = async () => {
     try {
       setIsLoggingOut(true);
-      console.log('Logging out user:', user?.email);
       await signOut();
-      console.log('Logout successful, redirecting to home');
       navigate('/', { replace: true });
     } catch (error) {
       console.error('Logout error:', error);
