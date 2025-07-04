@@ -88,19 +88,8 @@ export const useCreateMeterReading = () => {
 
   return useMutation({
     mutationFn: async (reading: Omit<MeterReading, 'id' | 'created_at'>) => {
-      const { data: userData } = await supabase.auth.getUser();
-      
-      const { data, error } = await supabase
-        .from("meter_readings")
-        .insert({
-          ...reading,
-          recorded_by: userData.user?.id,
-        })
-        .select()
-        .single();
-
-      if (error) throw error;
-      return data;
+      const { databaseApi } = await import('@/lib/database');
+      return await databaseApi.createMeterReading(reading);
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["meter-readings"] });

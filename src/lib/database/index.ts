@@ -77,6 +77,26 @@ export const databaseApi = {
     return data || [];
   },
 
+  // Meter readings
+  createMeterReading: async (reading: any) => {
+    const { supabase } = await import('@/integrations/supabase/client');
+    
+    const { data: userData } = await supabase.auth.getUser();
+    if (!userData.user) throw new Error('Not authenticated');
+    
+    const { data, error } = await supabase
+      .from('meter_readings')
+      .insert({
+        ...reading,
+        recorded_by: userData.user.id,
+      })
+      .select()
+      .single();
+    
+    if (error) throw error;
+    return data;
+  },
+
   // Billing stubs
   getOrganizationSubscription: async (organizationId: string) => {
     console.log('getOrganizationSubscription not yet implemented');
