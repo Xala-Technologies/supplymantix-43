@@ -55,7 +55,7 @@ export const PurchaseOrdersList = ({ purchaseOrders, onDelete }: PurchaseOrdersL
           </p>
           <Button 
             className="mt-4" 
-            onClick={() => navigate("/dashboard/purchase-orders/new")}
+            onClick={() => navigate("/dashboard/purchase-orders/create")}
           >
             Create Purchase Order
           </Button>

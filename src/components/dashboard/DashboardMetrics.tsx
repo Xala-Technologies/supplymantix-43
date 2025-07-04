@@ -2,12 +2,13 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useDashboardMetrics } from "@/hooks/useDashboardMetrics";
 import { AlertTriangle, CheckCircle, Clock, DollarSign, Package, Settings, TrendingUp, TrendingDown } from "lucide-react";
 
 export const DashboardMetrics = () => {
   const { data: metrics, isLoading } = useDashboardMetrics();
+  const navigate = useNavigate();
 
   if (isLoading) {
     return (
@@ -213,30 +214,24 @@ export const DashboardMetrics = () => {
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <Link to="/dashboard/work-orders/new">
-              <Button className="w-full" variant="outline">
-                <Settings className="w-4 h-4 mr-2" />
-                New Work Order
-              </Button>
-            </Link>
-            <Link to="/dashboard/assets/new">
-              <Button className="w-full" variant="outline">
-                <Package className="w-4 h-4 mr-2" />
-                Add Asset
-              </Button>
-            </Link>
+            <Button onClick={() => navigate('/dashboard/work-orders')} className="w-full" variant="outline">
+              <Settings className="w-4 h-4 mr-2" />
+              New Work Order
+            </Button>
+            <Button onClick={() => navigate('/dashboard/assets')} className="w-full" variant="outline">
+              <Package className="w-4 h-4 mr-2" />
+              Add Asset
+            </Button>
             {metrics.inventory.lowStock > 0 && (
-              <Button className="w-full" variant="outline">
+              <Button onClick={() => navigate('/dashboard/purchase-orders/create')} className="w-full" variant="outline">
                 <TrendingDown className="w-4 h-4 mr-2" />
                 Create Reorder PO
               </Button>
             )}
-            <Link to="/dashboard/procedures/new">
-              <Button className="w-full" variant="outline">
-                <CheckCircle className="w-4 h-4 mr-2" />
-                New Procedure
-              </Button>
-            </Link>
+            <Button onClick={() => navigate('/dashboard/procedures')} className="w-full" variant="outline">
+              <CheckCircle className="w-4 h-4 mr-2" />
+              New Procedure
+            </Button>
           </div>
         </CardContent>
       </Card>

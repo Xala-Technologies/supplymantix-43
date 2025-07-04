@@ -26,7 +26,7 @@ export const LowStockBanner = ({ inventoryItem }: LowStockBannerProps) => {
       1
     );
     
-    navigate(`/dashboard/purchase-orders/new?inventory_item_id=${inventoryItem.id}&quantity=${reorderQuantity}`);
+    navigate(`/dashboard/purchase-orders/create?inventory_item_id=${inventoryItem.id}&quantity=${reorderQuantity}`);
   };
 
   return (

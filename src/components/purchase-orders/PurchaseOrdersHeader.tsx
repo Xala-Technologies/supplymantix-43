@@ -14,7 +14,7 @@ export const PurchaseOrdersHeader = () => {
           Manage and track your purchase orders and vendor relationships
         </p>
       </div>
-      <Button onClick={() => navigate("/dashboard/purchase-orders/new")}>
+      <Button onClick={() => navigate("/dashboard/purchase-orders/create")}>
         <Plus className="mr-2 h-4 w-4" />
         New Purchase Order
       </Button>

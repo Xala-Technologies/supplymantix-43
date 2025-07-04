@@ -27,7 +27,7 @@ export const TopBar = () => {
       await signOut();
       navigate('/', { replace: true });
     } catch (error) {
-      console.error('Logout error:', error);
+      // Handle logout error silently
     } finally {
       setIsLoggingOut(false);
     }
