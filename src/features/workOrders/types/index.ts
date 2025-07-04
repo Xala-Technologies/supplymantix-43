@@ -1,5 +1,5 @@
 
-import { BaseEntity } from '@/shared/types/common';
+import { BaseEntity } from '@/types/common';
 
 export type WorkOrderStatus = 'draft' | 'open' | 'in_progress' | 'on_hold' | 'completed' | 'cancelled';
 export type PriorityLevel = 'none' | 'low' | 'medium' | 'high' | 'urgent';

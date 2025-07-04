@@ -1,6 +1,4 @@
-
-import { WorkOrderStatus, PriorityLevel, WorkOrderCategory } from '../types';
-
+// Work Order related constants
 export const WORK_ORDER_STATUS_OPTIONS = [
   { value: 'draft', label: 'Draft', color: 'bg-gray-100 text-gray-800 border-gray-200' },
   { value: 'open', label: 'Open', color: 'bg-blue-100 text-blue-800 border-blue-200' },
@@ -48,7 +46,7 @@ export const DEFAULT_WORK_ORDER_FILTERS = {
   priority: '',
   assignedTo: '',
   category: '',
-};
+} as const;
 
 export const WORK_ORDER_QUERY_KEYS = {
   all: ['work-orders'] as const,

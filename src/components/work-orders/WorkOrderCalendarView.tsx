@@ -4,7 +4,7 @@ import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, addMont
 import { workOrdersApi } from "@/lib/database/work-orders";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { WORK_ORDER_QUERY_KEYS } from "@/features/workOrders/constants";
+import { WORK_ORDER_QUERY_KEYS } from "@/constants/work-orders";
 import { CalendarHeader } from "./calendar/CalendarHeader";
 import { WeekdayHeader } from "./calendar/WeekdayHeader";
 import { CalendarDay } from "./calendar/CalendarDay";

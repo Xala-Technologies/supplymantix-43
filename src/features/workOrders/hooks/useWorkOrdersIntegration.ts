@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { workOrdersApi } from "@/lib/database/work-orders";
 import { toast } from "sonner";
 import { WorkOrder, WorkOrderStatus } from "../types";
-import { WORK_ORDER_QUERY_KEYS } from "../constants";
+import { WORK_ORDER_QUERY_KEYS } from "@/constants/work-orders";
 import { normalizeWorkOrderData } from "../utils";
 import { useAuth } from "@/contexts/AuthContext";
 
