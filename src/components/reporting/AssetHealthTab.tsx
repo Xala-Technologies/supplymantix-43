@@ -5,41 +5,24 @@ import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip } from 'recharts';
 import { Activity, AlertTriangle, CheckCircle, XCircle, TrendingUp } from 'lucide-react';
+import { useAssetHealthData } from '@/hooks/useReporting';
 
-const assetStatusData = [
-  { name: 'Operational', value: 142, color: 'hsl(var(--chart-1))' },
-  { name: 'Maintenance', value: 18, color: 'hsl(var(--chart-2))' },
-  { name: 'Out of Service', value: 5, color: 'hsl(var(--chart-3))' },
-];
-
-const assetHealthScore = [
-  { category: 'HVAC Systems', score: 92, trend: 'up' },
-  { category: 'Electrical', score: 88, trend: 'stable' },
-  { category: 'Plumbing', score: 85, trend: 'down' },
-  { category: 'Safety Equipment', score: 95, trend: 'up' },
-  { category: 'Manufacturing', score: 78, trend: 'down' },
-];
-
-const maintenanceSchedule = [
-  { asset: 'HVAC Unit #1', nextMaintenance: '2024-01-15', status: 'scheduled', priority: 'medium' },
-  { asset: 'Generator #2', nextMaintenance: '2024-01-12', status: 'overdue', priority: 'high' },
-  { asset: 'Pump #3', nextMaintenance: '2024-01-20', status: 'scheduled', priority: 'low' },
-  { asset: 'Compressor #4', nextMaintenance: '2024-01-18', status: 'scheduled', priority: 'medium' },
-];
-
-const uptimeData = [
-  { month: 'Jan', uptime: 98.5 },
-  { month: 'Feb', uptime: 97.2 },
-  { month: 'Mar', uptime: 99.1 },
-  { month: 'Apr', uptime: 96.8 },
-  { month: 'May', uptime: 98.9 },
-  { month: 'Jun', uptime: 99.3 },
-];
 
 export const AssetHealthTab = () => {
-  const totalAssets = assetStatusData.reduce((sum, item) => sum + item.value, 0);
-  const operationalRate = (assetStatusData[0].value / totalAssets) * 100;
-  const avgHealthScore = assetHealthScore.reduce((sum, item) => sum + item.score, 0) / assetHealthScore.length;
+  const { data: healthData, isLoading } = useAssetHealthData();
+  
+  if (isLoading) {
+    return <div className="text-center py-8">Loading asset health data...</div>;
+  }
+
+  if (!healthData) {
+    return <div className="text-center py-8">No asset health data available</div>;
+  }
+
+  const totalAssets = healthData.statusDistribution.reduce((sum, item) => sum + item.value, 0);
+  const operationalRate = totalAssets > 0 ? (healthData.statusDistribution[0].value / totalAssets) * 100 : 0;
+  const avgHealthScore = healthData.healthScores.length > 0 ? 
+    healthData.healthScores.reduce((sum, item) => sum + item.score, 0) / healthData.healthScores.length : 0;
 
   const getStatusIcon = (status: string) => {
     switch (status) {
@@ -102,7 +85,7 @@ export const AssetHealthTab = () => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {maintenanceSchedule.filter(item => item.status === 'overdue').length}
+              {healthData.maintenanceSchedule.filter(item => item.status === 'overdue').length}
             </div>
             <p className="text-xs text-muted-foreground">Requires immediate attention</p>
           </CardContent>
@@ -119,7 +102,7 @@ export const AssetHealthTab = () => {
             <ResponsiveContainer width="100%" height={300}>
               <PieChart>
                 <Pie
-                  data={assetStatusData}
+                  data={healthData.statusDistribution}
                   cx="50%"
                   cy="50%"
                   innerRadius={60}
@@ -127,7 +110,7 @@ export const AssetHealthTab = () => {
                   paddingAngle={5}
                   dataKey="value"
                 >
-                  {assetStatusData.map((entry, index) => (
+                  {healthData.statusDistribution.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={entry.color} />
                   ))}
                 </Pie>
@@ -135,7 +118,7 @@ export const AssetHealthTab = () => {
               </PieChart>
             </ResponsiveContainer>
             <div className="flex justify-center space-x-4 mt-4">
-              {assetStatusData.map((entry, index) => (
+              {healthData.statusDistribution.map((entry, index) => (
                 <div key={index} className="flex items-center gap-2">
                   <div 
                     className="w-3 h-3 rounded-full" 
@@ -154,15 +137,15 @@ export const AssetHealthTab = () => {
             <CardTitle>Asset Uptime Trend</CardTitle>
           </CardHeader>
           <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={uptimeData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="month" />
-                <YAxis domain={[95, 100]} />
-                <Tooltip formatter={(value) => [`${value}%`, 'Uptime']} />
-                <Bar dataKey="uptime" fill="hsl(var(--primary))" />
-              </BarChart>
-            </ResponsiveContainer>
+          <ResponsiveContainer width="100%" height={300}>
+            <BarChart data={healthData.uptimeData}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="month" />
+              <YAxis domain={[95, 100]} />
+              <Tooltip formatter={(value) => [`${value}%`, 'Uptime']} />
+              <Bar dataKey="uptime" fill="hsl(var(--primary))" />
+            </BarChart>
+          </ResponsiveContainer>
           </CardContent>
         </Card>
       </div>
@@ -181,30 +164,30 @@ export const AssetHealthTab = () => {
                 <TableHead>Trend</TableHead>
                 <TableHead>Status</TableHead>
               </TableRow>
-            </TableHeader>
-            <TableBody>
-              {assetHealthScore.map((item, index) => (
-                <TableRow key={index}>
-                  <TableCell className="font-medium">{item.category}</TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      <Progress value={item.score} className="w-20" />
-                      <span className="text-sm font-medium">{item.score}%</span>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant={item.trend === 'up' ? 'default' : item.trend === 'down' ? 'destructive' : 'secondary'}>
-                      {item.trend}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant={item.score >= 90 ? 'default' : item.score >= 80 ? 'secondary' : 'destructive'}>
-                      {item.score >= 90 ? 'Excellent' : item.score >= 80 ? 'Good' : 'Needs Attention'}
-                    </Badge>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
+        </TableHeader>
+        <TableBody>
+          {healthData.healthScores.map((item, index) => (
+            <TableRow key={index}>
+              <TableCell className="font-medium">{item.category}</TableCell>
+              <TableCell>
+                <div className="flex items-center gap-2">
+                  <Progress value={item.score} className="w-20" />
+                  <span className="text-sm font-medium">{item.score}%</span>
+                </div>
+              </TableCell>
+              <TableCell>
+                <Badge variant={item.trend === 'up' ? 'default' : item.trend === 'down' ? 'destructive' : 'secondary'}>
+                  {item.trend}
+                </Badge>
+              </TableCell>
+              <TableCell>
+                <Badge variant={item.score >= 90 ? 'default' : item.score >= 80 ? 'secondary' : 'destructive'}>
+                  {item.score >= 90 ? 'Excellent' : item.score >= 80 ? 'Good' : 'Needs Attention'}
+                </Badge>
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
           </Table>
         </CardContent>
       </Card>
@@ -223,22 +206,22 @@ export const AssetHealthTab = () => {
                 <TableHead>Status</TableHead>
                 <TableHead>Priority</TableHead>
               </TableRow>
-            </TableHeader>
-            <TableBody>
-              {maintenanceSchedule.map((item, index) => (
-                <TableRow key={index}>
-                  <TableCell className="font-medium">{item.asset}</TableCell>
-                  <TableCell>{item.nextMaintenance}</TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      {getStatusIcon(item.status)}
-                      <span className="capitalize">{item.status}</span>
-                    </div>
-                  </TableCell>
-                  <TableCell>{getPriorityBadge(item.priority)}</TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
+        </TableHeader>
+        <TableBody>
+          {healthData.maintenanceSchedule.map((item, index) => (
+            <TableRow key={index}>
+              <TableCell className="font-medium">{item.asset}</TableCell>
+              <TableCell>{item.nextMaintenance}</TableCell>
+              <TableCell>
+                <div className="flex items-center gap-2">
+                  {getStatusIcon(item.status)}
+                  <span className="capitalize">{item.status}</span>
+                </div>
+              </TableCell>
+              <TableCell>{getPriorityBadge(item.priority)}</TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
           </Table>
         </CardContent>
       </Card>

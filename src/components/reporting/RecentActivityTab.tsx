@@ -16,80 +16,14 @@ import {
   Clock,
   FileText
 } from 'lucide-react';
+import { useActivityLogs } from '@/hooks/useReporting';
 
-interface ActivityItem {
-  id: string;
-  workOrderId: string;
-  workOrderTitle: string;
-  action: 'created' | 'assigned' | 'reassigned' | 'comment' | 'status_change' | 'edited' | 'deleted';
-  user: {
-    id: string;
-    name: string;
-    avatar?: string;
-  };
-  timestamp: Date;
-  comment?: string;
-  details?: any;
-}
-
-const mockActivityData: ActivityItem[] = [
-  {
-    id: '1',
-    workOrderId: 'WO-001',
-    workOrderTitle: 'HVAC System Maintenance',
-    action: 'created',
-    user: { id: '1', name: 'John Smith', avatar: undefined },
-    timestamp: new Date(Date.now() - 1000 * 60 * 30), // 30 minutes ago
-  },
-  {
-    id: '2',
-    workOrderId: 'WO-001',
-    workOrderTitle: 'HVAC System Maintenance',
-    action: 'assigned',
-    user: { id: '2', name: 'Sarah Johnson', avatar: undefined },
-    timestamp: new Date(Date.now() - 1000 * 60 * 45), // 45 minutes ago
-    details: { assignedTo: 'Mike Wilson' },
-  },
-  {
-    id: '3',
-    workOrderId: 'WO-002',
-    workOrderTitle: 'Generator Inspection',
-    action: 'comment',
-    user: { id: '3', name: 'Mike Wilson', avatar: undefined },
-    timestamp: new Date(Date.now() - 1000 * 60 * 60 * 2), // 2 hours ago
-    comment: 'Started the inspection process. Found minor oil leak that needs attention.',
-  },
-  {
-    id: '4',
-    workOrderId: 'WO-001',
-    workOrderTitle: 'HVAC System Maintenance',
-    action: 'status_change',
-    user: { id: '3', name: 'Mike Wilson', avatar: undefined },
-    timestamp: new Date(Date.now() - 1000 * 60 * 60 * 3), // 3 hours ago
-    details: { from: 'open', to: 'in_progress' },
-  },
-  {
-    id: '5',
-    workOrderId: 'WO-003',
-    workOrderTitle: 'Pump Replacement',
-    action: 'created',
-    user: { id: '4', name: 'Lisa Chen', avatar: undefined },
-    timestamp: new Date(Date.now() - 1000 * 60 * 60 * 4), // 4 hours ago
-  },
-  {
-    id: '6',
-    workOrderId: 'WO-002',
-    workOrderTitle: 'Generator Inspection',
-    action: 'comment',
-    user: { id: '2', name: 'Sarah Johnson', avatar: undefined },
-    timestamp: new Date(Date.now() - 1000 * 60 * 60 * 5), // 5 hours ago
-    comment: 'Scheduled for next Tuesday morning.',
-  },
-];
 
 export const RecentActivityTab = () => {
   const [showComments, setShowComments] = useState(true);
   const [showAllUpdates, setShowAllUpdates] = useState(true);
+  
+  const { data: activityData = [], isLoading } = useActivityLogs();
 
   const getActionIcon = (action: string) => {
     switch (action) {
@@ -104,7 +38,7 @@ export const RecentActivityTab = () => {
     }
   };
 
-  const getActionText = (activity: ActivityItem) => {
+  const getActionText = (activity: any) => {
     switch (activity.action) {
       case 'created': return 'created this work order';
       case 'assigned': return `assigned this work order to ${activity.details?.assignedTo}`;
@@ -117,7 +51,7 @@ export const RecentActivityTab = () => {
     }
   };
 
-  const filteredActivities = mockActivityData.filter(activity => {
+  const filteredActivities = activityData.filter(activity => {
     if (!showComments && activity.action === 'comment') return false;
     if (!showAllUpdates && ['status_change', 'edited'].includes(activity.action)) return false;
     return true;
@@ -136,7 +70,7 @@ export const RecentActivityTab = () => {
     }
     groups[activity.workOrderId].activities.push(activity);
     return groups;
-  }, {} as Record<string, { workOrder: { id: string; title: string }; activities: ActivityItem[] }>);
+  }, {} as Record<string, { workOrder: { id: string; title: string }; activities: any[] }>);
 
   return (
     <div className="space-y-6">
@@ -169,7 +103,9 @@ export const RecentActivityTab = () => {
 
       {/* Activity Feed */}
       <div className="space-y-6">
-        {Object.values(groupedActivities).map(({ workOrder, activities }) => (
+        {isLoading ? (
+          <div className="text-center py-8">Loading activity...</div>
+        ) : Object.values(groupedActivities).map(({ workOrder, activities }) => (
           <Card key={workOrder.id}>
             <CardHeader className="pb-4">
               <div className="flex items-center justify-between">
@@ -218,7 +154,7 @@ export const RecentActivityTab = () => {
           </Card>
         ))}
 
-        {Object.keys(groupedActivities).length === 0 && (
+        {!isLoading && Object.keys(groupedActivities).length === 0 && (
           <Card>
             <CardContent className="flex flex-col items-center justify-center py-12">
               <Clock className="h-12 w-12 text-muted-foreground mb-4" />

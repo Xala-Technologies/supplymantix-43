@@ -8,52 +8,8 @@ import { Progress } from '@/components/ui/progress';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from 'recharts';
 import { TrendingUp, TrendingDown, Users, MapPin, Building, Package, Truck } from 'lucide-react';
 import { useReporting } from '@/contexts/ReportingContext';
+import { useWorkOrderSummary, useGroupedWorkOrders } from '@/hooks/useReporting';
 
-const mockCreatedVsCompletedData = [
-  { date: '2024-01-01', created: 12, completed: 8 },
-  { date: '2024-01-02', created: 15, completed: 12 },
-  { date: '2024-01-03', created: 10, completed: 14 },
-  { date: '2024-01-04', created: 18, completed: 10 },
-  { date: '2024-01-05', created: 14, completed: 16 },
-];
-
-const mockGroupedData = {
-  team: [
-    { name: 'Maintenance Team A', members: 5, assigned: 45, completed: 38, ratio: 84.4 },
-    { name: 'Maintenance Team B', members: 4, assigned: 32, completed: 28, ratio: 87.5 },
-    { name: 'Facility Team', members: 3, assigned: 28, completed: 22, ratio: 78.6 },
-  ],
-  user: [
-    { name: 'John Smith', avatar: null, created: 12, assigned: 25, completed: 22, ratio: 88.0 },
-    { name: 'Sarah Johnson', avatar: null, created: 8, assigned: 18, completed: 16, ratio: 88.9 },
-    { name: 'Mike Wilson', avatar: null, created: 15, assigned: 30, completed: 24, ratio: 80.0 },
-  ],
-  asset: [
-    { name: 'HVAC System #1', location: 'Building A', assigned: 15, completed: 12, ratio: 80.0 },
-    { name: 'Generator #2', location: 'Building B', assigned: 8, completed: 8, ratio: 100.0 },
-    { name: 'Pump #3', location: 'Basement', assigned: 12, completed: 9, ratio: 75.0 },
-  ],
-  location: [
-    { name: 'Building A', assigned: 35, completed: 28, ratio: 80.0 },
-    { name: 'Building B', assigned: 22, completed: 20, ratio: 90.9 },
-    { name: 'Basement', assigned: 18, completed: 15, ratio: 83.3 },
-  ],
-  category: [
-    { name: 'Preventive Maintenance', assigned: 45, completed: 42, ratio: 93.3 },
-    { name: 'Repairs', assigned: 28, completed: 22, ratio: 78.6 },
-    { name: 'Inspections', assigned: 15, completed: 14, ratio: 93.3 },
-  ],
-  asset_type: [
-    { name: 'HVAC', assetCount: 8, assigned: 35, completed: 28, ratio: 80.0 },
-    { name: 'Electrical', assetCount: 12, assigned: 22, completed: 20, ratio: 90.9 },
-    { name: 'Plumbing', assetCount: 6, assigned: 18, completed: 15, ratio: 83.3 },
-  ],
-  vendor: [
-    { name: 'ABC Maintenance Co.', assigned: 25, completed: 22, ratio: 88.0 },
-    { name: 'XYZ Services', assigned: 18, completed: 15, ratio: 83.3 },
-    { name: 'Internal Team', assigned: 32, completed: 26, ratio: 81.3 },
-  ],
-};
 
 type GroupBy = 'team' | 'user' | 'asset' | 'location' | 'category' | 'asset_type' | 'vendor';
 
@@ -61,8 +17,12 @@ export const WorkOrdersReportTab = () => {
   const [groupBy, setGroupBy] = useState<GroupBy>('team');
   const { dateRange, filters } = useReporting();
 
-  const totalCreated = mockCreatedVsCompletedData.reduce((sum, day) => sum + day.created, 0);
-  const totalCompleted = mockCreatedVsCompletedData.reduce((sum, day) => sum + day.completed, 0);
+  // Get real data
+  const { data: summaryData = [], isLoading: summaryLoading } = useWorkOrderSummary();
+  const { data: groupedData = [], isLoading: groupedLoading } = useGroupedWorkOrders(groupBy);
+
+  const totalCreated = summaryData.reduce((sum, day) => sum + day.created, 0);
+  const totalCompleted = summaryData.reduce((sum, day) => sum + day.completed, 0);
   const completionRate = totalCreated > 0 ? (totalCompleted / totalCreated) * 100 : 0;
 
   const groupIcons = {
@@ -78,7 +38,9 @@ export const WorkOrdersReportTab = () => {
   const IconComponent = groupIcons[groupBy];
 
   const renderGroupedTable = () => {
-    const data = mockGroupedData[groupBy] as any[];
+    if (groupedLoading) {
+      return <div className="text-center py-4">Loading...</div>;
+    }
     
     return (
       <Table>
@@ -100,19 +62,19 @@ export const WorkOrdersReportTab = () => {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {data.map((item, index) => (
-            <TableRow key={index}>
+          {groupedData.map((item, index) => (
+            <TableRow key={item.id || index}>
               <TableCell className="font-medium">{item.name}</TableCell>
-              {groupBy === 'team' && <TableCell>{item.members}</TableCell>}
-              {groupBy === 'user' && <TableCell>{item.created}</TableCell>}
-              {groupBy === 'asset' && <TableCell>{item.location}</TableCell>}
-              {groupBy === 'asset_type' && <TableCell>{item.assetCount}</TableCell>}
+              {groupBy === 'team' && <TableCell>{item.members || '-'}</TableCell>}
+              {groupBy === 'user' && <TableCell>{item.created || '-'}</TableCell>}
+              {groupBy === 'asset' && <TableCell>{item.location || '-'}</TableCell>}
+              {groupBy === 'asset_type' && <TableCell>{item.assetCount || '-'}</TableCell>}
               <TableCell className="text-right">{item.assigned}</TableCell>
               <TableCell className="text-right">{item.completed}</TableCell>
               <TableCell className="text-right">
                 <div className="flex items-center gap-2">
                   <Progress value={item.ratio} className="w-16" />
-                  <span className="text-sm font-medium">{item.ratio}%</span>
+                  <span className="text-sm font-medium">{item.ratio.toFixed(1)}%</span>
                 </div>
               </TableCell>
             </TableRow>
@@ -170,28 +132,32 @@ export const WorkOrdersReportTab = () => {
           <CardTitle>Created vs Completed Work Orders</CardTitle>
         </CardHeader>
         <CardContent>
-          <ResponsiveContainer width="100%" height={300}>
-            <LineChart data={mockCreatedVsCompletedData}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="date" />
-              <YAxis />
-              <Tooltip />
-              <Line 
-                type="monotone" 
-                dataKey="created" 
-                stroke="hsl(var(--primary))" 
-                strokeWidth={2}
-                name="Created"
-              />
-              <Line 
-                type="monotone" 
-                dataKey="completed" 
-                stroke="hsl(var(--chart-2))" 
-                strokeWidth={2}
-                name="Completed"
-              />
-            </LineChart>
-          </ResponsiveContainer>
+          {summaryLoading ? (
+            <div className="text-center py-8">Loading chart data...</div>
+          ) : (
+            <ResponsiveContainer width="100%" height={300}>
+              <LineChart data={summaryData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="date" />
+                <YAxis />
+                <Tooltip />
+                <Line 
+                  type="monotone" 
+                  dataKey="created" 
+                  stroke="hsl(var(--primary))" 
+                  strokeWidth={2}
+                  name="Created"
+                />
+                <Line 
+                  type="monotone" 
+                  dataKey="completed" 
+                  stroke="hsl(var(--chart-2))" 
+                  strokeWidth={2}
+                  name="Completed"
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          )}
         </CardContent>
       </Card>
 
