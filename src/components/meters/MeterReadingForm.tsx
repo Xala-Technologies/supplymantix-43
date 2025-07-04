@@ -32,7 +32,8 @@ export const MeterReadingForm = ({ meterId, meterName, unit, onClose }: MeterRea
       await createReading.mutateAsync({
         meter_id: meterId,
         value: Number(value),
-        comment: comment || null,
+        recorded_at: new Date().toISOString(),
+        notes: comment || undefined,
       });
       onClose();
     } catch (error) {

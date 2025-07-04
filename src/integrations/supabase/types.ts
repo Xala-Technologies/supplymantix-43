@@ -981,6 +981,47 @@ export type Database = {
           },
         ]
       }
+      meter_attachments: {
+        Row: {
+          created_at: string
+          file_name: string
+          file_path: string
+          file_size: number
+          file_type: string
+          id: string
+          meter_id: string
+          uploaded_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          file_name: string
+          file_path: string
+          file_size: number
+          file_type: string
+          id?: string
+          meter_id: string
+          uploaded_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          file_name?: string
+          file_path?: string
+          file_size?: number
+          file_type?: string
+          id?: string
+          meter_id?: string
+          uploaded_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "meter_attachments_meter_id_fkey"
+            columns: ["meter_id"]
+            isOneToOne: false
+            referencedRelation: "meters"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       meter_readings: {
         Row: {
           comment: string | null
@@ -2810,6 +2851,57 @@ export type Database = {
             columns: ["work_order_id"]
             isOneToOne: false
             referencedRelation: "work_orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      work_order_meter_readings: {
+        Row: {
+          actual_reading_id: string | null
+          created_at: string
+          id: string
+          meter_id: string
+          notes: string | null
+          reading_completed: boolean | null
+          reading_required: boolean | null
+          updated_at: string
+          work_order_id: string
+        }
+        Insert: {
+          actual_reading_id?: string | null
+          created_at?: string
+          id?: string
+          meter_id: string
+          notes?: string | null
+          reading_completed?: boolean | null
+          reading_required?: boolean | null
+          updated_at?: string
+          work_order_id: string
+        }
+        Update: {
+          actual_reading_id?: string | null
+          created_at?: string
+          id?: string
+          meter_id?: string
+          notes?: string | null
+          reading_completed?: boolean | null
+          reading_required?: boolean | null
+          updated_at?: string
+          work_order_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "work_order_meter_readings_actual_reading_id_fkey"
+            columns: ["actual_reading_id"]
+            isOneToOne: false
+            referencedRelation: "meter_readings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "work_order_meter_readings_meter_id_fkey"
+            columns: ["meter_id"]
+            isOneToOne: false
+            referencedRelation: "meters"
             referencedColumns: ["id"]
           },
         ]

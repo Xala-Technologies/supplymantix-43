@@ -143,9 +143,9 @@ export const MeterReadingsHistory = ({ meterId }: MeterReadingsHistoryProps) => 
                         <span>Recorded by user</span>
                       </div>
                     )}
-                    {reading.comment && (
+                    {reading.notes && (
                       <p className="text-xs text-gray-500 max-w-xs">
-                        {reading.comment}
+                        {reading.notes}
                       </p>
                     )}
                   </div>
