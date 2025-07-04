@@ -26,6 +26,7 @@ export const WorkOrderTimeTracking = ({ workOrderId }: WorkOrderTimeTrackingProp
 
     await createTimeLog.mutateAsync({
       work_order_id: workOrderId,
+      user_id: '', // Will be filled by the API from auth context
       duration_minutes: Number(duration),
       note: note.trim() || undefined,
     });
@@ -112,9 +113,9 @@ export const WorkOrderTimeTracking = ({ workOrderId }: WorkOrderTimeTrackingProp
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-1">
                   <span className="text-sm font-medium text-gray-900">
-                    {log.users?.first_name && log.users?.last_name 
-                      ? `${log.users.first_name} ${log.users.last_name}`
-                      : log.users?.email
+                    {log.user?.first_name && log.user?.last_name 
+                      ? `${log.user.first_name} ${log.user.last_name}`
+                      : log.user?.email
                     }
                   </span>
                   <Badge className="bg-green-100 text-green-800 border-green-300 text-xs">

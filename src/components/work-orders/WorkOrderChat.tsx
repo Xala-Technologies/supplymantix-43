@@ -23,6 +23,7 @@ export const WorkOrderChat = ({ workOrderId }: WorkOrderChatProps) => {
     try {
       await createComment.mutateAsync({
         work_order_id: workOrderId,
+        user_id: '', // Will be filled by the API from auth context
         content: newMessage.trim()
       });
       
@@ -86,7 +87,7 @@ export const WorkOrderChat = ({ workOrderId }: WorkOrderChatProps) => {
                     </span>
                   </div>
                   <div className="bg-gray-50 rounded-lg p-3">
-                    <p className="text-sm text-gray-800">{comment.content}</p>
+                    <p className="text-sm text-gray-800">{comment.message}</p>
                   </div>
                 </div>
               </div>

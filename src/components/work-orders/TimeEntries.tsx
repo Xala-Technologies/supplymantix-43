@@ -34,6 +34,7 @@ export const TimeEntries = ({ workOrderId, onSubmit }: TimeEntriesProps) => {
     try {
       await createTimeLog.mutateAsync({
         work_order_id: workOrderId,
+        user_id: '', // Will be filled by the API from auth context
         duration_minutes: parseInt(data.duration_minutes),
         note: data.note
       });
@@ -162,7 +163,7 @@ export const TimeEntries = ({ workOrderId, onSubmit }: TimeEntriesProps) => {
                     <div className="flex items-center gap-2">
                       <User className="w-4 h-4 text-gray-500" />
                       <span className="font-medium">
-                        {entry.users?.email || 'Unknown User'}
+                        {entry.user?.email || 'Unknown User'}
                       </span>
                     </div>
                   </TableCell>

@@ -61,12 +61,7 @@ export const WorkOrderTemplatesDialog = ({ isOpen, onClose }: WorkOrderTemplates
       description: template.description || "",
       priority: template.priority,
       default_tags: template.default_tags || [],
-      checklistItems: (template.template_checklist_items || []).map((item: any, index: number) => ({
-        id: item.id,
-        title: item.title,
-        note: item.note || "",
-        order_index: index,
-      })),
+      checklistItems: [], // Template checklist items will be implemented later
     });
     setIsEditing(true);
   };
@@ -237,9 +232,7 @@ export const WorkOrderTemplatesDialog = ({ isOpen, onClose }: WorkOrderTemplates
                     <CardContent className="pt-0">
                       <div className="flex items-center gap-2 text-sm text-gray-600">
                         <Badge variant="outline">{template.priority} priority</Badge>
-                        {template.template_checklist_items?.length > 0 && (
-                          <span>{template.template_checklist_items.length} checklist items</span>
-                        )}
+                        {/* Checklist items count placeholder */}
                       </div>
                       {template.default_tags?.length > 0 && (
                         <div className="flex flex-wrap gap-1 mt-2">
