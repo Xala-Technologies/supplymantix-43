@@ -51,8 +51,30 @@ export const databaseApi = {
   },
   
   getMeters: async () => {
-    console.log('getMeters not yet implemented');
-    return [];
+    const { supabase } = await import('@/integrations/supabase/client');
+    
+    const { data: userData } = await supabase.auth.getUser();
+    if (!userData.user) throw new Error('Not authenticated');
+    
+    const { data: userTenant } = await supabase
+      .from('users')
+      .select('tenant_id')
+      .eq('id', userData.user.id)
+      .single();
+    
+    if (!userTenant?.tenant_id) throw new Error('No tenant found');
+    
+    const { data, error } = await supabase
+      .from('meters')
+      .select(`
+        *,
+        assets(id, name, location)
+      `)
+      .eq('tenant_id', userTenant.tenant_id)
+      .order('created_at', { ascending: false });
+    
+    if (error) throw error;
+    return data || [];
   },
 
   // Billing stubs
