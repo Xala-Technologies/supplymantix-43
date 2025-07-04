@@ -11,6 +11,7 @@ export const WORK_ORDER_STATUS_OPTIONS = [
 ] as const;
 
 export const PRIORITY_OPTIONS = [
+  { value: 'none', label: 'None', color: 'bg-gray-400 text-white' },
   { value: 'low', label: 'Low', color: 'bg-green-500 text-white' },
   { value: 'medium', label: 'Medium', color: 'bg-yellow-500 text-white' },
   { value: 'high', label: 'High', color: 'bg-orange-500 text-white' },
@@ -23,6 +24,22 @@ export const CATEGORY_OPTIONS = [
   { value: 'inspection', label: 'Inspection', icon: '🔍' },
   { value: 'calibration', label: 'Calibration', icon: '⚖️' },
   { value: 'emergency', label: 'Emergency', icon: '🚨' },
+] as const;
+
+export const WORK_TYPE_OPTIONS = [
+  { value: 'reactive', label: 'Reactive', description: 'Work done in response to an issue' },
+  { value: 'preventive', label: 'Preventive', description: 'Scheduled maintenance to prevent issues' },
+  { value: 'predictive', label: 'Predictive', description: 'Maintenance based on condition monitoring' },
+  { value: 'emergency', label: 'Emergency', description: 'Urgent work requiring immediate attention' },
+] as const;
+
+export const RECURRENCE_OPTIONS = [
+  { value: 'none', label: 'Does not repeat' },
+  { value: 'daily', label: 'Daily' },
+  { value: 'weekly', label: 'Weekly' },
+  { value: 'monthly', label: 'Monthly' },
+  { value: 'yearly', label: 'Yearly' },
+  { value: 'custom', label: 'Custom' },
 ] as const;
 
 export const DEFAULT_WORK_ORDER_FILTERS = {

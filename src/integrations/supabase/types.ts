@@ -2650,6 +2650,75 @@ export type Database = {
         }
         Relationships: []
       }
+      work_order_assignments: {
+        Row: {
+          assigned_at: string
+          assigned_by: string | null
+          created_at: string
+          id: string
+          role: string | null
+          tenant_id: string
+          user_id: string
+          work_order_id: string
+        }
+        Insert: {
+          assigned_at?: string
+          assigned_by?: string | null
+          created_at?: string
+          id?: string
+          role?: string | null
+          tenant_id: string
+          user_id: string
+          work_order_id: string
+        }
+        Update: {
+          assigned_at?: string
+          assigned_by?: string | null
+          created_at?: string
+          id?: string
+          role?: string | null
+          tenant_id?: string
+          user_id?: string
+          work_order_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "work_order_assignments_assigned_by_fkey"
+            columns: ["assigned_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "work_order_assignments_assigned_by_fkey"
+            columns: ["assigned_by"]
+            isOneToOne: false
+            referencedRelation: "users_with_role"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "work_order_assignments_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "work_order_assignments_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users_with_role"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "work_order_assignments_work_order_id_fkey"
+            columns: ["work_order_id"]
+            isOneToOne: false
+            referencedRelation: "work_orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       work_order_comments: {
         Row: {
           content: string
@@ -2849,6 +2918,61 @@ export type Database = {
           },
         ]
       }
+      work_order_status_history: {
+        Row: {
+          changed_at: string
+          changed_by: string | null
+          id: string
+          new_status: Database["public"]["Enums"]["work_order_status"]
+          notes: string | null
+          old_status: Database["public"]["Enums"]["work_order_status"] | null
+          tenant_id: string
+          work_order_id: string
+        }
+        Insert: {
+          changed_at?: string
+          changed_by?: string | null
+          id?: string
+          new_status: Database["public"]["Enums"]["work_order_status"]
+          notes?: string | null
+          old_status?: Database["public"]["Enums"]["work_order_status"] | null
+          tenant_id: string
+          work_order_id: string
+        }
+        Update: {
+          changed_at?: string
+          changed_by?: string | null
+          id?: string
+          new_status?: Database["public"]["Enums"]["work_order_status"]
+          notes?: string | null
+          old_status?: Database["public"]["Enums"]["work_order_status"] | null
+          tenant_id?: string
+          work_order_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "work_order_status_history_changed_by_fkey"
+            columns: ["changed_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "work_order_status_history_changed_by_fkey"
+            columns: ["changed_by"]
+            isOneToOne: false
+            referencedRelation: "users_with_role"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "work_order_status_history_work_order_id_fkey"
+            columns: ["work_order_id"]
+            isOneToOne: false
+            referencedRelation: "work_orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       work_order_templates: {
         Row: {
           created_at: string
@@ -2911,18 +3035,28 @@ export type Database = {
         Row: {
           asset_id: string | null
           assigned_to: string | null
+          attachments: Json | null
           category: string | null
           client_id: string | null
+          completed_at: string | null
           created_at: string | null
           description: string | null
           due_date: string | null
+          estimated_hours: number | null
+          estimated_minutes: number | null
           id: string
+          images: Json | null
+          is_recurring: boolean | null
           location_id: string | null
+          parent_id: string | null
           parts_used: Json | null
           priority: Database["public"]["Enums"]["priority_level"] | null
+          procedure_id: string | null
           recurrence_rules: Json | null
+          recurring_parent_id: string | null
           requester_id: string | null
           start_date: string | null
+          started_at: string | null
           status: Database["public"]["Enums"]["work_order_status"]
           tags: string[] | null
           template_id: string | null
@@ -2931,22 +3065,34 @@ export type Database = {
           title: string
           total_cost: number | null
           updated_at: string | null
+          vendor_id: string | null
+          work_type: string | null
         }
         Insert: {
           asset_id?: string | null
           assigned_to?: string | null
+          attachments?: Json | null
           category?: string | null
           client_id?: string | null
+          completed_at?: string | null
           created_at?: string | null
           description?: string | null
           due_date?: string | null
+          estimated_hours?: number | null
+          estimated_minutes?: number | null
           id?: string
+          images?: Json | null
+          is_recurring?: boolean | null
           location_id?: string | null
+          parent_id?: string | null
           parts_used?: Json | null
           priority?: Database["public"]["Enums"]["priority_level"] | null
+          procedure_id?: string | null
           recurrence_rules?: Json | null
+          recurring_parent_id?: string | null
           requester_id?: string | null
           start_date?: string | null
+          started_at?: string | null
           status?: Database["public"]["Enums"]["work_order_status"]
           tags?: string[] | null
           template_id?: string | null
@@ -2955,22 +3101,34 @@ export type Database = {
           title: string
           total_cost?: number | null
           updated_at?: string | null
+          vendor_id?: string | null
+          work_type?: string | null
         }
         Update: {
           asset_id?: string | null
           assigned_to?: string | null
+          attachments?: Json | null
           category?: string | null
           client_id?: string | null
+          completed_at?: string | null
           created_at?: string | null
           description?: string | null
           due_date?: string | null
+          estimated_hours?: number | null
+          estimated_minutes?: number | null
           id?: string
+          images?: Json | null
+          is_recurring?: boolean | null
           location_id?: string | null
+          parent_id?: string | null
           parts_used?: Json | null
           priority?: Database["public"]["Enums"]["priority_level"] | null
+          procedure_id?: string | null
           recurrence_rules?: Json | null
+          recurring_parent_id?: string | null
           requester_id?: string | null
           start_date?: string | null
+          started_at?: string | null
           status?: Database["public"]["Enums"]["work_order_status"]
           tags?: string[] | null
           template_id?: string | null
@@ -2979,6 +3137,8 @@ export type Database = {
           title?: string
           total_cost?: number | null
           updated_at?: string | null
+          vendor_id?: string | null
+          work_type?: string | null
         }
         Relationships: [
           {
@@ -3017,6 +3177,27 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "work_orders_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "work_orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "work_orders_procedure_id_fkey"
+            columns: ["procedure_id"]
+            isOneToOne: false
+            referencedRelation: "procedures"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "work_orders_recurring_parent_id_fkey"
+            columns: ["recurring_parent_id"]
+            isOneToOne: false
+            referencedRelation: "work_orders"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "work_orders_requester_id_fkey"
             columns: ["requester_id"]
             isOneToOne: false
@@ -3042,6 +3223,13 @@ export type Database = {
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "work_orders_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendors"
             referencedColumns: ["id"]
           },
         ]
@@ -3173,6 +3361,17 @@ export type Database = {
       get_user_tenant_id: {
         Args: Record<PropertyKey, never>
         Returns: string
+      }
+      get_work_order_with_relations: {
+        Args: { wo_id: string }
+        Returns: {
+          work_order: Json
+          assignments: Json
+          procedures: Json
+          parts_used: Json
+          status_history: Json
+          comments: Json
+        }[]
       }
       global_search: {
         Args: { search_query: string; entity_types?: string[] }
