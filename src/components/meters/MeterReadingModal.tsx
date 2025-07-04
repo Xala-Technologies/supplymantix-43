@@ -37,7 +37,6 @@ export const MeterReadingModal = ({ open, onClose, meter }: MeterReadingModalPro
         value: Number(value),
         recorded_at: new Date().toISOString(),
         notes: notes.trim() || undefined,
-        attachments: [], // For now, we'll handle file uploads later
       });
 
       // Reset form and close
