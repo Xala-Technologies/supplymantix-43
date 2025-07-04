@@ -23,6 +23,7 @@ import CreatePurchaseOrder from "@/pages/CreatePurchaseOrder";
 import PurchaseOrderDetail from "@/pages/PurchaseOrderDetail";
 import Reporting from "@/pages/Reporting";
 import Meters from "@/pages/Meters";
+import MetersEnhanced from "@/pages/MetersEnhanced";
 import TranslationManagement from "@/pages/TranslationManagement";
 import InviteAccept from "@/pages/InviteAccept";
 import Clients from "@/pages/Clients";
@@ -137,6 +138,11 @@ function App() {
                 </ProtectedRoute>
               } />
               <Route path="/dashboard/meters" element={
+                <ProtectedRoute>
+                  <MetersEnhanced />
+                </ProtectedRoute>
+              } />
+              <Route path="/dashboard/meters-classic" element={
                 <ProtectedRoute>
                   <Meters />
                 </ProtectedRoute>

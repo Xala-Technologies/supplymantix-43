@@ -1062,8 +1062,10 @@ export type Database = {
       }
       meter_triggers: {
         Row: {
-          action: string
+          action_config: Json | null
+          action_type: string
           created_at: string
+          description: string | null
           id: string
           is_active: boolean
           last_fired_at: string | null
@@ -1075,8 +1077,10 @@ export type Database = {
           updated_at: string
         }
         Insert: {
-          action?: string
+          action_config?: Json | null
+          action_type?: string
           created_at?: string
+          description?: string | null
           id?: string
           is_active?: boolean
           last_fired_at?: string | null
@@ -1088,8 +1092,10 @@ export type Database = {
           updated_at?: string
         }
         Update: {
-          action?: string
+          action_config?: Json | null
+          action_type?: string
           created_at?: string
+          description?: string | null
           id?: string
           is_active?: boolean
           last_fired_at?: string | null

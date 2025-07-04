@@ -50,7 +50,7 @@ export const MeterTriggersManager = ({ meterId }: MeterTriggersManagerProps) => 
     name: "",
     trigger_condition: "above",
     trigger_value: "",
-    action: "create_work_order",
+    action_type: "create_work_order",
     throttle_hours: "24",
     is_active: true,
   });
@@ -60,7 +60,7 @@ export const MeterTriggersManager = ({ meterId }: MeterTriggersManagerProps) => 
       name: "",
       trigger_condition: "above",
       trigger_value: "",
-      action: "create_work_order",
+      action_type: "create_work_order",
       throttle_hours: "24",
       is_active: true,
     });
@@ -77,20 +77,21 @@ export const MeterTriggersManager = ({ meterId }: MeterTriggersManagerProps) => 
           id: editingTrigger.id,
           updates: {
             name: formData.name,
-            trigger_condition: formData.trigger_condition,
+            trigger_condition: formData.trigger_condition as 'above' | 'below' | 'equals',
             trigger_value: Number(formData.trigger_value),
-            action: formData.action,
+            action_type: formData.action_type as 'create_work_order' | 'send_notification' | 'change_asset_status',
             throttle_hours: Number(formData.throttle_hours),
-            is_active: formData.is_active,
           },
         });
       } else {
         await createTrigger.mutateAsync({
           meter_id: meterId,
           name: formData.name,
-          trigger_condition: formData.trigger_condition,
+          description: undefined,
+          trigger_condition: formData.trigger_condition as 'above' | 'below' | 'equals',
           trigger_value: Number(formData.trigger_value),
-          action: formData.action,
+          action_type: formData.action_type as 'create_work_order' | 'send_notification' | 'change_asset_status',
+          action_config: {},
           throttle_hours: Number(formData.throttle_hours),
           is_active: formData.is_active,
         });
@@ -106,7 +107,7 @@ export const MeterTriggersManager = ({ meterId }: MeterTriggersManagerProps) => 
       name: trigger.name,
       trigger_condition: trigger.trigger_condition,
       trigger_value: trigger.trigger_value.toString(),
-      action: trigger.action,
+      action_type: trigger.action_type,
       throttle_hours: trigger.throttle_hours.toString(),
       is_active: trigger.is_active,
     });
@@ -223,8 +224,8 @@ export const MeterTriggersManager = ({ meterId }: MeterTriggersManagerProps) => 
               <div className="space-y-2">
                 <Label htmlFor="action">Action</Label>
                 <Select 
-                  value={formData.action} 
-                  onValueChange={(value) => setFormData({ ...formData, action: value })}
+                  value={formData.action_type} 
+                  onValueChange={(value) => setFormData({ ...formData, action_type: value })}
                 >
                   <SelectTrigger>
                     <SelectValue />
@@ -275,7 +276,7 @@ export const MeterTriggersManager = ({ meterId }: MeterTriggersManagerProps) => 
                       <h4 className="font-semibold">{trigger.name}</h4>
                       <p className="text-sm text-muted-foreground">
                         {getConditionDisplay(trigger.trigger_condition, Number(trigger.trigger_value))} • 
-                        {trigger.action.replace('_', ' ')} • 
+                        {trigger.action_type.replace('_', ' ')} • 
                         Throttle: {trigger.throttle_hours}h
                       </p>
                       {trigger.last_fired_at && (

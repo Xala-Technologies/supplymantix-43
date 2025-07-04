@@ -127,7 +127,11 @@ export const useMeterTriggers = (meterId: string) => {
         .order("created_at", { ascending: false });
 
       if (error) throw error;
-      return (data || []) as MeterTrigger[];
+      return (data || []).map(item => ({
+        ...item,
+        trigger_condition: item.trigger_condition as 'above' | 'below' | 'equals',
+        action_type: item.action_type as 'create_work_order' | 'send_notification' | 'change_asset_status'
+      }));
     },
     enabled: !!meterId,
   });
