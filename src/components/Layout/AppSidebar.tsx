@@ -12,20 +12,20 @@ export function AppSidebar() {
 
   return (
     <Sidebar className={`
-      border-r-0 bg-white shadow-lg relative z-40 
+      border-r border-sidebar-border bg-sidebar shadow-sm relative z-40 
       transition-all duration-300 ease-in-out
       ${isCollapsed ? 'w-16' : 'w-72'}
     `}>
       <AppSidebarHeader />
       
       <ScrollArea className="flex-1 mt-16">
-        <SidebarContent className="flex-1 p-0">
+        <SidebarContent className="flex-1 p-4">
           <SidebarNavigation />
         </SidebarContent>
       </ScrollArea>
       
       <SidebarFooter className={`
-        transition-all duration-300 ease-in-out border-t border-gray-100 bg-white
+        transition-all duration-300 ease-in-out border-t border-sidebar-border bg-sidebar
         ${isCollapsed ? 'px-2' : 'px-4'}
       `}>
         <AppSidebarFooter />

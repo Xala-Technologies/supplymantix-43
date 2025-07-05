@@ -139,7 +139,7 @@ export const InventoryDashboard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background">
       <InventoryHeader
         onCreateItem={handleCreateItem}
         searchQuery={search}
@@ -158,7 +158,7 @@ export const InventoryDashboard = () => {
         onViewModeChange={setViewMode}
       />
       
-      <div className="p-6">
+      <div className="space-y-6">
         <InventoryStats
           totalItems={totalItems}
           lowStockItems={lowStockItems}
