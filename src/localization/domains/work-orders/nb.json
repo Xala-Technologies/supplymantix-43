@@ -1,0 +1,24 @@
+{
+  "title": "Arbeidsordrer",
+  "create": "Opprett arbeidsordre",
+  "status": {
+    "open": "Åpen",
+    "in_progress": "Pågår",
+    "completed": "Fullført",
+    "cancelled": "Avbrutt"
+  },
+  "priority": {
+    "low": "Lav",
+    "medium": "Middels", 
+    "high": "Høy",
+    "critical": "Kritisk"
+  },
+  "fields": {
+    "title": "Tittel",
+    "description": "Beskrivelse",
+    "assigned_to": "Tildelt til",
+    "due_date": "Forfallsdato",
+    "priority": "Prioritet",
+    "status": "Status"
+  }
+}

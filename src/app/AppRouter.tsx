@@ -2,17 +2,17 @@
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 
-import { ProtectedRoute } from '@features/auth/components/ProtectedRoute';
-import { DashboardLayout } from '@layouts/DashboardLayout';
+import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
+import { DashboardLayout } from '../layouts/DashboardLayout';
 
 // Pages - only composition, no logic
-import { DashboardPage } from '@pages/DashboardPage';
-import { WorkOrdersPage } from '@pages/WorkOrdersPage';
-import { AssetsPage } from '@pages/AssetsPage';
-import { InventoryPage } from '@pages/InventoryPage';
-import { MaintenancePage } from '@pages/MaintenancePage';
-import { LoginPage } from '@pages/LoginPage';
-import { NotFoundPage } from '@pages/NotFoundPage';
+import { DashboardPage } from '../pages/DashboardPage';
+import { WorkOrdersPage } from '../pages/WorkOrdersPage';
+import { AssetsPage } from '../pages/AssetsPage';
+import { InventoryPage } from '../pages/InventoryPage';
+import { MaintenancePage } from '../pages/MaintenancePage';
+import { LoginPage } from '../pages/LoginPage';
+import { NotFoundPage } from '../pages/NotFoundPage';
 
 export const AppRouter: React.FC = () => {
   return (

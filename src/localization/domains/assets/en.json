@@ -1,0 +1,17 @@
+{
+  "title": "Assets",
+  "create": "Create asset",
+  "fields": {
+    "name": "Name",
+    "description": "Description", 
+    "location": "Location",
+    "status": "Status",
+    "serial_number": "Serial number",
+    "purchase_date": "Purchase date"
+  },
+  "status": {
+    "active": "Active",
+    "maintenance": "Maintenance",
+    "retired": "Retired"
+  }
+}

@@ -4,11 +4,11 @@ import { BrowserRouter } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from 'sonner';
 
-import { AppProviders } from '@providers/AppProviders';
+import { AppProviders } from '../providers/AppProviders';
 import { AppRouter } from './AppRouter';
-import { ErrorBoundary } from '@components/ErrorBoundary';
-import { LocalizationProvider } from '@localization/LocalizationProvider';
-import { LicenseProvider } from '@services/licensing/LicenseProvider';
+import { ErrorBoundary } from '@/components/ErrorBoundary';
+import { LocalizationProvider } from '../localization/LocalizationProvider';
+import { LicenseProvider } from '../services/licensing/LicenseProvider';
 
 // Initialize React Query client
 const queryClient = new QueryClient({

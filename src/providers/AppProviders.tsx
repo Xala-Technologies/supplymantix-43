@@ -1,8 +1,8 @@
 // Centralized providers wrapper
 import React, { useEffect } from 'react';
 import { ThemeProvider } from 'next-themes';
-import { AuthProvider } from '@features/auth/providers/AuthProvider';
-import { useAuthStore } from '@state/authStore';
+import { AuthProvider } from '@/contexts/AuthContext';
+import { useAuthStore } from '../state/authStore';
 
 interface AppProvidersProps {
   children: React.ReactNode;

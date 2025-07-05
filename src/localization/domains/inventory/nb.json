@@ -1,0 +1,14 @@
+{
+  "title": "Lager",
+  "create": "Opprett lagerartikkel",
+  "fields": {
+    "name": "Navn",
+    "description": "Beskrivelse",
+    "quantity": "Antall",
+    "unit": "Enhet",
+    "price": "Pris",
+    "location": "Lokasjon"
+  },
+  "low_stock": "Lavt lager",
+  "out_of_stock": "Tomt på lager"
+}

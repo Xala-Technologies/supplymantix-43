@@ -1,10 +1,10 @@
 // License provider with tenant-aware feature gating
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { useLicenseAware } from '@hooks/useLicenseAware';
-import type { TenantLicense, FeatureAccess } from '@types/license';
-import { LoadingSpinner } from '@components/LoadingSpinner';
-import { Card } from '@components/ui/card';
-import { Button } from '@components/ui/button';
+import { useLicenseAware } from '@/hooks/useLicenseAware';
+import type { TenantLicense, FeatureAccess } from '../../types/license';
+import { LoadingSpinner } from '@/components/LoadingSpinner';
+import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { AlertTriangle } from 'lucide-react';
 
 interface LicenseContextType {

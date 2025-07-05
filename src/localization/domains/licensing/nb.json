@@ -1,0 +1,11 @@
+{
+  "feature_not_available": "Funksjon ikke tilgjengelig",
+  "feature_not_in_plan": "Denne funksjonen er ikke inkludert i din nåværende plan",
+  "required_plan": "Krever {{plan}} plan",
+  "upgrade_plan": "Oppgrader plan",
+  "usage_limit_reached": "Bruksgrense nådd",
+  "license_expired": "Lisensen har utløpt",
+  "renew_license": "Forny lisens",
+  "trial_expires_in": "Prøveperioden utløper om {{days}} dager ({{date}})",
+  "upgrade_now": "Oppgrader nå"
+}

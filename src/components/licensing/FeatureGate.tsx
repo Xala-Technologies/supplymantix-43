@@ -1,10 +1,10 @@
 // Enhanced feature gate with licensing enforcement
 import React from 'react';
-import { useLicense } from '@services/licensing/LicenseProvider';
-import { useDomainTranslation } from '@localization/LocalizationProvider';
-import { Card } from '@components/ui/card';
-import { Button } from '@components/ui/button';
-import { Alert, AlertDescription } from '@components/ui/alert';
+import { useLicense } from '../../services/licensing/LicenseProvider';
+import { useDomainTranslation } from '../../localization/LocalizationProvider';
+import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Lock, ArrowUp, AlertTriangle } from 'lucide-react';
 
 interface FeatureGateProps {

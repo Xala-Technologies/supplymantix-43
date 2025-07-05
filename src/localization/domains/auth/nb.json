@@ -1,0 +1,14 @@
+{
+  "login": "Logg inn",
+  "logout": "Logg ut",
+  "signup": "Registrer deg",
+  "email": "E-post",
+  "password": "Passord",
+  "confirm_password": "Bekreft passord",
+  "forgot_password": "Glemt passord?",
+  "remember_me": "Husk meg",
+  "login_success": "Innlogging vellykket",
+  "login_error": "Innloggingsfeil",
+  "signup_success": "Registrering vellykket",
+  "signup_error": "Registreringsfeil"
+}

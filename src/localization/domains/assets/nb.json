@@ -1,0 +1,17 @@
+{
+  "title": "Aktiva",
+  "create": "Opprett aktiva",
+  "fields": {
+    "name": "Navn",
+    "description": "Beskrivelse",
+    "location": "Lokasjon",
+    "status": "Status",
+    "serial_number": "Serienummer",
+    "purchase_date": "Kjøpsdato"
+  },
+  "status": {
+    "active": "Aktiv",
+    "maintenance": "Vedlikehold",
+    "retired": "Utrangert"
+  }
+}

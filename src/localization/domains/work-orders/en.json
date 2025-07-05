@@ -1,0 +1,24 @@
+{
+  "title": "Work Orders",
+  "create": "Create work order",
+  "status": {
+    "open": "Open",
+    "in_progress": "In Progress",
+    "completed": "Completed",
+    "cancelled": "Cancelled"
+  },
+  "priority": {
+    "low": "Low",
+    "medium": "Medium",
+    "high": "High",
+    "critical": "Critical"
+  },
+  "fields": {
+    "title": "Title",
+    "description": "Description",
+    "assigned_to": "Assigned to",
+    "due_date": "Due date",
+    "priority": "Priority",
+    "status": "Status"
+  }
+}

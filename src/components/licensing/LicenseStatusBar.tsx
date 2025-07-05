@@ -1,9 +1,9 @@
 // License status notification bar
 import React from 'react';
-import { useLicense } from '@services/licensing/LicenseProvider';
-import { useDomainTranslation } from '@localization/LocalizationProvider';
-import { Alert, AlertDescription } from '@components/ui/alert';
-import { Button } from '@components/ui/button';
+import { useLicense } from '../../services/licensing/LicenseProvider';
+import { useDomainTranslation } from '../../localization/LocalizationProvider';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Button } from '@/components/ui/button';
 import { AlertTriangle, Clock, ArrowRight } from 'lucide-react';
 
 export const LicenseStatusBar: React.FC = () => {
