@@ -1,0 +1,92 @@
+{
+  "app": {
+    "name": "XALA Asset Management",
+    "tagline": "Norsk løsning for aktivaforvaltning"
+  },
+  "navigation": {
+    "dashboard": "Dashbord",
+    "work_orders": "Arbeidsordrer",
+    "assets": "Aktiva",
+    "inventory": "Lager",
+    "maintenance": "Vedlikehold",
+    "reports": "Rapporter",
+    "settings": "Innstillinger",
+    "profile": "Profil",
+    "logout": "Logg ut"
+  },
+  "actions": {
+    "save": "Lagre",
+    "cancel": "Avbryt",
+    "delete": "Slett",
+    "edit": "Rediger",
+    "create": "Opprett",
+    "update": "Oppdater",
+    "search": "Søk",
+    "filter": "Filtrer",
+    "export": "Eksporter",
+    "import": "Importer",
+    "refresh": "Oppdater",
+    "close": "Lukk",
+    "confirm": "Bekreft",
+    "back": "Tilbake",
+    "next": "Neste",
+    "submit": "Send inn"
+  },
+  "status": {
+    "active": "Aktiv",
+    "inactive": "Inaktiv",
+    "pending": "Venter",
+    "completed": "Fullført",
+    "cancelled": "Avbrutt",
+    "approved": "Godkjent",
+    "rejected": "Avvist",
+    "draft": "Utkast"
+  },
+  "common": {
+    "loading": "Laster...",
+    "error": "Feil",
+    "success": "Suksess",
+    "warning": "Advarsel",
+    "info": "Informasjon",
+    "no_data": "Ingen data tilgjengelig",
+    "required": "Påkrevd",
+    "optional": "Valgfri",
+    "total": "Totalt",
+    "count": "Antall",
+    "date": "Dato",
+    "time": "Tid",
+    "name": "Navn",
+    "description": "Beskrivelse",
+    "category": "Kategori",
+    "priority": "Prioritet",
+    "assigned_to": "Tildelt til",
+    "created_by": "Opprettet av",
+    "updated_by": "Oppdatert av",
+    "due_date": "Forfallsdato",
+    "start_date": "Startdato",
+    "end_date": "Sluttdato"
+  },
+  "validation": {
+    "required_field": "Dette feltet er påkrevd",
+    "invalid_email": "Ugyldig e-postadresse",
+    "invalid_phone": "Ugyldig telefonnummer",
+    "invalid_org_number": "Ugyldig organisasjonsnummer",
+    "invalid_postal_code": "Ugyldig postnummer",
+    "password_too_short": "Passordet må være minst 8 tegn",
+    "passwords_dont_match": "Passordene stemmer ikke overens"
+  },
+  "compliance": {
+    "nsm_classification": {
+      "ÅPEN": "ÅPEN",
+      "BEGRENSET": "BEGRENSET", 
+      "KONFIDENSIELT": "KONFIDENSIELT",
+      "HEMMELIG": "HEMMELIG"
+    },
+    "gdpr": {
+      "consent_required": "Samtykke påkrevd",
+      "data_processing": "Databehandling",
+      "retention_period": "Lagringsperiode",
+      "right_to_be_forgotten": "Rett til å bli glemt"
+    }
+  }
+}

@@ -1,0 +1,92 @@
+{
+  "app": {
+    "name": "XALA Asset Management",
+    "tagline": "Norwegian solution for asset management"
+  },
+  "navigation": {
+    "dashboard": "Dashboard",
+    "work_orders": "Work Orders",
+    "assets": "Assets",
+    "inventory": "Inventory",
+    "maintenance": "Maintenance",
+    "reports": "Reports",
+    "settings": "Settings",
+    "profile": "Profile",
+    "logout": "Logout"
+  },
+  "actions": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "create": "Create",
+    "update": "Update",
+    "search": "Search",
+    "filter": "Filter",
+    "export": "Export",
+    "import": "Import",
+    "refresh": "Refresh",
+    "close": "Close",
+    "confirm": "Confirm",
+    "back": "Back",
+    "next": "Next",
+    "submit": "Submit"
+  },
+  "status": {
+    "active": "Active",
+    "inactive": "Inactive",
+    "pending": "Pending",
+    "completed": "Completed",
+    "cancelled": "Cancelled",
+    "approved": "Approved",
+    "rejected": "Rejected",
+    "draft": "Draft"
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "warning": "Warning",
+    "info": "Information",
+    "no_data": "No data available",
+    "required": "Required",
+    "optional": "Optional",
+    "total": "Total",
+    "count": "Count",
+    "date": "Date",
+    "time": "Time",
+    "name": "Name",
+    "description": "Description",
+    "category": "Category",
+    "priority": "Priority",
+    "assigned_to": "Assigned to",
+    "created_by": "Created by",
+    "updated_by": "Updated by",
+    "due_date": "Due date",
+    "start_date": "Start date",
+    "end_date": "End date"
+  },
+  "validation": {
+    "required_field": "This field is required",
+    "invalid_email": "Invalid email address",
+    "invalid_phone": "Invalid phone number",
+    "invalid_org_number": "Invalid organization number",
+    "invalid_postal_code": "Invalid postal code",
+    "password_too_short": "Password must be at least 8 characters",
+    "passwords_dont_match": "Passwords do not match"
+  },
+  "compliance": {
+    "nsm_classification": {
+      "ÅPEN": "OPEN",
+      "BEGRENSET": "RESTRICTED",
+      "KONFIDENSIELT": "CONFIDENTIAL",
+      "HEMMELIG": "SECRET"
+    },
+    "gdpr": {
+      "consent_required": "Consent required",
+      "data_processing": "Data processing",
+      "retention_period": "Retention period",
+      "right_to_be_forgotten": "Right to be forgotten"
+    }
+  }
+}
