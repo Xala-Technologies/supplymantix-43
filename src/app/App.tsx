@@ -33,12 +33,12 @@ export const App: React.FC = () => {
       <QueryClientProvider client={queryClient}>
         <BrowserRouter>
           <LocalizationProvider>
-            <LicenseProvider>
-              <AppProviders>
+            <AppProviders>
+              <LicenseProvider>
                 <AppRouter />
                 <Toaster position="top-right" />
-              </AppProviders>
-            </LicenseProvider>
+              </LicenseProvider>
+            </AppProviders>
           </LocalizationProvider>
         </BrowserRouter>
       </QueryClientProvider>
