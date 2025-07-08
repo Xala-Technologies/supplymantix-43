@@ -11,6 +11,8 @@ import { WorkOrderChat } from "./WorkOrderChat";
 import { StatusHistoryTimeline } from "./StatusHistoryTimeline";
 import { TimeTrackingCard } from "./TimeTrackingCard";
 import { WorkOrderStatusFlow } from "./WorkOrderStatusFlow";
+import { EnhancedChecklistSimple } from "./EnhancedChecklistSimple";
+import { PartsUsageCard } from "./PartsUsageCard";
 import { WorkOrder } from '@/types/workOrder';
 
 interface WorkOrdersDetailPageProps {
@@ -59,6 +61,7 @@ export const WorkOrdersDetailPage = ({
             {/* Main Content - Work Order Details */}
             <div className="lg:col-span-2 space-y-6">
               <WorkOrderDetailCard workOrder={selectedWorkOrderData} />
+              <EnhancedChecklistSimple workOrderId={selectedWorkOrderData.id} />
               <StatusHistoryTimeline workOrderId={selectedWorkOrderData.id} />
             </div>
 
@@ -66,6 +69,7 @@ export const WorkOrdersDetailPage = ({
             <div className="lg:col-span-1 space-y-6">
               <WorkOrderStatusFlow workOrder={selectedWorkOrderData} />
               <TimeTrackingCard workOrderId={selectedWorkOrderData.id} />
+              <PartsUsageCard workOrderId={selectedWorkOrderData.id} />
               <WorkOrderChat workOrderId={selectedWorkOrderData.id} />
             </div>
           </div>
