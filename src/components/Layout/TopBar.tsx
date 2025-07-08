@@ -2,6 +2,8 @@
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
 import { Bell, Search, Settings, User, Menu, LogOut } from "lucide-react";
+import { LanguageSelector } from "@/components/LanguageSelector";
+import { NotificationBell } from "@/components/notifications/NotificationBell";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -67,12 +69,10 @@ export const TopBar = () => {
         {/* Right side */}
         <div className="flex items-center gap-3">
           {/* Notifications */}
-          <Button variant="ghost" size="sm" className="relative h-9 w-9 rounded-lg">
-            <Bell className="w-4 h-4" />
-            <Badge className="absolute -top-1 -right-1 h-4 w-4 p-0 bg-error text-xs">
-              3
-            </Badge>
-          </Button>
+          <NotificationBell />
+          
+          {/* Language Selector */}
+          <LanguageSelector />
 
           {/* Settings */}
           <Button variant="ghost" size="sm" className="h-9 w-9 rounded-lg">

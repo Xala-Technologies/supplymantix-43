@@ -3486,6 +3486,16 @@ export type Database = {
         Args: { asset_id_param: string; work_order_id_param: string }
         Returns: undefined
       }
+      create_work_order_notification: {
+        Args: {
+          target_user_id: string
+          notification_type: string
+          notification_title: string
+          notification_message: string
+          notification_data?: Json
+        }
+        Returns: string
+      }
       current_user_is_super_admin: {
         Args: Record<PropertyKey, never>
         Returns: boolean

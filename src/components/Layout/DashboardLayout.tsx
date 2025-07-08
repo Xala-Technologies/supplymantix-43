@@ -3,6 +3,8 @@ import React from "react";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/Layout/AppSidebar";
 import { TopBar } from "@/components/Layout/TopBar";
+import { useAuth } from "@/contexts/AuthContext";
+import { OverdueNotificationService } from "@/components/notifications/OverdueNotificationService";
 import { Layout } from "./Layout";
 
 interface DashboardLayoutProps {
@@ -12,6 +14,7 @@ interface DashboardLayoutProps {
 export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   return (
     <SidebarProvider>
+      <OverdueNotificationService />
       <Layout className="bg-background">
         <div className="flex w-full min-h-screen">
           <AppSidebar />
