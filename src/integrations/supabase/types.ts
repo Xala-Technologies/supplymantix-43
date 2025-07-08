@@ -3068,6 +3068,53 @@ export type Database = {
           },
         ]
       }
+      work_order_recurrences: {
+        Row: {
+          created_at: string
+          id: string
+          is_active: boolean | null
+          last_generated_at: string | null
+          next_due_at: string
+          recurrence_pattern: Json
+          tenant_id: string
+          total_generated: number | null
+          updated_at: string
+          work_order_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          last_generated_at?: string | null
+          next_due_at: string
+          recurrence_pattern: Json
+          tenant_id: string
+          total_generated?: number | null
+          updated_at?: string
+          work_order_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          last_generated_at?: string | null
+          next_due_at?: string
+          recurrence_pattern?: Json
+          tenant_id?: string
+          total_generated?: number | null
+          updated_at?: string
+          work_order_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "work_order_recurrences_work_order_id_fkey"
+            columns: ["work_order_id"]
+            isOneToOne: false
+            referencedRelation: "work_orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       work_order_status_history: {
         Row: {
           changed_at: string
@@ -3198,10 +3245,15 @@ export type Database = {
           images: Json | null
           is_recurring: boolean | null
           location_id: string | null
+          next_occurrence: string | null
           parent_id: string | null
+          parent_recurrence_id: string | null
           parts_used: Json | null
           priority: Database["public"]["Enums"]["priority_level"] | null
           procedure_id: string | null
+          recurrence_end_date: string | null
+          recurrence_interval: number | null
+          recurrence_rule: string | null
           recurrence_rules: Json | null
           recurring_parent_id: string | null
           requester_id: string | null
@@ -3234,10 +3286,15 @@ export type Database = {
           images?: Json | null
           is_recurring?: boolean | null
           location_id?: string | null
+          next_occurrence?: string | null
           parent_id?: string | null
+          parent_recurrence_id?: string | null
           parts_used?: Json | null
           priority?: Database["public"]["Enums"]["priority_level"] | null
           procedure_id?: string | null
+          recurrence_end_date?: string | null
+          recurrence_interval?: number | null
+          recurrence_rule?: string | null
           recurrence_rules?: Json | null
           recurring_parent_id?: string | null
           requester_id?: string | null
@@ -3270,10 +3327,15 @@ export type Database = {
           images?: Json | null
           is_recurring?: boolean | null
           location_id?: string | null
+          next_occurrence?: string | null
           parent_id?: string | null
+          parent_recurrence_id?: string | null
           parts_used?: Json | null
           priority?: Database["public"]["Enums"]["priority_level"] | null
           procedure_id?: string | null
+          recurrence_end_date?: string | null
+          recurrence_interval?: number | null
+          recurrence_rule?: string | null
           recurrence_rules?: Json | null
           recurring_parent_id?: string | null
           requester_id?: string | null
@@ -3329,6 +3391,13 @@ export type Database = {
           {
             foreignKeyName: "work_orders_parent_id_fkey"
             columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "work_orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "work_orders_parent_recurrence_id_fkey"
+            columns: ["parent_recurrence_id"]
             isOneToOne: false
             referencedRelation: "work_orders"
             referencedColumns: ["id"]
@@ -3437,6 +3506,10 @@ export type Database = {
       enum_values: {
         Args: { enum_name: string }
         Returns: string[]
+      }
+      generate_recurring_work_order: {
+        Args: { recurrence_id: string }
+        Returns: string
       }
       get_asset_documents: {
         Args: { asset_id_param: string }

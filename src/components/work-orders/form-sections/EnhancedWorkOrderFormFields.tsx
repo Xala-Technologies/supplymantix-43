@@ -17,6 +17,8 @@ import { ImageUploadSection } from "./ImageUploadSection";
 import { FileUploadSection } from "../FileUploadSection";
 import { ProcedureCard } from "./ProcedureCard";
 import { ProcedureSelectionDialogEnhanced } from "./ProcedureSelectionDialogEnhanced";
+import { RecurrenceForm } from "../RecurrenceForm";
+import { useWorkOrderRecurrence, RecurrencePattern } from "@/hooks/useWorkOrderRecurrence";
 import { cn } from "@/lib/utils";
 
 import { SearchableCombobox } from "./SearchableCombobox";
@@ -87,6 +89,8 @@ export const EnhancedWorkOrderFormFields = ({
   const [partsSearch, setPartsSearch] = useState("");
   const [categoriesSearch, setCategoriesSearch] = useState("");
   const [vendorsSearch, setVendorsSearch] = useState("");
+  const [recurrencePattern, setRecurrencePattern] = useState<RecurrencePattern>({ rule: 'none', interval: 1 });
+  const [showRecurrence, setShowRecurrence] = useState(false);
 
   // Mock procedure data based on the reference images
   const mockProcedures = [
@@ -457,6 +461,37 @@ export const EnhancedWorkOrderFormFields = ({
       </div>
 
       <PriorityField form={form} />
+
+      {/* Recurrence Section */}
+      <div className="space-y-3">
+        {!showRecurrence ? (
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => setShowRecurrence(true)}
+            className="w-full justify-start text-blue-600 hover:text-blue-700 hover:bg-blue-50 border-dashed border-blue-200"
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            Add Recurrence Schedule
+          </Button>
+        ) : (
+          <RecurrenceForm
+            initialPattern={recurrencePattern}
+            onPatternChange={(pattern) => {
+              setRecurrencePattern(pattern);
+              form.setValue('recurrence', pattern.rule);
+              form.setValue('recurrenceInterval', pattern.interval);
+              form.setValue('recurrenceEndDate', pattern.endDate);
+            }}
+            onRemove={() => {
+              setShowRecurrence(false);
+              setRecurrencePattern({ rule: 'none', interval: 1 });
+              form.setValue('recurrence', 'none');
+            }}
+            showRemove
+          />
+        )}
+      </div>
 
       {/* Enhanced File Upload Section */}
       <div className="space-y-3">

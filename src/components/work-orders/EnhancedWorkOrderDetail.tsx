@@ -25,6 +25,7 @@ import { TimeEntries } from "./TimeEntries";
 import { CostEntries } from "./CostEntries";
 import { WorkOrderChat } from "./WorkOrderChat";
 import { FileUploadSection } from "./FileUploadSection";
+import { RecurrenceManager } from "./RecurrenceManager";
 import { getAssetName, getLocationName } from "@/utils/assetUtils";
 import { useWorkOrderStatusUpdate } from "@/hooks/useWorkOrdersIntegration";
 import { useWorkOrderAttachments } from "@/hooks/useWorkOrderAttachments";
@@ -147,7 +148,7 @@ export const EnhancedWorkOrderDetail = ({ workOrder, onEdit }: EnhancedWorkOrder
       {/* Tabs Navigation */}
       <div className="p-6">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-7 mb-6">
+          <TabsList className="grid w-full grid-cols-8 mb-6">
             <TabsTrigger value="overview" className="gap-2">
               <FileText className="w-4 h-4" />
               Overview
@@ -175,6 +176,10 @@ export const EnhancedWorkOrderDetail = ({ workOrder, onEdit }: EnhancedWorkOrder
             <TabsTrigger value="chat" className="gap-2">
               <MessageSquare className="w-4 h-4" />
               Chat
+            </TabsTrigger>
+            <TabsTrigger value="recurrence" className="gap-2">
+              <Clock className="w-4 h-4" />
+              Schedule
             </TabsTrigger>
           </TabsList>
 
@@ -277,6 +282,16 @@ export const EnhancedWorkOrderDetail = ({ workOrder, onEdit }: EnhancedWorkOrder
 
           <TabsContent value="chat">
             <WorkOrderChat workOrderId={workOrder.id} />
+          </TabsContent>
+
+          <TabsContent value="recurrence">
+            <RecurrenceManager 
+              workOrderId={workOrder.id}
+              onEditRecurrence={(recurrence) => {
+                console.log('Edit recurrence:', recurrence);
+                // TODO: Implement edit functionality
+              }}
+            />
           </TabsContent>
         </Tabs>
       </div>
