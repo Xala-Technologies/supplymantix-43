@@ -4,10 +4,8 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Clock, Users, MapPin, AlertCircle, Calendar, Tag } from 'lucide-react';
 import { WorkOrder } from '@/types/workOrder';
-import { EnhancedChecklist } from './EnhancedChecklist';
-import { WorkOrderTimeTracking } from './WorkOrderTimeTracking';
-import { WorkOrderProcedureSection } from './WorkOrderProcedureSection';
-import { TimeAndCostTracking } from './TimeAndCostTracking';
+import { SubWorkOrdersTable } from './SubWorkOrdersTable';
+import { WorkOrderAttachmentsDisplay } from './WorkOrderAttachmentsDisplay';
 import { getAssetName, getLocationName } from '@/utils/assetUtils';
 
 interface WorkOrderDetailCardProps {
@@ -47,7 +45,12 @@ export const WorkOrderDetailCard = ({ workOrder }: WorkOrderDetailCardProps) => 
         <CardHeader>
           <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
             <div className="flex-1">
-              <CardTitle className="text-xl mb-2">{workOrder.title}</CardTitle>
+              <div className="flex items-center gap-4 mb-2">
+                <CardTitle className="text-xl">{workOrder.title}</CardTitle>
+                <Badge className={`border ${getStatusColor(workOrder.status)}`}>
+                  {workOrder.status.replace('_', ' ')}
+                </Badge>
+              </div>
               <div className="flex flex-wrap items-center gap-3 text-sm text-gray-600">
                 <span>#{workOrder.id.slice(-4)}</span>
                 <span>•</span>
@@ -61,9 +64,6 @@ export const WorkOrderDetailCard = ({ workOrder }: WorkOrderDetailCardProps) => 
               </div>
             </div>
             <div className="flex flex-wrap gap-2">
-              <Badge className={`border ${getStatusColor(workOrder.status)}`}>
-                {workOrder.status.replace('_', ' ')}
-              </Badge>
               <Badge className={`border ${getPriorityColor(workOrder.priority)}`}>
                 {workOrder.priority} priority
               </Badge>
@@ -78,51 +78,67 @@ export const WorkOrderDetailCard = ({ workOrder }: WorkOrderDetailCardProps) => 
         </CardHeader>
         
         <CardContent>
-          {workOrder.description && (
-            <p className="text-gray-700 mb-4">{workOrder.description}</p>
-          )}
-          
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {/* Main Info Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
             {workOrder.due_date && (
-              <div className="flex items-center gap-2 text-sm">
-                <Calendar className="w-4 h-4 text-gray-400" />
-                <div>
-                  <div className="font-medium">Due Date</div>
-                  <div className={isOverdue ? "text-red-600" : "text-gray-600"}>
-                    {new Date(workOrder.due_date).toLocaleDateString()}
-                  </div>
+              <div>
+                <div className="text-sm font-medium text-gray-500 mb-1">Due Date</div>
+                <div className={`flex items-center gap-2 text-sm ${isOverdue ? "text-red-600" : "text-gray-900"}`}>
+                  <Calendar className="w-4 h-4" />
+                  <span>{new Date(workOrder.due_date).toLocaleDateString()}</span>
                 </div>
               </div>
             )}
             
-            <div className="flex items-center gap-2 text-sm">
-              <Users className="w-4 h-4 text-gray-400" />
-              <div>
-                <div className="font-medium">Assigned To</div>
-                <div className="text-gray-600">
-                  {workOrder.assignedTo?.length > 0 ? workOrder.assignedTo.join(', ') : 'Unassigned'}
-                </div>
+            <div>
+              <div className="text-sm font-medium text-gray-500 mb-1">Estimated Time</div>
+              <div className="text-sm text-gray-900">
+                {(workOrder as any).estimated_minutes ? `${Math.floor((workOrder as any).estimated_minutes / 60)}h ${(workOrder as any).estimated_minutes % 60}m` : 'Not set'}
               </div>
             </div>
             
-            {workOrder.category && (
-              <div className="flex items-center gap-2 text-sm">
-                <MapPin className="w-4 h-4 text-gray-400" />
-                <div>
-                  <div className="font-medium">Category</div>
-                  <div className="text-gray-600 capitalize">{workOrder.category}</div>
-                </div>
-              </div>
-            )}
+            <div>
+              <div className="text-sm font-medium text-gray-500 mb-1">Priority</div>
+              <Badge className={`border ${getPriorityColor(workOrder.priority)}`}>
+                {workOrder.priority}
+              </Badge>
+            </div>
+            
+            <div>
+              <div className="text-sm font-medium text-gray-500 mb-1">Work Order ID</div>
+              <div className="text-sm text-gray-900">#{workOrder.id.slice(-4)}</div>
+            </div>
           </div>
+
+          {/* Description */}
+          {workOrder.description && (
+            <div className="mb-6">
+              <div className="text-sm font-medium text-gray-500 mb-2">Description</div>
+              <p className="text-gray-700 bg-gray-50 p-3 rounded-lg">{workOrder.description}</p>
+            </div>
+          )}
+
+          {/* Assigned To Section */}
+          {workOrder.assignedTo && workOrder.assignedTo.length > 0 && (
+            <div className="mb-6">
+              <div className="text-sm font-medium text-gray-500 mb-2">Assigned To</div>
+              <div className="flex flex-wrap gap-2">
+                {workOrder.assignedTo.map((assignee, index) => (
+                  <div key={index} className="flex items-center gap-2 bg-gray-50 px-3 py-2 rounded-lg">
+                    <Users className="w-4 h-4 text-gray-400" />
+                    <span className="text-sm text-gray-700">{assignee}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Work Type - Remove this section since work_type is optional */}
 
           {/* Tags */}
           {workOrder.tags && workOrder.tags.length > 0 && (
-            <div className="mt-4 pt-4 border-t">
-              <div className="flex items-center gap-2 mb-2">
-                <Tag className="w-4 h-4 text-gray-400" />
-                <span className="text-sm font-medium text-gray-900">Tags</span>
-              </div>
+            <div className="mb-6">
+              <div className="text-sm font-medium text-gray-500 mb-2">Tags</div>
               <div className="flex flex-wrap gap-2">
                 {workOrder.tags.map((tag, index) => (
                   <Badge key={index} variant="outline" className="text-xs">
@@ -135,11 +151,11 @@ export const WorkOrderDetailCard = ({ workOrder }: WorkOrderDetailCardProps) => 
         </CardContent>
       </Card>
 
-      {/* Enhanced Checklist - only show if there are items */}
-      {/* Note: EnhancedChecklist component will handle its own visibility */}
-      
-      {/* Procedures Section - only show if there are procedures */}
-      {/* Note: WorkOrderProcedureSection component will handle its own visibility */}
+      {/* Sub Work Orders */}
+      <SubWorkOrdersTable parentWorkOrderId={workOrder.id} />
+
+      {/* Attachments */}
+      <WorkOrderAttachmentsDisplay workOrderId={workOrder.id} />
     </div>
   );
 };

@@ -57,19 +57,27 @@ export const WorkOrdersDetailPage = ({
         />
 
         <PageContent>
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 xl:grid-cols-4 gap-6">
             {/* Main Content - Work Order Details */}
-            <div className="lg:col-span-2 space-y-6">
+            <div className="xl:col-span-3">
               <WorkOrderDetailCard workOrder={selectedWorkOrderData} />
-              <EnhancedChecklistSimple workOrderId={selectedWorkOrderData.id} />
-              <StatusHistoryTimeline workOrderId={selectedWorkOrderData.id} />
             </div>
 
-            {/* Sidebar - Status, Time Tracking & Chat */}
-            <div className="lg:col-span-1 space-y-6">
+            {/* Sidebar - Status & Actions */}
+            <div className="xl:col-span-1 space-y-6">
               <WorkOrderStatusFlow workOrder={selectedWorkOrderData} />
               <TimeTrackingCard workOrderId={selectedWorkOrderData.id} />
               <PartsUsageCard workOrderId={selectedWorkOrderData.id} />
+            </div>
+          </div>
+
+          {/* Secondary Content - Comments, History, etc */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+            <div className="space-y-6">
+              <EnhancedChecklistSimple workOrderId={selectedWorkOrderData.id} />
+              <StatusHistoryTimeline workOrderId={selectedWorkOrderData.id} />
+            </div>
+            <div>
               <WorkOrderChat workOrderId={selectedWorkOrderData.id} />
             </div>
           </div>
