@@ -30,7 +30,7 @@ export const InventoryStatusBadge = ({
   return (
     <Badge 
       variant="secondary" 
-      className={`gap-1 bg-green-100 text-green-800 hover:bg-green-200 ${className}`}
+      className={`gap-1 bg-success-50 text-success-600 hover:bg-success-100 ${className}`}
     >
       <CheckCircle className="h-3 w-3" />
       In Stock

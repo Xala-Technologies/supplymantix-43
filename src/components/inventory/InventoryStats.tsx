@@ -26,25 +26,25 @@ export const InventoryStats = ({
       name: "Total Items",
       value: totalItems,
       icon: Package,
-      color: "text-blue-600"
+      color: "text-primary-600"
     },
     {
       name: "Low Stock",
       value: lowStockItems,
       icon: AlertTriangle,
-      color: "text-orange-600"
+      color: "text-warning-600"
     },
     {
       name: "Total Value",
       value: `$${totalValue.toFixed(2)}`,
       icon: DollarSign,
-      color: "text-green-600"
+      color: "text-success-600"
     },
     {
       name: "Categories",
       value: categories,
       icon: TrendingUp,
-      color: "text-purple-600"
+      color: "text-secondary-600"
     }
   ];
 
@@ -55,8 +55,8 @@ export const InventoryStats = ({
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">{stat.name}</p>
-                <p className="text-2xl font-bold text-gray-900">{stat.value}</p>
+                <p className="text-sm font-medium text-text-secondary">{stat.name}</p>
+                <p className="text-2xl font-bold text-text-primary">{stat.value}</p>
               </div>
               <stat.icon className={`h-8 w-8 ${stat.color}`} />
             </div>

@@ -23,7 +23,7 @@ export const LanguageSelector = () => {
             key={lang.code}
             onClick={() => setLanguage(lang.code)}
             className={`flex items-center space-x-3 ${
-              language === lang.code ? 'bg-blue-50 text-blue-600' : ''
+              language === lang.code ? 'bg-primary-50 text-primary-600' : ''
             }`}
           >
             <span className="text-lg">{lang.flag}</span>

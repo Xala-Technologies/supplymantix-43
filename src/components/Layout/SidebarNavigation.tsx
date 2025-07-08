@@ -21,12 +21,12 @@ export function SidebarNavigation() {
   const isCollapsed = state === "collapsed";
 
   return (
-    <SidebarContent className="p-0 bg-white overflow-hidden">
+    <SidebarContent className="p-0 bg-sidebar overflow-hidden">
       {Object.entries(groupedItems).map(([group, items]) => (
         <SidebarGroup key={group} className="px-4 py-1 mb-1">
           <SidebarGroupLabel 
             className={`
-              text-gray-500 uppercase text-xs font-bold tracking-widest px-0 py-2 mb-1
+              text-text-tertiary uppercase text-xs font-bold tracking-widest px-0 py-2 mb-1
               transition-all duration-300 ease-in-out
               ${isCollapsed ? 'opacity-0 scale-75' : 'opacity-100 scale-100'}
             `}
@@ -47,8 +47,8 @@ export function SidebarNavigation() {
                         relative group h-9 px-3 rounded-xl transition-all duration-200 ease-in-out m-0
                         overflow-hidden
                         ${isActive 
-                          ? 'bg-gradient-to-r from-blue-500 via-purple-600 to-indigo-600 text-white shadow-lg shadow-blue-500/25 hover:text-white' 
-                          : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900 active:bg-gray-100'
+                          ? 'bg-sidebar-item-active text-sidebar-item-active-foreground shadow-sm' 
+                          : 'text-sidebar-foreground hover:bg-sidebar-item-hover hover:text-text-primary'
                         }
                         ${isCollapsed ? 'w-9 justify-center' : 'w-full'}
                       `}
@@ -61,8 +61,8 @@ export function SidebarNavigation() {
                         <div className={`
                           w-5 h-5 rounded-lg flex items-center justify-center transition-all duration-200 ease-in-out
                           ${isActive 
-                            ? 'bg-white/20 text-white hover:text-white' 
-                            : 'bg-transparent text-gray-600 group-hover:text-gray-900'
+                            ? 'text-sidebar-item-active-foreground' 
+                            : 'text-text-secondary group-hover:text-text-primary'
                           }
                         `}>
                           <Icon className="w-4 h-4" />
@@ -84,7 +84,7 @@ export function SidebarNavigation() {
                         {/* Enhanced Active Indicator */}
                         {isActive && (
                           <div className={`
-                            absolute right-2 w-1.5 h-1.5 rounded-full bg-white shadow-sm
+                            absolute right-2 w-1.5 h-1.5 rounded-full bg-sidebar-item-active-foreground shadow-sm
                             transition-all duration-200 ease-in-out
                             ${isCollapsed ? 'opacity-0 scale-0' : 'opacity-100 scale-100'}
                           `}></div>

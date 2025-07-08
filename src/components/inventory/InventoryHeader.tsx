@@ -50,11 +50,11 @@ export const InventoryHeader = ({
   onViewModeChange
 }: InventoryHeaderProps) => {
   return (
-    <div className="bg-white border-b border-gray-200 px-6 py-4">
+    <div className="bg-surface border-b border-border-secondary px-6 py-4">
       <div className="flex items-center justify-between mb-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Inventory Management</h1>
-          <p className="text-gray-600 text-sm mt-1">
+          <h1 className="text-2xl font-bold text-text-primary">Inventory Management</h1>
+          <p className="text-text-secondary text-sm mt-1">
             {totalItems} items total • {lowStockCount} low stock alerts
           </p>
         </div>
@@ -100,7 +100,7 @@ export const InventoryHeader = ({
 
       <div className="flex items-center gap-4 flex-wrap">
         <div className="relative flex-1 min-w-[300px]">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-text-tertiary h-4 w-4" />
           <Input
             placeholder="Search by name, SKU, or description..."
             value={searchQuery}
@@ -147,8 +147,8 @@ export const InventoryHeader = ({
                   onClick={() => onViewModeChange('grid')}
                   className={`px-3 py-1.5 text-xs ${
                     viewMode === 'grid' 
-                      ? 'bg-white shadow-sm text-gray-900' 
-                      : 'text-gray-600 hover:text-gray-900'
+                      ? 'bg-surface shadow-sm text-text-primary' 
+                      : 'text-text-secondary hover:text-text-primary'
                   }`}
                 >
                   <Grid3X3 className="h-3.5 w-3.5 mr-1.5" />
@@ -160,8 +160,8 @@ export const InventoryHeader = ({
                   onClick={() => onViewModeChange('list')}
                   className={`px-3 py-1.5 text-xs ${
                     viewMode === 'list' 
-                      ? 'bg-white shadow-sm text-gray-900' 
-                      : 'text-gray-600 hover:text-gray-900'
+                      ? 'bg-surface shadow-sm text-text-primary' 
+                      : 'text-text-secondary hover:text-text-primary'
                   }`}
                 >
                   <List className="h-3.5 w-3.5 mr-1.5" />

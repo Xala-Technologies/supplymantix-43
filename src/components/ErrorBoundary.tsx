@@ -44,19 +44,19 @@ export class ErrorBoundary extends Component<Props, State> {
         <div className="flex items-center justify-center min-h-[400px] p-6">
           <Card className="max-w-md w-full">
             <CardHeader className="text-center">
-              <div className="mx-auto w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mb-4">
-                <AlertTriangle className="w-6 h-6 text-red-600" />
+              <div className="mx-auto w-12 h-12 bg-error-50 rounded-full flex items-center justify-center mb-4">
+                <AlertTriangle className="w-6 h-6 text-error-600" />
               </div>
-              <CardTitle className="text-red-900">Something went wrong</CardTitle>
+              <CardTitle className="text-error">Something went wrong</CardTitle>
             </CardHeader>
             <CardContent className="text-center space-y-4">
-              <p className="text-gray-600">
+              <p className="text-text-secondary">
                 An unexpected error occurred. Please try refreshing the page or contact support if the problem persists.
               </p>
               
               {process.env.NODE_ENV === 'development' && this.state.error && (
                 <details className="text-left">
-                  <summary className="cursor-pointer text-sm text-gray-500 mb-2">
+                  <summary className="cursor-pointer text-sm text-text-tertiary mb-2">
                     Error Details (Development)
                   </summary>
                   <pre className="text-xs bg-gray-100 p-2 rounded overflow-auto max-h-32">

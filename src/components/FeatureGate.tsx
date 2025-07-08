@@ -36,13 +36,13 @@ export const FeatureGate = ({
   return (
     <Card className="p-6 text-center">
       <div className="flex flex-col items-center space-y-4">
-        <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center">
-          <Lock className="w-6 h-6 text-muted-foreground" />
+        <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center">
+          <Lock className="w-6 h-6 text-text-tertiary" />
         </div>
         
         <div className="space-y-2">
-          <h3 className="font-semibold">Feature Not Available</h3>
-          <p className="text-sm text-muted-foreground">
+          <h3 className="font-semibold text-text-primary">Feature Not Available</h3>
+          <p className="text-sm text-text-secondary">
             {access.reason || 'This feature is not included in your current plan.'}
           </p>
         </div>

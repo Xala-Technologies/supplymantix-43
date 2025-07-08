@@ -9,7 +9,7 @@ export const PageLayout = ({
   children,
   className
 }: PageLayoutProps) => {
-  return <div className={cn("h-full flex flex-col bg-gray-50", className)}>
+  return <div className={cn("h-full flex flex-col bg-background", className)}>
       {children}
     </div>;
 };
@@ -27,13 +27,13 @@ export const PageLayoutHeader = ({
   leftContent,
   className
 }: PageHeaderProps) => {
-  return <div className={cn("bg-white border-b border-gray-200 px-6 py-4", className)}>
+  return <div className={cn("bg-surface border-b border-border-secondary px-6 py-4", className)}>
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
           {leftContent}
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">{title}</h1>
-            {description && <p className="text-sm text-gray-600 mt-1">{description}</p>}
+            <h1 className="text-2xl font-bold text-text-primary">{title}</h1>
+            {description && <p className="text-sm text-text-secondary mt-1">{description}</p>}
           </div>
         </div>
         {children && <div className="flex items-center gap-3">
@@ -50,7 +50,7 @@ export const PageFilters = ({
   children,
   className
 }: PageFiltersProps) => {
-  return <div className={cn("bg-white border-b border-gray-100", className)}>
+  return <div className={cn("bg-surface border-b border-border-secondary", className)}>
       {children}
     </div>;
 };

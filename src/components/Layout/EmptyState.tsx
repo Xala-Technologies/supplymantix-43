@@ -28,18 +28,17 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
       className
     )}>
       <div className="w-16 h-16 bg-gray-100 rounded-xl flex items-center justify-center mb-6">
-        <Icon className="h-8 w-8 text-gray-400" />
+        <Icon className="h-8 w-8 text-text-tertiary" />
       </div>
-      <h3 className="text-lg font-semibold text-gray-900 mb-2">
+      <h3 className="text-lg font-semibold text-text-primary mb-2">
         {title}
       </h3>
-      <p className="text-base text-gray-600 mb-6 max-w-md leading-relaxed">
+      <p className="text-base text-text-secondary mb-6 max-w-md leading-relaxed">
         {description}
       </p>
       {action && (
         <Button 
           onClick={action.onClick}
-          className="bg-blue-600 hover:bg-blue-700 text-white font-medium"
         >
           {action.label}
         </Button>

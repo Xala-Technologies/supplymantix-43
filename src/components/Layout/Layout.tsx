@@ -10,7 +10,7 @@ interface LayoutProps {
 export const Layout: React.FC<LayoutProps> = ({ children, className }) => {
   return (
     <div className={cn(
-      "min-h-screen bg-gray-50",
+      "min-h-screen bg-background",
       "flex flex-col",
       "w-full",
       className
