@@ -180,15 +180,13 @@ export const RecurrenceForm: React.FC<RecurrenceFormProps> = ({
             </Popover>
           </div>
 
-          {pattern.rule && pattern.rule !== 'none' && (
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-              <p className="text-sm text-blue-800">
-                <strong>Preview:</strong> This work order will repeat every{' '}
-                {pattern.interval} {getRuleLabel(pattern.rule)}
-                {endDate && ` until ${format(endDate, 'MMM dd, yyyy')}`}
-              </p>
-            </div>
-          )}
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+            <p className="text-sm text-blue-800">
+              <strong>Preview:</strong> This work order will repeat every{' '}
+              {pattern.interval} {getRuleLabel(pattern.rule)}
+              {endDate && ` until ${format(endDate, 'MMM dd, yyyy')}`}
+            </p>
+          </div>
         </div>
       </CardContent>
     </Card>
