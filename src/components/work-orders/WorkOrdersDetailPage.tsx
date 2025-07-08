@@ -14,6 +14,8 @@ import { WorkOrderStatusFlow } from "./WorkOrderStatusFlow";
 import { EnhancedChecklistSimple } from "./EnhancedChecklistSimple";
 import { PartsUsageCard } from "./PartsUsageCard";
 import { WorkOrder } from '@/types/workOrder';
+import { useQuery } from '@tanstack/react-query';
+import { workOrdersEnhancedApi } from '@/lib/database/work-orders-enhanced';
 
 interface WorkOrdersDetailPageProps {
   selectedWorkOrderData: WorkOrder;
@@ -26,6 +28,17 @@ export const WorkOrdersDetailPage = ({
   onBackToList,
   onEditWorkOrder
 }: WorkOrdersDetailPageProps) => {
+  // Fetch enhanced work order data with all relations
+  const { data: enhancedWorkOrder, isLoading } = useQuery({
+    queryKey: ['work-order-with-relations', selectedWorkOrderData.id],
+    queryFn: () => workOrdersEnhancedApi.getWorkOrderWithRelations(selectedWorkOrderData.id),
+    enabled: !!selectedWorkOrderData.id,
+  });
+
+  // Use enhanced data if available, fall back to provided data
+  // Cast to any to avoid TypeScript issues with mixed data types
+  const workOrderData = (enhancedWorkOrder || selectedWorkOrderData) as any;
+
   const backButton = (
     <Button
       variant="ghost"
@@ -42,7 +55,7 @@ export const WorkOrdersDetailPage = ({
       <PageContainer>
         <PageHeader
           title="Work Order Details"
-          description={selectedWorkOrderData.title}
+          description={workOrderData.title}
           icon={ClipboardList}
           backButton={backButton}
           actions={
@@ -57,30 +70,41 @@ export const WorkOrdersDetailPage = ({
         />
 
         <PageContent>
-          <div className="grid grid-cols-1 xl:grid-cols-4 gap-6">
-            {/* Main Content - Work Order Details */}
-            <div className="xl:col-span-3">
-              <WorkOrderDetailCard workOrder={selectedWorkOrderData} />
+          {isLoading ? (
+            <div className="flex items-center justify-center py-8">
+              <div className="text-center">
+                <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                <p className="text-gray-600">Loading work order details...</p>
+              </div>
             </div>
+          ) : (
+            <>
+              <div className="grid grid-cols-1 xl:grid-cols-4 gap-6">
+                {/* Main Content - Work Order Details */}
+                <div className="xl:col-span-3">
+                  <WorkOrderDetailCard workOrder={workOrderData} />
+                </div>
 
-            {/* Sidebar - Status & Actions */}
-            <div className="xl:col-span-1 space-y-6">
-              <WorkOrderStatusFlow workOrder={selectedWorkOrderData} />
-              <TimeTrackingCard workOrderId={selectedWorkOrderData.id} />
-              <PartsUsageCard workOrderId={selectedWorkOrderData.id} />
-            </div>
-          </div>
+                {/* Sidebar - Status & Actions */}
+                <div className="xl:col-span-1 space-y-6">
+                  <WorkOrderStatusFlow workOrder={workOrderData} />
+                  <TimeTrackingCard workOrderId={workOrderData.id} />
+                  <PartsUsageCard workOrderId={workOrderData.id} />
+                </div>
+              </div>
 
-          {/* Secondary Content - Comments, History, etc */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-            <div className="space-y-6">
-              <EnhancedChecklistSimple workOrderId={selectedWorkOrderData.id} />
-              <StatusHistoryTimeline workOrderId={selectedWorkOrderData.id} />
-            </div>
-            <div>
-              <WorkOrderChat workOrderId={selectedWorkOrderData.id} />
-            </div>
-          </div>
+              {/* Secondary Content - Comments, History, etc */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+                <div className="space-y-6">
+                  <EnhancedChecklistSimple workOrderId={workOrderData.id} />
+                  <StatusHistoryTimeline workOrderId={workOrderData.id} />
+                </div>
+                <div>
+                  <WorkOrderChat workOrderId={workOrderData.id} />
+                </div>
+              </div>
+            </>
+          )}
         </PageContent>
       </PageContainer>
     </Layout>

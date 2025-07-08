@@ -1,12 +1,10 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Clock, Users, MapPin, AlertCircle, Calendar, Tag } from 'lucide-react';
+import { Clock, Users, MapPin, AlertCircle, Calendar, Tag, Settings } from 'lucide-react';
 import { WorkOrder } from '@/types/workOrder';
 import { SubWorkOrdersTable } from './SubWorkOrdersTable';
 import { WorkOrderAttachmentsDisplay } from './WorkOrderAttachmentsDisplay';
-import { getAssetName, getLocationName } from '@/utils/assetUtils';
 
 interface WorkOrderDetailCardProps {
   workOrder: WorkOrder;
@@ -36,6 +34,47 @@ export const WorkOrderDetailCard = ({ workOrder }: WorkOrderDetailCardProps) => 
     return colors[priority.toLowerCase()] || colors.medium;
   };
 
+  // Helper functions to extract names from objects or return strings
+  const getAssetName = (asset: any) => {
+    if (!asset) return 'No asset assigned';
+    if (typeof asset === 'string') return asset;
+    if (typeof asset === 'object' && asset.name) return asset.name;
+    return 'Unknown asset';
+  };
+
+  const getLocationName = (location: any) => {
+    if (!location) return 'No location assigned';
+    if (typeof location === 'string') return location;
+    if (typeof location === 'object' && location.name) return location.name;
+    return 'Unknown location';
+  };
+
+  const getAssignedUserName = (assignedUser: any, assigned_to: any) => {
+    // Try to get from joined user data first
+    if (assignedUser) {
+      const name = assignedUser.first_name && assignedUser.last_name 
+        ? `${assignedUser.first_name} ${assignedUser.last_name}`
+        : assignedUser.email;
+      return name;
+    }
+    // Fall back to assigned_to field
+    if (assigned_to) return assigned_to;
+    return 'Unassigned';
+  };
+
+  const formatEstimatedTime = (workOrder: any) => {
+    const hours = workOrder.estimated_hours || (workOrder as any)?.estimated_hours;
+    const minutes = workOrder.estimated_minutes || (workOrder as any)?.estimated_minutes;
+    if (!hours && !minutes) return 'Not set';
+    const h = hours || 0;
+    const m = minutes || 0;
+    return `${h}h ${m}m`;
+  };
+
+  const getWorkType = (workOrder: any) => {
+    return workOrder.work_type || (workOrder as any)?.work_type || null;
+  };
+
   const isOverdue = workOrder.due_date && new Date(workOrder.due_date) < new Date() && workOrder.status !== 'completed';
 
   return (
@@ -52,15 +91,11 @@ export const WorkOrderDetailCard = ({ workOrder }: WorkOrderDetailCardProps) => 
                 </Badge>
               </div>
               <div className="flex flex-wrap items-center gap-3 text-sm text-gray-600">
-                <span>#{workOrder.id.slice(-4)}</span>
+                <span>#{workOrder.id.slice(-8)}</span>
                 <span>•</span>
-                <span>{getAssetName(workOrder.asset)}</span>
-                {workOrder.location && (
-                  <>
-                    <span>•</span>
-                    <span>{getLocationName(workOrder.location)}</span>
-                  </>
-                )}
+                <span>{getAssetName((workOrder as any)?.asset || (workOrder as any)?.assets)}</span>
+                <span>•</span>
+                <span>{getLocationName((workOrder as any)?.location || (workOrder as any)?.locations)}</span>
               </div>
             </div>
             <div className="flex flex-wrap gap-2">
@@ -79,7 +114,8 @@ export const WorkOrderDetailCard = ({ workOrder }: WorkOrderDetailCardProps) => 
         
         <CardContent>
           {/* Main Info Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
+            {/* Due Date */}
             {workOrder.due_date && (
               <div>
                 <div className="text-sm font-medium text-gray-500 mb-1">Due Date</div>
@@ -90,23 +126,53 @@ export const WorkOrderDetailCard = ({ workOrder }: WorkOrderDetailCardProps) => 
               </div>
             )}
             
+            {/* Start Date */}
+            {workOrder.start_date && (
+              <div>
+                <div className="text-sm font-medium text-gray-500 mb-1">Start Date</div>
+                <div className="flex items-center gap-2 text-sm text-gray-900">
+                  <Calendar className="w-4 h-4" />
+                  <span>{new Date(workOrder.start_date).toLocaleDateString()}</span>
+                </div>
+              </div>
+            )}
+            
+            {/* Estimated Time */}
             <div>
               <div className="text-sm font-medium text-gray-500 mb-1">Estimated Time</div>
-              <div className="text-sm text-gray-900">
-                {(workOrder as any).estimated_minutes ? `${Math.floor((workOrder as any).estimated_minutes / 60)}h ${(workOrder as any).estimated_minutes % 60}m` : 'Not set'}
+              <div className="flex items-center gap-2 text-sm text-gray-900">
+                <Clock className="w-4 h-4" />
+                <span>{formatEstimatedTime(workOrder)}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Second row of info */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
+            {/* Work Type */}
+            {getWorkType(workOrder) && (
+              <div>
+                <div className="text-sm font-medium text-gray-500 mb-1">Work Type</div>
+                <div className="flex items-center gap-2 text-sm text-gray-900">
+                  <Settings className="w-4 h-4" />
+                  <span className="capitalize">{getWorkType(workOrder)}</span>
+                </div>
+              </div>
+            )}
+            
+            {/* Category */}
+            <div>
+              <div className="text-sm font-medium text-gray-500 mb-1">Category</div>
+              <div className="flex items-center gap-2 text-sm text-gray-900">
+                <Tag className="w-4 h-4" />
+                <span className="capitalize">{workOrder.category}</span>
               </div>
             </div>
             
-            <div>
-              <div className="text-sm font-medium text-gray-500 mb-1">Priority</div>
-              <Badge className={`border ${getPriorityColor(workOrder.priority)}`}>
-                {workOrder.priority}
-              </Badge>
-            </div>
-            
+            {/* Work Order ID */}
             <div>
               <div className="text-sm font-medium text-gray-500 mb-1">Work Order ID</div>
-              <div className="text-sm text-gray-900">#{workOrder.id.slice(-4)}</div>
+              <div className="text-sm text-gray-900">#{workOrder.id.slice(-8)}</div>
             </div>
           </div>
 
@@ -119,21 +185,43 @@ export const WorkOrderDetailCard = ({ workOrder }: WorkOrderDetailCardProps) => 
           )}
 
           {/* Assigned To Section */}
-          {workOrder.assignedTo && workOrder.assignedTo.length > 0 && (
+          <div className="mb-6">
+            <div className="text-sm font-medium text-gray-500 mb-2">Assigned To</div>
+            <div className="flex items-center gap-2 bg-gray-50 px-3 py-2 rounded-lg">
+              <Users className="w-4 h-4 text-gray-400" />
+              <span className="text-sm text-gray-700">
+                {getAssignedUserName((workOrder as any)?.assigned_user, workOrder.assigned_to)}
+              </span>
+            </div>
+          </div>
+
+          {/* Procedures Section */}
+          {(workOrder as any)?.procedures && (workOrder as any).procedures.length > 0 && (
             <div className="mb-6">
-              <div className="text-sm font-medium text-gray-500 mb-2">Assigned To</div>
-              <div className="flex flex-wrap gap-2">
-                {workOrder.assignedTo.map((assignee, index) => (
-                  <div key={index} className="flex items-center gap-2 bg-gray-50 px-3 py-2 rounded-lg">
-                    <Users className="w-4 h-4 text-gray-400" />
-                    <span className="text-sm text-gray-700">{assignee}</span>
+              <div className="text-sm font-medium text-gray-500 mb-2">Procedures</div>
+              <div className="space-y-2">
+                {(workOrder as any).procedures.map((procedure: any, index: number) => (
+                  <div key={index} className="flex items-center justify-between bg-gray-50 px-3 py-2 rounded-lg">
+                    <div>
+                      <span className="text-sm font-medium text-gray-900">
+                        {procedure.procedure?.title || 'Unknown Procedure'}
+                      </span>
+                      {procedure.procedure?.description && (
+                        <p className="text-xs text-gray-600">{procedure.procedure.description}</p>
+                      )}
+                    </div>
+                    <Badge variant="outline" className={`text-xs ${
+                      procedure.status === 'completed' ? 'bg-green-50 text-green-700 border-green-200' :
+                      procedure.status === 'in_progress' ? 'bg-yellow-50 text-yellow-700 border-yellow-200' :
+                      'bg-gray-50 text-gray-700 border-gray-200'
+                    }`}>
+                      {procedure.status}
+                    </Badge>
                   </div>
                 ))}
               </div>
             </div>
           )}
-
-          {/* Work Type - Remove this section since work_type is optional */}
 
           {/* Tags */}
           {workOrder.tags && workOrder.tags.length > 0 && (
