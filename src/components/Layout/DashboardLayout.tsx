@@ -17,9 +17,11 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
           <AppSidebar />
           <div className="flex-1 flex flex-col overflow-hidden ml-0 md:ml-[var(--sidebar-width)] md:peer-data-[state=collapsed]:ml-[var(--sidebar-width-icon)] transition-[margin-left] duration-300 ease-linear">
             <TopBar />
-            <main className="flex-1 overflow-hidden pt-16 transition-all duration-300 ease-linear bg-background">
-              <div className="h-full w-full p-6">
-                {children}
+            <main className="flex-1 overflow-y-auto pt-16 transition-all duration-300 ease-linear bg-background">
+              <div className="h-full w-full max-w-full px-spacing-md sm:px-spacing-lg lg:px-spacing-xl py-spacing-md">
+                <div className="mx-auto max-w-7xl space-y-spacing-lg">
+                  {children}
+                </div>
               </div>
             </main>
           </div>
