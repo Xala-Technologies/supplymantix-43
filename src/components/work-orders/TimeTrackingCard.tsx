@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Clock, Plus, User } from 'lucide-react';
-import { useTimeTracking, useLogTime } from '@/hooks/useTimeTracking';
+import { useTimeLogs, useCreateTimeLog } from '@/hooks/useWorkOrdersEnhanced';
 import { formatDistanceToNow } from 'date-fns';
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -18,8 +18,8 @@ interface TimeTrackingCardProps {
 export const TimeTrackingCard: React.FC<TimeTrackingCardProps> = ({
   workOrderId
 }) => {
-  const { data: timeLogs = [], isLoading } = useTimeTracking(workOrderId);
-  const logTimeMutation = useLogTime();
+  const { data: timeLogs = [], isLoading } = useTimeLogs(workOrderId);
+  const logTimeMutation = useCreateTimeLog();
   
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [duration, setDuration] = useState('');
@@ -35,9 +35,10 @@ export const TimeTrackingCard: React.FC<TimeTrackingCardProps> = ({
 
     try {
       await logTimeMutation.mutateAsync({
-        workOrderId,
-        durationMinutes,
+        work_order_id: workOrderId,
+        duration_minutes: durationMinutes,
         note: note.trim() || undefined,
+        user_id: 'current-user-id', // This will be set by the hook
       });
       
       setIsDialogOpen(false);

@@ -23,8 +23,8 @@ export const WorkOrderChat = ({ workOrderId }: WorkOrderChatProps) => {
     try {
       await createComment.mutateAsync({
         work_order_id: workOrderId,
-        user_id: '', // Will be filled by the API from auth context
-        content: newMessage.trim()
+        user_id: 'current-user-id', // Will be filled by the API from auth context
+        message: newMessage.trim()
       });
       
       setNewMessage("");
@@ -80,7 +80,9 @@ export const WorkOrderChat = ({ workOrderId }: WorkOrderChatProps) => {
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-1">
                     <span className="text-sm font-medium">
-                      {comment.users?.email || 'Unknown User'}
+                      {comment.users?.first_name && comment.users?.last_name 
+                        ? `${comment.users.first_name} ${comment.users.last_name}`
+                        : comment.users?.email || 'Unknown User'}
                     </span>
                     <span className="text-xs text-gray-500">
                       {format(new Date(comment.created_at), 'MMM dd, yyyy h:mm a')}
