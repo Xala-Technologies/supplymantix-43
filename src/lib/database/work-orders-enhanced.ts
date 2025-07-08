@@ -100,7 +100,7 @@ export const workOrdersEnhancedApi = {
           id,
           role,
           assigned_at,
-          user:users(id, email, first_name, last_name)
+          user:users!work_order_assignments_user_id_fkey(id, email, first_name, last_name)
         ),
         procedures:work_order_procedures(
           id,
@@ -125,7 +125,7 @@ export const workOrdersEnhancedApi = {
           new_status,
           changed_at,
           notes,
-          user:users(email, first_name, last_name)
+          user:users!work_order_status_history_changed_by_fkey(email, first_name, last_name)
         ),
         sub_orders:work_orders!work_orders_parent_id_fkey(
           id,
@@ -334,7 +334,7 @@ export const workOrdersEnhancedApi = {
         assignments:work_order_assignments(
           id,
           role,
-          user:users(id, email, first_name, last_name)
+          user:users!work_order_assignments_user_id_fkey(id, email, first_name, last_name)
         )
       `)
       .eq("tenant_id", userData.tenant_id);
@@ -386,7 +386,7 @@ export const workOrdersEnhancedApi = {
       .from("work_order_status_history")
       .select(`
         *,
-        user:users(email, first_name, last_name)
+        user:users!work_order_status_history_changed_by_fkey(email, first_name, last_name)
       `)
       .eq("work_order_id", workOrderId)
       .order("changed_at", { ascending: false });
