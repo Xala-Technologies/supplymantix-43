@@ -22,10 +22,10 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
 }) => {
   return (
     <header className={cn(
-      "bg-white/90 backdrop-blur-xl border-b border-gray-200/40",
-      "px-4 sm:px-6 lg:px-8 py-6",
+      "bg-surface/95 backdrop-blur-xl border-b border-border-secondary",
+      "px-spacing-md sm:px-spacing-lg lg:px-spacing-xl py-spacing-lg",
       "flex-shrink-0",
-      "shadow-sm",
+      "shadow-card",
       className
     )}>
       {/* Back button row */}
@@ -38,16 +38,16 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-5 min-w-0 flex-1">
           {Icon && (
-            <div className="flex items-center justify-center w-14 h-14 bg-gradient-to-br from-blue-50 to-indigo-100/80 rounded-2xl border border-blue-200/50 shadow-sm">
-              <Icon className="w-7 h-7 text-blue-600" />
+            <div className="flex items-center justify-center w-14 h-14 bg-gradient-to-br from-primary-50 to-primary-100/80 rounded-2xl border border-primary-200/50 shadow-sm">
+              <Icon className="w-7 h-7 text-primary-600" />
             </div>
           )}
           <div className="min-w-0 flex-1">
-            <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 tracking-tight leading-tight">
+            <h1 className="text-3xl sm:text-4xl font-bold text-text-primary tracking-tight leading-tight">
               {title}
             </h1>
             {description && (
-              <p className="text-lg text-gray-600 mt-2 leading-relaxed font-medium">
+              <p className="text-lg text-text-secondary mt-2 leading-relaxed font-medium">
                 {description}
               </p>
             )}

@@ -16,15 +16,15 @@ export const PageContent: React.FC<PageContentProps> = ({
   spacing = "md"
 }) => {
   const spacingClasses = {
-    sm: "space-y-4",
-    md: "space-y-6",
-    lg: "space-y-8"
+    sm: "space-y-spacing-sm",
+    md: "space-y-spacing-md",
+    lg: "space-y-spacing-lg"
   };
 
   return (
     <main className={cn(
-      "flex-1 overflow-y-auto",
-      padding && "px-4 sm:px-6 lg:px-8 py-6",
+      "flex-1 overflow-y-auto bg-background",
+      padding && "px-spacing-md sm:px-spacing-lg lg:px-spacing-xl py-spacing-lg",
       spacingClasses[spacing],
       className
     )}>

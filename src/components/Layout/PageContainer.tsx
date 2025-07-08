@@ -28,8 +28,9 @@ export const PageContainer: React.FC<PageContainerProps> = ({
     <div className={cn(
       "h-full flex flex-col",
       "mx-auto w-full",
+      "bg-background",
       maxWidthClasses[maxWidth],
-      padding && "px-4 sm:px-6 lg:px-8",
+      padding && "px-spacing-md sm:px-spacing-lg lg:px-spacing-xl",
       className
     )}>
       {children}
