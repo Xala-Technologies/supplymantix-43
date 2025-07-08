@@ -15,7 +15,8 @@ import {
   CheckSquare,
   DollarSign,
   Settings,
-  MessageSquare
+  MessageSquare,
+  Paperclip
 } from "lucide-react";
 import { WorkOrder } from "@/types/workOrder";
 import { EnhancedChecklistSimple } from "./EnhancedChecklistSimple";
@@ -23,8 +24,10 @@ import { WorkOrderStatusFlow } from "./WorkOrderStatusFlow";
 import { TimeEntries } from "./TimeEntries";
 import { CostEntries } from "./CostEntries";
 import { WorkOrderChat } from "./WorkOrderChat";
+import { FileUploadSection } from "./FileUploadSection";
 import { getAssetName, getLocationName } from "@/utils/assetUtils";
 import { useWorkOrderStatusUpdate } from "@/hooks/useWorkOrdersIntegration";
+import { useWorkOrderAttachments } from "@/hooks/useWorkOrderAttachments";
 
 interface EnhancedWorkOrderDetailProps {
   workOrder: WorkOrder;
@@ -34,6 +37,7 @@ interface EnhancedWorkOrderDetailProps {
 export const EnhancedWorkOrderDetail = ({ workOrder, onEdit }: EnhancedWorkOrderDetailProps) => {
   const [activeTab, setActiveTab] = useState("overview");
   const updateStatus = useWorkOrderStatusUpdate();
+  const { attachments } = useWorkOrderAttachments(workOrder.id);
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
@@ -143,7 +147,7 @@ export const EnhancedWorkOrderDetail = ({ workOrder, onEdit }: EnhancedWorkOrder
       {/* Tabs Navigation */}
       <div className="p-6">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-6 mb-6">
+          <TabsList className="grid w-full grid-cols-7 mb-6">
             <TabsTrigger value="overview" className="gap-2">
               <FileText className="w-4 h-4" />
               Overview
@@ -151,6 +155,10 @@ export const EnhancedWorkOrderDetail = ({ workOrder, onEdit }: EnhancedWorkOrder
             <TabsTrigger value="checklist" className="gap-2">
               <CheckSquare className="w-4 h-4" />
               Checklist
+            </TabsTrigger>
+            <TabsTrigger value="attachments" className="gap-2">
+              <Paperclip className="w-4 h-4" />
+              Files
             </TabsTrigger>
             <TabsTrigger value="status" className="gap-2">
               <Settings className="w-4 h-4" />
@@ -228,6 +236,22 @@ export const EnhancedWorkOrderDetail = ({ workOrder, onEdit }: EnhancedWorkOrder
               workOrderId={workOrder.id}
               onUpdate={handleChecklistUpdate}
             />
+          </TabsContent>
+
+          <TabsContent value="attachments">
+            <Card>
+              <CardHeader>
+                <CardTitle>Files & Attachments</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <FileUploadSection
+                  workOrderId={workOrder.id}
+                  initialFiles={attachments}
+                  maxFiles={20}
+                  maxSize={25}
+                />
+              </CardContent>
+            </Card>
           </TabsContent>
 
           <TabsContent value="status">

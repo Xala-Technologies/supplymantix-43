@@ -14,6 +14,7 @@ import { TitleField } from "../form-fields/TitleField";
 import { PriorityField } from "../form-fields/PriorityField";
 import { DateFields } from "../form-fields/DateFields";
 import { ImageUploadSection } from "./ImageUploadSection";
+import { FileUploadSection } from "../FileUploadSection";
 import { ProcedureCard } from "./ProcedureCard";
 import { ProcedureSelectionDialogEnhanced } from "./ProcedureSelectionDialogEnhanced";
 import { cn } from "@/lib/utils";
@@ -463,13 +464,14 @@ export const EnhancedWorkOrderFormFields = ({
           <FileImage className="h-4 w-4 inline mr-2" />
           Photos & Attachments
         </FormLabel>
-        <ImageUploadSection
+        <FileUploadSection
+          workOrderId={form.watch('id')} // Pass work order ID if editing
           onFilesChange={(files) => {
             // Update form with uploaded files
             form.setValue('attachments', files);
           }}
           maxFiles={20}
-          maxFileSize={25}
+          maxSize={25}
         />
       </div>
 

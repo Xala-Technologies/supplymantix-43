@@ -2771,6 +2771,53 @@ export type Database = {
           },
         ]
       }
+      work_order_attachments: {
+        Row: {
+          created_at: string
+          file_name: string
+          file_path: string
+          file_size: number
+          file_type: string
+          id: string
+          tenant_id: string
+          updated_at: string
+          uploaded_by: string | null
+          work_order_id: string
+        }
+        Insert: {
+          created_at?: string
+          file_name: string
+          file_path: string
+          file_size: number
+          file_type: string
+          id?: string
+          tenant_id: string
+          updated_at?: string
+          uploaded_by?: string | null
+          work_order_id: string
+        }
+        Update: {
+          created_at?: string
+          file_name?: string
+          file_path?: string
+          file_size?: number
+          file_type?: string
+          id?: string
+          tenant_id?: string
+          updated_at?: string
+          uploaded_by?: string | null
+          work_order_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "work_order_attachments_work_order_id_fkey"
+            columns: ["work_order_id"]
+            isOneToOne: false
+            referencedRelation: "work_orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       work_order_comments: {
         Row: {
           content: string
