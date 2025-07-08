@@ -6,7 +6,11 @@ import { Layout } from '@/components/Layout/Layout';
 import { PageContainer } from '@/components/Layout/PageContainer';
 import { PageHeader } from '@/components/Layout/PageHeader';
 import { PageContent } from '@/components/Layout/PageContent';
-import { EnhancedWorkOrderDetail } from './EnhancedWorkOrderDetail';
+import { WorkOrderDetailCard } from "./WorkOrderDetailCard";
+import { WorkOrderChat } from "./WorkOrderChat";
+import { StatusHistoryTimeline } from "./StatusHistoryTimeline";
+import { TimeTrackingCard } from "./TimeTrackingCard";
+import { WorkOrderStatusFlow } from "./WorkOrderStatusFlow";
 import { WorkOrder } from '@/types/workOrder';
 
 interface WorkOrdersDetailPageProps {
@@ -51,10 +55,20 @@ export const WorkOrdersDetailPage = ({
         />
 
         <PageContent>
-          <EnhancedWorkOrderDetail
-            workOrder={selectedWorkOrderData}
-            onEdit={onEditWorkOrder}
-          />
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Main Content - Work Order Details */}
+            <div className="lg:col-span-2 space-y-6">
+              <WorkOrderDetailCard workOrder={selectedWorkOrderData} />
+              <StatusHistoryTimeline workOrderId={selectedWorkOrderData.id} />
+            </div>
+
+            {/* Sidebar - Status, Time Tracking & Chat */}
+            <div className="lg:col-span-1 space-y-6">
+              <WorkOrderStatusFlow workOrder={selectedWorkOrderData} />
+              <TimeTrackingCard workOrderId={selectedWorkOrderData.id} />
+              <WorkOrderChat workOrderId={selectedWorkOrderData.id} />
+            </div>
+          </div>
         </PageContent>
       </PageContainer>
     </Layout>

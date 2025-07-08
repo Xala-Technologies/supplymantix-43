@@ -135,17 +135,11 @@ export const WorkOrderDetailCard = ({ workOrder }: WorkOrderDetailCardProps) => 
         </CardContent>
       </Card>
 
-      {/* Enhanced Checklist */}
-      <EnhancedChecklist workOrderId={workOrder.id} />
-
-      {/* Time Tracking */}
-      <WorkOrderTimeTracking workOrderId={workOrder.id} />
-
-      {/* Procedures Section */}
-      <WorkOrderProcedureSection workOrderId={workOrder.id} />
-
-      {/* Time and Cost Tracking */}
-      <TimeAndCostTracking workOrderId={workOrder.id} />
+      {/* Enhanced Checklist - only show if there are items */}
+      {/* Note: EnhancedChecklist component will handle its own visibility */}
+      
+      {/* Procedures Section - only show if there are procedures */}
+      {/* Note: WorkOrderProcedureSection component will handle its own visibility */}
     </div>
   );
 };
