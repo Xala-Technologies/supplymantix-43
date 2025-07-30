@@ -22,19 +22,19 @@ export function SidebarNavigation() {
 
   return (
     <SidebarContent className="p-0 bg-sidebar overflow-hidden">
-      {Object.entries(groupedItems).map(([group, items], groupIndex) => (
-        <SidebarGroup key={group} className={`px-3 ${groupIndex === 0 ? 'pt-2' : 'pt-4'} pb-2`}>
+      {Object.entries(groupedItems).map(([group, items]) => (
+        <SidebarGroup key={group} className="px-4 py-1 mb-1">
           <SidebarGroupLabel 
             className={`
-              text-text-secondary uppercase text-xs font-semibold tracking-wider px-2 py-2 mb-2
-              transition-all duration-300 ease-in-out border-b border-sidebar-border/30
-              ${isCollapsed ? 'opacity-0 scale-75 h-0 py-0 mb-0 border-b-0' : 'opacity-100 scale-100'}
+              text-text-tertiary uppercase text-xs font-bold tracking-widest px-0 py-2 mb-1
+              transition-all duration-300 ease-in-out
+              ${isCollapsed ? 'opacity-0 scale-75' : 'opacity-100 scale-100'}
             `}
           >
             {!isCollapsed && t(group as keyof typeof t)}
           </SidebarGroupLabel>
           <SidebarGroupContent className="p-0">
-            <SidebarMenu className="space-y-1">
+            <SidebarMenu className="space-y-1 mb-3">
               {items.map((item) => {
                 const isActive = location.pathname === item.url;
                 const Icon = item.icon;
@@ -43,37 +43,35 @@ export function SidebarNavigation() {
                   <SidebarMenuItem key={item.title} className="m-0">
                     <SidebarMenuButton 
                       asChild
-                      tooltip={isCollapsed ? t(item.title as keyof typeof t) : undefined}
                       className={`
-                        relative group h-10 px-3 rounded-lg transition-all duration-200 ease-in-out m-0
-                        overflow-hidden border border-transparent
+                        relative group h-9 px-3 rounded-xl transition-all duration-200 ease-in-out m-0
+                        overflow-hidden
                         ${isActive 
-                          ? 'bg-primary/10 text-primary border-primary/20 shadow-sm' 
-                          : 'text-text-secondary hover:bg-sidebar-item-hover hover:text-text-primary hover:border-sidebar-border'
+                          ? 'bg-sidebar-item-active text-sidebar-item-active-foreground shadow-sm' 
+                          : 'text-sidebar-foreground hover:bg-sidebar-item-hover hover:text-text-primary'
                         }
-                        ${isCollapsed ? 'w-10 justify-center mx-auto' : 'w-full'}
+                        ${isCollapsed ? 'w-9 justify-center' : 'w-full'}
                       `}
                     >
                       <Link to={item.url} className={`
                         flex items-center w-full transition-all duration-200 ease-in-out
                         ${isCollapsed ? 'justify-center' : 'space-x-3'}
                       `}>
-                        {/* Icon Container */}
+                        {/* Enhanced Icon Container */}
                         <div className={`
-                          w-5 h-5 flex items-center justify-center transition-all duration-200 ease-in-out
+                          w-5 h-5 rounded-lg flex items-center justify-center transition-all duration-200 ease-in-out
                           ${isActive 
-                            ? 'text-primary' 
+                            ? 'text-sidebar-item-active-foreground' 
                             : 'text-text-secondary group-hover:text-text-primary'
                           }
                         `}>
-                          <Icon className="w-4 h-4" strokeWidth={isActive ? 2.5 : 2} />
+                          <Icon className="w-4 h-4" />
                         </div>
                         
-                        {/* Text Label */}
+                        {/* Enhanced Text with Animation */}
                         <span 
                           className={`
-                            font-medium text-sm transition-all duration-200 ease-in-out
-                            ${isActive ? 'text-primary' : 'text-text-secondary group-hover:text-text-primary'}
+                            font-medium text-sm tracking-wide transition-all duration-200 ease-in-out
                             ${isCollapsed 
                               ? 'opacity-0 scale-75 w-0 overflow-hidden' 
                               : 'opacity-100 scale-100 flex-1'
@@ -83,9 +81,13 @@ export function SidebarNavigation() {
                           {t(item.title as keyof typeof t)}
                         </span>
                         
-                        {/* Active Indicator */}
-                        {isActive && !isCollapsed && (
-                          <div className="w-2 h-2 rounded-full bg-primary opacity-80"></div>
+                        {/* Enhanced Active Indicator */}
+                        {isActive && (
+                          <div className={`
+                            absolute right-2 w-1.5 h-1.5 rounded-full bg-sidebar-item-active-foreground shadow-sm
+                            transition-all duration-200 ease-in-out
+                            ${isCollapsed ? 'opacity-0 scale-0' : 'opacity-100 scale-100'}
+                          `}></div>
                         )}
                       </Link>
                     </SidebarMenuButton>
