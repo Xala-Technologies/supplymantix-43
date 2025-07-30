@@ -1,7 +1,7 @@
 
 import React from "react";
 import { SidebarProvider } from "@/components/ui/sidebar";
-import { AppSidebar } from "@/components/Layout/AppSidebar";
+import { AppSidebar } from "@/components/layout/AppSidebar";
 import { TopBar } from "@/components/Layout/TopBar";
 import { useAuth } from "@/contexts/AuthContext";
 import { OverdueNotificationService } from "@/components/notifications/OverdueNotificationService";
