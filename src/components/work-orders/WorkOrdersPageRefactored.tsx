@@ -7,6 +7,7 @@ import { WorkOrdersCalendarPage } from './WorkOrdersCalendarPage';
 import { WorkOrdersDetailPage } from './WorkOrdersDetailPage';
 import { WorkOrdersFormPage } from './WorkOrdersFormPage';
 import { WorkOrdersListPage } from './WorkOrdersListPage';
+import { WorkOrderSplitLayout } from './WorkOrderSplitLayout';
 import { useWorkOrdersPage } from '@/hooks/useWorkOrdersPage';
 import { useWorkOrdersIntegration } from '@/hooks/useWorkOrdersIntegration';
 
@@ -145,7 +146,79 @@ export const WorkOrdersPageRefactored = () => {
     );
   }
 
-  // Default list view
+  // Default list view - use split layout for card/list view modes
+  if (viewMode === 'card' || viewMode === 'list') {
+    return (
+      <>
+        <div className="h-screen flex flex-col">
+          {/* Header with view mode toggle and new work order button */}
+          <div className="flex-shrink-0 p-4 border-b border-border bg-background">
+            <div className="flex items-center justify-between">
+              <div>
+                <h1 className="text-2xl font-semibold">Work Orders</h1>
+                <p className="text-muted-foreground">Manage and track your work orders</p>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="flex items-center rounded-lg border border-border p-1">
+                  <button
+                    onClick={() => setViewMode('card')}
+                    className={`px-3 py-1.5 text-sm font-medium rounded transition-colors ${
+                      viewMode === 'card'
+                        ? 'bg-primary text-primary-foreground shadow-sm'
+                        : 'text-muted-foreground hover:text-foreground'
+                    }`}
+                  >
+                    Card
+                  </button>
+                  <button
+                    onClick={() => setViewMode('list')}
+                    className={`px-3 py-1.5 text-sm font-medium rounded transition-colors ${
+                      viewMode === 'list'
+                        ? 'bg-primary text-primary-foreground shadow-sm'
+                        : 'text-muted-foreground hover:text-foreground'
+                    }`}
+                  >
+                    List
+                  </button>
+                  <button
+                    onClick={() => setViewMode('calendar')}
+                    className="px-3 py-1.5 text-sm font-medium rounded transition-colors text-muted-foreground hover:text-foreground"
+                  >
+                    Calendar
+                  </button>
+                </div>
+                <button
+                  onClick={handleNewWorkOrder}
+                  className="bg-primary text-primary-foreground px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors"
+                >
+                  New Work Order
+                </button>
+              </div>
+            </div>
+          </div>
+          
+          {/* Split Layout */}
+          <div className="flex-1 overflow-hidden">
+            <WorkOrderSplitLayout
+              workOrders={filteredWorkOrders}
+              selectedWorkOrder={selectedWorkOrder}
+              onSelectWorkOrder={handleSelectWorkOrder}
+              onEditWorkOrder={handleEditWorkOrder}
+              selectedWorkOrderData={selectedWorkOrderData}
+            />
+          </div>
+        </div>
+        <NewWorkOrderDialog
+          open={showNewDialog}
+          onOpenChange={setShowNewDialog}
+          onSuccess={handleDialogSuccess}
+          returnData={returnData}
+        />
+      </>
+    );
+  }
+
+  // Fallback to original list page for any other cases
   return (
     <>
       <WorkOrdersListPage
