@@ -7,6 +7,8 @@ import { RequestsList } from "@/components/requests/RequestsList";
 import { RequestForm } from "@/components/requests/RequestForm";
 import { RequestDetailDialog } from "@/components/requests/RequestDetailDialog";
 import { useRequests, useCreateRequest, useUpdateRequest, useDeleteRequest } from "@/hooks/useRequests";
+import { useUserRole } from "@/hooks/useUserRole";
+import { useSecureForm } from "@/hooks/useSecureForm";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
@@ -21,7 +23,12 @@ export default function Requests() {
   const [priorityFilter, setPriorityFilter] = useState("all");
   const [viewMode, setViewMode] = useState<'grid' | 'table'>('grid');
 
-  const userRole = 'admin';
+  // Use proper role management instead of hardcoded value
+  const { data: systemRole = 'user', isLoading: roleLoading } = useUserRole();
+  const { createSecureHandler } = useSecureForm();
+  
+  // Map system role to component role type
+  const userRole = systemRole === 'super_admin' || systemRole === 'organization_admin' ? 'admin' : 'user';
 
   const { data: requests = [], isLoading } = useRequests();
   const createRequest = useCreateRequest();
@@ -39,15 +46,15 @@ export default function Requests() {
     return matchesSearch && matchesStatus && matchesPriority;
   });
 
-  const handleCreateRequest = (data: CreateRequestRequest) => {
+  const handleCreateRequest = createSecureHandler((data: CreateRequestRequest) => {
     createRequest.mutate(data, {
       onSuccess: () => {
         setView("list");
       }
     });
-  };
+  });
 
-  const handleEditRequest = (data: CreateRequestRequest) => {
+  const handleEditRequest = createSecureHandler((data: CreateRequestRequest) => {
     if (!selectedRequest) return;
     
     updateRequest.mutate(
@@ -59,7 +66,7 @@ export default function Requests() {
         }
       }
     );
-  };
+  });
 
   const handleDeleteRequest = (id: string) => {
     if (confirm("Are you sure you want to delete this request?")) {
