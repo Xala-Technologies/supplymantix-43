@@ -9,7 +9,7 @@ import { PageContent } from '@/components/Layout/PageContent';
 import { SectionCard } from '@/components/Layout/SectionCard';
 import { EmptyState } from '@/components/Layout/EmptyState';
 import { WorkOrdersFilters } from './WorkOrdersFilters';
-import { WorkOrdersCardView } from './WorkOrdersCardView';
+import { WorkOrdersGridView } from './WorkOrdersGridView';
 import { WorkOrdersListView } from './WorkOrdersListView';
 import { WorkOrdersPageHeader } from './WorkOrdersPageHeader';
 import { WorkOrder, WorkOrderFilters } from '@/types/workOrder';
@@ -75,7 +75,7 @@ export const WorkOrdersListPage = ({
           ) : (
             <SectionCard padding="none" className="shadow-sm border-gray-200/60 bg-white/80 backdrop-blur-sm">
               {viewMode === 'card' ? (
-                <WorkOrdersCardView
+                <WorkOrdersGridView
                   workOrders={filteredWorkOrders}
                   onSelectWorkOrder={onSelectWorkOrder}
                   selectedWorkOrderId={selectedWorkOrder}
