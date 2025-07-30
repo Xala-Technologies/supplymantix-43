@@ -10,7 +10,7 @@ export type Database = {
   // Allows to automatically instanciate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "12.2.3 (519615d)"
+    PostgrestVersion: "13.0.4"
   }
   public: {
     Tables: {
@@ -3482,6 +3482,10 @@ export type Database = {
         }
         Returns: undefined
       }
+      check_admin_authorization: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
       copy_asset_procedures_to_work_order: {
         Args: { asset_id_param: string; work_order_id_param: string }
         Returns: undefined
@@ -3769,6 +3773,10 @@ export type Database = {
       }
       user_is_organization_member_secure: {
         Args: { org_id: string; user_id: string }
+        Returns: boolean
+      }
+      validate_tenant_access: {
+        Args: { target_tenant_id: string }
         Returns: boolean
       }
     }
