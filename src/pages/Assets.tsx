@@ -5,6 +5,7 @@ import { AssetsGrid } from "@/components/assets/AssetsGrid";
 import { AssetsList } from "@/components/assets/AssetsList";
 import { AssetDetailCard } from "@/components/assets/AssetDetailCard";
 import { AssetForm } from "@/components/assets/AssetForm";
+import { AssetsSplitLayout } from "@/components/assets/AssetsSplitLayout";
 import { useState } from "react";
 import { ChevronLeft, Plus, Upload, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -388,12 +389,12 @@ export default function Assets() {
                   isLoading={isLoading}
                 />
               ) : (
-                <AssetsList
-                  assets={uiAssets}
-                  selectedAssetId={selectedAsset?.id || null}
+                <AssetsSplitLayout
+                  assets={assets}
+                  selectedAsset={selectedAsset?.id || null}
                   onSelectAsset={handleSelectAsset}
                   onEditAsset={handleEditAsset}
-                  onDeleteAsset={handleDeleteAsset}
+                  selectedAssetData={selectedAsset}
                 />
               )}
             </StandardPageContent>
