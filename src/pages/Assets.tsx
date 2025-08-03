@@ -140,11 +140,19 @@ export default function Assets() {
     setViewMode('create');
   };
 
-  const handleEditAsset = (uiAsset: UIAsset) => {
-    const asset = assets.find(a => a.id === uiAsset.id);
-    if (asset) {
-      setSelectedAsset(asset);
-      setViewMode('edit');
+  const handleEditAsset = (uiAsset?: UIAsset) => {
+    if (uiAsset) {
+      // Called from grid view with asset parameter
+      const asset = assets.find(a => a.id === uiAsset.id);
+      if (asset) {
+        setSelectedAsset(asset);
+        setViewMode('edit');
+      }
+    } else {
+      // Called from split layout without parameter, use selectedAsset
+      if (selectedAsset) {
+        setViewMode('edit');
+      }
     }
   };
 
